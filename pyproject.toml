@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qnav"
+description = "Quantum Navigation Toolbox"
+keywords = ["quantum", "navigation", "IMU", "INS", "GPS", "sensing"]
+license = {text = "MIT License"}
+dynamic = ["version", "readme"]
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.1.1",
+    "scipy>=1.14.1",
+    "matplotlib>=3.9.2",
+    "pandas>=2.2.3",
+    "mypy>=1.11.2",
+    "requests>=2.32.2"
+]
+authors = [
+    {name = "University of Liverpool"},
+    {name = "Prof. Jason Ralph", email = "jfralph@liverpool.ac.uk"},
+    {name = "Michael Wright", email = "mjwright@liverpool.ac.uk"},
+]
+
+[project.scripts]
+run-cli = "qnav:run"
+
+[project.optional-dependencies]
+tests = [
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist",
+    "pytest-html"
+]
+plotting = [
+    "plotly",
+    "plotly-resampler",
+    "kaleido"
+]
+docs = [
+    "Sphinx",
+    "Sphinx-rtd-theme"
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "qnav.__version__"}
+readme = {file = ["README.md"]}
+
+
+
+

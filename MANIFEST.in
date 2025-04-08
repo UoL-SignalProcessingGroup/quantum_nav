@@ -1,0 +1,23 @@
+# MANIFEST.IN
+# This file is used for stating the files/folders to include with the project.
+# This is required when installing the toolbox via pip.
+
+# Files to include:
+include default_settings.ini
+include requirements.txt
+include README.md
+
+# Directories to include:
+recursive-include examples *
+recursive-include resources *
+recursive-include profiles *
+
+# Files to exclude:
+exclude deleted
+exclude venv
+exclude output
+
+# Directories to exclude:
+recursive-exclude deleted *
+recursive-exclude venv *
+recursive-exclude output *
