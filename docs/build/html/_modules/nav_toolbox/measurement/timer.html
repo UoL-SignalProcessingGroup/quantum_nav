@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nav_toolbox.measurement.timer &mdash; Navigation Toolbox 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Navigation Toolbox
+          </a>
+              <div class="version">
+                Version 1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">1. Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">2. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">3. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">4. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/processing.html">5. Estimation Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">6. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">7. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">8. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">9. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">10. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">11. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">12. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Navigation Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nav_toolbox.measurement.timer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nav_toolbox.measurement.timer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">========</span>
+<span class="sd">timer.py</span>
+<span class="sd">========</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Simplifies recording of update times in simulations.</span>
+<span class="sd">    This module contains timers used for recording the times between</span>
+<span class="sd">    measurements and announcing when new measurement is to be taken.</span>
+<span class="sd">    Since this task is often performed by each measurement (and GPS) object,</span>
+<span class="sd">    the routine code has been refracted into a simple standalone class. Doing</span>
+<span class="sd">    this has the added benefit of allowing times to be saved between</span>
+<span class="sd">    simulation partitions.</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="UpdateTimer">
+<a class="viewcode-back" href="../../../modules/measurement/timer.html#nav_toolbox.measurement.timer.UpdateTimer">[docs]</a>
+<span class="k">class</span> <span class="nc">UpdateTimer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used for recording and announcing update times for measurements.</span>
+<span class="sd">    This simple counts the time and records the indices covering the range of</span>
+<span class="sd">    measurements to be involved. This information can then be used to extract</span>
+<span class="sd">    the relevant indices of data from the waypoint information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+
+        <span class="c1"># Obtain the timestep for updates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__update_timestep</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">freq</span>
+
+        <span class="c1"># Calculate the time for the next measurement.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__next_update_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__update_timestep</span>
+
+<div class="viewcode-block" id="UpdateTimer.is_ready">
+<a class="viewcode-back" href="../../../modules/measurement/timer.html#nav_toolbox.measurement.timer.UpdateTimer.is_ready">[docs]</a>
+    <span class="k">def</span> <span class="nf">is_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clock_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Announces if enough time has elapsed for a measurement to be ready.</span>
+<span class="sd">        This method returns True if it is time for a measurement to be</span>
+<span class="sd">        produced.</span>
+
+<span class="sd">        :param clock_time: The current believed simulation time (in seconds).</span>
+<span class="sd">        :type clock_time: float</span>
+
+<span class="sd">        :return: Returns true if it is time to take a measurement.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">clock_time</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__next_update_time</span></div>
+
+
+    <span class="k">def</span> <span class="nf">get_weightings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_prev</span><span class="p">,</span> <span class="n">time_now</span><span class="p">):</span>
+        <span class="n">weight1</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__next_update_time</span> <span class="o">-</span> <span class="n">time_prev</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+                <span class="n">time_now</span> <span class="o">-</span> <span class="n">time_prev</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">weight1</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">weight1</span>
+
+    <span class="k">def</span> <span class="nf">increment_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__next_update_time</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__update_timestep</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

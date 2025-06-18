@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.simulation.simulation &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.simulation.simulation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.simulation.simulation</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=============</span>
+<span class="sd">simulation.py</span>
+<span class="sd">=============</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    The core harness responsible for coordinating simulations.</span>
+<span class="sd">    This module contains the core functionalities for managing simulations.</span>
+<span class="sd">    This mostly revolves around a core loop and the scheduling of sensor</span>
+<span class="sd">    time intervals, sensor measurements and data fusion.</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Collection</span>
+
+<span class="kn">from</span> <span class="nn">qnav.estimation.state</span> <span class="kn">import</span> <span class="n">EstimatedState</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.clock</span> <span class="kn">import</span> <span class="n">Clock</span><span class="p">,</span> <span class="n">DummyClock</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">SensorFusion</span>
+<span class="kn">from</span> <span class="nn">qnav.simulation.holonomic</span> <span class="kn">import</span> <span class="n">HolonomicConstraint</span>
+<span class="kn">from</span> <span class="nn">qnav.simulation.scheduling</span> <span class="kn">import</span> <span class="n">TimingHandler</span>
+<span class="kn">from</span> <span class="nn">qnav.simulation.results</span> <span class="kn">import</span> <span class="n">ResultsCapture</span>
+<span class="kn">from</span> <span class="nn">qnav.simulation.results</span> <span class="kn">import</span> <span class="n">CaptureAll</span>
+<span class="kn">from</span> <span class="nn">qnav.simulation.display</span> <span class="kn">import</span> <span class="n">ConsoleDisplay</span>
+<span class="kn">from</span> <span class="nn">qnav.simulation.display</span> <span class="kn">import</span> <span class="n">Display</span>
+<span class="kn">from</span> <span class="nn">qnav.waypoints.trajectory</span> <span class="kn">import</span> <span class="n">Trajectory</span>
+
+<span class="c1"># TODO: Make simulation class with run(), resume(), stop(), results(), etc..</span>
+
+<div class="viewcode-block" id="run_simulation_loop">
+<a class="viewcode-back" href="../../../modules/simulation/simulation.html#qnav.simulation.simulation.run_simulation_loop">[docs]</a>
+<span class="k">def</span> <span class="nf">run_simulation_loop</span><span class="p">(</span>
+        <span class="n">trajectory</span><span class="p">:</span> <span class="n">Trajectory</span><span class="p">,</span>
+        <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">,</span>
+        <span class="n">hardware</span><span class="p">:</span> <span class="n">Collection</span><span class="p">[</span><span class="n">SensorFusion</span><span class="p">],</span>
+        <span class="n">clock</span><span class="p">:</span> <span class="n">Clock</span> <span class="o">=</span> <span class="n">DummyClock</span><span class="p">(),</span>
+        <span class="n">results</span><span class="p">:</span> <span class="n">ResultsCapture</span> <span class="o">=</span> <span class="n">CaptureAll</span><span class="p">(),</span>
+        <span class="n">displayer</span><span class="p">:</span> <span class="n">Display</span> <span class="o">=</span> <span class="n">ConsoleDisplay</span><span class="p">(</span><span class="mf">2.5</span><span class="p">)):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Executes the full simulation loop from start to finish.</span>
+<span class="sd">    On succession returns states and results in requested format.</span>
+
+<span class="sd">    :param trajectory: The trajectory to draw ground truth records from.</span>
+<span class="sd">        This is what the virtual platform is to follow.</span>
+<span class="sd">    :type trajectory: Trajectory</span>
+
+<span class="sd">    :param estimated_state: The initial estimated state. This will be</span>
+<span class="sd">        updated throughout the simulation via fusion.</span>
+<span class="sd">    :type estimated_state: EstimatedState</span>
+
+<span class="sd">    :param hardware: A collection of SensorFusion instances. This represents</span>
+<span class="sd">        the hardware and fusion algorithms attached to the virtual platform.</span>
+<span class="sd">    :type hardware: Collection[SensorFusion]</span>
+
+<span class="sd">    :param clock: A virtual clock added to simulate clock errors.</span>
+<span class="sd">        This is used when virtual clock drift is required.</span>
+
+<span class="sd">    :param results: The results capture instance used to manage result data.</span>
+<span class="sd">        This controls how and what data is collected throughout the simulation.</span>
+
+<span class="sd">    :param displayer: The displayer instance used for displaying progress.</span>
+<span class="sd">        This presents a display of the ongoing simulation allowing for</span>
+<span class="sd">        immediate feedback of its progress.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Get the time frame of the trajectory:</span>
+    <span class="n">current_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">start_time</span>
+    <span class="n">end_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">end_time</span>
+
+    <span class="c1"># Create a scheduler for sensors and fusion methods:</span>
+    <span class="n">scheduler</span> <span class="o">=</span> <span class="n">TimingHandler</span><span class="p">(</span><span class="n">hardware</span><span class="p">)</span>
+    <span class="n">scheduler</span><span class="o">.</span><span class="n">update_sensors_past_time</span><span class="p">(</span><span class="n">current_time</span><span class="p">)</span>
+    <span class="n">sensor_sequence</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">sensor_iterator</span><span class="p">(</span><span class="n">end_time</span><span class="p">)</span>
+
+    <span class="c1"># Prepare the results and displaying instance:</span>
+    <span class="n">results</span><span class="o">.</span><span class="n">on_start</span><span class="p">(</span><span class="n">estimated_state</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">)</span>
+    <span class="n">displayer</span><span class="o">.</span><span class="n">on_start</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)</span>
+
+    <span class="c1"># For the next sensor in the sequence:</span>
+    <span class="k">for</span> <span class="n">sensor</span> <span class="ow">in</span> <span class="n">sensor_sequence</span><span class="p">:</span>
+
+        <span class="c1"># Get current and estimated time:</span>
+        <span class="n">estimated_time</span> <span class="o">=</span> <span class="n">sensor</span><span class="o">.</span><span class="n">next_update</span>
+        <span class="n">current_time</span> <span class="o">=</span> <span class="n">clock</span><span class="o">.</span><span class="n">get_time</span><span class="p">(</span><span class="n">estimated_time</span><span class="p">)</span>
+
+        <span class="c1"># Prevent going out of bounds of trajectory:</span>
+        <span class="k">if</span> <span class="n">current_time</span> <span class="o">&gt;</span> <span class="n">end_time</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="c1"># Remove clock drift for holonomic constraints:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sensor</span><span class="p">,</span> <span class="n">HolonomicConstraint</span><span class="p">):</span>
+            <span class="n">current_time</span> <span class="o">=</span> <span class="n">estimated_time</span>
+
+        <span class="c1"># Obtain the current sensor&#39;s measurement:</span>
+        <span class="n">ground_truth</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">get_record</span><span class="p">(</span><span class="n">current_time</span><span class="p">)</span>
+        <span class="n">sensor</span><span class="o">.</span><span class="n">take_measurement</span><span class="p">(</span><span class="n">estimated_time</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span>
+
+        <span class="c1"># Update sensor errors:</span>
+        <span class="n">sensor</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">current_time</span><span class="p">)</span>
+        <span class="n">clock</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">current_time</span><span class="p">)</span>
+
+        <span class="c1"># Mark that the sensor has been used:</span>
+        <span class="n">scheduler</span><span class="o">.</span><span class="n">set_sensor_used</span><span class="p">(</span><span class="n">sensor</span><span class="p">)</span>
+
+        <span class="c1"># After measurement perform fusion when available:</span>
+        <span class="k">for</span> <span class="n">fusion</span> <span class="ow">in</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">get_next_fusion</span><span class="p">(</span><span class="n">sensor</span><span class="p">):</span>
+
+            <span class="c1"># Update estimated state:</span>
+            <span class="n">fusion</span><span class="o">.</span><span class="n">perform_fusion</span><span class="p">(</span><span class="n">estimated_state</span><span class="p">)</span>
+
+            <span class="c1"># Update estimated time (assuming not be updated by fusion)</span>
+            <span class="n">estimated_state</span><span class="o">.</span><span class="n">update_estimates</span><span class="p">(</span><span class="n">timestamp</span><span class="o">=</span><span class="n">estimated_time</span><span class="p">)</span>
+
+            <span class="c1"># Record results and update the display:</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="n">current_time</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span>
+            <span class="n">displayer</span><span class="o">.</span><span class="n">on_update</span><span class="p">(</span><span class="n">current_time</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span>
+
+    <span class="c1"># Update the display with final update:</span>
+    <span class="n">ground_truth</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">get_record</span><span class="p">(</span><span class="n">current_time</span><span class="p">)</span>
+    <span class="n">displayer</span><span class="o">.</span><span class="n">on_finish</span><span class="p">(</span><span class="n">current_time</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span>
+
+    <span class="c1"># Finally, return the collected results.</span>
+    <span class="k">return</span> <span class="n">results</span><span class="o">.</span><span class="n">gather</span><span class="p">()</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

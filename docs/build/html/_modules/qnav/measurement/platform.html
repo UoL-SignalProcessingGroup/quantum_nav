@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.measurement.platform &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.measurement.platform</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.measurement.platform</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">===========</span>
+<span class="sd">platform.py</span>
+<span class="sd">===========</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Provides conversion to and from sensor reference frame.</span>
+<span class="sd">    This module is responsible for representing the orientation and location</span>
+<span class="sd">    of sensor&#39;s on a platform body, providing means for common conversion</span>
+<span class="sd">    between the reference frames.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Prof. Jason Ralph - jfralph@liverpool.ac.uk</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">qnav.util.transformations</span> <span class="k">as</span> <span class="nn">trans</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="SensorAxis">
+<a class="viewcode-back" href="../../../modules/measurement/platform.html#qnav.measurement.platform.SensorAxis">[docs]</a>
+<span class="k">class</span> <span class="nc">SensorAxis</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specifies the orientation and offset of sensors relative to platform.</span>
+<span class="sd">    For a corresponding sensor, this class specifies the angle orientation</span>
+<span class="sd">    and offset location of the sensor on the platform body. This supplies</span>
+<span class="sd">    a consistent practice for local conversion between sensor and</span>
+<span class="sd">    platform reference frames.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Fixed class properties</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;__sensor_angles_deg&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__sensor_angles_rad&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__lever_arm_xyz&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__body2sensor_mat&#39;</span>
+    <span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">sensor_angles</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+                 <span class="n">lever_arm</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define sensor orientation and location relative to platform.</span>
+<span class="sd">        Provided with the local orientations and offset location of a sensor</span>
+<span class="sd">        relative to platform body, this initialises an instance responsible</span>
+<span class="sd">        for handling conversions to and from sensor and platform body.</span>
+
+<span class="sd">        :param sensor_angles: The yaw, pitch and roll angle orientations</span>
+<span class="sd">            (in degrees) of the sensor relative to the platform body.</span>
+<span class="sd">        :type sensor_angles: npt.ArrayLike</span>
+
+<span class="sd">        :param lever_arm: The x, y and z position offsets (in metres)</span>
+<span class="sd">            of the sensor relative to the platform body.</span>
+<span class="sd">        :type sensor_angles: npt.ArrayLike</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Record the sensor angles and lever arm offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sensor_angles_deg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sensor_angles</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lever_arm_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lever_arm</span><span class="p">)</span>
+
+        <span class="c1"># Ensure the sensor angles are valid:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_angles_deg</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sensor_angles_deg</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Sensor angles must be a valid 3-element array&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Ensure the lever position is valid:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lever_arm</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lever_arm</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Lever arm offset must be a valid 3-element array&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the transformation matrix for body to sensor.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sensor_angles_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sensor_angles_deg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__body2sensor_mat</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">sensor_angles_rad</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sensor_angles_deg</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the sensor orientation angles in degrees.</span>
+
+<span class="sd">        :return: Sensor angles (in degrees).</span>
+<span class="sd">        :rtype: np.ndarray (3-elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sensor_angles_deg</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sensor_angles_rad</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the sensor orientation angles in radians.</span>
+
+<span class="sd">        :return: Sensor angles (in radians).</span>
+<span class="sd">        :rtype: np.ndarray (3-elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sensor_angles_rad</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lever_arm</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The lever arm position offset in metres.</span>
+
+<span class="sd">        :return: Lever arm offset (in metres).</span>
+<span class="sd">        :rtype: np.ndarray (3-elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lever_arm_xyz</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">body2sensor_mat</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The rotation matrix for body to sensor conversion.</span>
+
+<span class="sd">        :return: The rotation matrix for reference frame conversion.</span>
+<span class="sd">        :rtype: np.ndarray (3-by-3 elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__body2sensor_mat</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prints a descriptive string of the orientation and offset.</span>
+<span class="sd">        Used to cleanly display the sensor angles and lever arm values.</span>
+
+<span class="sd">        :return: A string stating the orientation angles and offset position.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lever_arm_xyz</span>
+        <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sensor_angles_deg</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Angles: (p:</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2"> q:</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2"> r:</span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">) deg</span><span class="se">\t</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Offset: (x:</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2"> y:</span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2"> z:</span><span class="si">{</span><span class="n">z</span><span class="si">}</span><span class="s2">) m&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">sensor</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">lever</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">sa</span> <span class="o">=</span> <span class="n">SensorAxis</span><span class="p">(</span><span class="n">sensor</span><span class="p">,</span> <span class="n">lever</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

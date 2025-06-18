@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>7. Estimation Processing &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="8. User Configuration" href="configuration.html" />
+    <link rel="prev" title="6. Sensor Processing" href="measurement.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">7. Estimation Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#inertial-navigation">7.1. Inertial Navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#altimeter">7.2. Altimeter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gps-gnss-systems">7.3. GPS/GNSS Systems</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><span class="section-number">7. </span>Estimation Processing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/processing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="estimation-processing">
+<h1><span class="section-number">7. </span>Estimation Processing<a class="headerlink" href="#estimation-processing" title="Link to this heading"></a></h1>
+<p>The toolbox contains various modules that assist with navigation. These modules can be flexibly customised with
+aspects such as update frequencies, noise values and error probabilities freely being selectable by the user.
+Some modules can be entirely disabled if not needed.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<section id="inertial-navigation">
+<h2><span class="section-number">7.1. </span>Inertial Navigation<a class="headerlink" href="#inertial-navigation" title="Link to this heading"></a></h2>
+<p>The Inertial Navigation System (INS) is the core component for producing estimations. It takes measurements from
+virtual hardware such as configured accelerometers, gyroscopes and altimeters. Furthermore, updates external updates
+such as GPS measurements interface with the INS via fusion methods. These measurement updates are fed at a fixed
+rate. Unlike the other system it cannot be disabled. The supported integration methods (along with their
+configuration method keys) are listed below:</p>
+<ol class="arabic simple">
+<li><p><span class="xref std std-ref">Classic Numerical</span> (<code class="docutils literal notranslate"><span class="pre">Numerical</span></code>)</p></li>
+<li><p><span class="xref std std-ref">Kalman Filter</span> (<code class="docutils literal notranslate"><span class="pre">Kalman</span></code>)</p></li>
+<li><p><span class="xref std std-ref">4th Order Runge Kutta</span> (<code class="docutils literal notranslate"><span class="pre">Runge_Kutta</span></code>)</p></li>
+<li><p><span class="xref std std-ref">Adams Bashforth Integration</span> (<code class="docutils literal notranslate"><span class="pre">Adams_Bashforth</span></code>)</p></li>
+</ol>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="altimeter">
+<h2><span class="section-number">7.2. </span>Altimeter<a class="headerlink" href="#altimeter" title="Link to this heading"></a></h2>
+<p>If enabled, an <span class="xref std std-ref">altimeter</span> component is included to provide simple fixed gain filtering for
+the vertical channel. This supplies additional processing to improve the current altitude estimation. This is useful
+for when the estimated altitude is included in other calculations such as acceleration or gravity mapping.</p>
+<p>To enable the altimeter, ensure that the variable <code class="docutils literal notranslate"><span class="pre">altimeterEnabled</span></code> is set to <code class="docutils literal notranslate"><span class="pre">true</span></code>. This is either located
+within an altimeter sub-configuration file or under the Measurement subsection.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="gps-gnss-systems">
+<h2><span class="section-number">7.3. </span>GPS/GNSS Systems<a class="headerlink" href="#gps-gnss-systems" title="Link to this heading"></a></h2>
+<p>The toolbox can also include the use of <span class="xref std std-ref">GPS navigation</span> within its estimation. Calculated
+GPS positions and velocities are merged with the current estimation using 1 of 3 methods. The supported methods
+(along with their configuration method keys) are listed below:</p>
+<ol class="arabic simple">
+<li><p><span class="xref std std-ref">Fixed Gain Fusion</span> (<code class="docutils literal notranslate"><span class="pre">Fixed</span></code>)</p></li>
+<li><p><span class="xref std std-ref">Loose Fusion</span> (<code class="docutils literal notranslate"><span class="pre">Loose</span></code>)</p></li>
+<li><p><span class="xref std std-ref">Tight Fusion</span> (<code class="docutils literal notranslate"><span class="pre">Tight</span></code>)</p></li>
+</ol>
+<p>To enable the GPS systems/processing ensure that the variable <code class="docutils literal notranslate"><span class="pre">gpsEnabled</span></code> (under GPS) is set to <code class="docutils literal notranslate"><span class="pre">true</span></code>
+and that <code class="docutils literal notranslate"><span class="pre">gpsFusionMethod</span></code> (under Estimation) is set to one of the above.</p>
+<p>In addition to this, rough <em>dead zones</em>, <em>jamming zones</em> or <em>deactivation zones</em> can be supplied by describing
+polygon shapes with latitude and longitude coordinates. The variables <code class="docutils literal notranslate"><span class="pre">gpsDisabledShapeLat</span></code> and
+<code class="docutils literal notranslate"><span class="pre">gpsDisabledShapeLon</span></code> (under the GPS section) can be used to state which areas the GPS cannot be used in.
+In contrast, the variables <code class="docutils literal notranslate"><span class="pre">gpsEnabledShapeLat</span></code> and <code class="docutils literal notranslate"><span class="pre">gpsEnabledShapeLon</span></code> can be used to state which areas the GPS
+can be used in (overriding disabled zones to allow for more advanced shapes). To provide more than one polygon,
+separate coordinates lists with the value <code class="docutils literal notranslate"><span class="pre">nan</span></code> By default, the GPS is enabled everywhere.</p>
+<p>Please note, enabling GPS systems involves additional processing steps for the environment state (simulating GNSS
+satellite activity for the requested date) which can result in slightly longer processing times due to the
+added complexity.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="measurement.html" class="btn btn-neutral float-left" title="6. Sensor Processing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="configuration.html" class="btn btn-neutral float-right" title="8. User Configuration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

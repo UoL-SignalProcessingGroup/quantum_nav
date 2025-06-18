@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.gravity.geosat &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.gravity.geosat</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.gravity.geosat</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=========</span>
+<span class="sd">geosat.py</span>
+<span class="sd">=========</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Geosat-44 reading, interpolation and gravity functions.</span>
+<span class="sd">    This module contains all the gravity calculation functionalities related</span>
+<span class="sd">    to the geosat-44 dataset. The Geosat44 database contains records of</span>
+<span class="sd">    time-offsets, positions, geoid heights, gravity anomalies and</span>
+<span class="sd">    calculation uncertainties.</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First implementation of this module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">LinearNDInterpolator</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">griddata</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">Delaunay</span>
+
+<span class="kn">from</span> <span class="nn">qnav.earth.geoid</span> <span class="kn">import</span> <span class="n">GeoidModel</span>
+<span class="kn">from</span> <span class="nn">qnav.gravity.map</span> <span class="kn">import</span> <span class="n">GravityMap</span>
+<span class="kn">from</span> <span class="nn">qnav.gravity.base</span> <span class="kn">import</span> <span class="n">GravityModel</span>
+<span class="kn">from</span> <span class="nn">qnav.util.connections</span> <span class="kn">import</span> <span class="n">download_file</span>
+
+
+<div class="viewcode-block" id="Geosat44">
+<a class="viewcode-back" href="../../../modules/gravity/geosat.html#qnav.gravity.geosat.Geosat44">[docs]</a>
+<span class="k">class</span> <span class="nc">Geosat44</span><span class="p">(</span><span class="n">GravityMap</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gravity Map implementation for the Geosat-44 dataset.</span>
+<span class="sd">    Provides corrections for a given base gravity function, using the</span>
+<span class="sd">    non-gridded geosat data values. Performs linear interpolation by</span>
+<span class="sd">    producing a Delaunay triangulation mesh with fixed zero value for</span>
+<span class="sd">    extrapolation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The full URL where required geosat resources are located.</span>
+    <span class="n">__DOWNLOAD_URL</span> <span class="o">=</span> <span class="s1">&#39;https://www.ngdc.noaa.gov/mgg/gravity/1999/data/global/geosat44/&#39;</span>
+
+    <span class="c1"># The required gravity files.</span>
+    <span class="n">__MAP_FILES</span> <span class="o">=</span> <span class="s1">&#39;geo44asc.bin&#39;</span><span class="p">,</span> <span class="s1">&#39;geo44des.bin&#39;</span>
+
+    <span class="c1"># The value interpolation instance.</span>
+    <span class="n">_interp</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_model</span><span class="p">:</span> <span class="n">GravityModel</span><span class="p">,</span> <span class="n">geoid_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">GeoidModel</span><span class="p">],</span>
+                  <span class="n">map_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">auto_download</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">auto_load</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a Geosat44 instance to apply gravity corrections.</span>
+<span class="sd">        Creates a Geosat44 gravity model using a given base gravity</span>
+<span class="sd">        function, directory to store geosat data and (optionally)</span>
+<span class="sd">        the ability to download data on demand.</span>
+
+<span class="sd">        :param base_model: The base gravity model to correct.</span>
+<span class="sd">        :type base_model: GravityModel</span>
+
+<span class="sd">        :param geoid_model: The geoid model to use for underlation lookup.</span>
+<span class="sd">        :type geoid_model: GeoidModel</span>
+
+<span class="sd">        :param map_dir: The local path for geosat database files.</span>
+<span class="sd">        :type map_dir: Path</span>
+
+<span class="sd">        :param auto_download: (Optional) Allow automatic downloading of files.</span>
+<span class="sd">            Required for first time use. By default is set to True.</span>
+<span class="sd">        :type auto_download: bool</span>
+
+<span class="sd">        :param auto_load: (Optional) Automatically load gravity map files.</span>
+<span class="sd">            Required for normal usage without firstly calling load_data().</span>
+<span class="sd">            By default is set to True.</span>
+<span class="sd">        :type auto_load: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">base_model</span><span class="p">,</span> <span class="n">geoid_model</span><span class="p">,</span> <span class="n">map_dir</span><span class="p">,</span> <span class="n">auto_download</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">auto_load</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an identifiable descriptive name for the gravity model.</span>
+
+<span class="sd">        :return: A descriptive string for the gravity model.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;Geosat44&quot;</span>
+
+<div class="viewcode-block" id="Geosat44.calc_gravity_z">
+<a class="viewcode-back" href="../../../modules/gravity/geosat.html#qnav.gravity.geosat.Geosat44.calc_gravity_z">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_gravity_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">grav_anom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_map_value</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_model</span><span class="o">.</span><span class="n">calc_gravity_z</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp_anomaly</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">grav_anom</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">g</span></div>
+
+
+<div class="viewcode-block" id="Geosat44.calc_gravity_z_vec">
+<a class="viewcode-back" href="../../../modules/gravity/geosat.html#qnav.gravity.geosat.Geosat44.calc_gravity_z_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_gravity_z_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">grav_anom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_map_value</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_model</span><span class="o">.</span><span class="n">calc_gravity_z_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp_anomaly_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">grav_anom</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">g</span></div>
+
+
+<div class="viewcode-block" id="Geosat44.get_map_value">
+<a class="viewcode-back" href="../../../modules/gravity/geosat.html#qnav.gravity.geosat.Geosat44.get_map_value">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_map_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interpolates the gravity anomaly for requested position(s).</span>
+<span class="sd">        Looks-up and returns the gravity anomaly value for requested latitude</span>
+<span class="sd">        and longitude positions. Supports both scalar and array input.</span>
+
+<span class="sd">        :param lat: The latitude coordinate(s) in decimal degrees.</span>
+<span class="sd">        :type lat: float | np.ndarray</span>
+
+<span class="sd">        :param lon: The longitude coordinate(s) in decimal degrees.</span>
+<span class="sd">        :type lon: float | np.ndarray</span>
+
+<span class="sd">        :return: The interpolated gravity anomaly value(s) in m/s^2.</span>
+<span class="sd">        :rtype: float | np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">anom_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">lon</span><span class="p">):</span>
+            <span class="n">anom_values</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">anom_values</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">anom_values</span></div>
+
+
+<div class="viewcode-block" id="Geosat44.get_anomaly">
+<a class="viewcode-back" href="../../../modules/gravity/geosat.html#qnav.gravity.geosat.Geosat44.get_anomaly">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_anomaly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_map_value</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Geosat44.get_anomaly_vec">
+<a class="viewcode-back" href="../../../modules/gravity/geosat.html#qnav.gravity.geosat.Geosat44.get_anomaly_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_anomaly_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_map_value</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Geosat44.get_disturbance">
+<a class="viewcode-back" href="../../../modules/gravity/geosat.html#qnav.gravity.geosat.Geosat44.get_disturbance">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_disturbance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">anomaly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_anomaly</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_anomaly_to_disturbance</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">anomaly</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Geosat44.get_disturbance_vec">
+<a class="viewcode-back" href="../../../modules/gravity/geosat.html#qnav.gravity.geosat.Geosat44.get_disturbance_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_disturbance_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">anomaly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_anomaly_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_anomaly_to_disturbance_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">anomaly</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Geosat44.load_data">
+<a class="viewcode-back" href="../../../modules/gravity/geosat.html#qnav.gravity.geosat.Geosat44.load_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads the Geosat data and generates internal interpolator for look-up.</span>
+<span class="sd">        Called on initialisation to load the required data to allow for</span>
+<span class="sd">        correction interpolation. Due to spacing between geosat records,</span>
+<span class="sd">        linear interpolation is used for stability.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Download missing data if possible</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">download_data</span><span class="p">()</span>
+
+        <span class="n">all_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># For each geosat data file to use:</span>
+        <span class="k">for</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__MAP_FILES</span><span class="p">:</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_dir</span> <span class="o">/</span> <span class="n">file_name</span>
+
+            <span class="c1"># Raise error if file not found:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">file_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;missing Geosat file </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Append current file to data set:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">read_geosat_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">current_values</span> <span class="o">=</span> <span class="n">all_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="n">all_data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_values</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+        <span class="c1"># Produce a look-up grid for all data</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;latitude&#39;</span><span class="p">],</span> <span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;longitude&#39;</span><span class="p">]))</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;gravity_anomaly&#39;</span><span class="p">]</span>
+        <span class="n">tri</span> <span class="o">=</span> <span class="n">Delaunay</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+
+        <span class="c1"># Generate an interpolation instance for the geosat data.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interp</span> <span class="o">=</span> <span class="n">LinearNDInterpolator</span><span class="p">(</span>
+            <span class="n">tri</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">rescale</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Geosat44.download_data">
+<a class="viewcode-back" href="../../../modules/gravity/geosat.html#qnav.gravity.geosat.Geosat44.download_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">download_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Downloads the required Geosat-44 files from the source.</span>
+<span class="sd">        If allowed and files are not present, will download the required</span>
+<span class="sd">        geosat files to the set directory. Optionally, files can be</span>
+<span class="sd">        overwritten.</span>
+
+<span class="sd">        :param overwrite: Should downloading replace existing files.</span>
+<span class="sd">            By default this is set to false and only missing files</span>
+<span class="sd">            are downloaded.</span>
+<span class="sd">        :type overwrite: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Prevent download if not allowed:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auto_download</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Generate required parent directories:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_map_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># For each of the required files:</span>
+        <span class="k">for</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__MAP_FILES</span><span class="p">:</span>
+            <span class="n">local_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_dir</span> <span class="o">/</span> <span class="n">file_name</span>
+
+            <span class="c1"># Download if requested or missing from directory:</span>
+            <span class="k">if</span> <span class="n">overwrite</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">local_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+                <span class="n">download_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__DOWNLOAD_URL</span><span class="si">}{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">download_file</span><span class="p">(</span><span class="n">download_url</span><span class="p">,</span> <span class="n">local_path</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="read_geosat_file">
+<a class="viewcode-back" href="../../../modules/gravity/geosat.html#qnav.gravity.geosat.read_geosat_file">[docs]</a>
+<span class="k">def</span> <span class="nf">read_geosat_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads and extracts the content of a given geosat file.</span>
+<span class="sd">    Parses a given binary (.bin) geosat file and returns its records in a</span>
+<span class="sd">    Python dictionary. The records include:</span>
+<span class="sd">    • time_offset:  The time since the beginning of each pass (seconds)</span>
+<span class="sd">    • latitude:     The latitude position of measurement (degrees)</span>
+<span class="sd">    • longitude:    The longitude position of measurement (degrees)</span>
+<span class="sd">    • geoid:        The geoid height from the ellipse (metres)</span>
+<span class="sd">    • anomaly:      The calculated gravity anomaly (m/s^2)</span>
+<span class="sd">    • uncertainty:  The measurement uncertainty (m/s^2)</span>
+
+<span class="sd">    :param file_path: The path for the binary geosat file to read.</span>
+<span class="sd">    :type file_path: Path</span>
+
+<span class="sd">    :return: A dictionary containing the read data records.</span>
+<span class="sd">    :rtype: dict[str, np.ndarray]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The datatypes in each record of the geosat file.</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i2&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;latitude&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i4&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;longitude&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i4&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;geoid&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i2&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;anomaly&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i2&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;uncertainty&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i2&#39;</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Read the entirety of the given file</span>
+    <span class="n">table_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> <span class="n">count</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Convert the table data into a 64-bit float matrix.</span>
+    <span class="n">float_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">table_data</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+    <span class="c1"># Convert from matrix from integer values to floats</span>
+    <span class="n">float_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*=</span> <span class="mf">0.489</span>  <span class="c1"># Time offset (seconds)</span>
+    <span class="n">float_data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">1e3</span>  <span class="c1"># Latitude (degrees)</span>
+    <span class="n">float_data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">1e3</span>  <span class="c1"># Longitude (degrees)</span>
+    <span class="n">float_data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">1e2</span>  <span class="c1"># Geoid height (metres)</span>
+    <span class="c1"># float_data[:, 4] /= 1e6  # Gravity anomaly (m/s^-2)</span>
+    <span class="c1"># float_data[:, 5] /= 1e6  # Gravity uncertainty (m/s^-2)</span>
+
+    <span class="n">float_data</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">1e7</span>  <span class="c1"># Gravity anomaly (m/s^-2)</span>
+    <span class="n">float_data</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">1e7</span>  <span class="c1"># Gravity uncertainty (m/s^-2)</span>
+
+    <span class="c1"># Fix the longitude bounds (from 0:360 to -180:180).</span>
+    <span class="n">float_data</span><span class="p">[</span><span class="n">float_data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">360</span>
+
+    <span class="c1"># Finally, return the data in the form of a struct.</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;time_offset&#39;</span><span class="p">:</span> <span class="n">float_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="s1">&#39;latitude&#39;</span><span class="p">:</span> <span class="n">float_data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="s1">&#39;longitude&#39;</span><span class="p">:</span> <span class="n">float_data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="s1">&#39;geoid_height&#39;</span><span class="p">:</span> <span class="n">float_data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="s1">&#39;gravity_anomaly&#39;</span><span class="p">:</span> <span class="n">float_data</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="s1">&#39;gravity_uncertainty&#39;</span><span class="p">:</span> <span class="n">float_data</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="create_interp_grid">
+<a class="viewcode-back" href="../../../modules/gravity/geosat.html#qnav.gravity.geosat.create_interp_grid">[docs]</a>
+<span class="k">def</span> <span class="nf">create_interp_grid</span><span class="p">(</span><span class="n">geosat_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                       <span class="n">interp_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span><span class="p">,</span>
+                       <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates interpolated grid points for geosat data.</span>
+<span class="sd">    For given geosat data, a set of grid points are generated using the</span>
+<span class="sd">    requested interpolation method and resolution. This is provided to</span>
+<span class="sd">    produced uniformly gridded maps for faster look-up and interpolation.</span>
+
+<span class="sd">    :param geosat_data: The contents read from the geosat file(s).</span>
+<span class="sd">    :type geosat_data: dict[str, np.ndarray]</span>
+
+<span class="sd">    :param interp_method: (Optional) The interpolation method to use.</span>
+<span class="sd">        Supported methods include &#39;nearest&#39;, &#39;linear&#39; and &#39;cubic&#39;.</span>
+<span class="sd">        By default, the &#39;linear&#39; method is used.</span>
+<span class="sd">    :type interp_method: str</span>
+
+<span class="sd">    :param resolution: (Optional) The requested step-size for the</span>
+<span class="sd">        interpolation in decimal degrees. By default 0.1 is used.</span>
+<span class="sd">    :type resolution:</span>
+
+<span class="sd">    :return: A tuple containing the produced latitude, longitude and gravity</span>
+<span class="sd">        anomaly values, respectively.</span>
+<span class="sd">    :rtype: tuple[np.ndarray, np.ndarray, np.ndarray]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Extract the dataset values and positions.</span>
+    <span class="n">lat_points</span> <span class="o">=</span> <span class="n">geosat_data</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span>
+    <span class="n">lon_points</span> <span class="o">=</span> <span class="n">geosat_data</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span>
+    <span class="n">anon_values</span> <span class="o">=</span> <span class="n">geosat_data</span><span class="p">[</span><span class="s2">&quot;gravity_anomaly&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Obtain the grid positions to calculate values for.</span>
+    <span class="n">query_lon_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+    <span class="n">query_lat_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+
+    <span class="c1"># Convert the query points into equal sized grids.</span>
+    <span class="n">lon_grid</span><span class="p">,</span> <span class="n">lat_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">query_lon_points</span><span class="p">,</span> <span class="n">query_lat_points</span><span class="p">)</span>
+
+    <span class="c1"># Perform grid data interpolation using the selected method.</span>
+    <span class="n">anom_grid</span> <span class="o">=</span> <span class="n">griddata</span><span class="p">((</span><span class="n">lon_points</span><span class="p">,</span> <span class="n">lat_points</span><span class="p">),</span>
+                         <span class="n">anon_values</span><span class="p">,</span> <span class="p">(</span><span class="n">lon_grid</span><span class="p">,</span> <span class="n">lat_grid</span><span class="p">),</span>
+                         <span class="n">method</span><span class="o">=</span><span class="n">interp_method</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="c1"># Finally, return the produced data.</span>
+    <span class="k">return</span> <span class="n">lat_grid</span><span class="p">,</span> <span class="n">lon_grid</span><span class="p">,</span> <span class="n">anom_grid</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

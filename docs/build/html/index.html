@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quantum Navigation Toolbox &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=fc837d61"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="1. Project Structure" href="usage/structure.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Quantum Navigation Toolbox</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="quantum-navigation-toolbox">
+<h1>Quantum Navigation Toolbox<a class="headerlink" href="#quantum-navigation-toolbox" title="Link to this heading"></a></h1>
+<a class="reference internal image-reference" href="_images/uol_logo.png"><img alt="University of Liverpool" class="align-center" src="_images/uol_logo.png" style="width: 284.76px; height: 73.32px;" /></a>
+<section id="about">
+<h2>About<a class="headerlink" href="#about" title="Link to this heading"></a></h2>
+<p>A Python based navigation toolbox designed to be used for experimenting
+with multi-source navigation. This library provides the necessary services
+to conduct in-depth realistic simulations, fully configurable by the user.
+These can extend from employing simple numerical methods to track movement
+along a basic pre-generated racetrack, to using kalman filters with
+tightly-coupled GPS fusion to track a custom vehicle along a bespoke
+trajectory. The implementation and object association is easy to
+understand an supports third-party additions. In summary, the toolbox
+presents the following key features:</p>
+<ul class="simple">
+<li><p>Trajectory generation with vehicle constraints</p></li>
+<li><p>Configurable accelerometers, gyroscopes and altimeters</p></li>
+<li><p>External clock allowing for controlled timing errors</p></li>
+<li><p>Selection of Inertial Navigation (INS) Fusion Methods</p></li>
+<li><p>GPS satellite simulation with pseudo range generation</p></li>
+<li><p>GPS fusion (fixed gain, loosely-coupled, tightly-coupled)</p></li>
+<li><p>Inertial based quantum sensors and fusion methods</p></li>
+<li><p>Gravity gradient based quantum sensors and fusion methods</p></li>
+<li><p>Generating and plotting interactive results in web browser</p></li>
+<li><p>Handling of various input and output file types for data</p></li>
+<li><p>Support for platforms with limited hardware resources</p></li>
+</ul>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/structure.html">1. Project Structure</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/structure.html#project-folders">1.1. Project Folders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/structure.html#project-files">1.2. Project Files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage/execution.html">2. Software Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/execution.html#command-line-usage">2.1. Command Line Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/execution.html#anaconda-spyder-usage">2.2. Anaconda/Spyder Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/execution.html#pycharm-usage">2.3. PyCharm Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/execution.html#eclipse-pydev-usage">2.4. Eclipse/PyDev Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage/technical.html">3. Technical Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/technical.html#trajectory-generation">3.1. Trajectory Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/technical.html#estimation-initialisation">3.2. Estimation Initialisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/technical.html#sensor-configuration">3.3. Sensor Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/technical.html#simulation-loop">3.4. Simulation Loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/technical.html#capturing-results">3.5. Capturing Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/technical.html#displaying-results">3.6. Displaying Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/technical.html#recreation">3.7. Recreation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage/trajectory.html">4. Trajectory Generation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/trajectory.html#vehicle-model">4.1. Vehicle Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/trajectory.html#path-generation">4.2. Path Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/trajectory.html#gravity-model">4.3. Gravity Model</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage/gravity_modelling.html">5. Gravity Modelling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/gravity_modelling.html#gravity-functions">5.1. Gravity Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/gravity_modelling.html#gravity-correction-maps">5.2. Gravity Correction Maps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage/measurement.html">6. Sensor Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/measurement.html#classic-inertia">6.1. Classic Inertia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/measurement.html#altitude">6.2. Altitude</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/measurement.html#gps-gnss">6.3. GPS/GNSS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/measurement.html#quantum-inertia">6.4. Quantum Inertia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/measurement.html#quantum-gravity">6.5. Quantum Gravity</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage/fusion.html">7. Fusion Methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/fusion.html#classic-inertia">7.1. Classic Inertia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/fusion.html#altitude">7.2. Altitude</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/fusion.html#gps-gnss">7.3. GPS/GNSS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/fusion.html#quantum-inertia">7.4. Quantum Inertia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/fusion.html#quantum-gravity">7.5. Quantum Gravity</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage/configuration.html">8. User Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/configuration.html#configuration-sections">8.1. Configuration Sections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/configuration.html#sub-configuration-files">8.2. Sub-configuration Files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage/packages.html">9. Software Components</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/packages.html#earth">9.1. Earth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/packages.html#estimation">9.2. Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/packages.html#fusion">9.3. Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/packages.html#gps">9.4. GPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/packages.html#gravity">9.5. Gravity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/packages.html#input">9.6. Input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/packages.html#measurement">9.7. Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/packages.html#output">9.8. Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/packages.html#quantum">9.9. Quantum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/packages.html#simulation">9.10. Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/packages.html#util">9.11. Util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/packages.html#waypoints">9.12. Waypoints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage/requirements.html">10. System Requirements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/requirements.html#hardware-requirements">10.1. Hardware Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/requirements.html#software-requirements">10.2. Software Requirements</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage/tutorials.html">11. Example Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#changing-ins-grades">11.1. Changing INS Grades</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#changing-ins-integration">11.2. Changing INS Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#holonomic-constraints">11.3. Holonomic Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#vehicle-models">11.4. Vehicle Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#configuring-trajectories">11.5. Configuring Trajectories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#altimeter-sensors-and-fusion">11.6. Altimeter Sensors and Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#gps-sensors-and-fusion">11.7. GPS Sensors and Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/tutorials.html#inertial-quantum-sensors">11.8. Inertial Quantum Sensors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage/faq.html">12. Frequently Asked Questions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/faq.html#questions-and-answers">12.1. Questions and Answers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage/future.html">13. Potential Future Work</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/future.html#possible-extensions">13.1. Possible Extensions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage/legal.html">14. Software Licence</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/legal.html#mit-license">14.1. MIT License</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="usage/structure.html" class="btn btn-neutral float-right" title="1. Project Structure" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

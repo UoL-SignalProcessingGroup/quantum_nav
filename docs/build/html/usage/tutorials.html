@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>11. Example Usage &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="12. Frequently Asked Questions" href="faq.html" />
+    <link rel="prev" title="10. System Requirements" href="requirements.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">11. Example Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#changing-ins-grades">11.1. Changing INS Grades</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#changing-ins-integration">11.2. Changing INS Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#holonomic-constraints">11.3. Holonomic Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vehicle-models">11.4. Vehicle Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuring-trajectories">11.5. Configuring Trajectories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#altimeter-sensors-and-fusion">11.6. Altimeter Sensors and Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gps-sensors-and-fusion">11.7. GPS Sensors and Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#inertial-quantum-sensors">11.8. Inertial Quantum Sensors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><span class="section-number">11. </span>Example Usage</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/tutorials.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="example-usage">
+<h1><span class="section-number">11. </span>Example Usage<a class="headerlink" href="#example-usage" title="Link to this heading"></a></h1>
+<p>This section covers and describes the examples included with the project. Examples are group into categories,
+with a handful of cases being given for each.</p>
+<section id="changing-ins-grades">
+<h2><span class="section-number">11.1. </span>Changing INS Grades<a class="headerlink" href="#changing-ins-grades" title="Link to this heading"></a></h2>
+<p>The sensor grades for the INS can be configured under the <code class="docutils literal notranslate"><span class="pre">Measurement</span></code> section. Specifically, by changing the
+path values of <code class="docutils literal notranslate"><span class="pre">accelerometerConfig</span></code> and <code class="docutils literal notranslate"><span class="pre">gyroscopeConfig</span></code>, or by changing the contents of the
+sub-configuration files. The examples included cover all of the typical sensors grades ranging from
+theoretically perfect down to basic consumer level grade.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python3 run.py &#39;examples/example_1/perfect.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_1/marine.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_1/aviation.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_1/intermediate.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_1/tactical.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_1/consumer.ini&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="changing-ins-integration">
+<h2><span class="section-number">11.2. </span>Changing INS Integration<a class="headerlink" href="#changing-ins-integration" title="Link to this heading"></a></h2>
+<p>The INS integration method can be configured under the <code class="docutils literal notranslate"><span class="pre">Estimation</span></code> section. Specifically, by changing the value of
+<code class="docutils literal notranslate"><span class="pre">integrationMethod</span></code> to either <em>numerical</em>, <em>runge_kutta</em>, <em>adams_bashforth</em> or <em>kalman</em>. If the Kalman Filter is
+selected, the variable <code class="docutils literal notranslate"><span class="pre">estimatedStateModel</span></code> must also be changed to <em>kalman</em> as well. The example include
+covering these four integration methods against perfect and aviation grade sensors.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python3 run.py &#39;examples/example_2/perfect_numerical.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_2/perfect_runge_kutta.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_2/perfect_adams_bashforth.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_2/perfect_kalman.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_2/aviation_numerical.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_2/aviation_runge_kutta.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_2/aviation_adams_bashforth.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_2/aviation_kalman.ini&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="holonomic-constraints">
+<h2><span class="section-number">11.3. </span>Holonomic Constraints<a class="headerlink" href="#holonomic-constraints" title="Link to this heading"></a></h2>
+<p>Holonomic constrains can be enabled to combat the impact of unwanted numerical sensitivities during simulations. To do
+this, the option <code class="docutils literal notranslate"><span class="pre">useHolonomics</span></code> under the <code class="docutils literal notranslate"><span class="pre">Holonomics</span></code> section should be enabled. These examples includes
+repeating the previously used trajectory with perfect sensor and other very long trajectories, all of
+which show varying degrees of round errors. More examples are then used to repeat these with holonomic constraints,
+removing the effect.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python3 run.py &#39;examples/example_3/perfect_numerical.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_3/20deg_perfect_without_hc.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_3/20deg_perfect_with_hc.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_3/5deg_perfect_without_hc.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_3/5deg_perfect_with_hc.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_3/60deg_perfect_without_hc.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_3/60deg_perfect_with_hc.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_3/lwpl_perfect_without_hc.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_3/lwpl_perfect_with_hc.ini&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="vehicle-models">
+<h2><span class="section-number">11.4. </span>Vehicle Models<a class="headerlink" href="#vehicle-models" title="Link to this heading"></a></h2>
+<p>The selected vehicle model for forming the trajectory can be configured under the <code class="docutils literal notranslate"><span class="pre">Vehicle</span></code> section. Specifically, a
+sub-configuration for the desired vehicle type can be selected using <code class="docutils literal notranslate"><span class="pre">vehicleConfig</span></code>, or a custom one can be
+generated. Each vehicle model describes the expected speeds, turning rates, acceleration profiles and drift delays
+expected. These configurations also can contain additional noise, vibration and oscillation profiles. The examples
+included cover various land, sea and aerial based vehicles.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python3 run.py &#39;examples/example_4/&#39;perfect_custom.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_4/&#39;perfect_large_plane.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_4/&#39;perfect_large_ship.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_4/&#39;perfect_large_van.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_4/&#39;perfect_submarine.ini&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="configuring-trajectories">
+<h2><span class="section-number">11.5. </span>Configuring Trajectories<a class="headerlink" href="#configuring-trajectories" title="Link to this heading"></a></h2>
+<p>The shape of the trajectory can be described in a handful of ways. Firstly, by setting <code class="docutils literal notranslate"><span class="pre">waypointMode</span></code> to <em>config</em>
+under the <code class="docutils literal notranslate"><span class="pre">Waypoints</span></code> section, a trajectory can be defined by setting a series of latitude, longitude an altitude
+points with the variables <code class="docutils literal notranslate"><span class="pre">waypointLat</span></code>, <code class="docutils literal notranslate"><span class="pre">waypointLon</span></code> and <code class="docutils literal notranslate"><span class="pre">waypointAlt</span></code>. Alternatively, the waypoint mode can
+be set to <em>csv</em> to read these values from a CSV file. Lastly, by settings the waypoint to <em>racetrack</em>, an
+arithmetically generated looping trajectory will be used, as configured under the <code class="docutils literal notranslate"><span class="pre">Racetrack</span></code> section. The examples
+included cover a few cases for each of these:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python3 run.py &#39;examples/example_5/&#39;perfect_lwpl_csv.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_5/&#39;perfect_lwpl_csv_2.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_5/&#39;perfect_racetrack_1.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_5/&#39;perfect_racetrack_2.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_5/&#39;perfect_s3k119200_qt_csv.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_5/&#39;perfect_trajeuler_csv.ini&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="altimeter-sensors-and-fusion">
+<h2><span class="section-number">11.6. </span>Altimeter Sensors and Fusion<a class="headerlink" href="#altimeter-sensors-and-fusion" title="Link to this heading"></a></h2>
+<p>An altimeter can be enabled to provide corrections to the estimated vertical position, configured under the
+<code class="docutils literal notranslate"><span class="pre">Altimeter</span></code> section. This allows not only the selection of sensor grade, but also whether the fusion method
+<em>fixed_gain</em> or <em>alpha_beta</em> should be used, selected using the <code class="docutils literal notranslate"><span class="pre">altimeterFusion</span></code> option. The examples covers
+a few scenarios:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python3 run.py &#39;examples/example_6/&#39;aviation_alpha_beta.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_6/&#39;aviation_fixed_gain.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_6/&#39;aviation_only.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_6/&#39;perfect_alpha_beta.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_6/&#39;perfect_fixed_gain.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_6/&#39;perfect_only.ini&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="gps-sensors-and-fusion">
+<h2><span class="section-number">11.7. </span>GPS Sensors and Fusion<a class="headerlink" href="#gps-sensors-and-fusion" title="Link to this heading"></a></h2>
+<p>The involvement of GPS can be configured under the <code class="docutils literal notranslate"><span class="pre">GPS</span></code> section. This allows the enabling of the sensor, stating if
+GPS data can be automatically downloaded, the configuration of noise and the involvement of active and inactive zones.
+These examples cover the three fusion methods <em>fixed_gain</em>, <em>loose</em> and <em>tight</em> that can be selected using
+<code class="docutils literal notranslate"><span class="pre">gpsFusionMethod</span></code>.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python3 run.py &#39;examples/example_7/&#39;aviation_gps_fixed.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_7/&#39;aviation_gps_fixed_with_zones.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_7/&#39;aviation_gps_loose.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_7/&#39;aviation_gps_loose_with_zones.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_7/&#39;aviation_gps_tight.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_7/&#39;aviation_gps_tight_with_zones.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_7/&#39;aviation_only.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_7/&#39;perfect_only.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_7/&#39;tactical_only.ini&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="inertial-quantum-sensors">
+<h2><span class="section-number">11.8. </span>Inertial Quantum Sensors<a class="headerlink" href="#inertial-quantum-sensors" title="Link to this heading"></a></h2>
+<p>The use of cold-atom quantum sensor can be configured under the <code class="docutils literal notranslate"><span class="pre">Quantum</span></code> section. This covers which sensors are
+to be enabled (inertia and/or gravity), their implementation, their configured error profiles and their selected
+fusion methods. These examples explore the options available for <code class="docutils literal notranslate"><span class="pre">quantumImu</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python3 run.py &#39;examples/example_8/&#39;aviation_only.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_8/&#39;aviation_quantum_concept.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_8/&#39;aviation_quantum_realistic.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_8/&#39;perfect_only.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_8/&#39;perfect_quantum_concept.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_8/&#39;perfect_quantum_realistic.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_8/&#39;tactical_only.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_8/&#39;tactical_quantum_concept.ini&#39;</span>
+<span class="go">python3 run.py &#39;examples/example_8/&#39;tactical_quantum_realistic.ini&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="requirements.html" class="btn btn-neutral float-left" title="10. System Requirements" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="faq.html" class="btn btn-neutral float-right" title="12. Frequently Asked Questions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

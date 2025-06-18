@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nav_toolbox.gps.ephemeris &mdash; Navigation Toolbox 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Navigation Toolbox
+          </a>
+              <div class="version">
+                Version 1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">1. Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">2. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">3. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">4. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/processing.html">5. Estimation Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">6. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">7. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">8. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">9. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">10. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">11. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">12. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Navigation Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nav_toolbox.gps.ephemeris</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nav_toolbox.gps.ephemeris</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">============</span>
+<span class="sd">ephemeris.py</span>
+<span class="sd">============</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Collection of functions for extracting GPS/GNSS information.</span>
+<span class="sd">    This module is responsible for the core satellite functionality within</span>
+<span class="sd">    the toolbox. This includes functions for downloading GPS information,</span>
+<span class="sd">    parsing RINEX files, extracting satellite information and estimating</span>
+<span class="sd">    missing values.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Dr. Niall Moroney - niall.moroney17@imperial.ac.uk</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First implementation of this module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">gzip</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">ftplib</span> <span class="kn">import</span> <span class="n">FTP_TLS</span>
+<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">norm</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">nav_toolbox.core.constants</span> <span class="kn">import</span> <span class="n">OMEGA_E</span>
+<span class="kn">from</span> <span class="nn">nav_toolbox.gps.satellite</span> <span class="kn">import</span> <span class="n">SatelliteParams</span>
+
+
+<span class="c1">#: The FTP server address for downloading RINEX files.</span>
+<span class="n">__FTP_ADDR</span> <span class="o">=</span> <span class="s2">&quot;gdc.cddis.eosdis.nasa.gov&quot;</span>
+
+
+<div class="viewcode-block" id="get_rinex_path">
+<a class="viewcode-back" href="../../../modules/gps/ephemeris.html#nav_toolbox.gps.ephemeris.get_rinex_path">[docs]</a>
+<span class="k">def</span> <span class="nf">get_rinex_path</span><span class="p">(</span><span class="n">time</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Obtain the location of a local RINEX file identified by GPS date and time.</span>
+<span class="sd">    This function will return the local filepath of a RINEX file corresponding</span>
+<span class="sd">    to a given (python) datetime. The file of the returned path may or may not</span>
+<span class="sd">    exist (requiring downloading if missing).</span>
+
+<span class="sd">    :param time: Python datetime object for the time required for the ephemeris.</span>
+<span class="sd">    :type time: datetime.datetime</span>
+
+<span class="sd">    :param directory: Location for the files to be downloaded to.</span>
+<span class="sd">    :type directory: Path</span>
+
+<span class="sd">    :return: The path of the corresponding RINEX file.</span>
+<span class="sd">    :rtype: Path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">day</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">timetuple</span><span class="p">()</span><span class="o">.</span><span class="n">tm_yday</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">year2digit</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">year</span> <span class="o">%</span> <span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">eph_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">year2digit</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">day</span><span class="si">}</span><span class="s2">.rnx&quot;</span>
+
+    <span class="c1"># database_dir = Path(PureWindowsPath(directory))</span>
+    <span class="k">return</span> <span class="n">directory</span> <span class="o">/</span> <span class="n">eph_file</span></div>
+
+
+
+<div class="viewcode-block" id="download_ephemeris_file">
+<a class="viewcode-back" href="../../../modules/gps/ephemeris.html#nav_toolbox.gps.ephemeris.download_ephemeris_file">[docs]</a>
+<span class="k">def</span> <span class="nf">download_ephemeris_file</span><span class="p">(</span><span class="n">gps_time</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function downloads and extracts an ephemeris file for a specified</span>
+<span class="sd">    day from &quot;cddis.gsfc.nasa.gov&quot; and saves it under the provided directory.</span>
+
+<span class="sd">    :param gps_time: The Python datetime object for the time required for the</span>
+<span class="sd">        ephemeris data.</span>
+<span class="sd">    :type: datetime.datetime</span>
+
+<span class="sd">    :param directory: The location for the files to be downloaded to.</span>
+<span class="sd">    :type directory: Path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Get time data in relevant format</span>
+    <span class="n">year4digit</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">gps_time</span><span class="o">.</span><span class="n">year</span><span class="p">)</span>
+    <span class="n">year2digit</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">gps_time</span><span class="o">.</span><span class="n">year</span> <span class="o">%</span> <span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">day</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">gps_time</span><span class="o">.</span><span class="n">timetuple</span><span class="p">()</span><span class="o">.</span><span class="n">tm_yday</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">hour</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">gps_time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">.</span><span class="n">hour</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># Get folder/file names for NASA server</span>
+    <span class="n">eph_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">year2digit</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">day</span><span class="si">}</span><span class="s2">.rnx&quot;</span>
+    <span class="c1"># hourly_dir = &#39;/gnss/data/hourly/&#39; + year4digit + &#39;/&#39; + day + &#39;/00/&#39;</span>
+    <span class="n">hourly_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/gnss/data/hourly/</span><span class="si">{</span><span class="n">year4digit</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">day</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">hour</span><span class="si">}</span><span class="s2">/&quot;</span>
+
+    <span class="n">ephemeris_file</span> <span class="o">=</span> <span class="n">directory</span> <span class="o">/</span> <span class="n">eph_file</span>
+    <span class="n">ephemeris_archive</span> <span class="o">=</span> <span class="n">directory</span> <span class="o">/</span> <span class="p">(</span><span class="n">eph_file</span> <span class="o">+</span> <span class="s1">&#39;.Z&#39;</span><span class="p">)</span>
+
+    <span class="c1"># If unzipped ephemeris file does not exist, download and unpack it:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ephemeris_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No ephemeris file found for current day, downloading file...&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Logging into NASA FTP server&#39;</span><span class="p">)</span>
+            <span class="n">ftp</span> <span class="o">=</span> <span class="n">FTP_TLS</span><span class="p">(</span><span class="n">__FTP_ADDR</span><span class="p">)</span>
+            <span class="n">ftp</span><span class="o">.</span><span class="n">login</span><span class="p">()</span>
+            <span class="n">ftp</span><span class="o">.</span><span class="n">prot_p</span><span class="p">()</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Downloading file from </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__FTP_ADDR</span> <span class="o">+</span> <span class="n">hourly_dir</span><span class="p">))</span>
+            <span class="n">ftp</span><span class="o">.</span><span class="n">cwd</span><span class="p">(</span><span class="n">hourly_dir</span><span class="p">)</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">ftp</span><span class="o">.</span><span class="n">dir</span><span class="p">(</span><span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">)</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="p">([</span><span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)))</span> <span class="k">for</span>
+                      <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;MN.rnx.gz&#39;</span><span class="p">)])</span>
+
+            <span class="n">sizes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">file</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="n">sizes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">sizes</span><span class="p">))][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">handle</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ephemeris_archive</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+
+            <span class="n">ftp</span><span class="o">.</span><span class="n">retrbinary</span><span class="p">(</span><span class="s1">&#39;RETR &#39;</span> <span class="o">+</span> <span class="n">file</span><span class="p">,</span> <span class="n">handle</span><span class="o">.</span><span class="n">write</span><span class="p">)</span>
+            <span class="n">handle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unable to download ephemeris file.</span><span class="se">\n\n</span><span class="s1"> &#39;</span>
+                       <span class="s1">&#39;A suitable file ending in </span><span class="se">\&#39;</span><span class="s1">mn.rnx.gz</span><span class="se">\&#39;</span><span class="s1"> &#39;</span>
+                       <span class="s1">&#39;could not be retrieved from ftp://</span><span class="si">{}</span><span class="s1">.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                       <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__FTP_ADDR</span> <span class="o">+</span> <span class="n">hourly_dir</span><span class="p">,</span> <span class="n">eph_file</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+        <span class="c1"># Extract the content from the zip file:</span>
+        <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">GzipFile</span><span class="p">(</span><span class="n">ephemeris_archive</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">input_file</span><span class="p">,</span> \
+                <span class="nb">open</span><span class="p">(</span><span class="n">ephemeris_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output_file</span><span class="p">:</span>
+            <span class="n">output_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">input_file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+        <span class="c1"># Delete the compressed version.</span>
+        <span class="n">ephemeris_archive</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ephemeris file extracted&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ephemeris file &#39;</span><span class="si">{</span><span class="n">eph_file</span><span class="si">}</span><span class="s2">&#39; already available&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="download_ephemeris_files">
+<a class="viewcode-back" href="../../../modules/gps/ephemeris.html#nav_toolbox.gps.ephemeris.download_ephemeris_files">[docs]</a>
+<span class="k">def</span> <span class="nf">download_ephemeris_files</span><span class="p">(</span><span class="n">gps_from_time</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">gps_to_time</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">inc_last</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function downloads and extracts multiple ephemeris files.</span>
+<span class="sd">    Given a date range, this function will download all the ephemeris</span>
+<span class="sd">    files covered by the range.</span>
+
+<span class="sd">    :param gps_from_time: The first date for the download range.</span>
+<span class="sd">        This is the date for the first GPS file to be downloaded.</span>
+<span class="sd">    :type gps_from_time: datetime.datetime</span>
+
+<span class="sd">    :param gps_to_time: The last date for the download range.</span>
+<span class="sd">        This is the end date for the GPS files to download.</span>
+<span class="sd">    :type gps_to_time: datetime.datetime</span>
+
+<span class="sd">    :param directory: The location for the files to be downloaded to.</span>
+<span class="sd">    :type directory: Path</span>
+
+<span class="sd">    :param inc_last: Should the last date of the range be included?</span>
+<span class="sd">    :type inc_last: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Perform the login.</span>
+    <span class="n">gps_ftp</span> <span class="o">=</span> <span class="n">FTP_TLS</span><span class="p">(</span><span class="n">__FTP_ADDR</span><span class="p">)</span>
+    <span class="n">gps_ftp</span><span class="o">.</span><span class="n">login</span><span class="p">()</span>
+    <span class="n">gps_ftp</span><span class="o">.</span><span class="n">prot_p</span><span class="p">()</span>
+
+    <span class="c1"># Extract the date range requested</span>
+    <span class="n">gps_time</span> <span class="o">=</span> <span class="n">gps_from_time</span>
+    <span class="n">end_date</span> <span class="o">=</span> <span class="n">gps_to_time</span>
+    <span class="n">num_days</span> <span class="o">=</span> <span class="p">(</span><span class="n">end_date</span> <span class="o">-</span> <span class="n">gps_time</span><span class="p">)</span><span class="o">.</span><span class="n">days</span>
+
+    <span class="c1"># Download the GPS data for all the dates given:</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_days</span> <span class="o">+</span> <span class="n">inc_last</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloading GPS Data </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">num_days</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">:</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span>
+              <span class="n">gps_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%a</span><span class="s2"> </span><span class="si">%d</span><span class="s2"> %b %Y&quot;</span><span class="p">))</span>
+
+        <span class="c1"># Get time data in relevant format</span>
+        <span class="n">year4digit</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">gps_time</span><span class="o">.</span><span class="n">year</span><span class="p">)</span>
+        <span class="n">year2digit</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">gps_time</span><span class="o">.</span><span class="n">year</span> <span class="o">%</span> <span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">day</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">gps_time</span><span class="o">.</span><span class="n">timetuple</span><span class="p">()</span><span class="o">.</span><span class="n">tm_yday</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">hour</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">gps_time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">.</span><span class="n">hour</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Get folder/file names for NASA server</span>
+        <span class="n">eph_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">year2digit</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">day</span><span class="si">}</span><span class="s2">.rnx&quot;</span>
+        <span class="n">hourly_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/gnss/data/hourly/</span><span class="si">{</span><span class="n">year4digit</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">day</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">hour</span><span class="si">}</span><span class="s2">/&quot;</span>
+
+        <span class="n">ephemeris_file</span> <span class="o">=</span> <span class="n">directory</span> <span class="o">/</span> <span class="n">eph_file</span>
+        <span class="n">ephemeris_archive</span> <span class="o">=</span> <span class="n">directory</span> <span class="o">/</span> <span class="p">(</span><span class="n">eph_file</span> <span class="o">+</span> <span class="s1">&#39;.Z&#39;</span><span class="p">)</span>
+
+        <span class="c1"># If unzipped ephemeris file does not exist, download and unpack it:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ephemeris_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+
+            <span class="n">gps_ftp</span><span class="o">.</span><span class="n">cwd</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+            <span class="n">gps_ftp</span><span class="o">.</span><span class="n">cwd</span><span class="p">(</span><span class="n">hourly_dir</span><span class="p">)</span>
+
+            <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">gps_ftp</span><span class="o">.</span><span class="n">dir</span><span class="p">(</span><span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">)</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="p">([</span><span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)))</span> <span class="k">for</span>
+                      <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;MN.rnx.gz&#39;</span><span class="p">)])</span>
+
+            <span class="n">sizes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">file</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="n">sizes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">sizes</span><span class="p">))][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ephemeris_archive</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+                <span class="n">gps_ftp</span><span class="o">.</span><span class="n">retrbinary</span><span class="p">(</span><span class="s1">&#39;RETR &#39;</span> <span class="o">+</span> <span class="n">file</span><span class="p">,</span> <span class="n">handle</span><span class="o">.</span><span class="n">write</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">GzipFile</span><span class="p">(</span><span class="n">ephemeris_archive</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">input_file</span><span class="p">,</span> \
+                    <span class="nb">open</span><span class="p">(</span><span class="n">ephemeris_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output_file</span><span class="p">:</span>
+                <span class="n">output_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">input_file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+            <span class="n">ephemeris_archive</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">gps_time</span> <span class="o">+=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+
+    <span class="c1"># Finally, close the GPS connection.</span>
+    <span class="n">gps_ftp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="read_ephemeris_file">
+<a class="viewcode-back" href="../../../modules/gps/ephemeris.html#nav_toolbox.gps.ephemeris.read_ephemeris_file">[docs]</a>
+<span class="k">def</span> <span class="nf">read_ephemeris_file</span><span class="p">(</span><span class="n">ephemeris_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">SatelliteParams</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function reads a downloaded ephemeris file and puts the relevant data</span>
+<span class="sd">    into a pandas data frame, which is saved as a csv.</span>
+
+<span class="sd">    :param ephemeris_file: The local ephemeris file to read.</span>
+<span class="sd">    :type ephemeris_file: Path</span>
+
+<span class="sd">    :returns: A list of extracted satellite parameters for GPS satellites.</span>
+<span class="sd">    :rtype: list[SatelliteParams]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">satellite_ephemeris</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">satellite_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># day = str(time.timetuple().tm_yday).zfill(3)</span>
+    <span class="c1"># year2digit = str(time.year % 100).zfill(2)</span>
+    <span class="c1"># eph_file = f&quot;{year2digit}_{day}.rnx&quot;</span>
+    <span class="c1">#</span>
+    <span class="c1"># database_dir = Path(PureWindowsPath(directory))</span>
+    <span class="c1"># ephemeris_file = (database_dir / eph_file).absolute()</span>
+
+    <span class="c1"># if not ephemeris_file.exists():</span>
+    <span class="c1">#     download_ephemeris_file(time, database_dir)</span>
+
+    <span class="c1"># Read File and ignore header</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">ephemeris_file</span><span class="p">)</span>
+
+    <span class="c1"># file = gzip.open(ephemeris_file, mode=&#39;r&#39;)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+    <span class="k">while</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;END OF HEADER&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+    <span class="c1"># Read blocks of four lines, each specifying one satellite</span>
+    <span class="n">prefix_length</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;G&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;J&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">}</span>
+    <span class="n">prefix_type</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;G&#39;</span><span class="p">:</span> <span class="s1">&#39;GPS&#39;</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span> <span class="s1">&#39;GLONASS&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="s1">&#39;SBAS&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;E&#39;</span><span class="p">:</span> <span class="s1">&#39;Galileo&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;BeiDou&#39;</span><span class="p">,</span> <span class="s1">&#39;J&#39;</span><span class="p">:</span> <span class="s1">&#39;QZSS&#39;</span><span class="p">}</span>
+
+    <span class="n">line</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">line</span><span class="p">:</span>
+
+        <span class="n">line_count</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">prefix_length</span><span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">block</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix_type</span><span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">block</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">block</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">])</span>
+        <span class="n">block</span><span class="p">[</span><span class="s1">&#39;month&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">9</span><span class="p">:</span><span class="mi">11</span><span class="p">])</span>
+        <span class="n">block</span><span class="p">[</span><span class="s1">&#39;day&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">12</span><span class="p">:</span><span class="mi">14</span><span class="p">])</span>
+        <span class="n">block</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">15</span><span class="p">:</span><span class="mi">23</span><span class="p">]</span>
+        <span class="n">block</span><span class="p">[</span><span class="s1">&#39;clock_bias&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">23</span><span class="p">:</span><span class="mi">42</span><span class="p">])</span>
+        <span class="n">block</span><span class="p">[</span><span class="s1">&#39;drift_freq_bias&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">42</span><span class="p">:</span><span class="mi">61</span><span class="p">])</span>
+        <span class="n">block</span><span class="p">[</span><span class="s1">&#39;drift_rate_message_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">61</span><span class="p">:</span><span class="mi">80</span><span class="p">])</span>
+        <span class="n">ephemeris_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">while</span> <span class="n">line_count</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+            <span class="n">line_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">)</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">23</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">23</span><span class="p">:</span><span class="mi">42</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">42</span><span class="p">:</span><span class="mi">61</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">61</span><span class="p">:</span><span class="mi">80</span><span class="p">]]</span>
+            <span class="n">ephemeris_data</span> <span class="o">+=</span> <span class="n">items</span>
+
+        <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;t_0e&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="s1">&#39;drift_rate_message_time&#39;</span><span class="p">]</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;prn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;delta_n&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;i_dot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;c_us&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;c_uc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;c_is&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;c_ic&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;c_rs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;c_rc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;omega_dot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="n">r_pz90f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">4</span><span class="p">]),</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span>
+            <span class="p">])</span>
+
+            <span class="n">v_pz90f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">5</span><span class="p">]),</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span>
+            <span class="p">])</span>
+
+            <span class="n">time_pz90f</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span>
+                <span class="n">block</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">],</span> <span class="n">block</span><span class="p">[</span><span class="s1">&#39;month&#39;</span><span class="p">],</span> <span class="n">block</span><span class="p">[</span><span class="s1">&#39;day&#39;</span><span class="p">],</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][</span><span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][</span><span class="mi">6</span><span class="p">:</span><span class="mi">9</span><span class="p">]))</span>
+
+            <span class="c1"># Convert given satellite position and velocity into ECI frame</span>
+            <span class="n">r_eci</span><span class="p">,</span> <span class="n">v_eci</span> <span class="o">=</span> <span class="n">_pz90f2eci</span><span class="p">(</span><span class="n">time_pz90f</span><span class="p">,</span> <span class="n">r_pz90f</span><span class="p">,</span> <span class="n">v_pz90f</span><span class="p">)</span>
+
+            <span class="c1"># Convert this position and velocity into Kepler orbital</span>
+            <span class="c1"># parameters</span>
+            <span class="n">kep_params</span> <span class="o">=</span> <span class="n">_get_kepler_parameters</span><span class="p">(</span><span class="n">r_eci</span><span class="p">,</span> <span class="n">v_eci</span><span class="p">)</span>
+
+            <span class="c1"># Assign Kepler parameters</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;sqrt_a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">kep_params</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kep_params</span><span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">]</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;i_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kep_params</span><span class="p">[</span><span class="s1">&#39;i&#39;</span><span class="p">]</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;omega_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kep_params</span><span class="p">[</span><span class="s1">&#39;Omega&#39;</span><span class="p">]</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kep_params</span><span class="p">[</span><span class="s1">&#39;omega_small&#39;</span><span class="p">]</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;m_bar_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kep_params</span><span class="p">[</span><span class="s1">&#39;theta&#39;</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># block[&#39;messageTime&#39;] = block[&#39;drift_rate_message_time&#39;]</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;sqrt_a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;i_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">12</span><span class="p">])</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;omega_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">14</span><span class="p">])</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;m_bar_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;delta_n&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;omega_dot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">15</span><span class="p">])</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;i_dot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">16</span><span class="p">])</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;c_us&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;c_uc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;c_is&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">11</span><span class="p">])</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;c_ic&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;c_rs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;c_rc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">13</span><span class="p">])</span>
+            <span class="c1"># block[&#39;t_tx&#39;] = _float(ephemeris_data[25])</span>
+            <span class="c1"># block[&#39;GPS_Week&#39;] = _float(ephemeris_data[18])</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;t_0e&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_float</span><span class="p">(</span><span class="n">ephemeris_data</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span>
+            <span class="n">block</span><span class="p">[</span><span class="s1">&#39;prn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+
+        <span class="n">sat_id</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="s1">&#39;prn&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">sat_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">satellite_list</span> <span class="ow">and</span> <span class="n">sat_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">]:</span>
+            <span class="n">satellite_ephemeris</span><span class="p">[</span><span class="n">sat_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">block</span>
+            <span class="c1"># satellite_list.append(sat_id)</span>
+
+        <span class="c1"># satellite_ephemeris[sat_id] = block</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">)</span>
+
+    <span class="n">to_return</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">satellite_ephemeris</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;GPS&#39;</span><span class="p">:</span>
+            <span class="n">to_return</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SatelliteParams</span><span class="p">(</span><span class="o">**</span><span class="n">v</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">to_return</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_pz90f2eci</span><span class="p">(</span><span class="n">time</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">r_pz90f</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">v_pz90f</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts a position and velocity given in the PZ-90F</span>
+<span class="sd">    coordinate reference frame used by the GLONASS system into the ECI</span>
+<span class="sd">    reference frame.</span>
+
+<span class="sd">    :param time: The datetime object for the time at which the PZ-90F</span>
+<span class="sd">        parameters are correct</span>
+<span class="sd">    :type time: datetime.datetime</span>
+
+<span class="sd">    :param r_pz90f: A numpy array for the position in PZ-90F reference frame</span>
+<span class="sd">    :type r_pz90f: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :param v_pz90f: A numpy array for the velocity in PZ-90F reference frame</span>
+<span class="sd">    :type v_pz90f: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :returns:</span>
+<span class="sd">        * rECI - numpy array for the position in the ECI reference frame</span>
+<span class="sd">        * vECI - numpy array for the velocity in the ECI reference frame</span>
+<span class="sd">    :rtype: tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">theta_g0</span> <span class="o">=</span> <span class="n">_greenwich_side_real_time_midnight</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>  <span class="c1"># Greenwich Sidereal Time</span>
+
+    <span class="n">time_sec</span> <span class="o">=</span> <span class="p">((</span><span class="n">time</span> <span class="o">-</span> <span class="n">datetime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">day</span><span class="p">))</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>  <span class="c1"># Seconds since midnight</span>
+    <span class="n">theta_ge</span> <span class="o">=</span> <span class="n">theta_g0</span> <span class="o">+</span> <span class="n">OMEGA_E</span> <span class="o">*</span> <span class="n">time_sec</span>  <span class="c1"># Sidereal time at epoch</span>
+
+    <span class="c1"># Convert position and velocity into ECI</span>
+    <span class="n">s_t</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_ge</span><span class="p">)</span>
+    <span class="n">c_t</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta_ge</span><span class="p">)</span>
+
+    <span class="n">r_eci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="n">r_pz90f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">c_t</span> <span class="o">-</span> <span class="n">r_pz90f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">s_t</span><span class="p">,</span>
+        <span class="n">r_pz90f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">s_t</span> <span class="o">+</span> <span class="n">r_pz90f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">c_t</span><span class="p">,</span>
+        <span class="n">r_pz90f</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="p">])</span>
+
+    <span class="n">v_eci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="n">v_pz90f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">c_t</span> <span class="o">-</span> <span class="n">v_pz90f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">s_t</span> <span class="o">-</span> <span class="n">OMEGA_E</span> <span class="o">*</span> <span class="n">r_eci</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">v_pz90f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">s_t</span> <span class="o">+</span> <span class="n">v_pz90f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">c_t</span> <span class="o">+</span> <span class="n">OMEGA_E</span> <span class="o">*</span> <span class="n">r_eci</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">v_pz90f</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">r_eci</span><span class="p">,</span> <span class="n">v_eci</span>
+
+
+<span class="k">def</span> <span class="nf">_greenwich_side_real_time_midnight</span><span class="p">(</span><span class="n">time</span><span class="p">:</span> <span class="n">datetime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function calculates the Sidereal Time at Greenwich at 00:00:00 on</span>
+<span class="sd">    the inputted day.</span>
+
+<span class="sd">    :param time: A Python datetime object for the time in question</span>
+<span class="sd">    :type time: datetime.datetime</span>
+
+<span class="sd">    :return: The Greenwich Sidereal Time @ 00:00:00 of input day</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">time00</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>  <span class="c1"># 00:00:00 of day</span>
+    <span class="n">jd</span> <span class="o">=</span> <span class="n">_julian_date</span><span class="p">(</span><span class="n">time00</span><span class="p">)</span>  <span class="c1"># Julian date of midnight time</span>
+    <span class="n">ut</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">jd</span> <span class="o">-</span> <span class="mf">2451545.0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">36525.0</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="mf">6.697374558</span> <span class="o">+</span> <span class="p">(</span><span class="mf">2400.051336</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.000025862</span> <span class="o">*</span> <span class="n">t</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">ut</span> <span class="o">*</span> <span class="mf">1.0027379093</span><span class="p">)</span>
+    <span class="n">gs_t0</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">%</span> <span class="mi">24</span>
+    <span class="k">return</span> <span class="n">gs_t0</span>
+
+
+<span class="k">def</span> <span class="nf">_julian_date</span><span class="p">(</span><span class="n">time</span><span class="p">:</span> <span class="n">datetime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function gives the Julian Date of an input time, i.e. the time in days</span>
+<span class="sd">    since 12:00 Jan 1 4713 B.C in Universal Time.</span>
+
+<span class="sd">    :param time: A Python datetime object for the time in question</span>
+<span class="sd">    :type time: datetime</span>
+
+<span class="sd">    :returns: The JD - Julian date</span>
+<span class="sd">    :rtype: float</span>
+
+<span class="sd">    .. TODO:</span>
+<span class="sd">        Currently only works for input times that are 00:00:00, this has a</span>
+<span class="sd">        quick but currently unnecessary fix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">year</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">month</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>
+
+    <span class="n">dum1</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">modf</span><span class="p">((</span><span class="n">month</span> <span class="o">-</span> <span class="mf">14.0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">jd</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">modf</span><span class="p">(</span><span class="mi">1461</span> <span class="o">*</span> <span class="p">(</span><span class="n">year</span> <span class="o">+</span> <span class="mi">4800</span> <span class="o">+</span> <span class="n">dum1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">4.0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">jd</span> <span class="o">+=</span> <span class="n">math</span><span class="o">.</span><span class="n">modf</span><span class="p">((</span><span class="mi">367</span> <span class="o">*</span> <span class="p">(</span><span class="n">month</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">dum1</span><span class="p">))</span> <span class="o">/</span> <span class="mf">12.0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">dum2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">modf</span><span class="p">((</span><span class="n">year</span> <span class="o">+</span> <span class="mi">4900</span> <span class="o">+</span> <span class="n">dum1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">jd</span> <span class="o">-=</span> <span class="n">math</span><span class="o">.</span><span class="n">modf</span><span class="p">((</span><span class="mi">3</span> <span class="o">*</span> <span class="n">dum2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">4.0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">jd</span> <span class="o">+=</span> <span class="n">day</span> <span class="o">-</span> <span class="mf">2432075.5</span> <span class="o">+</span> <span class="mi">2400000</span>
+    <span class="k">return</span> <span class="n">jd</span>
+
+
+<span class="k">def</span> <span class="nf">_get_kepler_parameters</span><span class="p">(</span><span class="n">r</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts a satellites position and velocity in the ECI</span>
+<span class="sd">    frame into the keplerian parameters of the associated orbit as per the</span>
+<span class="sd">    method shown in &quot;Fundamentals of Astrodynamics and Applications&quot;,</span>
+<span class="sd">    Vallado, 2007.</span>
+
+<span class="sd">    :param r: Satellite position in ECI frame</span>
+<span class="sd">    :type r: numpy.array (3-elements)</span>
+
+<span class="sd">    :param v: Satellite velocity in ECI frame</span>
+<span class="sd">    :type v: numpy.array (3-elements)</span>
+
+<span class="sd">    :return: A dictionary containing all relevant Kepler orbital parameters</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># warnings.filterwarnings(&quot;ignore&quot;)</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="mf">3.986004418e5</span>  <span class="c1"># Earth&#39;s gravitational parameter.</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Satellite&#39;s orbital momentum</span>
+    <span class="n">n_hat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">h</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">e_vec</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">mu</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="n">norm</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">mu</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">r</span><span class="p">))</span> <span class="o">*</span> <span class="n">r</span>
+                        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span> <span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">v</span><span class="p">)</span>  <span class="c1"># Eccentricity vector</span>
+
+    <span class="n">e</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">e_vec</span><span class="p">)</span>  <span class="c1"># Eccentricity</span>
+    <span class="n">ke</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">mu</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>  <span class="c1"># Specific mechanical energy</span>
+    <span class="c1"># Calculate semi major acis</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">e</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="o">-</span><span class="n">mu</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ke</span><span class="p">)</span>
+        <span class="c1"># p = a * (1 - e ** 2)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># p = norm(h) ** 2 / mu</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
+    <span class="n">cos_e</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">norm</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">/</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="n">e</span>
+
+    <span class="c1"># NEW</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">mu</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="s1">&#39;Omega&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+                <span class="s1">&#39;omega_small&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="s1">&#39;theta&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="s1">&#39;tau&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">}</span>
+
+    <span class="n">sin_e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">e</span> <span class="o">*</span> <span class="p">(</span><span class="n">mu</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">sin_e</span><span class="p">,</span> <span class="n">cos_e</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">h</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">h</span><span class="p">))</span>  <span class="c1"># Inclination</span>
+
+    <span class="n">omega</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">n_hat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">n_hat</span><span class="p">))</span>  <span class="c1"># Longitude of ascending node</span>
+
+    <span class="k">if</span> <span class="n">n_hat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">omega</span>
+
+    <span class="c1"># omega = omega[0]</span>
+    <span class="c1"># Argument of pericentre</span>
+
+    <span class="n">omega_small</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">n_hat</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span> <span class="n">e_vec</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">norm</span><span class="p">(</span><span class="n">n_hat</span><span class="p">)</span> <span class="o">*</span> <span class="n">e</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">e_vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">omega_small</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">omega_small</span>
+
+    <span class="c1"># True anomaly at epoch time</span>
+    <span class="c1"># omega_small = omega_small[0][0]</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">e_vec</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span> <span class="n">r</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">norm</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">e</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span> <span class="n">v</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">theta</span>
+
+    <span class="c1"># theta = theta[0][0]</span>
+    <span class="n">tau</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">e</span> <span class="o">-</span> <span class="n">e</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">e</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">mu</span> <span class="o">*</span> <span class="n">a</span> <span class="o">**</span> <span class="o">-</span><span class="mi">3</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="n">e</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">:</span> <span class="n">i</span><span class="p">,</span> <span class="s1">&#39;Omega&#39;</span><span class="p">:</span> <span class="n">omega</span><span class="p">,</span>
+            <span class="s1">&#39;omega_small&#39;</span><span class="p">:</span> <span class="n">omega_small</span><span class="p">,</span> <span class="s1">&#39;theta&#39;</span><span class="p">:</span> <span class="n">theta</span><span class="p">,</span> <span class="s1">&#39;tau&#39;</span><span class="p">:</span> <span class="n">tau</span><span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">_float</span><span class="p">(</span><span class="n">string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is a minor amendment to the python &quot;float&quot; function,</span>
+<span class="sd">    returning None for an input string of ``\\n`` rather than an error.</span>
+
+<span class="sd">    :param string: The input string to be converted to a float</span>
+<span class="sd">    :type string: str</span>
+
+<span class="sd">    :return: A corresponding float value or None</span>
+<span class="sd">    :rtype: float or None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">string</span> <span class="o">!=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

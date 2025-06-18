@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.gps.sensor &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.gps.sensor</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.gps.sensor</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=============</span>
+<span class="sd">gps/sensor.py</span>
+<span class="sd">=============</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    GPS sensor activities used for collecting measurements from satellites.</span>
+<span class="sd">    This module provides sensor classes that are responsible for obtaining</span>
+<span class="sd">    and returning GPS measurements from selected satellites. These</span>
+<span class="sd">    measurements can then be passed to the appropriate GPS fusion method.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Kallum O&#39;Hara - sgkohara@liverpool.ac.uk</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First implementation of this module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># .. TODO:</span>
+<span class="c1">#       - Implement sensor axes properties</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Collection</span>
+<span class="kn">from</span> <span class="nn">qnav.gps.satellite</span> <span class="kn">import</span> <span class="n">Satellite</span>
+<span class="kn">from</span> <span class="nn">qnav.gps.zones</span> <span class="kn">import</span> <span class="n">FlaggedPolygonGroup</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">Sensor</span>
+<span class="kn">from</span> <span class="nn">qnav.waypoints.trajectory</span> <span class="kn">import</span> <span class="n">GroundTruth</span>
+
+
+<div class="viewcode-block" id="GpsSensor">
+<a class="viewcode-back" href="../../../modules/gps/sensor.html#qnav.gps.sensor.GpsSensor">[docs]</a>
+<span class="k">class</span> <span class="nc">GpsSensor</span><span class="p">(</span><span class="n">Sensor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A basic sensor for collecting measurements from GPS satellites.</span>
+<span class="sd">    This sensor can be used to collect measurements on demand from</span>
+<span class="sd">    presented GPS satellites at requested frequency.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">satellites</span><span class="p">:</span> <span class="n">Collection</span><span class="p">[</span><span class="n">Satellite</span><span class="p">],</span>
+                 <span class="n">gps_zones</span><span class="p">:</span> <span class="n">FlaggedPolygonGroup</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">start_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                 <span class="n">rand_seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a GPS sensor that produces GPS satellite measurements.</span>
+
+<span class="sd">        :param frequency: The exact measurement frequency of the sensor in Hz.</span>
+<span class="sd">        :type frequency: float</span>
+
+<span class="sd">        :param satellites: The satellites to collect measurements from.</span>
+<span class="sd">        :type satellites: Collection[Satellite]</span>
+
+<span class="sd">        :param start_time: The starting time of the sensor in seconds.</span>
+<span class="sd">        :type start_time: float</span>
+
+<span class="sd">        :param rand_seed: The random number generation seed.</span>
+<span class="sd">        :type rand_seed: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">rand_seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_satellites</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">satellites</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_measurement</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gps_zones</span> <span class="o">=</span> <span class="n">gps_zones</span>
+
+<div class="viewcode-block" id="GpsSensor.take_measurement">
+<a class="viewcode-back" href="../../../modules/gps/sensor.html#qnav.gps.sensor.GpsSensor.take_measurement">[docs]</a>
+    <span class="k">def</span> <span class="nf">take_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">est_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Obtains updated measurement from GPS satellites.</span>
+<span class="sd">        Obtains measurements from all GPS satellites and updates the last</span>
+<span class="sd">        measurement. Performed prior to GPS fusion.</span>
+
+<span class="sd">        :param est_time: The estimated time the measurement of the sensor</span>
+<span class="sd">            is expected to be captured at (in seconds).</span>
+<span class="sd">        :type est_time: float</span>
+
+<span class="sd">        :param ground_truth: The corresponding ground truth data.</span>
+<span class="sd">        :type ground_truth: GroundTruth</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Unpack the ground truth data</span>
+        <span class="n">ant_pos_lla</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="o">.</span><span class="n">position</span>
+        <span class="n">ant_vel_body</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="o">.</span><span class="n">velocity</span>
+        <span class="n">ant_att_deg</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="o">.</span><span class="n">attitude</span>
+
+        <span class="c1"># Get a measurement from each of the satellites.</span>
+        <span class="n">sat_measurements</span> <span class="o">=</span> <span class="p">[</span><span class="n">sat</span><span class="o">.</span><span class="n">get_measurements</span><span class="p">(</span>
+            <span class="n">ant_pos_lla</span><span class="p">,</span> <span class="n">ant_att_deg</span><span class="p">,</span> <span class="n">ant_vel_body</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">sat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_satellites</span><span class="p">]</span>
+
+        <span class="c1"># Apply zones if active:</span>
+        <span class="n">is_usable</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gps_zones</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="o">.</span><span class="n">position</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">is_usable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gps_zones</span><span class="o">.</span><span class="n">get_point_flag</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+
+        <span class="c1"># Record the last measurement group</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_measurement</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;is_usable&#39;</span><span class="p">:</span> <span class="n">is_usable</span><span class="p">,</span>
+            <span class="s1">&#39;sat_measurements&#39;</span><span class="p">:</span> <span class="n">sat_measurements</span>
+        <span class="p">}</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">last_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the list of latest GPS satellite measurements.</span>
+
+<span class="sd">        :return: Latest GPS satellite measurements.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_measurement</span>
+
+<div class="viewcode-block" id="GpsSensor.update">
+<a class="viewcode-back" href="../../../modules/gps/sensor.html#qnav.gps.sensor.GpsSensor.update">[docs]</a>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_sec</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the state of the satellites for the given amount of seconds.</span>
+<span class="sd">        This method is used to update each of the underlying satellites in</span>
+<span class="sd">        the given collection.</span>
+
+<span class="sd">        :param time_sec: The estimated current simulation time.</span>
+<span class="sd">        :type time_sec: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Substitute None value for default time difference</span>
+        <span class="k">if</span> <span class="n">time_sec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="p">(</span><span class="n">time_sec</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_elapsed</span><span class="p">)</span>
+
+        <span class="c1"># Increase the time elapsed.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_elapsed</span> <span class="o">+=</span> <span class="n">dt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next_update</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_elapsed</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span>
+        <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_satellites</span><span class="p">]</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

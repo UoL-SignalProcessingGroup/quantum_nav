@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nav_toolbox.output.write &mdash; Navigation Toolbox 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Navigation Toolbox
+          </a>
+              <div class="version">
+                Version 1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">1. Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">2. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">3. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">4. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/processing.html">5. Estimation Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">6. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">7. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">8. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">9. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">10. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">11. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">12. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Navigation Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nav_toolbox.output.write</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nav_toolbox.output.write</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">========</span>
+<span class="sd">write.py</span>
+<span class="sd">========</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Exports simulation and results data in various file formats.</span>
+<span class="sd">    This module is responsible for writing results to disk in various</span>
+<span class="sd">    save formats.</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.1.0 - Fixed error in CSV column names.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="kn">from</span> <span class="nn">nav_toolbox.input.defaults</span> <span class="kn">import</span> <span class="n">RESULTS_PATH</span>
+<span class="kn">from</span> <span class="nn">nav_toolbox.output.formats</span> <span class="kn">import</span> <span class="n">FileFormat</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">scipy.io</span> <span class="kn">import</span> <span class="n">savemat</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+
+<span class="c1">#: The header for CSV data</span>
+<span class="c1"># TODO: Extract headers from Pandas table!</span>
+<span class="n">__CSV_HEADER</span> <span class="o">=</span> <span class="s2">&quot;Time (s), &quot;</span> \
+               <span class="s2">&quot;Latitude (deg), Longitude (deg), Altitude (m), &quot;</span> \
+               <span class="s2">&quot;Velocity Along (m/s), Velocity Across (m/s), Velocity Down (m/s), &quot;</span> \
+               <span class="s2">&quot;Acceleration Along (m/s^2), Across East (m/s^2), Acceleration Down (m/s^2), &quot;</span> \
+               <span class="s2">&quot;Heading (deg), Pitch (deg), Roll (deg), &quot;</span> \
+               <span class="s2">&quot;Body Rate R (deg/s), Body Rate P (deg/s), Body Rate Q (deg/s)&quot;</span>
+
+
+<div class="viewcode-block" id="write_data">
+<a class="viewcode-back" href="../../../modules/output/write.html#nav_toolbox.output.write.write_data">[docs]</a>
+<span class="k">def</span> <span class="nf">write_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">results_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">data_format</span><span class="p">:</span> <span class="n">FileFormat</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Writes the given data in the selected file formats.</span>
+
+<span class="sd">    :param data: The array data to write.</span>
+<span class="sd">    :type data: numpy.ndarray (n-by-16 elements)</span>
+
+<span class="sd">    :param results_path: The file to write the results to.</span>
+<span class="sd">    :type results_path: pathlib.Path</span>
+
+<span class="sd">    :param data_format: The selected file formats.</span>
+<span class="sd">    :type data_format: FileFormat</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">data_format</span><span class="o">.</span><span class="n">is_none</span><span class="p">():</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">data_format</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">FileFormat</span><span class="o">.</span><span class="n">CSV</span><span class="p">):</span>
+        <span class="n">write_csv_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">results_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data_format</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">FileFormat</span><span class="o">.</span><span class="n">CSV_GZ</span><span class="p">):</span>
+        <span class="n">write_csv_compressed_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">results_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data_format</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">FileFormat</span><span class="o">.</span><span class="n">NUMPY</span><span class="p">):</span>
+        <span class="n">write_numpy_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">results_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data_format</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">FileFormat</span><span class="o">.</span><span class="n">NUMPY_GZ</span><span class="p">):</span>
+        <span class="n">write_numpy_compressed_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">results_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data_format</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">FileFormat</span><span class="o">.</span><span class="n">BINARY</span><span class="p">):</span>
+        <span class="n">write_binary_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">results_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data_format</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">FileFormat</span><span class="o">.</span><span class="n">PICKLE</span><span class="p">):</span>
+        <span class="n">write_pickle_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">results_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data_format</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">FileFormat</span><span class="o">.</span><span class="n">MATLAB</span><span class="p">):</span>
+        <span class="n">write_matlab_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">results_path</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data_format</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">FileFormat</span><span class="o">.</span><span class="n">MATLAB_COMP</span><span class="p">):</span>
+        <span class="n">write_matlab_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">results_path</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="write_csv_data">
+<a class="viewcode-back" href="../../../modules/output/write.html#nav_toolbox.output.write.write_csv_data">[docs]</a>
+<span class="k">def</span> <span class="nf">write_csv_data</span><span class="p">(</span><span class="n">to_write</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write the data in Comma-Seperated Value (CSV) format.</span>
+
+<span class="sd">    :param to_write: The array data to write.</span>
+<span class="sd">    :type to_write: numpy.ndarray (n-by-16 elements)</span>
+
+<span class="sd">    :param file_path: The file to write the results to.</span>
+<span class="sd">    :type file_path: pathlib.Path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">output_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">confirm_non_existence</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="n">to_write</span><span class="p">,</span>
+                   <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">__CSV_HEADER</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="write_csv_compressed_data">
+<a class="viewcode-back" href="../../../modules/output/write.html#nav_toolbox.output.write.write_csv_compressed_data">[docs]</a>
+<span class="k">def</span> <span class="nf">write_csv_compressed_data</span><span class="p">(</span><span class="n">to_write</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write the data in compressed Comma-Seperated Value (CSV) format.</span>
+<span class="sd">    The data is compressed using gzip compressed format.</span>
+
+<span class="sd">    :param to_write: The array data to write.</span>
+<span class="sd">    :type to_write: numpy.array (n-by-16 elements)</span>
+
+<span class="sd">    :param file_path: The file to write the results to.</span>
+<span class="sd">    :type file_path: pathlib.Path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">output_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.gz&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">confirm_non_existence</span><span class="p">(</span><span class="n">output_file</span><span class="p">):</span>
+        <span class="c1"># np.savetxt(output_file, to_write,</span>
+        <span class="c1">#            delimiter=&quot;,&quot;, header=__CSV_HEADER)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="n">to_write</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="write_numpy_data">
+<a class="viewcode-back" href="../../../modules/output/write.html#nav_toolbox.output.write.write_numpy_data">[docs]</a>
+<span class="k">def</span> <span class="nf">write_numpy_data</span><span class="p">(</span><span class="n">to_write</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write the data in numpy file format.</span>
+
+<span class="sd">    :param to_write: The array data to write.</span>
+<span class="sd">    :type to_write: numpy.array (n-by-16 elements)</span>
+
+<span class="sd">    :param file_path: The file to write the results to.</span>
+<span class="sd">    :type file_path: pathlib.Path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">output_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.npy&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">confirm_non_existence</span><span class="p">(</span><span class="n">output_file</span><span class="p">):</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">output_file</span><span class="p">),</span> <span class="n">to_write</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="write_numpy_compressed_data">
+<a class="viewcode-back" href="../../../modules/output/write.html#nav_toolbox.output.write.write_numpy_compressed_data">[docs]</a>
+<span class="k">def</span> <span class="nf">write_numpy_compressed_data</span><span class="p">(</span><span class="n">to_write</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write the data in compressed numpy file format.</span>
+<span class="sd">    The given array is saved under the field &#39;data&#39;.</span>
+
+<span class="sd">    :param to_write: The array data to write.</span>
+<span class="sd">    :type to_write: numpy.array (n-by-16 elements)</span>
+
+<span class="sd">    :param file_path: The file to write the results to.</span>
+<span class="sd">    :type file_path: pathlib.Path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">output_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.npz&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">confirm_non_existence</span><span class="p">(</span><span class="n">output_file</span><span class="p">):</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savez_compressed</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">output_file</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">to_write</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="write_binary_data">
+<a class="viewcode-back" href="../../../modules/output/write.html#nav_toolbox.output.write.write_binary_data">[docs]</a>
+<span class="k">def</span> <span class="nf">write_binary_data</span><span class="p">(</span><span class="n">to_write</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write the data in standard binary format.</span>
+<span class="sd">    Written in big-endian, float64, C-order array format.</span>
+
+<span class="sd">    :param to_write: The array data to write.</span>
+<span class="sd">    :type to_write: numpy.array (n-by-16 elements)</span>
+
+<span class="sd">    :param file_path: The file to write the results to.</span>
+<span class="sd">    :type file_path: pathlib.Path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">output_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.bin&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">confirm_non_existence</span><span class="p">(</span><span class="n">output_file</span><span class="p">):</span>
+        <span class="n">to_write</span><span class="o">.</span><span class="n">tofile</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="write_pickle_data">
+<a class="viewcode-back" href="../../../modules/output/write.html#nav_toolbox.output.write.write_pickle_data">[docs]</a>
+<span class="k">def</span> <span class="nf">write_pickle_data</span><span class="p">(</span><span class="n">to_write</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write the data in Python pickle format (insecure).</span>
+<span class="sd">    For compatability the highest pickle protocol is used.</span>
+
+<span class="sd">    :param to_write: The array data to write.</span>
+<span class="sd">    :type to_write: numpy.array (n-by-16 elements)</span>
+
+<span class="sd">    :param file_path: The file to write the results to.</span>
+<span class="sd">    :type file_path: pathlib.Path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">output_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.pickle&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">confirm_non_existence</span><span class="p">(</span><span class="n">output_file</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">to_write</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="write_matlab_data">
+<a class="viewcode-back" href="../../../modules/output/write.html#nav_toolbox.output.write.write_matlab_data">[docs]</a>
+<span class="k">def</span> <span class="nf">write_matlab_data</span><span class="p">(</span><span class="n">to_write</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">do_compress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write the data in MATLAB (.mat) file format.</span>
+<span class="sd">    This uses MAT format 7.2 (supporting arrays &gt; 2GB). By default, this</span>
+<span class="sd">    function does not apply compression that MATLAB does automatically.</span>
+
+<span class="sd">    :param to_write: The array data to write.</span>
+<span class="sd">    :type to_write: numpy.array (n-by-16 elements)</span>
+
+<span class="sd">    :param file_path: The file to write the results to.</span>
+<span class="sd">    :type file_path: pathlib.Path</span>
+
+<span class="sd">    :param do_compress: Should the results be compressed to reduce file-size?</span>
+<span class="sd">        This will not affect values (default=False).</span>
+<span class="sd">    :type do_compress: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">output_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.mat&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">confirm_non_existence</span><span class="p">(</span><span class="n">output_file</span><span class="p">):</span>
+        <span class="n">savemat</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">to_write</span><span class="p">},</span>
+                <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;5&#39;</span><span class="p">,</span> <span class="n">do_compression</span><span class="o">=</span><span class="n">do_compress</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="make_unique_dir">
+<a class="viewcode-back" href="../../../modules/output/write.html#nav_toolbox.output.write.make_unique_dir">[docs]</a>
+<span class="k">def</span> <span class="nf">make_unique_dir</span><span class="p">(</span><span class="n">parent_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">RESULTS_PATH</span><span class="p">,</span> <span class="n">make_dirs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a unique directory to avoid conflicting names.</span>
+<span class="sd">    This function generates a directory with a unique under the given folder.</span>
+
+<span class="sd">    :param parent_dir: The directory to generate the unique folder within.</span>
+<span class="sd">    :type parent_dir: pathlib.Path</span>
+
+<span class="sd">    :param make_dirs: Should the directory (and any parent directories)</span>
+<span class="sd">        be created now (default=True).</span>
+<span class="sd">    :type make_dirs: bool</span>
+
+<span class="sd">    :return: The directory of the unique folder.</span>
+<span class="sd">    :rtype: pathlib.Path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">date_str</span> <span class="o">=</span> <span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> %b %Y  %H_%M_%S&quot;</span><span class="p">)</span>
+    <span class="n">unique_path</span> <span class="o">=</span> <span class="n">parent_dir</span> <span class="o">/</span> <span class="n">date_str</span>
+
+    <span class="k">if</span> <span class="n">unique_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;An output directory &#39;</span><span class="si">{</span><span class="n">unique_path</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="si">}</span><span class="s2">&#39;&quot;</span> \
+              <span class="sa">f</span><span class="s2">&quot; already exists! Please re-run to generate unique directory&quot;</span>
+        <span class="k">raise</span> <span class="ne">IsADirectoryError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">make_dirs</span><span class="p">:</span>
+        <span class="n">unique_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">unique_path</span></div>
+
+
+
+<div class="viewcode-block" id="confirm_non_existence">
+<a class="viewcode-back" href="../../../modules/output/write.html#nav_toolbox.output.write.confirm_non_existence">[docs]</a>
+<span class="k">def</span> <span class="nf">confirm_non_existence</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A simple function to prevent accidental overwriting.</span>
+<span class="sd">    This function will generate a warning and return False if the given file</span>
+<span class="sd">    already exists. Otherwise, it will return True.</span>
+
+<span class="sd">    :param file_path: The path for the file to check.</span>
+<span class="sd">    :type file_path: Path</span>
+
+<span class="sd">    :return: True if the given file does NOT already exist.</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">file_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot overwrite pre-existing file &#39;</span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&#39;!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.quantum.realistic &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.quantum.realistic</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.quantum.realistic</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">============</span>
+<span class="sd">realistic.py</span>
+<span class="sd">============</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Provides quantum sensors with realistic implementations.</span>
+<span class="sd">    Extends from the base quantum sensor and includes realistic</span>
+<span class="sd">    physics for capturing measurements.</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">asin</span>
+<span class="kn">from</span> <span class="nn">qnav.waypoints.trajectory</span> <span class="kn">import</span> <span class="n">GroundTruth</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.error_properties</span> <span class="kn">import</span> <span class="n">ErrorProperties</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.platform</span> <span class="kn">import</span> <span class="n">SensorAxis</span>
+<span class="kn">from</span> <span class="nn">qnav.quantum.base</span> <span class="kn">import</span> <span class="n">ConceptQuantumImu</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># Atomic mass (kg) - Caesium 133 (132.90545 amu&#39;s)</span>
+<span class="n">_CAESIUM_ATOM_MASS</span> <span class="o">=</span> <span class="mf">2.20693925e-25</span>
+
+<span class="c1"># Planck&#39;s Constant (Joules*seconds, Js)</span>
+<span class="n">_H_BAR</span> <span class="o">=</span> <span class="mf">1.054571817e-34</span>
+
+
+<div class="viewcode-block" id="ColdAtomInterferometer">
+<a class="viewcode-back" href="../../../modules/quantum/realistic.html#qnav.quantum.realistic.ColdAtomInterferometer">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">ColdAtomInterferometer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters used for defining a Cold Atom Interferometer.</span>
+<span class="sd">    These properties describe the qualities of an ultra-cold atom</span>
+<span class="sd">    interferometer, which is used for capturing quantum </span>
+<span class="sd">    accelerations and angle rates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The number of atoms to use for each measurement</span>
+    <span class="n">num_of_atoms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mf">1e6</span>
+
+    <span class="c1"># The mass of each of the atoms (in kilograms)</span>
+    <span class="n">atom_mass</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">_CAESIUM_ATOM_MASS</span>
+
+    <span class="c1"># The length of the interferometer (in metres)</span>
+    <span class="n">sensor_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+    <span class="c1"># The interferometer beam width (in metres)</span>
+    <span class="n">beam_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
+
+    <span class="c1"># The detection efficiency for measurements (decimal percentage)</span>
+    <span class="n">eta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span>
+
+    <span class="c1"># The time between measurement pulses (in seconds)</span>
+    <span class="n">time_pulse</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.16</span>
+
+    <span class="c1"># The recoil velocity of the cold atoms when absorbing/emitting a photon</span>
+    <span class="n">recoil_velocity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">7.0e-3</span></div>
+
+
+
+<div class="viewcode-block" id="QuantumIMU">
+<a class="viewcode-back" href="../../../modules/quantum/realistic.html#qnav.quantum.realistic.QuantumIMU">[docs]</a>
+<span class="k">class</span> <span class="nc">QuantumIMU</span><span class="p">(</span><span class="n">ConceptQuantumImu</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Quantum IMU that uses an ultra-cold atom interferometer for measurements.</span>
+<span class="sd">    This extends from the base concept quantum IMU by replacing the acquiring</span>
+<span class="sd">    of measurement methods with realistic implementations. These feature</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">full_frequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">imu_frequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">accelerometer_errors</span><span class="p">:</span> <span class="n">ErrorProperties</span><span class="p">,</span>
+                 <span class="n">gyroscope_errors</span><span class="p">:</span> <span class="n">ErrorProperties</span><span class="p">,</span>
+                 <span class="n">interferometer</span><span class="p">:</span> <span class="n">ColdAtomInterferometer</span><span class="p">,</span>
+                 <span class="n">sensor_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="n">SensorAxis</span><span class="p">(),</span>
+                 <span class="n">duty_cycle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+                 <span class="n">start_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                 <span class="n">rand_seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a cold-atom interferometer based quantum IMU sensor.</span>
+
+<span class="sd">        :param full_frequency: The frequency of quantum measurements. This is</span>
+<span class="sd">            the rate at which the sensor produces a quantum measurement.</span>
+<span class="sd">        :type full_frequency: float</span>
+
+<span class="sd">        :param imu_frequency: The frequency of shared IMU components. This is</span>
+<span class="sd">            the rate at which the sensor samples from the ground truth.</span>
+<span class="sd">            Must be higher than the full frequency.</span>
+<span class="sd">        :type imu_frequency: float</span>
+
+<span class="sd">        :param accelerometer_errors: The accelerometer errors to present in</span>
+<span class="sd">            the quantum accelerometer.</span>
+<span class="sd">        :type accelerometer_errors: ErrorProperties</span>
+
+<span class="sd">        :param gyroscope_errors: The gyroscope errors to present in</span>
+<span class="sd">            the quantum gyroscope.</span>
+<span class="sd">        :type gyroscope_errors: ErrorProperties</span>
+
+<span class="sd">        :param interferometer: The interferometer parameters to use.</span>
+<span class="sd">        :type interferometer: ColdAtomInterferometer</span>
+
+<span class="sd">        :param sensor_axis: The quantum IMU sensor axis.</span>
+<span class="sd">        :type sensor_axis: SensorAxis</span>
+
+<span class="sd">        :param duty_cycle: The percentage of time the measurement period</span>
+<span class="sd">            requires to gain a quantum measurement (between 0.0 and 1.0).</span>
+<span class="sd">        :type duty_cycle: float</span>
+
+<span class="sd">        :param start_time: The starting time of the sensor in seconds.</span>
+<span class="sd">        :type start_time: float</span>
+
+<span class="sd">        :param rand_seed: The random number generation seed.</span>
+<span class="sd">        :type rand_seed: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Call parent constructor with given arguments:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">full_frequency</span><span class="p">,</span> <span class="n">imu_frequency</span><span class="p">,</span>
+                         <span class="n">accelerometer_errors</span><span class="p">,</span> <span class="n">gyroscope_errors</span><span class="p">,</span>
+                         <span class="n">sensor_axis</span><span class="p">,</span> <span class="n">duty_cycle</span><span class="p">,</span>
+                         <span class="n">start_time</span><span class="p">,</span> <span class="n">rand_seed</span><span class="p">)</span>
+
+        <span class="c1"># Get the interferometer properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span> <span class="o">=</span> <span class="n">interferometer</span>
+
+        <span class="c1"># Also record the clock time of each measurement</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clock_record</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_active_steps</span><span class="p">)</span>
+
+<div class="viewcode-block" id="QuantumIMU.take_measurement">
+<a class="viewcode-back" href="../../../modules/quantum/realistic.html#qnav.quantum.realistic.QuantumIMU.take_measurement">[docs]</a>
+    <span class="k">def</span> <span class="nf">take_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">est_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Samples from the ground truth to collect data to produce measurements.</span>
+<span class="sd">        Using the ground truth, captures the current acceleration and angles</span>
+<span class="sd">        rates at the time. A series of these are required to produce a</span>
+<span class="sd">        measurement before fusion.</span>
+
+<span class="sd">        :param est_time: The estimated time the measurement of the sensor</span>
+<span class="sd">            is expected to be captured at (in seconds).</span>
+<span class="sd">        :type est_time: float</span>
+
+<span class="sd">        :param ground_truth: The corresponding ground truth data.</span>
+<span class="sd">        :type ground_truth: GroundTruth</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># While within the duty cycle for measurements:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_active_steps</span><span class="p">:</span>
+
+            <span class="c1"># Produce measurements from &quot;quantum IMU sensors&quot;:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qs_accelerometer</span><span class="o">.</span><span class="n">take_measurement</span><span class="p">(</span><span class="n">est_time</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qs_gyroscope</span><span class="o">.</span><span class="n">take_measurement</span><span class="p">(</span><span class="n">est_time</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span>
+
+            <span class="c1"># Record the produced measurements for current time step:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qs_acc_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qs_accelerometer</span><span class="o">.</span><span class="n">last_measurement</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qs_gyro_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qs_gyroscope</span><span class="o">.</span><span class="n">last_measurement</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_clock_record</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">]</span> <span class="o">=</span> <span class="n">est_time</span>
+
+        <span class="c1"># If the final step:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_total_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+
+            <span class="c1"># Get the quantum measurements from the sensor</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_measurement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_measurements</span><span class="p">()</span>
+
+        <span class="c1"># Increment the measurement step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="QuantumIMU.reset">
+<a class="viewcode-back" href="../../../modules/quantum/realistic.html#qnav.quantum.realistic.QuantumIMU.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resets the sensor, clearing all previous measurements.</span>
+<span class="sd">        Normally used directly after fusion.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clock_record</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_get_measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        When ready, processes the sampled data to produce measurements.</span>
+<span class="sd">        This takes the sampled quantum measurements and uses the</span>
+<span class="sd">        interferometer parameters to calculate realistic measurements</span>
+<span class="sd">        that can be subject to failure under certain conditions.</span>
+
+<span class="sd">        :return: The capture accelerometer and gyroscope measurements.</span>
+<span class="sd">        :rtype: tuple[np.ndarray, np.ndarray]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Unpack the interferometer parameters</span>
+        <span class="n">num_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">num_of_atoms</span>
+        <span class="n">atom_mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">atom_mass</span>
+        <span class="n">recoil_velocity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">recoil_velocity</span>
+        <span class="n">t_pulse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">time_pulse</span>
+        <span class="n">eta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">eta</span>
+
+        <span class="c1"># Effective wave number</span>
+        <span class="n">k_eff</span> <span class="o">=</span> <span class="n">atom_mass</span> <span class="o">*</span> <span class="n">recoil_velocity</span> <span class="o">/</span> <span class="n">_H_BAR</span>
+
+        <span class="c1"># Obtain the average sensor measurement</span>
+        <span class="n">measured_acceleration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_qs_acc_data</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">measured_angle_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_qs_gyro_data</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Validate which readings have been successfully obtained.</span>
+        <span class="n">x_valid</span><span class="p">,</span> <span class="n">y_valid</span><span class="p">,</span> <span class="n">z_valid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_readings</span><span class="p">()</span>
+
+        <span class="c1"># Calculate phase shifts</span>
+        <span class="c1"># delta_phi_x, delta_phi_y, delta_phi_z = k_eff * np.mean(</span>
+        <span class="c1">#     measured_acceleration, axis=0) * t_pulse ** 2</span>
+
+        <span class="n">delta_phi_x</span><span class="p">,</span> <span class="n">delta_phi_y</span><span class="p">,</span> <span class="n">delta_phi_z</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">k_eff</span> <span class="o">*</span> <span class="n">measured_acceleration</span> <span class="o">*</span> <span class="n">t_pulse</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Random phase for each interferometer measurement</span>
+        <span class="n">phi_x0</span><span class="p">,</span> <span class="n">phi_y0</span><span class="p">,</span> <span class="n">phi_z0</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="c1"># Measured Signals</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">eta</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_atoms</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">num_atoms</span><span class="p">))</span>
+        <span class="n">s_x</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">delta_phi_x</span> <span class="o">+</span> <span class="n">phi_x0</span><span class="p">)</span>
+        <span class="n">s_y</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">delta_phi_y</span> <span class="o">+</span> <span class="n">phi_y0</span><span class="p">)</span>
+        <span class="n">s_z</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">delta_phi_z</span> <span class="o">+</span> <span class="n">phi_z0</span><span class="p">)</span>
+
+        <span class="n">n_x</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">delta_phi_x</span> <span class="o">+</span> <span class="n">phi_x0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">pi</span><span class="p">))</span>
+        <span class="n">n_y</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">delta_phi_y</span> <span class="o">+</span> <span class="n">phi_y0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">pi</span><span class="p">))</span>
+        <span class="n">n_z</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">delta_phi_z</span> <span class="o">+</span> <span class="n">phi_z0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">pi</span><span class="p">))</span>
+
+        <span class="c1"># Lambda function for calculating angle difference</span>
+        <span class="c1"># ang_diff = lambda a, b: (((b - a) + pi) % (2 * pi)) - pi</span>
+
+        <span class="c1"># Inverted Signals to find measured acceleration values.</span>
+        <span class="c1"># (Check for arc-sin to be defined sine must be between -1 and 1).</span>
+        <span class="k">if</span> <span class="n">x_valid</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">s_x</span> <span class="o">/</span> <span class="n">eta</span> <span class="o">/</span> <span class="n">num_atoms</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="n">acc_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">ang_diff</span><span class="p">(</span><span class="n">asin</span><span class="p">(</span><span class="n">s_x</span> <span class="o">/</span> <span class="n">eta</span> <span class="o">/</span> <span class="n">num_atoms</span><span class="p">),</span> <span class="n">phi_x0</span><span class="p">)</span> <span class="o">+</span>
+                     <span class="mf">2.0</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">n_x</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">k_eff</span> <span class="o">*</span> <span class="n">t_pulse</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">acc_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="k">if</span> <span class="n">y_valid</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">s_y</span> <span class="o">/</span> <span class="n">eta</span> <span class="o">/</span> <span class="n">num_atoms</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="n">acc_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">ang_diff</span><span class="p">(</span><span class="n">asin</span><span class="p">(</span><span class="n">s_y</span> <span class="o">/</span> <span class="n">eta</span> <span class="o">/</span> <span class="n">num_atoms</span><span class="p">),</span> <span class="n">phi_y0</span><span class="p">)</span> <span class="o">+</span>
+                     <span class="mf">2.0</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">n_y</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">k_eff</span> <span class="o">*</span> <span class="n">t_pulse</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">acc_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="k">if</span> <span class="n">z_valid</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">s_z</span> <span class="o">/</span> <span class="n">eta</span> <span class="o">/</span> <span class="n">num_atoms</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="n">acc_z</span> <span class="o">=</span> <span class="p">(</span><span class="n">ang_diff</span><span class="p">(</span><span class="n">asin</span><span class="p">(</span><span class="n">s_z</span> <span class="o">/</span> <span class="n">eta</span> <span class="o">/</span> <span class="n">num_atoms</span><span class="p">),</span> <span class="n">phi_z0</span><span class="p">)</span> <span class="o">+</span>
+                     <span class="mf">2.0</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">n_z</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">k_eff</span> <span class="o">*</span> <span class="n">t_pulse</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">acc_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="c1"># Obtain the average acceleration and angle rates</span>
+        <span class="n">avg_acceleration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">acc_x</span><span class="p">,</span> <span class="n">acc_y</span><span class="p">,</span> <span class="n">acc_z</span><span class="p">])</span>
+        <span class="n">avg_angle_rate</span> <span class="o">=</span> <span class="n">measured_angle_rate</span>
+
+        <span class="c1"># Return the calculated measurement vector</span>
+        <span class="k">return</span> <span class="n">avg_acceleration</span><span class="p">,</span> <span class="n">avg_angle_rate</span>
+
+    <span class="k">def</span> <span class="nf">_validate_readings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate that the acquired readings are usable.</span>
+<span class="sd">        For this a check is performed of the lateral accelerations to ensure</span>
+<span class="sd">        that no measurement drifts outside the interferometer beam. On</span>
+<span class="sd">        completion, returns valid status for the X, Y and Z readings.</span>
+
+<span class="sd">        :return: Whether the X, Y and Z axis readings are valid, respectively.</span>
+<span class="sd">        :rtype: tuple[bool, bool, bool]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Unpack the interferometer parameters</span>
+        <span class="n">delta_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">beam_width</span>
+        <span class="n">delta_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">sensor_length</span>
+
+        <span class="c1"># Obtain the average time_step between measurements</span>
+        <span class="n">time_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_clock_record</span><span class="p">))</span>
+        <span class="n">time_step_sq</span> <span class="o">=</span> <span class="n">time_step</span> <span class="o">*</span> <span class="n">time_step</span>
+
+        <span class="c1"># The initial position and velocity</span>
+        <span class="n">position_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">velocity_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="c1"># The valid status for each axis</span>
+        <span class="n">x_valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">y_valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">z_valid</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># For each quantum acceleration measurement:</span>
+        <span class="k">for</span> <span class="n">acceleration_s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qs_acc_data</span><span class="p">:</span>
+
+            <span class="c1"># Update the position</span>
+            <span class="n">position_s</span> <span class="o">+=</span> <span class="p">(</span><span class="n">velocity_s</span> <span class="o">*</span> <span class="n">time_step</span> <span class="o">+</span>
+                           <span class="mf">0.5</span> <span class="o">*</span> <span class="n">acceleration_s</span> <span class="o">*</span> <span class="n">time_step_sq</span><span class="p">)</span>
+
+            <span class="c1"># Update the velocity</span>
+            <span class="n">velocity_s</span> <span class="o">+=</span> <span class="n">acceleration_s</span> <span class="o">*</span> <span class="n">time_step</span>
+
+            <span class="c1"># Calculate the deviations in each axis</span>
+            <span class="n">deviation_x</span><span class="p">,</span> <span class="n">deviation_y</span><span class="p">,</span> <span class="n">deviation_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">position_s</span><span class="p">)</span>
+
+            <span class="c1"># Calculate if any exceed the bounds of the beam</span>
+            <span class="n">x_gt_dx</span> <span class="o">=</span> <span class="p">(</span><span class="n">deviation_x</span> <span class="o">&gt;</span> <span class="n">delta_x</span><span class="p">)</span>
+            <span class="n">x_gt_dz</span> <span class="o">=</span> <span class="p">(</span><span class="n">deviation_x</span> <span class="o">&gt;</span> <span class="n">delta_z</span><span class="p">)</span>
+            <span class="n">y_gt_dx</span> <span class="o">=</span> <span class="p">(</span><span class="n">deviation_y</span> <span class="o">&gt;</span> <span class="n">delta_x</span><span class="p">)</span>
+            <span class="n">y_gt_dz</span> <span class="o">=</span> <span class="p">(</span><span class="n">deviation_y</span> <span class="o">&gt;</span> <span class="n">delta_z</span><span class="p">)</span>
+            <span class="n">z_gt_dx</span> <span class="o">=</span> <span class="p">(</span><span class="n">deviation_z</span> <span class="o">&gt;</span> <span class="n">delta_x</span><span class="p">)</span>
+            <span class="n">z_gt_dz</span> <span class="o">=</span> <span class="p">(</span><span class="n">deviation_z</span> <span class="o">&gt;</span> <span class="n">delta_z</span><span class="p">)</span>
+
+            <span class="c1"># Update the valid flags for each axis</span>
+            <span class="n">x_valid</span> <span class="o">&amp;=</span> <span class="ow">not</span> <span class="p">(</span><span class="n">x_gt_dz</span> <span class="ow">or</span> <span class="n">y_gt_dx</span> <span class="ow">or</span> <span class="n">z_gt_dx</span><span class="p">)</span>
+            <span class="n">y_valid</span> <span class="o">&amp;=</span> <span class="ow">not</span> <span class="p">(</span><span class="n">x_gt_dx</span> <span class="ow">or</span> <span class="n">y_gt_dz</span> <span class="ow">or</span> <span class="n">z_gt_dx</span><span class="p">)</span>
+            <span class="n">z_valid</span> <span class="o">&amp;=</span> <span class="ow">not</span> <span class="p">(</span><span class="n">x_gt_dx</span> <span class="ow">or</span> <span class="n">y_gt_dx</span> <span class="ow">or</span> <span class="n">z_gt_dz</span><span class="p">)</span>
+
+        <span class="c1"># Finally, return the valid status</span>
+        <span class="k">return</span> <span class="n">x_valid</span><span class="p">,</span> <span class="n">y_valid</span><span class="p">,</span> <span class="n">z_valid</span></div>
+
+
+
+<div class="viewcode-block" id="ang_diff">
+<a class="viewcode-back" href="../../../modules/quantum/realistic.html#qnav.quantum.realistic.ang_diff">[docs]</a>
+<span class="k">def</span> <span class="nf">ang_diff</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the difference between two angles (in radians).</span>
+
+<span class="sd">    :param a: The first angle value.</span>
+<span class="sd">    :type a: float</span>
+
+<span class="sd">    :param b: The second angle value.</span>
+<span class="sd">    :type b: float</span>
+
+<span class="sd">    :return: The difference between the given angles.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(((</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">pi</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span><span class="p">))</span> <span class="o">-</span> <span class="n">pi</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

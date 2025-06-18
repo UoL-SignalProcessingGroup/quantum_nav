@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.earth.geoid &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.earth.geoid</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.earth.geoid</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">========</span>
+<span class="sd">geoid.py</span>
+<span class="sd">========</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    A module for interpolating geoid heights from presented geoid PGM files.</span>
+<span class="sd">    This module provides classes and functions used to extract geoid</span>
+<span class="sd">    information from given PGM encoded geoid files. The most common use for</span>
+<span class="sd">    this module is for interpolating the geoid height at requested positions.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of this module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span> <span class="nn">qnav.util.transformations</span> <span class="kn">import</span> <span class="n">ned2lla</span>
+<span class="kn">from</span> <span class="nn">qnav.util.transformations</span> <span class="kn">import</span> <span class="n">ned2lla_vec</span>
+
+
+<span class="c1"># The default offset value used for encoding heights inside a PGM file.</span>
+<span class="n">_PGM_OFFSET</span> <span class="o">=</span> <span class="o">-</span><span class="mi">108</span>
+
+<span class="c1"># The default scale value used for encoding heights inside a PGM file.</span>
+<span class="n">_PGM_SCALE</span> <span class="o">=</span> <span class="mf">0.003</span>
+
+
+<div class="viewcode-block" id="GeoidModel">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.GeoidModel">[docs]</a>
+<span class="k">class</span> <span class="nc">GeoidModel</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract base class for geoid representations.</span>
+<span class="sd">    Defines the method that implemented geoid representations must supply.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a description of the geoid model instance.</span>
+<span class="sd">        Named used for summarising the model and its configuration. Mostly</span>
+<span class="sd">        used when reporting or reviewing simulations.</span>
+
+<span class="sd">        :return: A string describing the model instance.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="GeoidModel.get_height">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.GeoidModel.get_height">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns geoid height for single latitude and longitude position.</span>
+
+<span class="sd">        :param lat: A latitude coordinate in decimal degrees.</span>
+<span class="sd">        :type lat: float</span>
+
+<span class="sd">        :param lon: A longitude coordinate in decimal degrees.</span>
+<span class="sd">        :type lon: float</span>
+
+<span class="sd">        :return: The geoid height for the corresponding location (in metres).</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="GeoidModel.get_height_vec">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.GeoidModel.get_height_vec">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_height_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns geoid height for given latitude and longitude positions.</span>
+
+<span class="sd">        :param lat: The latitude coordinates in decimal degrees.</span>
+<span class="sd">        :type lat: float</span>
+
+<span class="sd">        :param lon: The longitude coordinates in decimal degrees.</span>
+<span class="sd">        :type lon: float</span>
+
+<span class="sd">        :return: The geoid height for the corresponding locations (in metres).</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="GeoidModel.get_dov">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.GeoidModel.get_dov">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_dov</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the Deflection of the Vertical (DoV) for requested position.</span>
+<span class="sd">        Calculates and returns the DoV gradients for the north and east</span>
+<span class="sd">        components (in metres) for requested location.</span>
+
+<span class="sd">        :param lat: A latitude coordinate in decimal degrees.</span>
+<span class="sd">        :type lat: float</span>
+
+<span class="sd">        :param lon: A longitude coordinate in decimal degrees.</span>
+<span class="sd">        :type lon: float</span>
+
+<span class="sd">        :return: Tuple containing the north and east components respectively.</span>
+<span class="sd">        :rtype: tuple[float, float]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="GeoidModel.get_dov_vec">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.GeoidModel.get_dov_vec">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_dov_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the Deflection of the Vertical (DoV) for requested positions.</span>
+<span class="sd">        Calculates and returns the DoV gradients for the north and east</span>
+<span class="sd">        components (in metres) for requested location.</span>
+
+<span class="sd">        :param lat: The latitude coordinates in decimal degrees.</span>
+<span class="sd">        :type lat: np.ndarray</span>
+
+<span class="sd">        :param lon: The longitude coordinates in decimal degrees.</span>
+<span class="sd">        :type lon: np.ndarray</span>
+
+<span class="sd">        :return: Tuple containing the north and east components respectively.</span>
+<span class="sd">        :rtype: tuple[float, float]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="GeoidPGM">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.GeoidPGM">[docs]</a>
+<span class="k">class</span> <span class="nc">GeoidPGM</span><span class="p">(</span><span class="n">GeoidModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for handling and managing reading the Geoid height information</span>
+<span class="sd">    from a selected PGM (Pixel Gray Map) file and providing functionality for</span>
+<span class="sd">    extracting required information from it. Methods for reading or</span>
+<span class="sd">    interpolating the Geoid height at given coordinates, as well as</span>
+<span class="sd">    visualising the loaded data are all contained within this class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The pixel gray map file path.</span>
+    <span class="n">_pgm_file</span><span class="p">:</span> <span class="n">Path</span>
+
+    <span class="c1"># The matrix containing the read geoid heights.</span>
+    <span class="n">_geoid_matrix</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># The interpolation of the above matrix.</span>
+    <span class="n">_geoid_matrix_interp</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pgm_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reads and returns geoid interpolate for given geoid PGM file.</span>
+<span class="sd">        On succession, produces a look-up class for interpolating the geoid</span>
+<span class="sd">        height at requested positions, using the provided geoid PGM data.</span>
+
+<span class="sd">        :param pgm_file: The name of the PGM file to be used.</span>
+<span class="sd">        :type pgm_file: Path</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Attempt to read the given geoid file.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_geoid_matrix</span> <span class="o">=</span> <span class="n">read_pgm_data</span><span class="p">(</span><span class="n">pgm_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pgm_file</span> <span class="o">=</span> <span class="n">pgm_file</span>
+
+        <span class="c1"># Knowing the shape of the above matrix, calculate the latitude and</span>
+        <span class="c1"># longitude coordinates for each position within the matrix.</span>
+        <span class="n">geoid_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_geoid_matrix</span><span class="p">)</span>
+        <span class="n">lat_ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="n">geoid_size</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">lon_ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="n">geoid_size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_geoid_matrix_interp</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">RegularGridInterpolator</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">lat_ticks</span><span class="p">,</span> <span class="n">lon_ticks</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geoid_matrix</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+
+        <span class="c1"># With the original matrix known, produce an interpolated version.</span>
+        <span class="c1"># self._geoid_matrix_interp = interpolate.RectBivariateSpline(</span>
+        <span class="c1">#     lat_ticks, lon_ticks, self._geoid_matrix)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a describing name for the geoid model.</span>
+<span class="sd">        Simply extracts and returns the file name of the PGM file used.</span>
+
+<span class="sd">        :return: An identifying name of the geoid model.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pgm_file</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+
+<div class="viewcode-block" id="GeoidPGM.get_height">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.GeoidPGM.get_height">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interpolates geoid height for given latitude and longitude.</span>
+<span class="sd">        For a single coordinate point, interpolates and returns the geoid</span>
+<span class="sd">        elevation height in metres.</span>
+
+<span class="sd">        :param lat: A latitude coordinate in decimal degrees.</span>
+<span class="sd">        :type lat: float</span>
+
+<span class="sd">        :param lon: A longitude coordinate in decimal degrees.</span>
+<span class="sd">        :type lon: float</span>
+
+<span class="sd">        :return: The geoid height for the corresponding location (in metres).</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># return float(self._geoid_matrix_interp(lat, lon, grid=False))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geoid_matrix_interp</span><span class="p">((</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="GeoidPGM.get_height_vec">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.GeoidPGM.get_height_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_height_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interpolates geoid height for given latitude and longitude points.</span>
+<span class="sd">        For a single coordinate point, interpolates and returns the geoid</span>
+<span class="sd">        elevation height in metres.</span>
+
+<span class="sd">        :param lat: The latitude coordinates in decimal degrees.</span>
+<span class="sd">        :type lat: float</span>
+
+<span class="sd">        :param lon: The longitude coordinates in decimal degrees.</span>
+<span class="sd">        :type lon: float</span>
+
+<span class="sd">        :return: The geoid height for the corresponding locations (in metres).</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">lat</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">lon</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;lat and lon array must be of same shape&#39;</span><span class="p">)</span>
+        <span class="c1"># return self._geoid_matrix_interp(lat, lon, grid=False)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geoid_matrix_interp</span><span class="p">((</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="GeoidPGM.get_dov">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.GeoidPGM.get_dov">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_dov</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">step_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the Deflection of the Vertical (DoV) for requested position.</span>
+<span class="sd">        Calculates and returns the DoV gradients for the north and east</span>
+<span class="sd">        components (in metres) for requested location.</span>
+
+<span class="sd">        :param lat: A latitude coordinate in decimal degrees.</span>
+<span class="sd">        :type lat: float</span>
+
+<span class="sd">        :param lon: A longitude coordinate in decimal degrees.</span>
+<span class="sd">        :type lon: float</span>
+
+<span class="sd">        :param step_size: The step size for calculating the gradient.</span>
+<span class="sd">        :type step_size: float</span>
+
+<span class="sd">        :return: Tuple containing the north and east components respectively.</span>
+<span class="sd">        :rtype: tuple[float, float]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get the offsets for north and east</span>
+        <span class="n">north_offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">step_size</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">east_offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">step_size</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Get the three position coordinates</span>
+        <span class="n">centre_lla</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+        <span class="n">north_lla</span> <span class="o">=</span> <span class="n">ned2lla</span><span class="p">(</span><span class="n">north_offset</span><span class="p">,</span> <span class="n">centre_lla</span><span class="p">)</span>
+        <span class="n">east_lla</span> <span class="o">=</span> <span class="n">ned2lla</span><span class="p">(</span><span class="n">east_offset</span><span class="p">,</span> <span class="n">centre_lla</span><span class="p">)</span>
+
+        <span class="c1"># Get the geoid heights for all positions.</span>
+        <span class="n">centre_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_height</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">north_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_height</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">north_lla</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">north_lla</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">east_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_height</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">east_lla</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">east_lla</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="c1"># Get and return the two DoV gradients</span>
+        <span class="n">north_dov</span> <span class="o">=</span> <span class="p">((</span><span class="n">north_height</span> <span class="o">-</span> <span class="n">centre_height</span><span class="p">)</span> <span class="o">/</span> <span class="n">step_size</span><span class="p">)</span>
+        <span class="n">east_dov</span> <span class="o">=</span> <span class="p">((</span><span class="n">east_height</span> <span class="o">-</span> <span class="n">centre_height</span><span class="p">)</span> <span class="o">/</span> <span class="n">step_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">north_dov</span><span class="p">,</span> <span class="n">east_dov</span></div>
+
+
+<div class="viewcode-block" id="GeoidPGM.get_dov_vec">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.GeoidPGM.get_dov_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_dov_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">step_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the Deflection of the Vertical (DoV) for requested position.</span>
+<span class="sd">        Calculates and returns the DoV gradients for the north and east</span>
+<span class="sd">        components (in metres) for requested location.</span>
+
+<span class="sd">        :param lat: The latitude coordinates in decimal degrees.</span>
+<span class="sd">        :type lat: np.ndarray</span>
+
+<span class="sd">        :param lon: The longitude coordinates in decimal degrees.</span>
+<span class="sd">        :type lon: np.ndarray</span>
+
+<span class="sd">        :param step_size: The step size for calculating the gradient.</span>
+<span class="sd">        :type step_size: float</span>
+
+<span class="sd">        :return: Tuple containing the north and east components respectively.</span>
+<span class="sd">        :rtype: tuple[float, float]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">lat</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">lon</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;lat and lon array must be of same shape&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Get the offsets for north and east</span>
+        <span class="n">north_offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">step_size</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">east_offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">step_size</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Format the centre positions</span>
+        <span class="n">centre_lla</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">lat</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="n">centre_lla</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lat</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">centre_lla</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">lon</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+        <span class="c1"># Get the north and east position coordinates</span>
+        <span class="n">north_lla</span> <span class="o">=</span> <span class="n">ned2lla_vec</span><span class="p">(</span><span class="n">north_offset</span><span class="p">,</span> <span class="n">centre_lla</span><span class="p">)</span>
+        <span class="n">east_lla</span> <span class="o">=</span> <span class="n">ned2lla_vec</span><span class="p">(</span><span class="n">east_offset</span><span class="p">,</span> <span class="n">centre_lla</span><span class="p">)</span>
+
+        <span class="c1"># Get the geoid heights for all positions.</span>
+        <span class="n">centre_heights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_height_vec</span><span class="p">(</span><span class="n">centre_lla</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">centre_lla</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">north_heights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_height_vec</span><span class="p">(</span><span class="n">north_lla</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">north_lla</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">east_heights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_height_vec</span><span class="p">(</span><span class="n">east_lla</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">east_lla</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Get and return the two DoV gradients</span>
+        <span class="n">north_dov</span> <span class="o">=</span> <span class="p">((</span><span class="n">north_heights</span> <span class="o">-</span> <span class="n">centre_heights</span><span class="p">)</span> <span class="o">/</span> <span class="n">step_size</span><span class="p">)</span>
+        <span class="n">east_dov</span> <span class="o">=</span> <span class="p">((</span><span class="n">east_heights</span> <span class="o">-</span> <span class="n">centre_heights</span><span class="p">)</span> <span class="o">/</span> <span class="n">step_size</span><span class="p">)</span>
+        <span class="n">north_dov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">north_dov</span><span class="p">,</span> <span class="n">lat</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">east_dov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">east_dov</span><span class="p">,</span> <span class="n">lat</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">north_dov</span><span class="p">,</span> <span class="n">east_dov</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The north and east resolutions of the grid data.</span>
+<span class="sd">        Can be used for determining the accuracy of the model.</span>
+
+<span class="sd">        :return: The north and east steps of the grid data.</span>
+<span class="sd">        :rtype: tuple[int, int]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geoid_matrix</span><span class="o">.</span><span class="n">shape</span></div>
+
+
+
+<div class="viewcode-block" id="GeoidDummy">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.GeoidDummy">[docs]</a>
+<span class="k">class</span> <span class="nc">GeoidDummy</span><span class="p">(</span><span class="n">GeoidModel</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;No Geoid&#39;</span>
+
+<div class="viewcode-block" id="GeoidDummy.get_height">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.GeoidDummy.get_height">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="GeoidDummy.get_height_vec">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.GeoidDummy.get_height_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_height_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">lat</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GeoidDummy.get_dov">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.GeoidDummy.get_dov">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_dov</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="GeoidDummy.get_dov_vec">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.GeoidDummy.get_dov_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_dov_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">lat</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">lat</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="read_pgm_data">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.read_pgm_data">[docs]</a>
+<span class="k">def</span> <span class="nf">read_pgm_data</span><span class="p">(</span><span class="n">pgm_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+                  <span class="n">pgm_offset</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">_PGM_OFFSET</span><span class="p">,</span>
+                  <span class="n">pgm_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">_PGM_SCALE</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads and returns the numerical contents of given PGM file.</span>
+<span class="sd">    For a given PGM file, this function will read it and extract the Geoid</span>
+<span class="sd">    height information (relative to the Earth&#39;s Ellipsoid) from it. The</span>
+<span class="sd">    returned matrix&#39;s origin point&#39;s coordinates will be [90, -180] with the</span>
+<span class="sd">    last point&#39;s coordinates being [-90, 180].</span>
+
+<span class="sd">    :param pgm_file: The location of the PGM file containing Geoid data.</span>
+<span class="sd">    :type pgm_file: str or Path</span>
+
+<span class="sd">    :param pgm_offset: (Optional) The offset values for the values within the</span>
+<span class="sd">        PGM file as PGM values normally start from 0 (default = -108).</span>
+<span class="sd">    :type pgm_offset: float</span>
+
+<span class="sd">    :param pgm_scale: (Optional) The scale for the values within the PGM file</span>
+<span class="sd">        as PGM values can only be integers (default = 0.003).</span>
+<span class="sd">    :type pgm_scale: float</span>
+
+<span class="sd">    :return: A matrix containing the Geoid height (relative to the Earth&#39;s</span>
+<span class="sd">        Ellipsoid) for various locations along the earth.</span>
+<span class="sd">    :rtype: np.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># The unique string used to identify PGM file format.</span>
+    <span class="n">magic_string</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;P5</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="c1"># The string used to represent the starting symbol for a comment.</span>
+    <span class="n">comment_string</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;#&quot;</span>
+
+    <span class="c1"># Attempt to open the given file and read in binary:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pgm_file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pgm</span><span class="p">:</span>
+
+        <span class="c1"># If the file is not a valid PGM file, raise an error.</span>
+        <span class="k">if</span> <span class="n">pgm</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span> <span class="o">!=</span> <span class="n">magic_string</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;File given is not a valid PGM file!&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Skip (the header) to the next line that is not a comment.</span>
+        <span class="n">current_line</span> <span class="o">=</span> <span class="n">pgm</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">current_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">comment_string</span><span class="p">):</span>
+            <span class="n">current_line</span> <span class="o">=</span> <span class="n">pgm</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># Read the number of columns and rows from the next line.</span>
+        <span class="c1"># These values are strings separated by a space.</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="n">current_line</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">num_columns</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dims</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">num_rows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Read the string stating the maximum integer value within the data.</span>
+        <span class="n">max_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">pgm</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+
+        <span class="c1"># Knowing the maximum integer value, we can calculate the number of</span>
+        <span class="c1"># expected bytes each value will take (either 1 or 2 bytes).</span>
+        <span class="c1"># data_type = (&#39;&gt;u2&#39;, &#39;&gt;u1&#39;)[max_value &lt; 256]</span>
+        <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;&gt;u1&#39;</span> <span class="k">if</span> <span class="n">max_value</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="k">else</span> <span class="s1">&#39;&gt;u2&#39;</span>
+
+        <span class="c1"># Read and record all the remaining values within the file.</span>
+        <span class="c1"># These values are the actual data contained within the PGM file.</span>
+        <span class="n">pgm_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">pgm</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span> <span class="n">count</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Reshape the resulting matrix to the expected dimensions.</span>
+        <span class="c1"># (Convert the 1x(NxM) matrix to an MxN matrix).</span>
+        <span class="n">pgm_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">pgm_matrix</span><span class="p">,</span> <span class="p">[</span><span class="n">num_rows</span><span class="p">,</span> <span class="n">num_columns</span><span class="p">])</span>
+
+        <span class="c1"># Multiply the resulting matrix by the given scale and add the offset.</span>
+        <span class="n">return_matrix</span> <span class="o">=</span> <span class="p">(</span><span class="n">pgm_matrix</span> <span class="o">*</span> <span class="n">pgm_scale</span><span class="p">)</span> <span class="o">+</span> <span class="n">pgm_offset</span>
+
+        <span class="c1"># While not required, shift the origin of the produced matrix from</span>
+        <span class="c1"># latitude=90 and longitude=0 to latitude=90 and longitude=-180.</span>
+        <span class="n">return_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">return_matrix</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">num_columns</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Finally, return the resulting matrix flipped within the up/down</span>
+        <span class="c1"># direction. The increasing order of axis is required for some</span>
+        <span class="c1"># interpolation methods (including cubic).</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">return_matrix</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="read_pgm_header">
+<a class="viewcode-back" href="../../../modules/earth/geoid.html#qnav.earth.geoid.read_pgm_header">[docs]</a>
+<span class="k">def</span> <span class="nf">read_pgm_header</span><span class="p">(</span><span class="n">pgm_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns values present in the header of a given PGM file.</span>
+<span class="sd">    PGM files can contain comments which describe information such as the</span>
+<span class="sd">    offset and scale values for the Geoid data they contain. For scenarios</span>
+<span class="sd">    where the offset and scale are contained within these comments, this</span>
+<span class="sd">    function will find and extract their values.</span>
+
+<span class="sd">    :param pgm_file: The location of the PGM file containing Geoid data.</span>
+<span class="sd">    :type pgm_file: Path</span>
+
+<span class="sd">    :return: A dictionary containing the found offset and scale values</span>
+<span class="sd">        (or None/Null if the values could not be found within the comments).</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">offset</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># The offset value to be found and returned.</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># The scale value to be found and returned.</span>
+
+    <span class="c1"># The string used to represent the starting symbol for a comment.</span>
+    <span class="n">comment_string</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;# &quot;</span>
+
+    <span class="c1"># The regular expression to match and find for the offset value.</span>
+    <span class="n">offset_regex</span> <span class="o">=</span> <span class="s1">&#39;offset (.[0-9-.]+)&#39;</span>
+
+    <span class="c1"># The regular expression to match and find for the scale value.</span>
+    <span class="n">scale_regex</span> <span class="o">=</span> <span class="s1">&#39;scale (.[0-9-.]+)&#39;</span>
+
+    <span class="c1"># Attempt to open the given file and read in binary:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pgm_file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pgm</span><span class="p">:</span>
+
+        <span class="c1"># For each line within the given file:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">pgm</span><span class="p">:</span>
+
+            <span class="c1"># If the current line starts with the comment string:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">comment_string</span><span class="p">):</span>
+
+                <span class="c1"># Get the current line of the file and convert to lower case.</span>
+                <span class="n">current_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+                <span class="c1"># Search the current line for the given search strings.</span>
+                <span class="n">offset_search</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">offset_regex</span><span class="p">,</span> <span class="n">current_line</span><span class="p">)</span>
+                <span class="n">scale_search</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">scale_regex</span><span class="p">,</span> <span class="n">current_line</span><span class="p">)</span>
+
+                <span class="c1"># If a match for the offset regular expression was found,</span>
+                <span class="c1"># use the first occurrence for the return value.</span>
+                <span class="k">if</span> <span class="n">offset_search</span><span class="p">:</span>
+                    <span class="n">offset</span> <span class="o">=</span> <span class="n">offset_search</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="c1"># If a match for the scale regular expression was found,</span>
+                <span class="c1"># use the first occurrence for the return value.</span>
+                <span class="k">if</span> <span class="n">scale_search</span><span class="p">:</span>
+                    <span class="n">scale</span> <span class="o">=</span> <span class="n">scale_search</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Finally, return the values for offset and scale.</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="n">offset</span><span class="p">,</span> <span class="s2">&quot;scale&quot;</span><span class="p">:</span> <span class="n">scale</span><span class="p">}</span></div>
+
+
+
+
+<span class="c1"># if __name__ == &quot;__main__&quot;:</span>
+<span class="c1">#</span>
+<span class="c1">#     project_dir = Path(__file__).parent.parent.parent</span>
+<span class="c1">#     test_pgm = project_dir / &#39;databases&#39; / &#39;geoid&#39; / &#39;egm2008-5.pgm&#39;</span>
+<span class="c1">#     test_geoid = GeoidPGM(test_pgm)</span>
+<span class="c1">#</span>
+<span class="c1">#     [n_dov, e_dov] = test_geoid.get_dov(52, -3)</span>
+<span class="c1">#</span>
+<span class="c1">#     test_lats = np.random.rand(10) * 180 - 90</span>
+<span class="c1">#     test_lons = np.random.rand(10) * 360 - 180</span>
+<span class="c1">#     [n_dovs, e_dovs] = test_geoid.get_dov_vec(test_lats, test_lons)</span>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

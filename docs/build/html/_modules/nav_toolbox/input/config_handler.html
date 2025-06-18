@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nav_toolbox.input.config_handler &mdash; Navigation Toolbox 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Navigation Toolbox
+          </a>
+              <div class="version">
+                Version 1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">1. Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">2. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">3. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">4. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/processing.html">5. Estimation Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">6. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">7. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">8. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">9. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">10. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">11. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">12. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Navigation Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nav_toolbox.input.config_handler</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nav_toolbox.input.config_handler</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=================</span>
+<span class="sd">config_handler.py</span>
+<span class="sd">=================</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    This class provides a wrapper for Python&#39;s ConfigHandler class.</span>
+<span class="sd">    This supplies additional functionality such as automatically reading from</span>
+<span class="sd">    sub-configuration files and providing platform independent means for</span>
+<span class="sd">    extracting configuration values in usable formats.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First implementation of class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">configparser</span> <span class="kn">import</span> <span class="n">ExtendedInterpolation</span>
+<span class="kn">from</span> <span class="nn">configparser</span> <span class="kn">import</span> <span class="n">NoSectionError</span>
+<span class="kn">from</span> <span class="nn">configparser</span> <span class="kn">import</span> <span class="n">NoOptionError</span>
+<span class="kn">from</span> <span class="nn">configparser</span> <span class="kn">import</span> <span class="n">ConfigParser</span>
+<span class="kn">from</span> <span class="nn">shutil</span> <span class="kn">import</span> <span class="n">copyfile</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">PureWindowsPath</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">typing</span> <span class="k">as</span> <span class="n">npt</span>
+
+<span class="c1"># The name of the default settings configuration file.</span>
+<span class="n">DEFAULT_CONFIG</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default_settings.ini&quot;</span>
+
+
+<div class="viewcode-block" id="ConfigHandler">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler">[docs]</a>
+<span class="k">class</span> <span class="nc">ConfigHandler</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class provides means for reading the user&#39;s configuration preferences</span>
+<span class="sd">    from a given configuration file. Once read, values can be extracted within</span>
+<span class="sd">    various formats (strings, booleans, floats, arrays, etc..). This class is</span>
+<span class="sd">    essentially a wrapper for Python&#39;s ConfigHandler class, providing</span>
+<span class="sd">    additional functionality such as the ability to split configuration</span>
+<span class="sd">    across multiple files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The ConfigParser used for reading the given config file.</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># The default configuration file to use.</span>
+    <span class="n">config_file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Whether a warning should be displayed if a fallback value is used.</span>
+    <span class="n">warn_on_fallback</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_CONFIG</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The constructor for this class. Reads the settings from  a given config</span>
+<span class="sd">        file. If no config file is supplied, a specified default file will be</span>
+<span class="sd">        used instead. Once initialised, values can be extracted from the</span>
+<span class="sd">        configuration file during runtime in requested formats.</span>
+
+<span class="sd">        :param config_file: (Optional) The location of the configuration file</span>
+<span class="sd">            to read from. If not provided, the default configuration file</span>
+<span class="sd">            will be used automatically (default=``DEFAULT_CONFIG``).</span>
+<span class="sd">        :type config_file: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Load the given configuration file (or the default file).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_configuration</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ConfigHandler.get_config_name">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.get_config_name">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_config_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This simple function returns the name of the configuration file being</span>
+<span class="sd">        used. This function will automatically remove the project directory</span>
+<span class="sd">        from the returned name (if the selected config is located within the</span>
+<span class="sd">        project directory).</span>
+
+<span class="sd">        :return: The short name of the selected configuration file that is</span>
+<span class="sd">            being used.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Extract the current configuration file</span>
+        <span class="c1"># and the project&#39;s directory name.</span>
+        <span class="c1"># config_file_str = self.config_file.name</span>
+        <span class="c1"># parent_dir_str = str(PROJECT_PATH / &quot;a&quot;)[:-1]</span>
+        <span class="c1">#</span>
+        <span class="c1"># # Finally, return the short name of the config file.</span>
+        <span class="c1"># return config_file_str.replace(parent_dir_str, &quot;&quot;)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">name</span></div>
+
+
+<div class="viewcode-block" id="ConfigHandler.load_configuration">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.load_configuration">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function reads and records the content of the given configuration</span>
+<span class="sd">        file (and expected sub-files). Expected sections/sensors are</span>
+<span class="sd">        automatically searched and their sub-files are also included within</span>
+<span class="sd">        the loading process. This function can be used to re-load/re-read the</span>
+<span class="sd">        information from configuration files (if changes are made during</span>
+<span class="sd">        runtime).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Try to read from the configuration file using extended interpolation.</span>
+            <span class="c1"># This allows variables to be used within the config file.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">(</span><span class="n">interpolation</span><span class="o">=</span><span class="n">ExtendedInterpolation</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="p">)</span>
+
+            <span class="c1"># If the file is empty or could not be read, throw an exception.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">sections</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No settings found in file &#39;</span><span class="si">{}</span><span class="s2">&#39;!&quot;</span>
+                                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="p">))</span>
+
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="c1"># If the file could not be read from, throw an exception.</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;File &#39;</span><span class="si">{}</span><span class="s2">&#39; could not be read!&quot;</span>
+                            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ConfigHandler.append_config">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.append_config">[docs]</a>
+    <span class="k">def</span> <span class="nf">append_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">from_section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">to_section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">to_overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function will read and record the values of an external</span>
+<span class="sd">        configuration files (i.e. a sub-configuration) and merge the read</span>
+<span class="sd">        information with the current ConfigHandler instance.</span>
+
+<span class="sd">        :param config_file: The sub-configuration file to read.</span>
+<span class="sd">        :type config_file: str</span>
+
+<span class="sd">        :param from_section: The section within the sub-configuration</span>
+<span class="sd">            file to read and record.</span>
+<span class="sd">        :type from_section: str</span>
+
+<span class="sd">        :param to_section: The section within the current instance to append</span>
+<span class="sd">            the read information to (can be a new section).</span>
+<span class="sd">        :type to_section: str</span>
+
+<span class="sd">        :param to_overwrite: If set to true, previous existing values from</span>
+<span class="sd">            the main configuration will be overwritten by those read from</span>
+<span class="sd">            sub-configuration files (default=False).</span>
+<span class="sd">        :type to_overwrite: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Identify the sub-configuration file.</span>
+        <span class="n">sub_config</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+
+        <span class="c1"># Ensure the sub-file exists before continuing:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sub_config</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="c1"># If not, raise an error.</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                <span class="s2">&quot;The sub-file &#39;</span><span class="si">{}</span><span class="s2">&#39; does not exist!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sub_config</span><span class="p">))</span>
+
+        <span class="c1"># Attempt to parse the given sub-configuration file.</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">(</span><span class="n">interpolation</span><span class="o">=</span><span class="n">ExtendedInterpolation</span><span class="p">())</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">sub_config</span><span class="p">)</span>
+
+        <span class="c1"># Ensure that the sub-configuration file can be read.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">sections</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;No settings could be read from sub-file &#39;</span><span class="si">{}</span><span class="s2">&#39;!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sub_config</span><span class="p">))</span>
+
+        <span class="c1"># If the given new section has not been created before, create it.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">has_section</span><span class="p">(</span><span class="n">to_section</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">add_section</span><span class="p">(</span><span class="n">to_section</span><span class="p">)</span>
+
+        <span class="c1"># Append each of the items read from the sub-configuration file to the</span>
+        <span class="c1"># current ConfigHandler instance under the new section. Update</span>
+        <span class="c1"># previously existing values depending on the to_overwrite option.</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">from_section</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">has_option</span><span class="p">(</span><span class="n">to_section</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="ow">and</span> <span class="n">to_overwrite</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">to_section</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigHandler.quick_append_config">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.quick_append_config">[docs]</a>
+    <span class="k">def</span> <span class="nf">quick_append_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                            <span class="n">from_section</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
+                            <span class="n">from_variable</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
+                            <span class="n">external_section</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
+                            <span class="n">to_overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function simplifies merging multiple configuration file sections</span>
+<span class="sd">        to the current configuration.</span>
+
+<span class="sd">        :param from_section: The sections within the main configuration file</span>
+<span class="sd">            that contain the variables to read from.</span>
+<span class="sd">        :type from_section: numpy.typing.ArrayLike</span>
+
+<span class="sd">        :param from_variable: The filepath variable names from the given</span>
+<span class="sd">            section stating the external configuration files to read from.</span>
+<span class="sd">        :type from_variable: numpy.typing.ArrayLike</span>
+
+<span class="sd">        :param external_section: The external sub-configuration file sections</span>
+<span class="sd">            to merge with the main configuration.</span>
+<span class="sd">        :type external_section: numpy.typing.ArrayLike</span>
+
+<span class="sd">        :param to_overwrite: If set to true, previous existing values from</span>
+<span class="sd">            the main configuration will be overwritten by those read from</span>
+<span class="sd">            sub-configuration files (default=False).</span>
+<span class="sd">        :type to_overwrite: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Ensure the given input is of equal size.</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">from_section</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">from_variable</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">external_section</span><span class="p">),</span> \
+            <span class="s2">&quot;The given input lists must be of the same size!&quot;</span>
+
+        <span class="c1"># For each element within the given lists:</span>
+        <span class="k">for</span> <span class="n">section</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">ext</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">from_section</span><span class="p">,</span> <span class="n">from_variable</span><span class="p">,</span> <span class="n">external_section</span><span class="p">):</span>
+
+            <span class="c1"># If the current section and value exist:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">has_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+                <span class="c1"># Extract the current value.</span>
+                <span class="n">config_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_value_str</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Attempt to append to the current configuration.</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">append_config</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="n">ext</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">to_overwrite</span><span class="p">)</span>
+
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="c1"># In the event of a reading error, return a custom error.</span>
+                    <span class="n">e_type</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+                    <span class="k">raise</span> <span class="n">NavConfigError</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">e_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ConfigHandler.get_all_values">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.get_all_values">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_all_values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns a matrix containing all the values read from the</span>
+<span class="sd">        given configuration file(s). This function is namely for debugging</span>
+<span class="sd">        purposes. Values are displayed as raw strings.</span>
+
+<span class="sd">        :return: An N-by-3 matrix of values containing the section, variable</span>
+<span class="sd">            name and value for each option read.</span>
+<span class="sd">        :rtype: numpy.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># The final matrix to return.</span>
+        <span class="n">to_return</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># For each of the read sections:</span>
+        <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sections</span><span class="p">():</span>
+
+            <span class="c1"># Obtain a matrix of values for the current section.</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">section</span><span class="p">))</span>
+
+            <span class="c1"># Create an equal sized column repeating the current section name,</span>
+            <span class="c1"># then append it to the above matrix.</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">column</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">to_append</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">column</span><span class="p">,</span> <span class="n">values</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># Append the resulting matrix to the return matrix.</span>
+            <span class="k">if</span> <span class="n">to_return</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">to_return</span> <span class="o">=</span> <span class="n">to_append</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">to_return</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">to_return</span><span class="p">,</span> <span class="n">to_append</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Remove comments from the returned values to prevent confusion.</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">to_return</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">to_return</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">to_return</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="c1"># to_return[i, 2] = to_return[i, 2].split(&quot;#&quot;, 1)[0].strip()</span>
+
+        <span class="c1"># Finally, return the resulting matrix.</span>
+        <span class="k">return</span> <span class="n">to_return</span></div>
+
+
+<div class="viewcode-block" id="ConfigHandler.get_sections">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.get_sections">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_sections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns a list of all the sections read from the given</span>
+<span class="sd">        configuration file(s). This is useful for debugging and ensure</span>
+<span class="sd">        required content is being correctly read.</span>
+
+<span class="sd">        :return: A list containing all section names.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">sections</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_missing_value_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fallback_value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If requested, this function prints a warning each time a requested</span>
+<span class="sd">        parameter could not be found from the provided configuration file.</span>
+<span class="sd">        This is useful for debugging and finding non-supplied variables that</span>
+<span class="sd">        have been overridden with hardcoded defaults.</span>
+
+<span class="sd">        :param section: The section name where the missing value/parameter was</span>
+<span class="sd">            to be found under.</span>
+<span class="sd">        :type section: str</span>
+
+<span class="sd">        :param name: The name of the missing value/parameter.</span>
+<span class="sd">        :type name: str</span>
+
+<span class="sd">        :param fallback_value: The hardcoded default value that has been</span>
+<span class="sd">            automatically use inplace of the missing value.</span>
+<span class="sd">        :type fallback_value: any</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># If an actual fallback value is being used with warnings enabled:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">warn_on_fallback</span> <span class="ow">and</span> <span class="n">fallback_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="c1"># Ensure the used fallback value is human-readable.</span>
+            <span class="n">fallback_str</span> <span class="o">=</span> <span class="n">fallback_value</span> <span class="k">if</span> <span class="n">fallback_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;None&quot;</span>
+
+            <span class="c1"># Construct a warning message to be presented to the user.</span>
+            <span class="n">warning_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\t</span><span class="s1">Section:</span><span class="se">\t\t</span><span class="si">{</span><span class="n">section</span><span class="si">}</span><span class="se">\n\t</span><span class="s1">Variable:</span><span class="se">\t</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span> \
+                          <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\n\t</span><span class="s1">Warning:</span><span class="se">\t</span><span class="s1"> Missing value automatically&#39;</span> \
+                          <span class="sa">f</span><span class="s1">&#39; set to </span><span class="se">\&#39;</span><span class="si">{</span><span class="n">fallback_str</span><span class="si">}</span><span class="se">\&#39;</span><span class="s1">&#39;</span>
+
+            <span class="c1"># Produce the above warning.</span>
+            <span class="n">warn</span><span class="p">(</span><span class="n">warning_msg</span><span class="p">,</span> <span class="n">NavConfigWarning</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_missing_value_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function throws an error for when a mandatory parameter could</span>
+<span class="sd">        not be found from the provided configuration file. Unlike missing</span>
+<span class="sd">        value warnings, this error cannot be suppressed or ignored by the</span>
+<span class="sd">        user.</span>
+
+<span class="sd">        :param section: The section name where the missing value/parameter was</span>
+<span class="sd">            to be found under.</span>
+<span class="sd">        :type section: str</span>
+
+<span class="sd">        :param name: The name of the missing value/parameter.</span>
+<span class="sd">        :type name: str</span>
+
+<span class="sd">        :raises: KeyError</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="n">NavConfigError</span><span class="p">(</span>
+            <span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;MissingValue&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;Missing entry for required variable!&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Attempts to return the corresponding named value under the given</span>
+<span class="sd">        section. If the requested value could not be found, an error will be</span>
+<span class="sd">        thrown unless a suitable fallback/default value has been given. In</span>
+<span class="sd">        the case of the latter the fallback will be used, but a warning may</span>
+<span class="sd">        be displayed to the user (if enabled).</span>
+
+<span class="sd">        This function returns values as the (string) text parsed from the</span>
+<span class="sd">        configuration file. Therefore, for additional data formats other</span>
+<span class="sd">        functions must be supplied that extend from this one.</span>
+
+<span class="sd">        :param section: The section of the configuration file.</span>
+<span class="sd">        :type section: str</span>
+
+<span class="sd">        :param name: The name of the variable to read from the given section.</span>
+<span class="sd">        :type name: str</span>
+
+<span class="sd">        :param fallback: (Optional) The fallback value to use if not found.</span>
+<span class="sd">        :type fallback: any</span>
+
+<span class="sd">        :return: Returns either the string found within the config file</span>
+<span class="sd">            for the given section and name, or the fallback value if not</span>
+<span class="sd">            found.</span>
+<span class="sd">        :rtype: str or any</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="c1"># Attempt to retrieve the value under the given section and name.</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">x</span>
+
+        <span class="k">except</span> <span class="p">(</span><span class="n">NoOptionError</span><span class="p">,</span> <span class="n">NoSectionError</span><span class="p">):</span>
+
+            <span class="c1"># If the value is missing, but a fallback has been provided:</span>
+            <span class="k">if</span> <span class="n">fallback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Return the fallback with a warning (if requested).</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_missing_value_warning</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">fallback</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">fallback</span>
+
+            <span class="c1"># Otherwise, return an error if no fallback was provided.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_missing_value_error</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ConfigHandler.get_value_str">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.get_value_str">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_value_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fallback</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function will return the string value for a parameter in the</span>
+<span class="sd">        selected configuration file, identified by its section and name. If</span>
+<span class="sd">        the value is missing, an optional fallback value can be used instead.</span>
+
+<span class="sd">        :param section: The section of the configuration file.</span>
+<span class="sd">        :type section: str</span>
+
+<span class="sd">        :param name: The name of the variable to read from the given section.</span>
+<span class="sd">        :type name: str</span>
+
+<span class="sd">        :param fallback: (Optional) The fallback value to use if not found.</span>
+<span class="sd">        :type fallback: str</span>
+
+<span class="sd">        :return: Returns either the string found within the config file</span>
+<span class="sd">            for the given section and name, or the fallback value if not</span>
+<span class="sd">            found.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Return the value (or fallback if missing) as a string.</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_value</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">fallback</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ConfigHandler.get_value_int">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.get_value_int">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_value_int</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fallback</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function will return the integer value for a parameter in the</span>
+<span class="sd">        selected configuration file, identified by its section and name.</span>
+<span class="sd">        If the value is missing, an optional fallback value can be used instead.</span>
+
+<span class="sd">        :param section: The section of the configuration file.</span>
+<span class="sd">        :type section: str</span>
+
+<span class="sd">        :param name: The name of the variable to read from the given section.</span>
+<span class="sd">        :type name: str</span>
+
+<span class="sd">        :param fallback: (Optional) The fallback value to use if not found.</span>
+<span class="sd">        :type fallback: int</span>
+
+<span class="sd">        :return: Returns either the integer value found within the config file</span>
+<span class="sd">            for the given section and name, or the fallback value if not found.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Perform evaluation of the returned string to support user</span>
+        <span class="c1"># expressions. For example &#39;1 / value&#39;, &#39;value ** 2&#39; or &#39;1e-6&#39;.</span>
+        <span class="n">parsed_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_value</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fallback</span><span class="p">))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="c1"># Attempt to evaluate the string and convert it to a float.</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="n">parsed_value</span><span class="p">))</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+
+            <span class="c1"># In the event of an error, display useful error information.</span>
+            <span class="k">raise</span> <span class="n">NavConfigError</span><span class="p">(</span>
+                <span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;A valid integer value could not be &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;extracted from &#39;</span><span class="si">{</span><span class="n">parsed_value</span><span class="si">}</span><span class="s2">&#39;!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigHandler.get_value_float">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.get_value_float">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_value_float</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fallback</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function will return the float value for a parameter in the</span>
+<span class="sd">        selected configuration file, identified by its section and name.</span>
+<span class="sd">        This function returns a numpy 64-bit float instead of a normal float.</span>
+<span class="sd">        If the value is missing, an optional fallback value can be used instead.</span>
+
+<span class="sd">        :param section: The section of the configuration file.</span>
+<span class="sd">        :type section: str</span>
+
+<span class="sd">        :param name: The name of the variable to read from the given section.</span>
+<span class="sd">        :type name: str</span>
+
+<span class="sd">        :param fallback: (Optional) The fallback value to use if not found.</span>
+<span class="sd">        :type fallback: float</span>
+
+<span class="sd">        :return: Returns either the float value found within the config file</span>
+<span class="sd">            for the given section and name, or the fallback value if not found.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Perform evaluation of the returned string to support user</span>
+        <span class="c1"># expressions. For example &#39;1 / value&#39;, &#39;value ** 2&#39; or &#39;1e-6&#39;.</span>
+        <span class="n">parsed_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_value</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fallback</span><span class="p">))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="c1"># Attempt to evaluate the string and convert it to a float.</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="n">parsed_value</span><span class="p">))</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+
+            <span class="c1"># In the event of an error, display useful error information.</span>
+            <span class="k">raise</span> <span class="n">NavConfigError</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                                        <span class="sa">f</span><span class="s2">&quot;A valid float value could not be &quot;</span>
+                                        <span class="sa">f</span><span class="s2">&quot;extracted from &#39;</span><span class="si">{</span><span class="n">parsed_value</span><span class="si">}</span><span class="s2">&#39;!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigHandler.get_value_bool">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.get_value_bool">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_value_bool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fallback</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function will return the boolean value for a parameter in the</span>
+<span class="sd">        selected configuration file, identified by its section and name.</span>
+<span class="sd">        Acceptable True values are &#39;yes&#39;, &#39;true&#39;, &#39;on&#39; and &#39;1&#39;. Acceptable</span>
+<span class="sd">        False values are &#39;no&#39;, &#39;false&#39;, &#39;off&#39; and &#39;0&#39;. If the value is missing,</span>
+<span class="sd">        an optional fallback value can be used instead.</span>
+
+<span class="sd">        :param section: The section of the configuration file.</span>
+<span class="sd">        :type section: str</span>
+
+<span class="sd">        :param name: The name of the variable to read from the given section.</span>
+<span class="sd">        :type name: str</span>
+
+<span class="sd">        :param fallback: (Optional) The fallback value to use if not found.</span>
+<span class="sd">        :type fallback: bool</span>
+
+<span class="sd">        :return: Returns either the boolean found within the config file for</span>
+<span class="sd">            the given section and name, or the fallback value if not found.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="c1"># Attempt to evaluate the string and convert it to a float.</span>
+            <span class="k">if</span> <span class="n">fallback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">getboolean</span><span class="p">(</span>
+                    <span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="n">fallback</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">getboolean</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+
+            <span class="c1"># Obtain the original input values</span>
+            <span class="n">parsed_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_value</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fallback</span><span class="p">))</span>
+
+            <span class="c1"># In the event of an error, display useful error information.</span>
+            <span class="k">raise</span> <span class="n">NavConfigError</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                                        <span class="sa">f</span><span class="s2">&quot;A valid boolean value could not be &quot;</span>
+                                        <span class="sa">f</span><span class="s2">&quot;extracted from &#39;</span><span class="si">{</span><span class="n">parsed_value</span><span class="si">}</span><span class="s2">&#39;!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigHandler.get_value_csv">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.get_value_csv">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_value_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                      <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                      <span class="n">fallback</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">sep</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function will return an array of values that are separated by a</span>
+<span class="sd">        common character (comma by default) from the selected configuration</span>
+<span class="sd">        file, identified by its section and name. This function returns a</span>
+<span class="sd">        numpy array. If the value is missing, an optional fallback value can</span>
+<span class="sd">        be used instead.</span>
+
+<span class="sd">        :param section: The section of the configuration file.</span>
+<span class="sd">        :type section: str</span>
+
+<span class="sd">        :param name: The name of the variable to read from the given section.</span>
+<span class="sd">        :type name: str</span>
+
+<span class="sd">        :param fallback: (Optional) The fallback value(s) to use if not found.</span>
+<span class="sd">        :type fallback: list</span>
+
+<span class="sd">        :param sep: (Optional) The item separator character (default=&#39;,&#39;).</span>
+<span class="sd">        :type: str</span>
+
+<span class="sd">        :return: A numpy array containing the written items.</span>
+<span class="sd">        :rtype: numpy.ndarray | None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Read the line from the file as a string.</span>
+        <span class="n">line_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_value</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># If not empty:</span>
+        <span class="k">if</span> <span class="n">line_text</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+
+            <span class="c1"># Return the parsed values as an array.</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">line_text</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="n">sep</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="c1"># Otherwise, return the fallback value.</span>
+            <span class="k">return</span> <span class="n">fallback</span></div>
+
+
+<div class="viewcode-block" id="ConfigHandler.get_list_of_values">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.get_list_of_values">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_list_of_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                           <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                           <span class="n">fallback</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">sep</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function will return an array of string values that are</span>
+<span class="sd">        separated by a common character (comma by default) from the selected</span>
+<span class="sd">        configuration file, identified by its section and name. This function</span>
+<span class="sd">        returns a list of one or more character values. If the value is</span>
+<span class="sd">        missing, an optional fallback value can be used instead.</span>
+
+<span class="sd">        :param section: The section of the configuration file.</span>
+<span class="sd">        :type section: str</span>
+
+<span class="sd">        :param name: The name of the variable to read from the given section.</span>
+<span class="sd">        :type name: str</span>
+
+<span class="sd">        :param fallback: (Optional) The fallback value(s) to use if not found.</span>
+<span class="sd">        :type fallback: list</span>
+
+<span class="sd">        :param sep: (Optional) The item separator character (default=&#39;,&#39;).</span>
+<span class="sd">        :type: str</span>
+
+<span class="sd">        :return: A Python list containing the written items.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Read the line from the file as a string.</span>
+        <span class="n">line_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_value</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># If the string is not empty:</span>
+        <span class="k">if</span> <span class="n">line_text</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+
+            <span class="c1"># If more than one value exists:</span>
+            <span class="k">if</span> <span class="n">sep</span> <span class="ow">in</span> <span class="n">line_text</span><span class="p">:</span>
+
+                <span class="c1"># Split the items into a list.</span>
+                <span class="k">return</span> <span class="n">line_text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="c1"># Return the single item as a list.</span>
+                <span class="k">return</span> <span class="p">[</span><span class="n">line_text</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="c1"># Otherwise, return the fallback value.</span>
+            <span class="k">return</span> <span class="n">fallback</span></div>
+
+
+<div class="viewcode-block" id="ConfigHandler.get_value_filepath">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.get_value_filepath">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_value_filepath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                           <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                           <span class="n">fallback</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">must_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function will return a local filepath read for a parameter in the</span>
+<span class="sd">        selected configuration file, identified by its section and name. This</span>
+<span class="sd">        function will handle read paths in a platform independent manner,</span>
+<span class="sd">        automatically deciding and converting when needed. This allows paths</span>
+<span class="sd">        read from the configuration file to be written in either Linux/Unix or</span>
+<span class="sd">        Windows/NT format without affecting behaviour on different platforms.</span>
+
+<span class="sd">        :param section: The section of the configuration file.</span>
+<span class="sd">        :type section: str</span>
+
+<span class="sd">        :param name: The name of the variable to read from the given section.</span>
+<span class="sd">        :type name: str</span>
+
+<span class="sd">        :param fallback: (Optional) The fallback value to use if not found.</span>
+<span class="sd">        :type fallback: str</span>
+
+<span class="sd">        :param must_exist: (Optional) Should the path exist on the filesystem?</span>
+<span class="sd">            If enabled an error will raise if the given path is not found on</span>
+<span class="sd">            the system (default=True).</span>
+
+<span class="sd">        :return: A valid filepath for the current system to the given</span>
+<span class="sd">            location/resources.</span>
+<span class="sd">        :rtype: Path</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Obtain the value from the configuration file. If the value</span>
+        <span class="c1"># is not found and a fallback value if given, use that instead.</span>
+        <span class="n">given_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_value_str</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">fallback</span><span class="p">)</span>
+
+        <span class="c1"># Use the path as a Linux filepath (default by pathlib).</span>
+        <span class="n">return_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">given_path</span><span class="p">)</span>
+
+        <span class="c1"># If the path does not exist, attempt to convert it from a</span>
+        <span class="c1"># Windows path to the path format of the current system.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">return_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">return_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">PureWindowsPath</span><span class="p">(</span><span class="n">given_path</span><span class="p">))</span>
+
+        <span class="c1"># If the path still cannot be found:</span>
+
+        <span class="k">if</span> <span class="n">must_exist</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">return_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="c1"># Return a constructed error.</span>
+            <span class="k">raise</span> <span class="n">NavConfigError</span><span class="p">(</span>
+                <span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;FileNotFoundError&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;The file path &#39;</span><span class="si">{</span><span class="n">return_path</span><span class="si">}</span><span class="s2">&#39; does not exist!&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Finally, return the valid path in the current system&#39;s format.</span>
+        <span class="k">return</span> <span class="n">return_path</span></div>
+
+
+<div class="viewcode-block" id="ConfigHandler.get_value_filepath_str">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.get_value_filepath_str">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_value_filepath_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fallback</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function will return a local filepath read for a parameter in the</span>
+<span class="sd">        selected configuration file, identified by its section and name. This</span>
+<span class="sd">        function will handle read paths in a platform independent manner,</span>
+<span class="sd">        automatically deciding and converting when needed. This allows paths</span>
+<span class="sd">        read from the configuration file to be written in either Linux/Unix or</span>
+<span class="sd">        Windows/NT format without affecting behaviour on different platforms.</span>
+
+<span class="sd">        Unlike &#39;get_value_filepath&#39; this function does not enforce the</span>
+<span class="sd">        existence of a requested file/directory.</span>
+
+<span class="sd">        :param section: The section of the configuration file.</span>
+<span class="sd">        :type section: str</span>
+
+<span class="sd">        :param name: The name of the variable to read from the given section.</span>
+<span class="sd">        :type name: str</span>
+
+<span class="sd">        :param fallback: (Optional) The fallback value to use if not found.</span>
+<span class="sd">        :type fallback: str</span>
+
+<span class="sd">        :return: A filepath for the current system to the given location/</span>
+<span class="sd">            resources. This resource does not have to exist.</span>
+<span class="sd">        :rtype: Path</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Initially, attempt to extract the corresponding as a string.</span>
+        <span class="n">given_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_value_str</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">fallback</span><span class="p">)</span>
+
+        <span class="c1"># Return this value converted into the current systems directory</span>
+        <span class="c1"># format (i.e. correct forward/backward slashes).</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">PureWindowsPath</span><span class="p">(</span><span class="n">given_path</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ConfigHandler.is_value_set">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.is_value_set">[docs]</a>
+    <span class="k">def</span> <span class="nf">is_value_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns true if there is an entry for (all of) the given sections and</span>
+<span class="sd">        values. This function works for both single values and lists of</span>
+<span class="sd">        values. For multiple values, both lists must be of the same length.</span>
+
+<span class="sd">        :param section: A single or list of sections names.</span>
+<span class="sd">        :type section: list or str</span>
+
+<span class="sd">        :param value: A single or list of value names.</span>
+<span class="sd">        :type section: list or str</span>
+
+<span class="sd">        :return: True if an entry could be found in the provided configuration</span>
+<span class="sd">            for all the given section-list pairs. False if one or more entries</span>
+<span class="sd">            could not be found.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Convert the input arguments to lists if they aren&#39;t already.</span>
+        <span class="n">section</span> <span class="o">=</span> <span class="p">(</span><span class="nb">list</span><span class="p">([</span><span class="n">section</span><span class="p">]),</span> <span class="n">section</span><span class="p">)[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="nb">list</span><span class="p">)]</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="nb">list</span><span class="p">([</span><span class="n">value</span><span class="p">]),</span> <span class="n">value</span><span class="p">)[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)]</span>
+
+        <span class="c1"># Ensure the given list lengths are the same.</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">section</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> \
+            <span class="s2">&quot;The given section and value lists must be of same length!&quot;</span>
+
+        <span class="c1"># For each section-value pair:</span>
+        <span class="k">for</span> <span class="n">sec</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+            <span class="c1"># Check if an entry could be found in the configuration.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">has_option</span><span class="p">(</span><span class="n">sec</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+                <span class="c1"># If not, return False.</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># Return True if an entry has been given for each section-value pair.</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="ConfigHandler.overwrite_value">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.overwrite_value">[docs]</a>
+    <span class="k">def</span> <span class="nf">overwrite_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This simple function can be used to overwrite or insert any value</span>
+<span class="sd">        extracted from the given configuration file. This is only to be used</span>
+<span class="sd">        for automatically generated values and is not an alternative to</span>
+<span class="sd">        fallbacks.</span>
+
+<span class="sd">        :param section: The section name of the variable to override</span>
+<span class="sd">        :type section: str</span>
+
+<span class="sd">        :param name: The name of the variable to read from the given section.</span>
+<span class="sd">        :type name: str</span>
+
+<span class="sd">        :param new_value: The new value to use for the given section and name.</span>
+<span class="sd">        :type new_value: str, int, float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Set/override the value within the config parser.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_value</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ConfigHandler.copy_file">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.copy_file">[docs]</a>
+    <span class="k">def</span> <span class="nf">copy_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Copies the configuration file to a destination.</span>
+<span class="sd">        This method produces a copy of the configuration file at the</span>
+<span class="sd">        requested destination.</span>
+
+<span class="sd">        :param dest: The location to write the file to.</span>
+<span class="sd">        :type dest: Path</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">copyfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="n">warning_msg</span> <span class="o">=</span> <span class="s2">&quot;Unable to copy configuration file!&quot;</span>
+            <span class="n">warn</span><span class="p">(</span><span class="n">warning_msg</span><span class="p">,</span> <span class="n">NavConfigWarning</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigHandler.write_file">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.ConfigHandler.write_file">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Writes the configuration values to a file.</span>
+<span class="sd">        This method writes the configuration values in their current state</span>
+<span class="sd">        (including modifications) to a requested file. The produced file can</span>
+<span class="sd">        then be re-used as a settings file to repeat experimentation.</span>
+
+<span class="sd">        :param dest: The location to write the file to.</span>
+<span class="sd">        :type dest: Path</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">configfile</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="n">warning_msg</span> <span class="o">=</span> <span class="s2">&quot;Unable to write configuration file!&quot;</span>
+            <span class="n">warn</span><span class="p">(</span><span class="n">warning_msg</span><span class="p">,</span> <span class="n">NavConfigWarning</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="NavConfigWarning">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.NavConfigWarning">[docs]</a>
+<span class="k">class</span> <span class="nc">NavConfigWarning</span><span class="p">(</span><span class="ne">UserWarning</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A custom warning type used to inform the user about invalid, unsuitable</span>
+<span class="sd">    or missing values present in the configuration file. If these warnings</span>
+<span class="sd">    generated can be safely ignored, this warning type can be suppressed</span>
+<span class="sd">    to hide all configuration file warnings for the session. Suppressing</span>
+<span class="sd">    this warning type will not affect the displaying of other warnings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="NavConfigError">
+<a class="viewcode-back" href="../../../modules/input/config_handler.html#nav_toolbox.input.config_handler.NavConfigError">[docs]</a>
+<span class="k">class</span> <span class="nc">NavConfigError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A custom exception type used for inform the user about erroneous values</span>
+<span class="sd">    present in the provided configuration file that cannot be ignored. This</span>
+<span class="sd">    includes syntax, value type and conflicting value errors. This exception</span>
+<span class="sd">    type is primarily used for formatting the errors being displayed. This</span>
+<span class="sd">    custom class also allows configuration based errors to be distinguished</span>
+<span class="sd">    from serious errors such faults not detected until after delivery.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># A short error code/description for the error.</span>
+    <span class="n">error_code</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># The section for the variable causing the error.</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># The name of the variable causing the error.</span>
+    <span class="n">variable</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># A meaningful description of the error.</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># The error message to be printed in the output console.</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">error_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">error_desc</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The constructor used for raising a new Quantum Navigation</span>
+<span class="sd">        Configuration Error. This takes information about the configuration</span>
+<span class="sd">        variable whose value has caused an error that cannot be overcome.</span>
+
+<span class="sd">        :param section_name: The name of the section for the variable in the</span>
+<span class="sd">            configuration file that is causing an error.</span>
+<span class="sd">        :type section_name: str</span>
+
+<span class="sd">        :param variable_name: The name of the variable in the configuration</span>
+<span class="sd">            file that is causing an error.</span>
+<span class="sd">        :type variable_name: str</span>
+
+<span class="sd">        :param error_type: A short description about the error, such as</span>
+<span class="sd">            &#39;Must Be Positive&#39; or &#39;Conflicting Value&#39;.</span>
+<span class="sd">        :type error_type: str</span>
+
+<span class="sd">        :param error_desc: A description about the cause of the error. This</span>
+<span class="sd">            message should explain why the value is invalid and how it can</span>
+<span class="sd">            be changed to become valid.</span>
+<span class="sd">        :type error_desc: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Record the section of the variable causing a fault.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">section</span> <span class="o">=</span> <span class="n">section_name</span>
+
+        <span class="c1"># Record the name of the variable causing a fault.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variable</span> <span class="o">=</span> <span class="n">variable_name</span>
+
+        <span class="c1"># Record the short code/description of the error.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error_code</span> <span class="o">=</span> <span class="n">error_type</span>
+
+        <span class="c1"># Record a description of the error.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="n">error_desc</span>
+
+        <span class="c1"># Construct the exception message to be displayed.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">error_code</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span> \
+                       <span class="sa">f</span><span class="s2">&quot;Config Section:</span><span class="se">\t\t</span><span class="s2">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section</span><span class="si">}</span><span class="s2">&#39;</span><span class="se">\n</span><span class="s2">&quot;</span> \
+                       <span class="sa">f</span><span class="s2">&quot;Variable Name:</span><span class="se">\t\t</span><span class="s2">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2">&#39;</span><span class="se">\n\n</span><span class="s2">&quot;</span> \
+                       <span class="sa">f</span><span class="s2">&quot;Error Description:</span><span class="se">\t</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">desc</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Call the original exception constructor</span>
+        <span class="c1"># with the assembled error message.</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function overrides the default behaviour when the raised</span>
+<span class="sd">        exception is converted to a string. This is useful as it</span>
+<span class="sd">        simplifies the displaying of the error.</span>
+
+<span class="sd">        :return: A string describing the exception raised.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Extract the name of the current class.</span>
+        <span class="n">class_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="c1"># Append the class name to the error message.</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2">:</span><span class="se">\t</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

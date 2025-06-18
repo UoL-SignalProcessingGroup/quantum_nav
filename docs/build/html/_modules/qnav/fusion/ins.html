@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.fusion.ins &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.fusion.ins</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.fusion.ins</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">======</span>
+<span class="sd">ins.py</span>
+<span class="sd">======</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Fusion method for supplying Inertial Navigation.</span>
+<span class="sd">    Provides a selection of standard sensor fusion methods for means of basic</span>
+<span class="sd">    internal navigation. Each of these takes measurements from accelerometer</span>
+<span class="sd">    and gyroscope sensors (IMU).</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Prof. Jason Ralph - jfralph@liverpool.ac.uk</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">qnav.estimation.state</span> <span class="kn">import</span> <span class="n">EstimatedState</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.accelerometer</span> <span class="kn">import</span> <span class="n">Accelerometer</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.gyroscope</span> <span class="kn">import</span> <span class="n">Gyroscope</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.platform</span> <span class="kn">import</span> <span class="n">SensorAxis</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">SensorFusion</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">FusionTrigger</span>
+<span class="kn">from</span> <span class="nn">qnav.util.transformations</span> <span class="kn">import</span> <span class="n">cross_prod_xy</span>
+<span class="c1"># from qnav.util.transformations import cross_prod3</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">radians</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">tan</span><span class="p">,</span> <span class="n">pi</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="kn">import</span> <span class="nn">qnav.util.transformations</span> <span class="k">as</span> <span class="nn">trans</span>
+<span class="kn">import</span> <span class="nn">qnav.util.constants</span> <span class="k">as</span> <span class="nn">const</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+
+<div class="viewcode-block" id="NumericalINS">
+<a class="viewcode-back" href="../../../modules/fusion/ins.html#qnav.fusion.ins.NumericalINS">[docs]</a>
+<span class="k">class</span> <span class="nc">NumericalINS</span><span class="p">(</span><span class="n">SensorFusion</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A fairly basic simple numerical solution for Internal Navigation (INS).</span>
+<span class="sd">    This INS solution is based on simple numerical integration. While its</span>
+<span class="sd">    estimation calculations are relatively primitive, it serves as a base</span>
+<span class="sd">    model that other solutions can extend from. The simple implementation</span>
+<span class="sd">    also provides straight-forward means for testing calculations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accelerometer</span><span class="p">:</span> <span class="n">Accelerometer</span><span class="p">,</span>
+                 <span class="n">gyroscope</span><span class="p">:</span> <span class="n">Gyroscope</span><span class="p">,</span>
+                 <span class="n">estimated_acc_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">estimated_gyro_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a simple numerical solution for internal Navigation (INS).</span>
+<span class="sd">        Processes periodic measurements from given accelerometer and</span>
+<span class="sd">        gyroscopes to update estimated state.</span>
+
+<span class="sd">        :param accelerometer: An accelerometer instance used to capture</span>
+<span class="sd">            acceleration values during simulation.</span>
+<span class="sd">        :type accelerometer: Accelerometer</span>
+
+<span class="sd">        :param gyroscope: A gyroscope instance used to capture</span>
+<span class="sd">            angle rate acceleration values during simulation.</span>
+<span class="sd">        :type gyroscope: Gyroscope</span>
+
+<span class="sd">        :param estimated_acc_axis: (Optional) The estimated axis for the</span>
+<span class="sd">            accelerometer instance. If not provided, the actual</span>
+<span class="sd">            accelerometer&#39;s axis will be used, resulting in zero misalignment.</span>
+<span class="sd">        :type estimated_acc_axis: SensorAxis</span>
+
+
+<span class="sd">        :param estimated_gyro_axis: (Optional) The estimated axis for the</span>
+<span class="sd">            gyroscope instance. If not provided, the actual gyroscope&#39;s</span>
+<span class="sd">            axis will be used, resulting in zero misalignment.</span>
+<span class="sd">        :type estimated_acc_axis: SensorAxis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Call parent class&#39;s constructor:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">FusionTrigger</span><span class="o">.</span><span class="n">ALL</span><span class="p">,</span> <span class="n">accelerometer</span><span class="p">,</span> <span class="n">gyroscope</span><span class="p">)</span>
+
+        <span class="c1"># Copy given required arguments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_accelerometer</span> <span class="o">=</span> <span class="n">accelerometer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gyroscope</span> <span class="o">=</span> <span class="n">gyroscope</span>
+
+        <span class="c1"># Get the axis to use for the accelerometer</span>
+        <span class="k">if</span> <span class="n">estimated_acc_axis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_acc_axis</span> <span class="o">=</span> <span class="n">accelerometer</span><span class="o">.</span><span class="n">sensor_axis</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_acc_axis</span> <span class="o">=</span> <span class="n">estimated_acc_axis</span>
+
+        <span class="c1"># Get the axis to use for the accelerometer</span>
+        <span class="k">if</span> <span class="n">estimated_gyro_axis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gyro_axis</span> <span class="o">=</span> <span class="n">gyroscope</span><span class="o">.</span><span class="n">sensor_axis</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gyro_axis</span> <span class="o">=</span> <span class="n">estimated_gyro_axis</span>
+
+        <span class="c1"># Ensure that the sensor frequencies are compatible</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accelerometer</span><span class="o">.</span><span class="n">frequency</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gyroscope</span><span class="o">.</span><span class="n">frequency</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Accelerometer and Gyroscope have different measurement frequencies&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="NumericalINS.perform_fusion">
+<a class="viewcode-back" href="../../../modules/fusion/ins.html#qnav.fusion.ins.NumericalINS.perform_fusion">[docs]</a>
+    <span class="k">def</span> <span class="nf">perform_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs fusion using latest accelerometer and gyroscope measurements.</span>
+<span class="sd">        Using the latest basic inertial measurements, updates the full current</span>
+<span class="sd">        estimated state using a simple numerical model.</span>
+
+<span class="sd">        :param estimated_state: The current estimated state.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get the latest measurement from the sensors:</span>
+        <span class="n">measured_acceleration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accelerometer</span><span class="o">.</span><span class="n">last_measurement</span>
+        <span class="n">measured_angle_rates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gyroscope</span><span class="o">.</span><span class="n">last_measurement</span>
+
+        <span class="c1"># TODO: Correct for non-uniform time steps?</span>
+        <span class="c1"># Get the time step difference between measurements</span>
+        <span class="n">acc_time_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accelerometer</span><span class="o">.</span><span class="n">time_step</span>
+        <span class="n">gyro_time_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gyroscope</span><span class="o">.</span><span class="n">time_step</span>
+
+        <span class="c1"># Unpack old estimated states</span>
+        <span class="n">est_position</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">position</span>
+        <span class="n">est_attitude</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">attitude</span>
+        <span class="n">est_angle_rates</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">angle_rates</span>
+
+        <span class="c1"># ------------------------------------------------------------------------</span>
+
+        <span class="c1"># Unpack required sensor axis values:</span>
+        <span class="n">acc_lever_arm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acc_axis</span><span class="o">.</span><span class="n">lever_arm</span>
+        <span class="n">acc_rot_body2sensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acc_axis</span><span class="o">.</span><span class="n">body2sensor_mat</span>
+        <span class="n">gyro_rot_body2sensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gyro_axis</span><span class="o">.</span><span class="n">body2sensor_mat</span>
+
+        <span class="c1"># Calculate the estimated gravity vector:</span>
+        <span class="n">gravity_model</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">gravity_model</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">gravity_model</span><span class="o">.</span><span class="n">calc_gravity_xyz</span><span class="p">(</span><span class="o">*</span><span class="n">est_position</span><span class="p">)</span>
+
+        <span class="c1"># Define Angular velocity for Earth&#39;s rotation (in local NED axes)</span>
+        <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">est_position</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">omega_e</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">OMEGA_E</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)])</span>
+
+        <span class="c1"># Set up acceleration and angle rate measurements (Sensor axes)</span>
+        <span class="n">acceleration_s1</span> <span class="o">=</span> <span class="n">measured_acceleration</span>
+        <span class="n">angle_rate_s1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">measured_angle_rates</span><span class="p">)</span>
+
+        <span class="c1"># Convert measured acceleration and angle rates to Body axes</span>
+        <span class="n">angle_rate_b0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">est_angle_rates</span><span class="p">)</span>
+
+        <span class="c1"># rot_body2sensor = trans.rotate_3d(*sensor_angles_rad)</span>
+        <span class="n">angle_rate_b1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">gyro_rot_body2sensor</span><span class="p">,</span> <span class="n">angle_rate_s1</span><span class="p">)</span>
+        <span class="n">acceleration_b1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">acc_rot_body2sensor</span><span class="p">,</span> <span class="n">acceleration_s1</span><span class="p">)</span> <span class="o">-</span> <span class="n">cross_prod_xy</span><span class="p">(</span>
+            <span class="n">angle_rate_b0</span><span class="p">,</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">angle_rate_b0</span><span class="p">,</span> <span class="n">acc_lever_arm</span><span class="p">))</span>
+
+        <span class="c1"># Calculate estimated body axes from Earth-oriented axes.</span>
+        <span class="n">attitude_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">est_attitude</span><span class="p">)</span>
+        <span class="n">psi_0</span><span class="p">,</span> <span class="n">theta_0</span><span class="p">,</span> <span class="n">phi_0</span> <span class="o">=</span> <span class="n">attitude_0</span>
+        <span class="n">rot_earth2body_0</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">attitude_0</span><span class="p">)</span>
+
+        <span class="c1"># ------------------------------------------------------------------------</span>
+
+        <span class="c1"># Convert position to local NED co-ordinates</span>
+        <span class="n">ref_lla</span> <span class="o">=</span> <span class="n">est_position</span>
+        <span class="n">position_e0</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">lla2ned</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">)</span>
+
+        <span class="c1"># Convert velocity from body axes to Earth Axes</span>
+        <span class="n">velocity_b0</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">velocity</span>
+        <span class="n">velocity_e0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_earth2body_0</span><span class="p">,</span> <span class="n">velocity_b0</span><span class="p">)</span>
+
+        <span class="c1"># Convert measured acceleration from body axes to Earth axes</span>
+        <span class="c1"># and remove Coriolis and gravity terms</span>
+        <span class="n">acceleration_e1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_earth2body_0</span><span class="p">,</span> <span class="n">acceleration_b1</span><span class="p">)</span> <span class="o">+</span> <span class="n">g</span>
+
+        <span class="n">omega_tr</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">get_transport_rate</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">,</span> <span class="n">velocity_e0</span><span class="p">)</span>
+        <span class="n">acceleration_e1</span> <span class="o">-=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">omega_e</span><span class="p">,</span> <span class="n">velocity_e0</span><span class="p">)</span>
+        <span class="n">acceleration_e1</span> <span class="o">-=</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">omega_tr</span><span class="p">,</span> <span class="n">velocity_e0</span><span class="p">)</span>  <span class="c1"># NEW</span>
+
+        <span class="n">position_e1</span> <span class="o">=</span> <span class="n">position_e0</span> <span class="o">+</span> <span class="n">velocity_e0</span> <span class="o">*</span> <span class="n">acc_time_step</span> \
+                      <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">acceleration_e1</span> <span class="o">*</span> <span class="n">acc_time_step</span> <span class="o">**</span> <span class="mi">2</span>
+
+        <span class="c1"># Velocity increments (calculated in Earth axes)</span>
+        <span class="n">velocity_e1</span> <span class="o">=</span> <span class="n">velocity_e0</span> <span class="o">+</span> <span class="n">acceleration_e1</span> <span class="o">*</span> <span class="n">acc_time_step</span>
+        <span class="n">angle_rate_b1</span> <span class="o">-=</span> <span class="n">rot_earth2body_0</span> <span class="o">@</span> <span class="n">omega_e</span>
+        <span class="n">angle_rate_b1</span> <span class="o">-=</span> <span class="n">rot_earth2body_0</span> <span class="o">@</span> <span class="n">omega_tr</span>
+
+        <span class="n">d_theta_dt_1</span> <span class="o">=</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">phi_0</span><span class="p">)</span> <span class="o">-</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">phi_0</span><span class="p">)</span>
+        <span class="n">d_psi_dt_1</span> <span class="o">=</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">phi_0</span><span class="p">)</span> <span class="o">/</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta_0</span><span class="p">)</span> <span class="o">+</span> \
+                     <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">phi_0</span><span class="p">)</span> <span class="o">/</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta_0</span><span class="p">)</span>
+        <span class="n">d_phi_dt_1</span> <span class="o">=</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">d_psi_dt_1</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta_0</span><span class="p">)</span>
+
+        <span class="c1"># Attitudes</span>
+        <span class="n">d_psi_1</span> <span class="o">=</span> <span class="n">d_psi_dt_1</span> <span class="o">*</span> <span class="n">gyro_time_step</span>
+        <span class="n">d_theta_1</span> <span class="o">=</span> <span class="n">d_theta_dt_1</span> <span class="o">*</span> <span class="n">gyro_time_step</span>
+        <span class="n">d_phi_1</span> <span class="o">=</span> <span class="n">d_phi_dt_1</span> <span class="o">*</span> <span class="n">gyro_time_step</span>
+
+        <span class="c1"># Add attitude angle updates</span>
+        <span class="n">attitude_b1</span> <span class="o">=</span> <span class="n">attitude_0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">d_psi_1</span><span class="p">,</span> <span class="n">d_theta_1</span><span class="p">,</span> <span class="n">d_phi_1</span><span class="p">])</span>
+        <span class="n">attitude_b1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">attitude_b1</span> <span class="o">+</span> <span class="n">pi</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">pi</span>
+
+        <span class="c1"># Rotation matrix from Earth to body axes with updated rotation angles</span>
+        <span class="n">rot_earth2body_1</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">attitude_b1</span><span class="p">)</span>
+
+        <span class="c1"># Add effect of Coriolis term due to Earth&#39;s rotation (in Local NED axes)</span>
+        <span class="n">acceleration_e1</span> <span class="o">+=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">omega_e</span><span class="p">,</span> <span class="n">velocity_e1</span><span class="p">)</span>
+        <span class="n">acceleration_e1</span> <span class="o">+=</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">omega_tr</span><span class="p">,</span> <span class="n">velocity_e1</span><span class="p">)</span>
+
+        <span class="c1"># Convert Velocities from Earth Axes to Body Axes</span>
+        <span class="n">velocity_b1</span> <span class="o">=</span> <span class="n">rot_earth2body_1</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">velocity_e1</span><span class="p">)</span>
+
+        <span class="c1"># Add gravity terms and convert acceleration from Earth axes to Body Axes</span>
+        <span class="n">acceleration_b1</span> <span class="o">=</span> <span class="n">rot_earth2body_1</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">acceleration_e1</span> <span class="o">-</span> <span class="n">g</span><span class="p">)</span>
+
+        <span class="c1"># Update the estimated variables</span>
+        <span class="n">estimated_state</span><span class="o">.</span><span class="n">update_estimates</span><span class="p">(</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">trans</span><span class="o">.</span><span class="n">ned2lla</span><span class="p">(</span><span class="n">position_e1</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">),</span>
+            <span class="n">velocity</span><span class="o">=</span><span class="n">velocity_b1</span><span class="p">,</span>
+            <span class="n">acceleration</span><span class="o">=</span><span class="n">acceleration_b1</span><span class="p">,</span>
+            <span class="n">attitude</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">attitude_b1</span><span class="p">),</span>
+            <span class="n">angle_rates</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">angle_rate_b1</span><span class="p">)</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="RungeKutta">
+<a class="viewcode-back" href="../../../modules/fusion/ins.html#qnav.fusion.ins.RungeKutta">[docs]</a>
+<span class="k">class</span> <span class="nc">RungeKutta</span><span class="p">(</span><span class="n">NumericalINS</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An extension of the numerical INS that employs Runge-Kutta methods.</span>
+<span class="sd">    Processes the measurement vector and updates the estimation states using</span>
+<span class="sd">    Runge Kutta (4th order) integration.</span>
+
+<span class="sd">    Does include:</span>
+<span class="sd">        * Simple Accelerometer Measurement Model (basic - independent</span>
+<span class="sd">          measurement errors, giving drift term)</span>
+<span class="sd">        * 3 x Individual Accelerator Bias values (fixed)</span>
+<span class="sd">        * 3 x Individual Accelerator Scaling errors (fixed)</span>
+<span class="sd">        * 3D Accelerometer non-orthogonality errors (fixed) for cross-coupling</span>
+<span class="sd">        * Simple (not position dependent) Gravity Compensation</span>
+<span class="sd">        * Simple Gyroscope Measurement Model (basic - independent</span>
+<span class="sd">          measurement errors, giving drift term)</span>
+<span class="sd">        * 3 x Individual Gyroscope Bias values (fixed)</span>
+<span class="sd">        * 3 x Individual Gyroscope Scaling errors (fixed)</span>
+<span class="sd">        * 3D Gyroscope non-orthogonality errors (fixed) for cross-coupling</span>
+<span class="sd">        * Sensor bias drift for accelerometers and gyroscopes</span>
+<span class="sd">        * Kalman Filtering of measurement signals</span>
+<span class="sd">        * WGS&#39;84 coordinates (ellipsoidal rotating Earth)</span>
+<span class="sd">        * Effect of Coriolis effect due to Earth&#39;s rotation</span>
+
+<span class="sd">    Does NOT currently include:</span>
+<span class="sd">        * Schuler correction loop.</span>
+<span class="sd">        * Physics-based accelerometer sensor model</span>
+<span class="sd">        * Physics-based gyroscope sensor model</span>
+<span class="sd">        * Lever-arm effects from rotations not around origin/centre of the IMU</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="RungeKutta.perform_fusion">
+<a class="viewcode-back" href="../../../modules/fusion/ins.html#qnav.fusion.ins.RungeKutta.perform_fusion">[docs]</a>
+    <span class="k">def</span> <span class="nf">perform_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs fusion using latest accelerometer and gyroscope measurements.</span>
+<span class="sd">        Using the latest basic inertial measurements, updates the full current</span>
+<span class="sd">        estimated state using a simple numerical model.</span>
+
+<span class="sd">        :param estimated_state: The current estimated state.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get the latest measurement from the sensors:</span>
+        <span class="n">measured_acceleration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accelerometer</span><span class="o">.</span><span class="n">last_measurement</span>
+        <span class="n">measured_angle_rates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gyroscope</span><span class="o">.</span><span class="n">last_measurement</span>
+
+        <span class="c1"># Get the timestep between measurements:</span>
+        <span class="n">acc_time_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accelerometer</span><span class="o">.</span><span class="n">time_step</span>
+        <span class="n">gyro_time_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gyroscope</span><span class="o">.</span><span class="n">time_step</span>
+        <span class="n">time_step</span> <span class="o">=</span> <span class="p">(</span><span class="n">acc_time_step</span> <span class="o">+</span> <span class="n">gyro_time_step</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="c1"># Define Angular velocity for Earth&#39;s rotation (in local NED axes)</span>
+        <span class="n">ref_lla</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">position</span>
+        <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">omega_e</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">OMEGA_E</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)])</span>
+
+        <span class="c1"># Calculate the gravity vector</span>
+        <span class="n">gravity_model</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">gravity_model</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">gravity_model</span><span class="o">.</span><span class="n">calc_gravity_xyz</span><span class="p">(</span><span class="o">*</span><span class="n">ref_lla</span><span class="p">)</span>
+
+        <span class="c1"># Set up acceleration and angle rate measurements (Sensor axes)</span>
+        <span class="n">acceleration_s0</span> <span class="o">=</span> <span class="n">measured_acceleration</span>
+        <span class="n">angle_rate_s0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">measured_angle_rates</span><span class="p">)</span>
+
+        <span class="c1"># Unpack required sensor axis values:</span>
+        <span class="n">acc_lever_arm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acc_axis</span><span class="o">.</span><span class="n">lever_arm</span>
+        <span class="n">acc_rot_body2sensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acc_axis</span><span class="o">.</span><span class="n">body2sensor_mat</span>
+        <span class="n">gyro_rot_body2sensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gyro_axis</span><span class="o">.</span><span class="n">body2sensor_mat</span>
+
+        <span class="c1"># Convert measured angle rates to Body axes</span>
+        <span class="c1"># rot_body2sensor = trans.rotate_3d(*sensor_angles)</span>
+        <span class="n">angle_rate_bs0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">gyro_rot_body2sensor</span><span class="p">,</span> <span class="n">angle_rate_s0</span><span class="p">)</span>
+
+        <span class="c1"># TODO: Use angle_rate_s0 instead of angle_rate_bs0?</span>
+
+        <span class="c1"># Convert measured acceleration to Body axes</span>
+        <span class="c1"># acceleration_bs0 = np.linalg.solve(</span>
+        <span class="c1">#     acc_rot_body2sensor, acceleration_s0) - np.array(cross_prod3(</span>
+        <span class="c1">#     angle_rate_bs0, np.array(cross_prod3(angle_rate_bs0, acc_lever_arm))))</span>
+
+        <span class="n">acceleration_bs0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span>
+            <span class="n">acc_rot_body2sensor</span><span class="p">,</span> <span class="n">acceleration_s0</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cross_prod_xy</span><span class="p">(</span>
+            <span class="n">angle_rate_bs0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">angle_rate_bs0</span><span class="p">,</span> <span class="n">acc_lever_arm</span><span class="p">))))</span>
+
+        <span class="c1"># Fix the reference Lat-Long-Altitude location</span>
+        <span class="c1"># ref_lla = self._est_position</span>
+
+        <span class="c1"># Euler angles (in radians)</span>
+        <span class="n">attitude_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">attitude</span><span class="p">)</span>
+        <span class="n">angle_rate_b0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">angle_rates</span><span class="p">)</span>
+
+        <span class="c1"># Convert position to local NED co-ordinates</span>
+        <span class="c1"># position_e0 = trans.lla2ned(position, position)</span>
+        <span class="n">position_e0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="c1"># Obtain the body velocity and acceleration</span>
+        <span class="n">velocity_b0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">velocity</span><span class="p">)</span>
+        <span class="n">acceleration_b0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">acceleration</span><span class="p">)</span>
+
+        <span class="c1"># Runge-Kutta Setup</span>
+        <span class="c1"># -----------------</span>
+
+        <span class="c1"># The number of steps to repeat</span>
+        <span class="n">order_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span>
+
+        <span class="c1"># Create arrays to stops the k terms</span>
+        <span class="n">k_position_e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">order_number</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="n">k_velocity_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">order_number</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="n">k_acceleration_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">order_number</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="n">k_attitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">order_number</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="n">k_angle_rate_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">order_number</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+        <span class="c1"># Record the previous estimation values to be updated</span>
+        <span class="n">updated_position</span> <span class="o">=</span> <span class="n">position_e0</span>
+        <span class="n">updated_velocity</span> <span class="o">=</span> <span class="n">velocity_b0</span>
+        <span class="n">updated_acceleration</span> <span class="o">=</span> <span class="n">acceleration_b0</span>
+        <span class="n">updated_attitude</span> <span class="o">=</span> <span class="n">attitude_0</span>
+        <span class="n">updated_angle_rates</span> <span class="o">=</span> <span class="n">angle_rate_b0</span>
+
+        <span class="c1"># For each of the k steps:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">order_number</span><span class="p">):</span>
+
+            <span class="c1"># Set the increment to calculate the derivatives</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">d_time_step</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">time_step</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">d_time_step</span> <span class="o">=</span> <span class="n">time_step</span>
+
+            <span class="c1"># Calculate ESTIMATED body axes from Earth-oriented axes</span>
+            <span class="n">rot_earth2body_0</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">attitude_0</span><span class="p">)</span>
+
+            <span class="c1"># Calculate the body axes from Earth-oriented axes</span>
+            <span class="n">velocity_e0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_earth2body_0</span><span class="p">,</span> <span class="n">velocity_b0</span><span class="p">)</span>
+            <span class="c1"># velocity_e0 = np.linalg.lstsq(rot_earth2body_0, velocity_b0, rcond=None)[0]</span>
+
+            <span class="c1"># Calculate the transport rate</span>
+            <span class="n">omega_tr</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">get_transport_rate</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">,</span> <span class="n">velocity_e0</span><span class="p">)</span>
+
+            <span class="c1"># Convert measured acceleration from body axes to Earth axes</span>
+            <span class="c1"># and remove Coriolis and gravity terms</span>
+            <span class="n">acceleration_e1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_earth2body_0</span><span class="p">,</span> <span class="n">acceleration_bs0</span><span class="p">)</span> <span class="o">+</span> <span class="n">g</span>
+            <span class="c1"># acceleration_e1 = np.linalg.lstsq(rot_earth2body_0, acceleration_bs0, rcond=None)[0] + g</span>
+
+            <span class="c1"># Remove effect of Coriolis term due to Earth&#39;s rotation and transport rate (in Local NED axes)</span>
+            <span class="n">acceleration_e1</span> <span class="o">-=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">omega_e</span><span class="p">,</span> <span class="n">velocity_e0</span><span class="p">)</span>
+            <span class="n">acceleration_e1</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">omega_tr</span><span class="p">,</span> <span class="n">velocity_e0</span><span class="p">)</span>
+
+            <span class="c1"># Position increments in local NED/Earth axes</span>
+            <span class="n">position_e1</span> <span class="o">=</span> <span class="n">position_e0</span> <span class="o">+</span> <span class="n">velocity_e0</span> <span class="o">*</span> <span class="n">d_time_step</span>
+
+            <span class="c1"># Velocity increments (calculated in Earth axes)</span>
+            <span class="n">velocity_e1</span> <span class="o">=</span> <span class="n">velocity_e0</span> <span class="o">+</span> <span class="n">acceleration_e1</span> <span class="o">*</span> <span class="n">d_time_step</span>
+            <span class="c1"># angle_rate_b1 = angle_rate_bs0 - rot_earth2body_0 @ omega_e + rot_earth2body_0 @ omega_tr</span>
+            <span class="n">angle_rate_b1</span> <span class="o">=</span> <span class="n">angle_rate_bs0</span> <span class="o">-</span> <span class="n">rot_earth2body_0</span> <span class="o">@</span> <span class="n">omega_e</span> <span class="o">-</span> <span class="n">rot_earth2body_0</span> <span class="o">@</span> <span class="n">omega_tr</span>  <span class="c1"># &lt;&lt;&lt;&lt; NEW</span>
+
+            <span class="c1"># Calculate the updated angle rates</span>
+            <span class="n">d_psi_dt</span> <span class="o">=</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="n">cos</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> \
+                       <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="n">cos</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="n">d_theta_dt</span> <span class="o">=</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+            <span class="n">d_phi_dt</span> <span class="o">=</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="n">tan</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> \
+                       <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="n">tan</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="c1"># Add attitude angle updates</span>
+            <span class="n">attitude_1</span> <span class="o">=</span> <span class="n">attitude_0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">d_psi_dt</span><span class="p">,</span> <span class="n">d_theta_dt</span><span class="p">,</span> <span class="n">d_phi_dt</span><span class="p">])</span> <span class="o">*</span> <span class="n">d_time_step</span>
+
+            <span class="c1"># Rotation matrix from Earth to body axes with NEW (updated) rotation angles</span>
+            <span class="n">rot_earth2body_1</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">attitude_1</span><span class="p">)</span>
+
+            <span class="c1"># Add effect of Coriolis term due to Earth&#39;s rotation (in Local NED axes)</span>
+            <span class="n">acceleration_e1</span> <span class="o">+=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">omega_e</span><span class="p">,</span> <span class="n">velocity_e1</span><span class="p">)</span>
+
+            <span class="c1"># Convert Velocities from Earth Axes to Body Axes</span>
+            <span class="n">velocity_b1</span> <span class="o">=</span> <span class="n">rot_earth2body_1</span> <span class="o">@</span> <span class="n">velocity_e1</span>
+
+            <span class="c1"># Add gravity terms and convert acceleration from Earth axes to Body Axes</span>
+            <span class="n">acceleration_b1</span> <span class="o">=</span> <span class="n">rot_earth2body_1</span> <span class="o">@</span> <span class="p">(</span><span class="n">acceleration_e1</span> <span class="o">-</span> <span class="n">g</span><span class="p">)</span>
+
+            <span class="c1"># Update angle rate to include Earth rotation rate</span>
+            <span class="n">omega_tr</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">get_transport_rate</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">,</span> <span class="n">velocity_e1</span><span class="p">)</span>
+            <span class="n">angle_rate_b1</span> <span class="o">+=</span> <span class="n">rot_earth2body_1</span> <span class="o">@</span> <span class="n">omega_e</span> <span class="o">-</span> <span class="n">rot_earth2body_1</span> <span class="o">@</span> <span class="n">omega_tr</span>
+
+            <span class="c1"># Runge_Kutta values</span>
+            <span class="n">k_position_e</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">position_e1</span> <span class="o">-</span> <span class="n">position_e0</span><span class="p">)</span> <span class="o">/</span> <span class="n">d_time_step</span>
+            <span class="n">k_velocity_b</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">velocity_b1</span> <span class="o">-</span> <span class="n">velocity_b0</span><span class="p">)</span> <span class="o">/</span> <span class="n">d_time_step</span>
+            <span class="n">k_acceleration_b</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">acceleration_b1</span> <span class="o">-</span> <span class="n">acceleration_b0</span><span class="p">)</span> <span class="o">/</span> <span class="n">d_time_step</span>
+            <span class="n">k_attitude</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">attitude_1</span> <span class="o">-</span> <span class="n">attitude_0</span><span class="p">)</span> <span class="o">/</span> <span class="n">d_time_step</span>
+            <span class="n">k_angle_rate_b</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">angle_rate_b1</span> <span class="o">-</span> <span class="n">angle_rate_b0</span><span class="p">)</span> <span class="o">/</span> <span class="n">d_time_step</span>
+
+            <span class="c1"># Repeat the loop using the updated values</span>
+            <span class="n">position_e0</span> <span class="o">=</span> <span class="n">position_e1</span>
+            <span class="n">velocity_b0</span> <span class="o">=</span> <span class="n">velocity_b1</span>
+            <span class="n">attitude_0</span> <span class="o">=</span> <span class="n">attitude_1</span>
+
+        <span class="c1"># Assign weightings to each of the mid-points</span>
+        <span class="n">k_weightings</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Pre-calculate the time step multiplier</span>
+        <span class="n">multiply_amount</span> <span class="o">=</span> <span class="n">time_step</span> <span class="o">/</span> <span class="mf">6.0</span>
+
+        <span class="c1"># Sum together all Runge-Kutta terms with their assigned weightings</span>
+        <span class="n">updated_position</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">k_position_e</span> <span class="o">*</span> <span class="n">k_weightings</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">multiply_amount</span>
+        <span class="n">updated_velocity</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">k_velocity_b</span> <span class="o">*</span> <span class="n">k_weightings</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">multiply_amount</span>
+        <span class="n">updated_acceleration</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">k_acceleration_b</span> <span class="o">*</span> <span class="n">k_weightings</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">multiply_amount</span>
+        <span class="n">updated_attitude</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">k_attitude</span> <span class="o">*</span> <span class="n">k_weightings</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">multiply_amount</span>
+        <span class="n">updated_angle_rates</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">k_angle_rate_b</span> <span class="o">*</span> <span class="n">k_weightings</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">multiply_amount</span>
+
+        <span class="c1"># Ensure the updated attitude values are valid</span>
+        <span class="n">updated_attitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">updated_attitude</span> <span class="o">+</span> <span class="n">pi</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">pi</span>
+
+        <span class="c1"># Update the estimated variables</span>
+        <span class="n">estimated_state</span><span class="o">.</span><span class="n">update_estimates</span><span class="p">(</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">trans</span><span class="o">.</span><span class="n">ned2lla</span><span class="p">(</span><span class="n">updated_position</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">),</span>
+            <span class="n">velocity</span><span class="o">=</span><span class="n">updated_velocity</span><span class="p">,</span>
+            <span class="n">acceleration</span><span class="o">=</span><span class="n">updated_acceleration</span><span class="p">,</span>
+            <span class="n">attitude</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">updated_attitude</span><span class="p">),</span>
+            <span class="n">angle_rates</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">updated_angle_rates</span><span class="p">)</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AdamsBashforth">
+<a class="viewcode-back" href="../../../modules/fusion/ins.html#qnav.fusion.ins.AdamsBashforth">[docs]</a>
+<span class="k">class</span> <span class="nc">AdamsBashforth</span><span class="p">(</span><span class="n">NumericalINS</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An extension of the numerical INS that employs Adams-bashforth method.</span>
+<span class="sd">    Processes the measurement vector and updates the estimation states using</span>
+<span class="sd">    Adams-Bashforth integration.</span>
+
+<span class="sd">    Does include:</span>
+<span class="sd">        * Simple Accelerometer Measurement Model (basic - independent</span>
+<span class="sd">          measurement errors, giving drift term)</span>
+<span class="sd">        * 3 x Individual Accelerator Bias values (fixed)</span>
+<span class="sd">        * 3 x Individual Accelerator Scaling errors (fixed)</span>
+<span class="sd">        * 3D Accelerometer non-orthogonality errors (fixed) for cross-coupling</span>
+<span class="sd">        * Simple (not position dependent) Gravity Compensation</span>
+<span class="sd">        * Simple Gyroscope Measurement Model (basic - independent</span>
+<span class="sd">          measurement errors, giving drift term)</span>
+<span class="sd">        * 3 x Individual Gyroscope Bias values (fixed)</span>
+<span class="sd">        * 3 x Individual Gyroscope Scaling errors (fixed)</span>
+<span class="sd">        * 3D Gyroscope non-orthogonality errors (fixed) for cross-coupling</span>
+<span class="sd">        * Sensor bias drift for accelerometers and gyroscopes</span>
+<span class="sd">        * Kalman Filtering of measurement signals</span>
+<span class="sd">        * WGS&#39;84 coordinates (ellipsoidal rotating Earth)</span>
+<span class="sd">        * Effect of Coriolis effect due to Earth&#39;s rotation</span>
+
+<span class="sd">    Does NOT currently include:</span>
+<span class="sd">        * Schuler correction loop.</span>
+<span class="sd">        * Physics-based accelerometer sensor model</span>
+<span class="sd">        * Physics-based gyroscope sensor model</span>
+<span class="sd">        * Lever-arm effects from rotations not around origin/centre of the IMU</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accelerometer</span><span class="p">:</span> <span class="n">Accelerometer</span><span class="p">,</span> <span class="n">gyroscope</span><span class="p">:</span> <span class="n">Gyroscope</span><span class="p">,</span>
+                 <span class="n">estimated_acc_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">estimated_gyro_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># Call parent class&#39;s constructor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">accelerometer</span><span class="p">,</span> <span class="n">gyroscope</span><span class="p">,</span> <span class="n">estimated_acc_axis</span><span class="p">,</span> <span class="n">estimated_gyro_axis</span><span class="p">)</span>
+
+        <span class="c1"># Set the estimation differences</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_velocity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_acceleration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_attitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_angle_rates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="c1"># Set that bootstrapping is required.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__requires_bootstrap</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">__perform_bootstrapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        An alternative processing method for the first run.</span>
+<span class="sd">        If previous estimates are not available, this method can be used</span>
+<span class="sd">        to bootstrap the difference in estimation values by using the</span>
+<span class="sd">        parent&#39;s classes original fusion method.</span>
+
+<span class="sd">        :param estimated_state: The current estimated state.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Obtain the current estimated position.</span>
+        <span class="n">ref_lla</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">position</span>
+
+        <span class="c1"># Obtain the current estimation values.</span>
+        <span class="n">position_e0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">velocity_b0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">velocity</span><span class="p">)</span>
+        <span class="n">acceleration_b0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">acceleration</span><span class="p">)</span>
+        <span class="n">attitude_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">attitude</span><span class="p">)</span>
+        <span class="n">angle_rate_b0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">angle_rates</span><span class="p">)</span>
+
+        <span class="c1"># Use the parent class&#39;s update method.</span>
+        <span class="c1"># super().take_inertia_measurement(</span>
+        <span class="c1">#     time_step, measured_acceleration, measured_angle_rates)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">perform_fusion</span><span class="p">(</span><span class="n">estimated_state</span><span class="p">)</span>
+
+        <span class="c1"># Obtain the updated estimation values.</span>
+        <span class="n">position_e1</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">lla2ned</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">)</span>
+        <span class="n">velocity_b1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">velocity</span><span class="p">)</span>
+        <span class="n">acceleration_b1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">acceleration</span><span class="p">)</span>
+        <span class="n">attitude_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">attitude</span><span class="p">)</span>
+        <span class="n">angle_rate_b1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">angle_rates</span><span class="p">)</span>
+
+        <span class="c1"># Finally, initialise the estimation differences.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_position</span> <span class="o">=</span> <span class="n">position_e1</span> <span class="o">-</span> <span class="n">position_e0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_velocity</span> <span class="o">=</span> <span class="n">velocity_b1</span> <span class="o">-</span> <span class="n">velocity_b0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_acceleration</span> <span class="o">=</span> <span class="n">acceleration_b1</span> <span class="o">-</span> <span class="n">acceleration_b0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_attitude</span> <span class="o">=</span> <span class="n">attitude_1</span> <span class="o">-</span> <span class="n">attitude_0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_angle_rates</span> <span class="o">=</span> <span class="n">angle_rate_b1</span> <span class="o">-</span> <span class="n">angle_rate_b0</span>
+
+<div class="viewcode-block" id="AdamsBashforth.perform_fusion">
+<a class="viewcode-back" href="../../../modules/fusion/ins.html#qnav.fusion.ins.AdamsBashforth.perform_fusion">[docs]</a>
+    <span class="k">def</span> <span class="nf">perform_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs fusion using latest accelerometer and gyroscope measurements.</span>
+<span class="sd">        Using the latest basic inertial measurements, updates the full current</span>
+<span class="sd">        estimated state using a simple numerical model.</span>
+
+<span class="sd">        :param estimated_state: The current estimated state.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Use bootstrapping for the first run</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__requires_bootstrap</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__perform_bootstrapping</span><span class="p">(</span><span class="n">estimated_state</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__requires_bootstrap</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Get the latest measurement from the sensors:</span>
+        <span class="n">measured_acceleration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accelerometer</span><span class="o">.</span><span class="n">last_measurement</span>
+        <span class="n">measured_angle_rates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gyroscope</span><span class="o">.</span><span class="n">last_measurement</span>
+
+        <span class="c1"># Get the timestep between measurements:</span>
+        <span class="n">acc_time_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accelerometer</span><span class="o">.</span><span class="n">time_step</span>
+        <span class="n">gyro_time_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gyroscope</span><span class="o">.</span><span class="n">time_step</span>
+        <span class="n">time_step</span> <span class="o">=</span> <span class="p">(</span><span class="n">acc_time_step</span> <span class="o">+</span> <span class="n">gyro_time_step</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="n">ref_lla</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">position</span>
+
+        <span class="c1"># Calculate the estimated gravity vector</span>
+        <span class="n">gravity_model</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">gravity_model</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">gravity_model</span><span class="o">.</span><span class="n">calc_gravity_xyz</span><span class="p">(</span><span class="o">*</span><span class="n">ref_lla</span><span class="p">)</span>
+
+        <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">omega_e</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">OMEGA_E</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)])</span>
+
+        <span class="c1"># Set up acceleration and angle rate measurements (Sensor axes)</span>
+        <span class="n">acceleration_s0</span> <span class="o">=</span> <span class="n">measured_acceleration</span>
+        <span class="n">angle_rate_s0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">measured_angle_rates</span><span class="p">)</span>
+
+        <span class="c1"># Unpack required sensor axis values:</span>
+        <span class="n">acc_lever_arm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acc_axis</span><span class="o">.</span><span class="n">lever_arm</span>
+        <span class="n">acc_rot_body2sensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acc_axis</span><span class="o">.</span><span class="n">body2sensor_mat</span>
+        <span class="n">gyro_rot_body2sensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gyro_axis</span><span class="o">.</span><span class="n">body2sensor_mat</span>
+
+        <span class="c1"># Convert measured angle rates to Body axes</span>
+        <span class="n">angle_rate_bs0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">gyro_rot_body2sensor</span><span class="p">,</span> <span class="n">angle_rate_s0</span><span class="p">)</span>
+
+        <span class="c1"># Convert measured acceleration to Body axes</span>
+        <span class="c1"># TODO: Use tuple functions instead?</span>
+        <span class="n">acceleration_bs0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span>
+            <span class="n">acc_rot_body2sensor</span><span class="p">,</span> <span class="n">acceleration_s0</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span>
+            <span class="n">angle_rate_bs0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">angle_rate_bs0</span><span class="p">,</span> <span class="n">acc_lever_arm</span><span class="p">))</span>
+
+        <span class="c1"># Euler angles (in radians)</span>
+        <span class="n">attitude_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">attitude</span><span class="p">)</span>
+        <span class="n">angle_rate_b0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">angle_rates</span><span class="p">)</span>
+
+        <span class="c1"># Convert position to local NED co-ordinates</span>
+        <span class="n">position_e0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="c1"># Obtain the body velocity and acceleration</span>
+        <span class="c1"># Obtain the body velocity and acceleration</span>
+        <span class="n">velocity_b0</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">velocity</span>
+        <span class="n">acceleration_b0</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">acceleration</span>
+
+        <span class="c1"># Adams-Bashforth</span>
+        <span class="c1"># ---------------</span>
+
+        <span class="c1"># Calculate ESTIMATED body axes from Earth-oriented axes.</span>
+        <span class="n">rot_e2b_0</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">attitude_0</span><span class="p">)</span>
+
+        <span class="c1"># Convert velocity from body axes to Earth Axes</span>
+        <span class="n">velocity_e0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_e2b_0</span><span class="p">,</span> <span class="n">velocity_b0</span><span class="p">)</span>
+        <span class="n">omega_tr</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">get_transport_rate</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">,</span> <span class="n">velocity_e0</span><span class="p">)</span>
+
+        <span class="c1"># Convert measured acceleration from body axes to Earth axes and remove gravity terms</span>
+        <span class="n">acceleration_e1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_e2b_0</span><span class="p">,</span> <span class="n">acceleration_bs0</span><span class="p">)</span> <span class="o">+</span> <span class="n">g</span>
+
+        <span class="c1"># Remove effect of Coriolis term due to Earth&#39;s rotation and transport rate (in Local NED axes)</span>
+        <span class="n">acceleration_e1</span> <span class="o">-=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">omega_e</span><span class="p">,</span> <span class="n">velocity_e0</span><span class="p">)</span>
+        <span class="n">acceleration_e1</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">omega_tr</span><span class="p">,</span> <span class="n">velocity_e0</span><span class="p">)</span>
+
+        <span class="c1"># Position increments in local NED/Earth axes</span>
+        <span class="n">position_e1</span> <span class="o">=</span> <span class="n">position_e0</span> <span class="o">+</span> <span class="n">velocity_e0</span> <span class="o">*</span> <span class="n">time_step</span>
+
+        <span class="c1"># Velocity increments (calculated in Earth axes)</span>
+        <span class="n">velocity_e1</span> <span class="o">=</span> <span class="n">velocity_e0</span> <span class="o">+</span> <span class="n">acceleration_e1</span> <span class="o">*</span> <span class="n">time_step</span>
+
+        <span class="c1"># angle_rate_b1 = angle_rate_bs0 - rot_e2b_0 @ omega_e + rot_e2b_0 @ omega_tr</span>
+        <span class="n">angle_rate_b1</span> <span class="o">=</span> <span class="n">angle_rate_bs0</span> <span class="o">-</span> <span class="n">rot_e2b_0</span> <span class="o">@</span> <span class="n">omega_e</span> <span class="o">-</span> <span class="n">rot_e2b_0</span> <span class="o">@</span> <span class="n">omega_tr</span>
+
+        <span class="c1"># Angle Rates</span>
+        <span class="n">d_psi_dt</span> <span class="o">=</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> \
+                   <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">d_theta_dt</span> <span class="o">=</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> \
+                     <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="n">d_phi_dt</span> <span class="o">=</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> \
+                   <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> \
+                   <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">attitude_0</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Add attitude angle updates</span>
+        <span class="n">attitude_1</span> <span class="o">=</span> <span class="n">attitude_0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">d_psi_dt</span><span class="p">,</span> <span class="n">d_theta_dt</span><span class="p">,</span> <span class="n">d_phi_dt</span><span class="p">])</span> <span class="o">*</span> <span class="n">time_step</span>
+
+        <span class="c1"># Rotation matrix from Earth to body axes with NEW (updated) rotation angles</span>
+        <span class="n">rot_e2b_1</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">attitude_1</span><span class="p">)</span>
+
+        <span class="c1"># Add effect of Coriolis term due to Earth&#39;s rotation (in Local NED axes)</span>
+        <span class="n">acceleration_e1</span> <span class="o">=</span> <span class="n">acceleration_e1</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">omega_e</span><span class="p">,</span> <span class="n">velocity_e1</span><span class="p">)</span>
+
+        <span class="c1"># Convert Velocities from Earth Axes to Body Axes</span>
+        <span class="n">velocity_b1</span> <span class="o">=</span> <span class="n">rot_e2b_1</span> <span class="o">@</span> <span class="n">velocity_e1</span>
+
+        <span class="c1"># Add gravity terms and convert acceleration from Earth axes to Body Axes</span>
+        <span class="n">acceleration_b1</span> <span class="o">=</span> <span class="n">rot_e2b_1</span> <span class="o">@</span> <span class="p">(</span><span class="n">acceleration_e1</span> <span class="o">-</span> <span class="n">g</span><span class="p">)</span>
+
+        <span class="c1"># Update angle rate to include Earth rotation rate</span>
+        <span class="n">omega_tr</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">get_transport_rate</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">,</span> <span class="n">velocity_e1</span><span class="p">)</span>
+        <span class="n">angle_rate_b1</span> <span class="o">=</span> <span class="n">angle_rate_b1</span> <span class="o">+</span> <span class="n">rot_e2b_1</span> <span class="o">@</span> <span class="n">omega_e</span> <span class="o">-</span> <span class="n">rot_e2b_1</span> <span class="o">@</span> <span class="n">omega_tr</span>
+
+        <span class="c1"># Adams-Bashforth increments</span>
+        <span class="n">d_position_e1</span> <span class="o">=</span> <span class="n">position_e1</span> <span class="o">-</span> <span class="n">position_e0</span>
+        <span class="n">d_velocity_b1</span> <span class="o">=</span> <span class="n">velocity_b1</span> <span class="o">-</span> <span class="n">velocity_b0</span>
+        <span class="n">d_acceleration_b1</span> <span class="o">=</span> <span class="n">acceleration_b1</span> <span class="o">-</span> <span class="n">acceleration_b0</span>
+        <span class="n">d_attitude_1</span> <span class="o">=</span> <span class="n">attitude_1</span> <span class="o">-</span> <span class="n">attitude_0</span>
+        <span class="n">d_angle_rate_b1</span> <span class="o">=</span> <span class="n">angle_rate_b1</span> <span class="o">-</span> <span class="n">angle_rate_b0</span>
+
+        <span class="n">d_position_e0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_position</span>
+        <span class="n">d_velocity_b0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_velocity</span>
+        <span class="n">d_acceleration_b0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_acceleration</span>
+        <span class="n">d_attitude_0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_attitude</span>
+        <span class="n">d_angle_rate_b0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_angle_rates</span>
+
+        <span class="c1"># Sum together all Adams-Bashforth terms</span>
+        <span class="n">position_e2</span> <span class="o">=</span> <span class="n">position_e0</span> <span class="o">+</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">d_position_e1</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">d_position_e0</span>
+        <span class="n">velocity_b2</span> <span class="o">=</span> <span class="n">velocity_b0</span> <span class="o">+</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">d_velocity_b1</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">d_velocity_b0</span>
+        <span class="n">acceleration_b2</span> <span class="o">=</span> <span class="n">acceleration_b0</span> <span class="o">+</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">d_acceleration_b1</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">d_acceleration_b0</span>
+        <span class="n">attitude_2</span> <span class="o">=</span> <span class="n">attitude_0</span> <span class="o">+</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">d_attitude_1</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">d_attitude_0</span>
+        <span class="n">angle_rate_b2</span> <span class="o">=</span> <span class="n">angle_rate_b0</span> <span class="o">+</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">d_angle_rate_b1</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">d_angle_rate_b0</span>
+
+        <span class="c1"># Ensure the updated attitude values are valid</span>
+        <span class="n">attitude_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">attitude_2</span> <span class="o">+</span> <span class="n">pi</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">pi</span>
+
+        <span class="c1"># Update the estimated variables</span>
+        <span class="n">estimated_state</span><span class="o">.</span><span class="n">update_estimates</span><span class="p">(</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">trans</span><span class="o">.</span><span class="n">ned2lla</span><span class="p">(</span><span class="n">position_e2</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">),</span>
+            <span class="n">velocity</span><span class="o">=</span><span class="n">velocity_b2</span><span class="p">,</span>
+            <span class="n">acceleration</span><span class="o">=</span><span class="n">acceleration_b2</span><span class="p">,</span>
+            <span class="n">attitude</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">attitude_2</span><span class="p">),</span>
+            <span class="n">angle_rates</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">angle_rate_b2</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Convert position from local NED co-ordinates back to Lat-Long-Altitude</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_position</span> <span class="o">=</span> <span class="n">d_position_e1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_velocity</span> <span class="o">=</span> <span class="n">d_velocity_b1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_acceleration</span> <span class="o">=</span> <span class="n">d_acceleration_b1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_attitude</span> <span class="o">=</span> <span class="n">d_attitude_1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_est_angle_rates</span> <span class="o">=</span> <span class="n">d_angle_rate_b1</span></div>
+</div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

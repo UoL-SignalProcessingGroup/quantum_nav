@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.12.3. qnav.waypoints.vehicle &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="9.12.4. qnav.waypoints.tracks" href="tracks.html" />
+    <link rel="prev" title="9.12.2. qnav.waypoints.trajectory" href="trajectory.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../usage/packages.html">9. Software Components</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#earth">9.1. Earth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#estimation">9.2. Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#fusion">9.3. Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gps">9.4. GPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gravity">9.5. Gravity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#input">9.6. Input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#measurement">9.7. Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#output">9.8. Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#quantum">9.9. Quantum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#simulation">9.10. Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#util">9.11. Util</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../usage/packages.html#waypoints">9.12. Waypoints</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="generation.html">9.12.1. generation.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trajectory.html">9.12.2. trajectory.py</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">9.12.3. vehicle.py</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#vehicle-py">9.12.3.1. vehicle.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.vehicle.Vehicle"><code class="docutils literal notranslate"><span class="pre">Vehicle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.vehicle.get_default_profile"><code class="docutils literal notranslate"><span class="pre">get_default_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.vehicle.get_large_aircraft_profile"><code class="docutils literal notranslate"><span class="pre">get_large_aircraft_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.vehicle.get_large_ship_profile"><code class="docutils literal notranslate"><span class="pre">get_large_ship_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.vehicle.get_large_van_profile"><code class="docutils literal notranslate"><span class="pre">get_large_van_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.vehicle.get_submarine_profile"><code class="docutils literal notranslate"><span class="pre">get_submarine_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.vehicle.get_unrestricted_profile"><code class="docutils literal notranslate"><span class="pre">get_unrestricted_profile()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tracks.html">9.12.4. tracks.py</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../usage/packages.html"><span class="section-number">9. </span>Software Components</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">9.12.3. </span>qnav.waypoints.vehicle</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/modules/waypoints/vehicle.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qnav.waypoints.vehicle">
+<span id="qnav-waypoints-vehicle"></span><h1><span class="section-number">9.12.3. </span>qnav.waypoints.vehicle<a class="headerlink" href="#module-qnav.waypoints.vehicle" title="Link to this heading"></a></h1>
+<section id="vehicle-py">
+<h2><span class="section-number">9.12.3.1. </span>vehicle.py<a class="headerlink" href="#vehicle-py" title="Link to this heading"></a></h2>
+<dl class="field-list">
+<dt class="field-odd">summary<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Represents vehicle properties for waypoint generation.
+This module contains a template Vehicle tuple listing all the properties
+applied during waypoint generation. In addition to this a handful of
+integrated vehicle profiles are include for testing. It is recommended
+that a custom Vehicle instance is created for finer control.</p>
+</dd>
+<dt class="field-even">authors<span class="colon">:</span></dt>
+<dd class="field-even"><div class="line-block">
+<div class="line">Prof. Jason Ralph - <a class="reference external" href="mailto:jfralph&#37;&#52;&#48;liverpool&#46;ac&#46;uk">jfralph<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></div>
+<div class="line">Michael Wright - <a class="reference external" href="mailto:mjwright&#37;&#52;&#48;liverpool&#46;ac&#46;uk">mjwright<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></div>
+</div>
+</dd>
+<dt class="field-odd">version<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1.1.0 - Added integrated vehicle types for testing.</p>
+</dd>
+</dl>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.waypoints.vehicle.</span></span><span class="sig-name descname"><span class="pre">Vehicle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Unnamed'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turn_rate_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acceleration_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deceleration_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_delay_acc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_delay_turn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch_constant_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch_osc_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch_osc_magnitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll_constant_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll_osc_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll_osc_magnitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_roll_d_turn_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vibration_noise_acceleration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vibration_noise_angle_rates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vibration_damping_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variation_per_second1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variation_per_second2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rand_seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/vehicle.html#Vehicle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle" title="Link to this definition"></a></dt>
+<dd><p>A structure used for holding vehicle model information.
+This is used to describe limitations, offsets and expected
+noise/oscillations. Unlike a normal class, the variables held within this
+structure are immutable and cannot be changed. This is done to enforce
+restrictions without them being accidentally overwritten later.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.description" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.turn_rate_max">
+<span class="sig-name descname"><span class="pre">turn_rate_max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.turn_rate_max" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.acceleration_max">
+<span class="sig-name descname"><span class="pre">acceleration_max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.acceleration_max" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.deceleration_max">
+<span class="sig-name descname"><span class="pre">deceleration_max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.deceleration_max" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.time_delay_acc">
+<span class="sig-name descname"><span class="pre">time_delay_acc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.time_delay_acc" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.time_delay_turn">
+<span class="sig-name descname"><span class="pre">time_delay_turn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.time_delay_turn" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 5</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.pitch_constant_offset">
+<span class="sig-name descname"><span class="pre">pitch_constant_offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.pitch_constant_offset" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 6</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.pitch_osc_period">
+<span class="sig-name descname"><span class="pre">pitch_osc_period</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.pitch_osc_period" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 7</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.pitch_osc_magnitude">
+<span class="sig-name descname"><span class="pre">pitch_osc_magnitude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.pitch_osc_magnitude" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 8</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.pitch_max">
+<span class="sig-name descname"><span class="pre">pitch_max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.pitch_max" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 9</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.roll_constant_offset">
+<span class="sig-name descname"><span class="pre">roll_constant_offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.roll_constant_offset" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 10</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.roll_osc_period">
+<span class="sig-name descname"><span class="pre">roll_osc_period</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.roll_osc_period" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 11</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.roll_osc_magnitude">
+<span class="sig-name descname"><span class="pre">roll_osc_magnitude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.roll_osc_magnitude" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 12</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.roll_max">
+<span class="sig-name descname"><span class="pre">roll_max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.roll_max" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 13</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.d_roll_d_turn_rate">
+<span class="sig-name descname"><span class="pre">d_roll_d_turn_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.d_roll_d_turn_rate" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 14</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.vibration_noise_acceleration">
+<span class="sig-name descname"><span class="pre">vibration_noise_acceleration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.vibration_noise_acceleration" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 15</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.vibration_noise_angle_rates">
+<span class="sig-name descname"><span class="pre">vibration_noise_angle_rates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.vibration_noise_angle_rates" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 16</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.vibration_damping_period">
+<span class="sig-name descname"><span class="pre">vibration_damping_period</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.vibration_damping_period" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 17</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.variation_per_second1">
+<span class="sig-name descname"><span class="pre">variation_per_second1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.variation_per_second1" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 18</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.variation_per_second2">
+<span class="sig-name descname"><span class="pre">variation_per_second2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.variation_per_second2" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 19</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.Vehicle.rand_seed">
+<span class="sig-name descname"><span class="pre">rand_seed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#qnav.waypoints.vehicle.Vehicle.rand_seed" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 20</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.get_default_profile">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.vehicle.</span></span><span class="sig-name descname"><span class="pre">get_default_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rand_seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle"><span class="pre">Vehicle</span></a></span></span><a class="reference internal" href="../../_modules/qnav/waypoints/vehicle.html#get_default_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.vehicle.get_default_profile" title="Link to this definition"></a></dt>
+<dd><p>Returns a Vehicle instance representing the default profile.
+This profile is for a typical aircraft with no noise/vibrations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rand_seed</strong> (<em>int</em>) – The seed to use for random number generation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The default Vehicle profile.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle">Vehicle</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.get_large_aircraft_profile">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.vehicle.</span></span><span class="sig-name descname"><span class="pre">get_large_aircraft_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rand_seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle"><span class="pre">Vehicle</span></a></span></span><a class="reference internal" href="../../_modules/qnav/waypoints/vehicle.html#get_large_aircraft_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.vehicle.get_large_aircraft_profile" title="Link to this definition"></a></dt>
+<dd><p>Returns a Vehicle instance representing that of a large aircraft.
+This profile supplies the parameters for a 737 type of air-vehicle,
+stating slow acceleration and deceleration with wide turning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rand_seed</strong> (<em>int</em>) – The seed to use for random number generation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Vehicle profile for a large aircraft.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle">Vehicle</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.get_large_ship_profile">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.vehicle.</span></span><span class="sig-name descname"><span class="pre">get_large_ship_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rand_seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle"><span class="pre">Vehicle</span></a></span></span><a class="reference internal" href="../../_modules/qnav/waypoints/vehicle.html#get_large_ship_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.vehicle.get_large_ship_profile" title="Link to this definition"></a></dt>
+<dd><p>Returns a Vehicle instance representing that of a large aircraft.
+This profile supplies the parameters for a large ship, such as a cargo
+vessel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rand_seed</strong> (<em>int</em>) – The seed to use for random number generation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Vehicle profile for a large ship.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle">Vehicle</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.get_large_van_profile">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.vehicle.</span></span><span class="sig-name descname"><span class="pre">get_large_van_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rand_seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle"><span class="pre">Vehicle</span></a></span></span><a class="reference internal" href="../../_modules/qnav/waypoints/vehicle.html#get_large_van_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.vehicle.get_large_van_profile" title="Link to this definition"></a></dt>
+<dd><p>Returns a Vehicle instance representing that of a large van.
+This profile supplies the parameters for a large ground vehicle, such as
+a heavy van vessel, slow acceleration/deceleration and little turning
+limitations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rand_seed</strong> (<em>int</em>) – The seed to use for random number generation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Vehicle profile for a large van.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle">Vehicle</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.get_submarine_profile">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.vehicle.</span></span><span class="sig-name descname"><span class="pre">get_submarine_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rand_seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle"><span class="pre">Vehicle</span></a></span></span><a class="reference internal" href="../../_modules/qnav/waypoints/vehicle.html#get_submarine_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.vehicle.get_submarine_profile" title="Link to this definition"></a></dt>
+<dd><p>Returns a Vehicle instance representing that of a submarine.
+This profile supplies the parameters for a submarine vessel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rand_seed</strong> (<em>int</em>) – The seed to use for random number generation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Vehicle profile for a submarine vessel.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle">Vehicle</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.vehicle.get_unrestricted_profile">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.vehicle.</span></span><span class="sig-name descname"><span class="pre">get_unrestricted_profile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle"><span class="pre">Vehicle</span></a></span></span><a class="reference internal" href="../../_modules/qnav/waypoints/vehicle.html#get_unrestricted_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.vehicle.get_unrestricted_profile" title="Link to this definition"></a></dt>
+<dd><p>Returns a Vehicle instance with no movement restrictions
+This profile is solely used for following tightly placed waypoints in
+situations where placing vehicle limitations would be impractical. No
+vehicle noise or vibrations are contained in this profile.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The Vehicle profile with no limitations or noise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle">Vehicle</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="trajectory.html" class="btn btn-neutral float-left" title="9.12.2. qnav.waypoints.trajectory" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tracks.html" class="btn btn-neutral float-right" title="9.12.4. qnav.waypoints.tracks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

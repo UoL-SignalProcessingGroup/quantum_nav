@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.gps.zones &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.gps.zones</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.gps.zones</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">========</span>
+<span class="sd">zones.py</span>
+<span class="sd">========</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Handles the representation and method connected with zones/areas.</span>
+<span class="sd">    This module contains a family of classes used for representing</span>
+<span class="sd">    and querying zones. This has been designed for reuse, with various</span>
+<span class="sd">    child area-polygon classes and their associated group handlers.</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First implementation of this module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="k">def</span> <span class="nf">_assert_lat_lon_valid</span><span class="p">(</span><span class="n">lat_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks that coordinates of latitude and longitude points are valid.</span>
+<span class="sd">    This function compares the size of the two and checks that both</span>
+<span class="sd">    are equal one dimensional arrays.</span>
+
+<span class="sd">    :param lat_points: 1D latitude points given in decimal degrees.</span>
+<span class="sd">    :type lat_points: np.ndarray</span>
+
+<span class="sd">    :param lon_points: 1D longitude points given in decimal degrees.</span>
+<span class="sd">    :type lon_points: np.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">lat_points</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;lat_points must be a 1D array&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">lon_points</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;lon_points must be a 1D array&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">lat_points</span><span class="p">)</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">lon_points</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;lat_points and lon_points must have same shape&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Polygon">
+<a class="viewcode-back" href="../../../modules/gps/zones.html#qnav.gps.zones.Polygon">[docs]</a>
+<span class="k">class</span> <span class="nc">Polygon</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a simple latitude-longitude closed polygon.</span>
+<span class="sd">    Can be used for defining custom 2D zones on the globe.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">lat_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">lon_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">priority</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Defines a polygon given latitude and longitude points and priority.</span>
+<span class="sd">        If coordinates for an open polygon are given it will be automatically</span>
+<span class="sd">        closed using the first and last points.</span>
+
+<span class="sd">        :param lat_points: A list of latitude coordinates in decimal degrees.</span>
+<span class="sd">            This must be one dimensional and the same length as lon_points.</span>
+<span class="sd">        :type lat_points: np.ndarray</span>
+
+<span class="sd">        :param lon_points: A list of longitude coordinates in decimal degrees.</span>
+<span class="sd">            This must be one dimensional and the same length as lat_points.</span>
+<span class="sd">        :type lat_points: np.ndarray</span>
+
+<span class="sd">        :param priority: The priority/layer order of the polygon. Polygons</span>
+<span class="sd">            with higher priority will be used over overlapping lower</span>
+<span class="sd">            priority polygons.</span>
+<span class="sd">        :type priority: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">_assert_lat_lon_valid</span><span class="p">(</span><span class="n">lat_points</span><span class="p">,</span> <span class="n">lon_points</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lat_points</span> <span class="o">=</span> <span class="n">lat_points</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lon_points</span> <span class="o">=</span> <span class="n">lon_points</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_priority</span> <span class="o">=</span> <span class="n">priority</span>
+
+        <span class="c1"># If the given polygon is not closed:</span>
+        <span class="k">if</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_lat_points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lat_points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="ow">or</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lon_points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lon_points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])):</span>
+
+            <span class="c1"># Automatically add point to close it.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lat_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lat_points</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lat_points</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lon_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lon_points</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lon_points</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<div class="viewcode-block" id="Polygon.is_point_inside">
+<a class="viewcode-back" href="../../../modules/gps/zones.html#qnav.gps.zones.Polygon.is_point_inside">[docs]</a>
+    <span class="k">def</span> <span class="nf">is_point_inside</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat_point</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon_point</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determines if a given position is inside the polygon.</span>
+<span class="sd">        Given the latitude and longitude coordinates of a single point in</span>
+<span class="sd">        decimal degrees, this function will return True if the point is</span>
+<span class="sd">        inside the polygon.</span>
+
+<span class="sd">        :param lat_point: The latitude coordinate of the point of interest.</span>
+<span class="sd">        :type lat_point: float</span>
+
+<span class="sd">        :param lon_point: The longitude coordinate of the point of interest.</span>
+<span class="sd">        :type lon_point: float</span>
+
+<span class="sd">        :return: Returns True if given point is inside the polygon.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">is_inside_polygon</span><span class="p">(</span>
+            <span class="n">lon_point</span><span class="p">,</span> <span class="n">lat_point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lon_points</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lat_points</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Polygon.is_points_inside">
+<a class="viewcode-back" href="../../../modules/gps/zones.html#qnav.gps.zones.Polygon.is_points_inside">[docs]</a>
+    <span class="k">def</span> <span class="nf">is_points_inside</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determines if a series of positions are inside the polygon.</span>
+<span class="sd">        Given the latitude and longitude coordinates of a multiple points</span>
+<span class="sd">        in decimal degrees, this function will return True for each point</span>
+<span class="sd">        that is inside the polygon.</span>
+
+<span class="sd">        :param lat_points: The latitude coordinates of the points of interest.</span>
+<span class="sd">        :type lat_points: float</span>
+
+<span class="sd">        :param lon_points: The longitude coordinates of the points of interest.</span>
+<span class="sd">        :type lon_points: float</span>
+
+<span class="sd">        :return: Returns True for each given point inside the polygon.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_assert_lat_lon_valid</span><span class="p">(</span><span class="n">lat_points</span><span class="p">,</span> <span class="n">lon_points</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">is_inside_polygon_vec</span><span class="p">(</span>
+            <span class="n">lon_points</span><span class="p">,</span> <span class="n">lat_points</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lon_points</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lat_points</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lat_points</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the list of latitude coordinate points of the polygon.</span>
+<span class="sd">        This property returns a copy, preventing accidental editing.</span>
+
+<span class="sd">        :return: The latitude coordinate points of the polygon.</span>
+<span class="sd">        :rtype: np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lat_points</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lon_points</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the list of longitude coordinate points of the polygon.</span>
+<span class="sd">        This property returns a copy, preventing accidental editing.</span>
+
+<span class="sd">        :return: The longitude coordinate points of the polygon.</span>
+<span class="sd">        :rtype: np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lon_points</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">priority</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the priority (or layer) of the polygon.</span>
+<span class="sd">        This is used for determining the outcome when multiple polygons</span>
+<span class="sd">        overlapping one another are involved. When this occurs the highest</span>
+<span class="sd">        priority polygon is used.</span>
+
+<span class="sd">        :return: The priority (or layer) of the polygon.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_priority</span></div>
+
+
+<div class="viewcode-block" id="FlaggedPolygon">
+<a class="viewcode-back" href="../../../modules/gps/zones.html#qnav.gps.zones.FlaggedPolygon">[docs]</a>
+<span class="k">class</span> <span class="nc">FlaggedPolygon</span><span class="p">(</span><span class="n">Polygon</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a latitude-longitude closed polygon with binary active flag.</span>
+<span class="sd">    These polygons are used for determining &quot;active&quot; and &quot;inactive&quot; areas.</span>
+<span class="sd">    For example, areas where specific sensors, such as where GPS or</span>
+<span class="sd">    quantum sensors can and cannot be used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">is_active_area</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">priority</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Defines a polygon given latitude and longitude points, active flag</span>
+<span class="sd">        and optional priority. If coordinates for an open polygon are given</span>
+<span class="sd">        it will be automatically closed using the first and last points.</span>
+
+<span class="sd">        :param lat_points: A list of latitude coordinates in decimal degrees.</span>
+<span class="sd">            This must be one dimensional and the same length as lon_points.</span>
+<span class="sd">        :type lat_points: np.ndarray</span>
+
+<span class="sd">        :param lon_points: A list of longitude coordinates in decimal degrees.</span>
+<span class="sd">            This must be one dimensional and the same length as lat_points.</span>
+<span class="sd">        :type lat_points: np.ndarray</span>
+
+<span class="sd">        :param is_active_area: If the polygon should represent an active</span>
+<span class="sd">            area or not. For example, representing a GPS active zone.</span>
+<span class="sd">        :type is_active_area: bool</span>
+
+<span class="sd">        :param priority: The priority/layer order of the polygon. Polygons</span>
+<span class="sd">            with higher priority will be used over overlapping lower</span>
+<span class="sd">            priority polygons.</span>
+<span class="sd">        :type priority: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">lat_points</span><span class="p">,</span> <span class="n">lon_points</span><span class="p">,</span> <span class="n">priority</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_active_area</span> <span class="o">=</span> <span class="n">is_active_area</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_active_area</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns True if the polygon is active area.</span>
+<span class="sd">        This can be used to determine if points which are found inside the</span>
+<span class="sd">        polygon are to be considered inside an active area.</span>
+
+<span class="sd">        :return: Whether the polygon is an active area.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_active_area</span></div>
+
+
+
+<div class="viewcode-block" id="FlaggedPolygonGroup">
+<a class="viewcode-back" href="../../../modules/gps/zones.html#qnav.gps.zones.FlaggedPolygonGroup">[docs]</a>
+<span class="k">class</span> <span class="nc">FlaggedPolygonGroup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A handler for a group of flagged polygons.</span>
+<span class="sd">    Allows the querying of multiple polygons, in priority order,</span>
+<span class="sd">    with a default flag.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygons</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">FlaggedPolygon</span><span class="p">],</span>
+                 <span class="n">is_active_by_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates group of flagged polygons with default is active behaviour.</span>
+<span class="sd">        Handles list of given polygons, applying operations in priority order.</span>
+<span class="sd">        If given positions do not fall inside any polygons, the default</span>
+<span class="sd">        flag will be returned (True by default).</span>
+
+<span class="sd">        :param polygons: A list of flagged polygons.</span>
+<span class="sd">        :type polygons: List[FlaggedPolygon]</span>
+
+<span class="sd">        :param is_active_by_default: The default flag to be returned.</span>
+<span class="sd">        :type is_active_by_default: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">polygons</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">priority</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_active_by_default</span> <span class="o">=</span> <span class="n">is_active_by_default</span>
+
+<div class="viewcode-block" id="FlaggedPolygonGroup.get_point_flag">
+<a class="viewcode-back" href="../../../modules/gps/zones.html#qnav.gps.zones.FlaggedPolygonGroup.get_point_flag">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_point_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat_point</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon_point</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the boolean flag for given point.</span>
+<span class="sd">        Searches through given polygons in priority order and returns the</span>
+<span class="sd">        flag for the highest priority polygon that the point is inside of.</span>
+<span class="sd">        If the point is not in any polygons, the default flag will be used.</span>
+
+<span class="sd">        :param lat_point: The latitude coordinate of the point of interest.</span>
+<span class="sd">        :type lat_point: float</span>
+
+<span class="sd">        :param lon_point: The longitude coordinate of the point of interest.</span>
+<span class="sd">        :type lon_point: float</span>
+
+<span class="sd">        :return: Boolean flag of the highest priority polygon the point is</span>
+<span class="sd">            inside of (or the default flag for the group).</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Set the return flag as the default flag</span>
+        <span class="n">to_return</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_active_by_default</span>
+
+        <span class="c1"># Search through polygon&#39;s in order:</span>
+        <span class="k">for</span> <span class="n">polygon</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span><span class="p">:</span>
+
+            <span class="c1"># If inside current polygon, update the flag</span>
+            <span class="k">if</span> <span class="n">polygon</span><span class="o">.</span><span class="n">is_point_inside</span><span class="p">(</span><span class="n">lat_point</span><span class="p">,</span> <span class="n">lon_point</span><span class="p">):</span>
+                <span class="n">to_return</span> <span class="o">=</span> <span class="n">polygon</span><span class="o">.</span><span class="n">is_active_area</span>
+
+        <span class="c1"># Return the final flag</span>
+        <span class="k">return</span> <span class="n">to_return</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">FlaggedPolygon</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns list of flagged polygons used by group.</span>
+
+<span class="sd">        :return: list of flagged polygons used by group</span>
+<span class="sd">        :rtype: List[FlaggedPolygon]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the number of polygons covered by the group.</span>
+
+<span class="sd">        :return: The number of polygons covered by the group.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FlaggedPolygonGroup.get_point_flags">
+<a class="viewcode-back" href="../../../modules/gps/zones.html#qnav.gps.zones.FlaggedPolygonGroup.get_point_flags">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_point_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the boolean flags for multiple given points.</span>
+<span class="sd">        Searches through given polygons in priority order and returns the</span>
+<span class="sd">        flags of the highest priority polygons that each of the point is</span>
+<span class="sd">        inside of. For points that do not fall inside nay polygon&#39;s the</span>
+<span class="sd">        default flag is used.</span>
+
+<span class="sd">        :param lat_points: The latitude coordinates of the points of interest.</span>
+<span class="sd">        :type lat_points: np.ndarray</span>
+
+<span class="sd">        :param lon_points: The longitude coordinates of the points of interest.</span>
+<span class="sd">        :type lon_points: np.ndarray</span>
+
+<span class="sd">        :return: Boolean flags of the highest priority polygon each point is</span>
+<span class="sd">            inside of (or the default flag for the group).</span>
+<span class="sd">        :rtype: np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get the size of the inputs</span>
+        <span class="n">num_lat_points</span> <span class="o">=</span> <span class="n">lat_points</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">num_lon_points</span> <span class="o">=</span> <span class="n">lon_points</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="c1"># Validate the input arrays (same size and dimensions)</span>
+        <span class="k">if</span> <span class="n">num_lat_points</span> <span class="o">!=</span> <span class="n">num_lon_points</span> <span class="ow">or</span> <span class="p">(</span><span class="n">lat_points</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">lon_points</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;lat_points and lon_points must have same 1-dimensional size&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Set the return flag as the default flag</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_active_by_default</span><span class="p">:</span>
+            <span class="n">to_return</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">num_lat_points</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">to_return</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_lat_points</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+        <span class="c1"># Search through polygon&#39;s in order:</span>
+        <span class="k">for</span> <span class="n">polygon</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span><span class="p">:</span>
+
+            <span class="c1"># If inside current polygon, update the flag</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">polygon</span><span class="o">.</span><span class="n">is_points_inside</span><span class="p">(</span><span class="n">lat_points</span><span class="p">,</span> <span class="n">lon_points</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">tmp</span><span class="p">):</span>
+                <span class="n">to_return</span><span class="p">[</span><span class="n">tmp</span><span class="p">]</span> <span class="o">=</span> <span class="n">polygon</span><span class="o">.</span><span class="n">is_active_area</span>
+
+        <span class="c1"># Return the final flag</span>
+        <span class="k">return</span> <span class="n">to_return</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="is_inside_polygon">
+<a class="viewcode-back" href="../../../modules/gps/zones.html#qnav.gps.zones.is_inside_polygon">[docs]</a>
+<span class="k">def</span> <span class="nf">is_inside_polygon</span><span class="p">(</span><span class="n">x_point</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                      <span class="n">y_point</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                      <span class="n">polygon_x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                      <span class="n">polygon_y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determines if a given position is inside given the polygon.</span>
+<span class="sd">    Tests by generating horizontal lines and assessing the number of</span>
+<span class="sd">    polygon lines that are crossed. Using this count, a point can be</span>
+<span class="sd">    determine to be inside the closed polygon or not.</span>
+
+<span class="sd">    :param x_point: The x coordinate of the point of interest.</span>
+<span class="sd">    :type x_point: float</span>
+
+<span class="sd">    :param y_point: The y coordinate of the point of interest.</span>
+<span class="sd">    :type y_point: float</span>
+
+<span class="sd">    :param polygon_x: The x-coordinates of the polygon. Assumed to be closed.</span>
+<span class="sd">    :type polygon_x: np.ndarray</span>
+
+<span class="sd">    :param polygon_y: The y-coordinates of the polygon. Assumed to be closed.</span>
+<span class="sd">    :type polygon_y: np.ndarray</span>
+
+<span class="sd">    :return: Returns True if the given position is inside the polygon.</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">inside</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">num_vertices</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">polygon_x</span><span class="p">)</span>
+
+    <span class="c1"># Get the first point on the polygon</span>
+    <span class="n">p1_x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">polygon_x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">p1_y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">polygon_y</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># Loop through each edge in the polygon</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_vertices</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+
+        <span class="c1"># Get the next point in the polygon</span>
+        <span class="n">p2_x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">polygon_x</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">num_vertices</span><span class="p">])</span>
+        <span class="n">p2_y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">polygon_y</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">num_vertices</span><span class="p">])</span>
+
+        <span class="c1"># Check if the point is above the minimum y coordinate of the edge</span>
+        <span class="k">if</span> <span class="n">y_point</span> <span class="o">&gt;</span> <span class="nb">min</span><span class="p">(</span><span class="n">p1_y</span><span class="p">,</span> <span class="n">p2_y</span><span class="p">):</span>
+
+            <span class="c1"># Check if the point is below the maximum y coordinate of the edge</span>
+            <span class="k">if</span> <span class="n">y_point</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">p1_y</span><span class="p">,</span> <span class="n">p2_y</span><span class="p">):</span>
+
+                <span class="c1"># Check if the point is to the left of the maximum x coordinate of the edge</span>
+                <span class="k">if</span> <span class="n">x_point</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">p1_x</span><span class="p">,</span> <span class="n">p2_x</span><span class="p">):</span>
+
+                    <span class="c1"># Calculate the x-intersection of the line connecting the point to the edge</span>
+                    <span class="n">x_intersection</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_point</span> <span class="o">-</span> <span class="n">p1_y</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">p2_x</span> <span class="o">-</span> <span class="n">p1_x</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">p2_y</span> <span class="o">-</span> <span class="n">p1_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">p1_x</span>
+
+                    <span class="c1"># Check if the point is on the same line as the edge or to the left of the x-intersection</span>
+                    <span class="k">if</span> <span class="n">p1_x</span> <span class="o">==</span> <span class="n">p2_x</span> <span class="ow">or</span> <span class="n">x_point</span> <span class="o">&lt;=</span> <span class="n">x_intersection</span><span class="p">:</span>
+
+                        <span class="c1"># Flip the inside flag</span>
+                        <span class="n">inside</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">inside</span>
+
+        <span class="c1"># Store the current point as the first point for the next iteration</span>
+        <span class="n">p1_x</span> <span class="o">=</span> <span class="n">p2_x</span>
+        <span class="n">p1_y</span> <span class="o">=</span> <span class="n">p2_y</span>
+
+    <span class="c1"># Return the value of the inside flag</span>
+    <span class="k">return</span> <span class="n">inside</span></div>
+
+
+
+<div class="viewcode-block" id="is_inside_polygon_vec">
+<a class="viewcode-back" href="../../../modules/gps/zones.html#qnav.gps.zones.is_inside_polygon_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">is_inside_polygon_vec</span><span class="p">(</span><span class="n">x_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                          <span class="n">y_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                          <span class="n">polygon_x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                          <span class="n">polygon_y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determines if a given position is inside given the polygon.</span>
+<span class="sd">    Tests by generating horizontal lines and assessing the number of</span>
+<span class="sd">    polygon lines that are crossed. Using this count, points can be</span>
+<span class="sd">    determine to be inside the closed polygon or not.</span>
+
+<span class="sd">    :param x_points: The x coordinates of the point of interest.</span>
+<span class="sd">    :type x_points: float</span>
+
+<span class="sd">    :param y_points: The y coordinates of the point of interest.</span>
+<span class="sd">    :type y_points: float</span>
+
+<span class="sd">    :param polygon_x: The x-coordinates of the polygon. Assumed to be closed.</span>
+<span class="sd">    :type polygon_x: np.ndarray</span>
+
+<span class="sd">    :param polygon_y: The y-coordinates of the polygon. Assumed to be closed.</span>
+<span class="sd">    :type polygon_y: np.ndarray</span>
+
+<span class="sd">    :return: Returns True if the given position is inside the polygon.</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">inside</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x_points</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="n">num_vertices</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">polygon_x</span><span class="p">)</span>
+
+    <span class="n">p1_x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">polygon_x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">p1_y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">polygon_y</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># Loop through each edge in the polygon</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_vertices</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+
+        <span class="c1"># Get the next point in the polygon</span>
+        <span class="n">p2_x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">polygon_x</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">num_vertices</span><span class="p">])</span>
+        <span class="n">p2_y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">polygon_y</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">num_vertices</span><span class="p">])</span>
+
+        <span class="c1"># For points that are between the line&#39;s Y coordinates</span>
+        <span class="c1"># and left of the line&#39;s maximum x coordinate:</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="p">((</span><span class="n">y_points</span> <span class="o">&gt;</span> <span class="nb">min</span><span class="p">(</span><span class="n">p1_y</span><span class="p">,</span> <span class="n">p2_y</span><span class="p">))</span>
+                 <span class="o">&amp;</span> <span class="p">(</span><span class="n">y_points</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">p1_y</span><span class="p">,</span> <span class="n">p2_y</span><span class="p">))</span>
+                 <span class="o">&amp;</span> <span class="p">(</span><span class="n">x_points</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">p1_x</span><span class="p">,</span> <span class="n">p2_x</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">check</span><span class="p">):</span>
+
+            <span class="c1"># Calculate the x-intersection of the line connecting the point to the edge</span>
+            <span class="n">x_intersection</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_points</span><span class="p">[</span><span class="n">check</span><span class="p">]</span> <span class="o">-</span> <span class="n">p1_y</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">p2_x</span> <span class="o">-</span> <span class="n">p1_x</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">p2_y</span> <span class="o">-</span> <span class="n">p1_y</span><span class="p">)</span> <span class="o">+</span> <span class="n">p1_x</span>
+
+            <span class="c1"># Check if the point is on the same line as the edge or to the left of the x-intersection</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">x_points</span><span class="p">[</span><span class="n">check</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x_intersection</span>
+            <span class="n">tmp</span> <span class="o">|=</span> <span class="n">p1_x</span> <span class="o">==</span> <span class="n">p2_x</span>
+
+            <span class="c1"># Flip the corresponding flags</span>
+            <span class="n">inside</span><span class="p">[</span><span class="n">check</span><span class="p">]</span> <span class="o">^=</span> <span class="n">tmp</span>
+
+        <span class="c1"># Store the current point as the first point for the next iteration</span>
+        <span class="n">p1_x</span> <span class="o">=</span> <span class="n">p2_x</span>
+        <span class="n">p1_y</span> <span class="o">=</span> <span class="n">p2_y</span>
+
+    <span class="c1"># Return the value of the inside flag</span>
+    <span class="k">return</span> <span class="n">inside</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

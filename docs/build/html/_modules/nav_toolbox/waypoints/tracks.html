@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nav_toolbox.waypoints.tracks &mdash; Navigation Toolbox 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Navigation Toolbox
+          </a>
+              <div class="version">
+                Version 1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">1. Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">2. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">3. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">4. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/processing.html">5. Estimation Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">6. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">7. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">8. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">9. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">10. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">11. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">12. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Navigation Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nav_toolbox.waypoints.tracks</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nav_toolbox.waypoints.tracks</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=========</span>
+<span class="sd">tracks.py</span>
+<span class="sd">=========</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Provides default waypoint generation for testing tracks.</span>
+<span class="sd">    This module contains various functions for generating different default</span>
+<span class="sd">    waypoint tracks. This is an alternative instead of using user supplied</span>
+<span class="sd">    trajectories. This is namely used for testing, but can also be used for</span>
+<span class="sd">    rapid experimentation when a custom trajectory is unavailable.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Prof. Jason Ralph - jfralph@liverpool.ac.uk</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">nav_toolbox.core.transformations</span> <span class="kn">import</span> <span class="n">ned2lla_vec</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+
+<div class="viewcode-block" id="generate_racetrack">
+<a class="viewcode-back" href="../../../modules/waypoints/tracks.html#nav_toolbox.waypoints.tracks.generate_racetrack">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_racetrack</span><span class="p">(</span><span class="n">frequency0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1000.0</span><span class="p">,</span>
+                       <span class="n">max_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
+                       <span class="n">r_x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1000.0</span><span class="p">,</span>
+                       <span class="n">r_y</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1000.0</span><span class="p">,</span>
+                       <span class="n">r_z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">,</span>
+                       <span class="n">theta_x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                       <span class="n">theta_y</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                       <span class="n">theta_z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                       <span class="n">t0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
+                       <span class="n">n_y</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+                       <span class="n">n_z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates waypoints for a racetrack of requested dimensions.</span>
+<span class="sd">    This function produces waypoints at a requested frequency that represent</span>
+<span class="sd">    a simple looping path. The produced waypoints can be then used with</span>
+<span class="sd">    previously implemented waypoint functions, essentially (efficiently)</span>
+<span class="sd">    pre-calculating the values at each position along the racetrack.</span>
+
+<span class="sd">    :param frequency0: The simulation&#39;s update frequency (in Hz). This is used</span>
+<span class="sd">        for calculating the number of intermediate points and total number of</span>
+<span class="sd">        waypoints to return.</span>
+<span class="sd">    :type frequency0: float</span>
+
+<span class="sd">    :param max_time: The time at which the simulation is to end (in seconds).</span>
+<span class="sd">        No waypoints will be generated for points after this time</span>
+<span class="sd">    :type max_time: float</span>
+
+<span class="sd">    :param r_x: The size of the racetrack along the x-direction (in metres).</span>
+<span class="sd">    :type r_x: float</span>
+
+<span class="sd">    :param r_y: The size of the racetrack along the y-direction (in metres).</span>
+<span class="sd">    :type r_y: float</span>
+
+<span class="sd">    :param r_z: The height variations of the racetrack (in metres).</span>
+<span class="sd">    :type r_z: float</span>
+
+<span class="sd">    :param theta_x: The starting X position on the circuit.</span>
+<span class="sd">    :type theta_x: float</span>
+
+<span class="sd">    :param theta_y: The starting Y position on the circuit.</span>
+<span class="sd">    :type theta_y: float</span>
+
+<span class="sd">    :param theta_z: The starting Z position on the circuit.</span>
+<span class="sd">    :type theta_z: float</span>
+
+<span class="sd">    :param t0: The time period (in seconds) for one circuit of the track.</span>
+<span class="sd">        This is used to calculate how fast the vehicle is moving around the</span>
+<span class="sd">        generated racetrack.</span>
+<span class="sd">    :type t0: float</span>
+
+<span class="sd">    :param n_y: Number of periods of y variations for each circuit in x.</span>
+<span class="sd">    :type n_y: float</span>
+
+<span class="sd">    :param n_z: Number of periods of height variations for each circuit in x.</span>
+<span class="sd">    :type n_z: float</span>
+
+<span class="sd">    :return: The calculated latitude, longitude and altitude for each time</span>
+<span class="sd">        step from 0 to the maximum time requested.</span>
+<span class="sd">    :rtype: numpy.ndarray (n-by-4 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Calculate the number of waypoints to produce.</span>
+    <span class="n">num_of_waypoints</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">frequency0</span> <span class="o">*</span> <span class="n">max_time</span><span class="p">)</span>
+
+    <span class="c1"># Obtain the timestamps for each waypoint.</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_time</span><span class="p">,</span> <span class="n">num_of_waypoints</span><span class="p">)</span>
+
+    <span class="c1"># Obtain the angles along the racetrack.</span>
+    <span class="n">omega_x</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">t0</span>
+    <span class="n">omega_y</span> <span class="o">=</span> <span class="n">n_y</span> <span class="o">*</span> <span class="n">omega_x</span>
+    <span class="n">omega_z</span> <span class="o">=</span> <span class="n">n_z</span> <span class="o">*</span> <span class="n">omega_x</span>
+
+    <span class="c1"># Calculate the position along the racetrack</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">r_x</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega_x</span> <span class="o">*</span> <span class="n">times</span> <span class="o">+</span> <span class="n">theta_x</span><span class="p">)</span> <span class="o">-</span> <span class="n">r_x</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_x</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">r_y</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega_y</span> <span class="o">*</span> <span class="n">times</span> <span class="o">+</span> <span class="n">theta_y</span><span class="p">)</span> <span class="o">-</span> <span class="n">r_y</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_y</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">r_z</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega_z</span> <span class="o">*</span> <span class="n">times</span> <span class="o">+</span> <span class="n">theta_z</span><span class="p">)</span> <span class="o">-</span> <span class="n">r_z</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_z</span><span class="p">)</span>
+    <span class="n">positions_ned</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+
+    <span class="c1"># Specify the centre reference position.</span>
+    <span class="n">ref_lla</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">num_of_waypoints</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+    <span class="c1"># Convert the NED values to LLA values.</span>
+    <span class="n">positions_lla</span> <span class="o">=</span> <span class="n">ned2lla_vec</span><span class="p">(</span><span class="n">positions_ned</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">)</span>
+
+    <span class="c1"># Finally, return the calculated waypoints</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">times</span><span class="p">,</span> <span class="n">positions_lla</span><span class="p">])</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

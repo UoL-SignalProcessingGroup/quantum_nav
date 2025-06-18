@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.fusion.altimeter &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.fusion.altimeter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.fusion.altimeter</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">===========</span>
+<span class="sd">altitude.py</span>
+<span class="sd">===========</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Supplied fusion method for altitude measurements.</span>
+<span class="sd">    This module contains methods that can be used for acquiring altimeter</span>
+<span class="sd">    measurements during simulation and fusing them with the current</span>
+<span class="sd">    estimated altitude. Additional methods may be added in future updates.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Prof. Jason Ralph - jfralph@liverpool.ac.uk</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">qnav.estimation.state</span> <span class="kn">import</span> <span class="n">EstimatedState</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.altimeter</span> <span class="kn">import</span> <span class="n">Altimeter</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">FusionTrigger</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">SensorFusion</span>
+
+<span class="kn">import</span> <span class="nn">qnav.util.transformations</span> <span class="k">as</span> <span class="nn">trans</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="FixedGainAltimeter">
+<a class="viewcode-back" href="../../../modules/fusion/altimeter.html#qnav.fusion.altimeter.FixedGainAltimeter">[docs]</a>
+<span class="k">class</span> <span class="nc">FixedGainAltimeter</span><span class="p">(</span><span class="n">SensorFusion</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fuses altimeter altitude measurements using fixed gain fusion.</span>
+<span class="sd">    Updates the estimated altitude by using a weighted average of the</span>
+<span class="sd">    measurement altitude and current estimated altitude. This gain</span>
+<span class="sd">    amount can be set and updated at any time.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Fixed properties used by the class</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="s1">&#39;__altimeter&#39;</span><span class="p">,</span> <span class="s1">&#39;__gain_amount&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">altimeter</span><span class="p">:</span> <span class="n">Altimeter</span><span class="p">,</span> <span class="n">gain_amount</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates fixed gain fusion for given altimeter and gain amounts.</span>
+<span class="sd">        When initialised can be used to fuse successful altimeter measurements</span>
+<span class="sd">        with the current estimated state.</span>
+
+<span class="sd">        :param altimeter: The altimeter to acquire measurements from.</span>
+<span class="sd">        :type altimeter: Altimeter</span>
+
+<span class="sd">        :param gain_amount: The gain amount to use (between 0 and 1).</span>
+<span class="sd">        :type gain_amount: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">FusionTrigger</span><span class="o">.</span><span class="n">ALL</span><span class="p">,</span> <span class="n">altimeter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__altimeter</span> <span class="o">=</span> <span class="n">altimeter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gain_amount</span> <span class="o">=</span> <span class="n">gain_amount</span>
+
+<div class="viewcode-block" id="FixedGainAltimeter.perform_fusion">
+<a class="viewcode-back" href="../../../modules/fusion/altimeter.html#qnav.fusion.altimeter.FixedGainAltimeter.perform_fusion">[docs]</a>
+    <span class="k">def</span> <span class="nf">perform_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs the fixed gained fusion with last altimeter measurement.</span>
+<span class="sd">        Simply fuses the last altimeter measurement with previous measurement</span>
+<span class="sd">        using a fixed-gain (weighted average) update.</span>
+
+<span class="sd">        :param estimated_state: The current estimated state.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Unpack measurements and current estimates:</span>
+        <span class="n">measured_alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__altimeter</span><span class="o">.</span><span class="n">last_measurement</span>
+        <span class="n">est_position</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">position</span>
+
+        <span class="c1"># Skip fusion if measurement unsuccessful:</span>
+        <span class="k">if</span> <span class="n">measured_alt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Update the current estimated position.</span>
+        <span class="n">est_position</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__gain_amount</span><span class="p">)</span> <span class="o">*</span> <span class="n">est_position</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                     <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__gain_amount</span> <span class="o">*</span> <span class="n">measured_alt</span><span class="p">)</span>
+
+        <span class="c1"># Write update to the shared estimated state.</span>
+        <span class="n">estimated_state</span><span class="o">.</span><span class="n">update_estimates</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="n">est_position</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fixed_gain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property getter method for fixed gain amount.</span>
+
+<span class="sd">        :return: The current gain amount for the altimeter measurements.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__gain_amount</span>
+
+    <span class="nd">@fixed_gain</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">fixed_gain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gain</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property setter method for fixed gain amount.</span>
+
+<span class="sd">        :param gain: The new gain amount for the altimeter measurements.</span>
+<span class="sd">        :type gain: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">gain</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">gain</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;gain must be between 0 and 1&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gain_amount</span> <span class="o">=</span> <span class="n">gain</span></div>
+
+
+
+<div class="viewcode-block" id="AlphaBetaAltimeter">
+<a class="viewcode-back" href="../../../modules/fusion/altimeter.html#qnav.fusion.altimeter.AlphaBetaAltimeter">[docs]</a>
+<span class="k">class</span> <span class="nc">AlphaBetaAltimeter</span><span class="p">(</span><span class="n">SensorFusion</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fuses altimeter altitude measurements using alpha-beta filtering.</span>
+<span class="sd">    Updates the estimated altitude by using an alpha-beta filter, where alpha</span>
+<span class="sd">    relates to the expected accuracy of the altimeter and beta relates to the</span>
+<span class="sd">    precision of the vertical velocity estimate. This method updates both</span>
+<span class="sd">    estimated altitude and the vertical velocity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Fixed properties used by the class</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="s1">&#39;__altimeter&#39;</span><span class="p">,</span> <span class="s1">&#39;__alpha&#39;</span><span class="p">,</span> <span class="s1">&#39;__beta&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">altimeter</span><span class="p">:</span> <span class="n">Altimeter</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span> <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates alpha-beta fusion for given altimeter</span>
+<span class="sd">        When initialised can be used to fuse successful altimeter measurements</span>
+<span class="sd">        with the current estimated state using alpha-beta fusion. This updates</span>
+<span class="sd">        both the estimated altitude and vertical velocity.</span>
+
+<span class="sd">        :param alpha: The value to use for alpha (between 0 and 1). This</span>
+<span class="sd">            corresponds to the precision of the altimeter.</span>
+<span class="sd">        :type alpha: float</span>
+
+<span class="sd">        :param beta: The value to use for beta (between 0 and 1). This</span>
+<span class="sd">            corresponds to the accuracy of the vertical velocity.</span>
+<span class="sd">        :type beta: float</span>
+
+<span class="sd">        :param altimeter: The altimeter to acquire measurements from.</span>
+<span class="sd">        :type altimeter: Altimeter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">FusionTrigger</span><span class="o">.</span><span class="n">ALL</span><span class="p">,</span> <span class="n">altimeter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__altimeter</span> <span class="o">=</span> <span class="n">altimeter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__beta</span> <span class="o">=</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">beta</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">beta</span>
+
+<div class="viewcode-block" id="AlphaBetaAltimeter.perform_fusion">
+<a class="viewcode-back" href="../../../modules/fusion/altimeter.html#qnav.fusion.altimeter.AlphaBetaAltimeter.perform_fusion">[docs]</a>
+    <span class="k">def</span> <span class="nf">perform_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs alpha-beta fusion with latest altimeter measurement.</span>
+<span class="sd">        Updates both the estimated altitude and the vertical velocity using</span>
+<span class="sd">        the latest measurement from the altimeter. From this both the</span>
+<span class="sd">        vertical position and vertical velocity are updated.</span>
+
+<span class="sd">        :param estimated_state: The current estimated state.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__altimeter</span><span class="o">.</span><span class="n">last_measurement</span>
+        <span class="k">if</span> <span class="n">alt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Convert position to local NED co-ordinates</span>
+        <span class="n">position_e0</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">position</span>
+        <span class="c1"># position_e0 = trans.lla2ned(ref_lla, ref_lla)</span>
+
+        <span class="c1"># Obtain the rotation from Earth to body axis</span>
+        <span class="n">attitude_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">attitude</span><span class="p">)</span>
+        <span class="n">rot_earth2body</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">attitude_0</span><span class="p">)</span>
+
+        <span class="c1"># Convert velocity from body axes to Earth Axes</span>
+        <span class="n">velocity_b0</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">velocity</span>
+        <span class="n">velocity_e0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_earth2body</span><span class="p">,</span> <span class="n">velocity_b0</span><span class="p">)</span>
+
+        <span class="n">time_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__altimeter</span><span class="o">.</span><span class="n">time_step</span>
+
+        <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__alpha</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__beta</span>  <span class="c1"># (alpha * alpha) / 2</span>
+
+        <span class="n">z</span> <span class="o">=</span> <span class="n">position_e0</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">v_z</span> <span class="o">=</span> <span class="n">velocity_e0</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">z_prime</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">z</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">alt</span>
+        <span class="n">v_z_prime</span> <span class="o">=</span> <span class="n">v_z</span> <span class="o">-</span> <span class="p">(</span><span class="n">beta</span> <span class="o">/</span> <span class="n">time_step</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">alt</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span>
+
+        <span class="n">position_e1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">position_e0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position_e0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">z_prime</span><span class="p">])</span>
+        <span class="n">velocity_e1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">velocity_e0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">velocity_e0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">v_z_prime</span><span class="p">])</span>
+        <span class="n">velocity_b1</span> <span class="o">=</span> <span class="n">rot_earth2body</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">velocity_e1</span><span class="p">)</span>
+
+        <span class="n">estimated_state</span><span class="o">.</span><span class="n">update_estimates</span><span class="p">(</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">position_e1</span><span class="p">,</span>
+            <span class="n">velocity</span><span class="o">=</span><span class="n">velocity_b1</span>
+        <span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property getter method for the alpha value.</span>
+
+<span class="sd">        :return: The current alpha value to use for filtering.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__alpha</span>
+
+    <span class="nd">@alpha</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property setter method for the alpha value.</span>
+
+<span class="sd">        :param alpha_value: The updated alpha value to use for filtering.</span>
+<span class="sd">        :type alpha_value: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">alpha_value</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">alpha_value</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Alpha must be between 0 and 1&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__alpha</span> <span class="o">=</span> <span class="n">alpha_value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">beta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property getter method for the beta value.</span>
+
+<span class="sd">        :return: The current beta value to use for filtering.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__beta</span>
+
+    <span class="nd">@beta</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">beta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Property setter method for the beta value.</span>
+
+<span class="sd">        :param beta_value: The updated beta value to use for filtering.</span>
+<span class="sd">        :type beta_value: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">beta_value</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">beta_value</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Beta must be between 0 and 1&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__beta</span> <span class="o">=</span> <span class="n">beta_value</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.gravity.ggm_plus &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.gravity.ggm_plus</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.gravity.ggm_plus</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">===========</span>
+<span class="sd">ggm_plus.py</span>
+<span class="sd">===========</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Global Gravity Map Plus (GGMPlus) gravity map implementations.</span>
+<span class="sd">    This module provides support for the GGMPlus gravity models. Specifically,</span>
+<span class="sd">    two implementations for the GGPlus gravity acceleration and gravity</span>
+<span class="sd">    disturbance corrections.</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First implementation of this module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span>
+<span class="kn">from</span> <span class="nn">requests</span> <span class="kn">import</span> <span class="n">HTTPError</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">RegularGridInterpolator</span>
+
+<span class="kn">from</span> <span class="nn">qnav.earth.geoid</span> <span class="kn">import</span> <span class="n">GeoidModel</span>
+<span class="kn">from</span> <span class="nn">qnav.gravity.map</span> <span class="kn">import</span> <span class="n">GravityMap</span>
+<span class="kn">from</span> <span class="nn">qnav.gravity.base</span> <span class="kn">import</span> <span class="n">GravityModel</span>
+<span class="kn">from</span> <span class="nn">qnav.util.connections</span> <span class="kn">import</span> <span class="n">download_file</span>
+
+<span class="c1"># The size to expect for GGM Plus tiles:</span>
+<span class="n">_TILE_SIZE</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2500</span><span class="p">,</span> <span class="mi">2500</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="GGMPlusAcc">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusAcc">[docs]</a>
+<span class="k">class</span> <span class="nc">GGMPlusAcc</span><span class="p">(</span><span class="n">GravityMap</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Global Gravity Map Plus for Acceleration Correction.</span>
+<span class="sd">    An implementation of GGMPlus, using the provided base gravity</span>
+<span class="sd">    acceleration values. This overwrites the base values zero-altitude</span>
+<span class="sd">    gravity estimation, but uses its altitude extrapolation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The current minimum latitude of the region of loaded data.</span>
+    <span class="n">_min_lat</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">)</span>
+
+    <span class="c1"># The current minimum latitude of the region of loaded data.</span>
+    <span class="n">_max_lat</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">)</span>
+
+    <span class="c1"># The current minimum latitude of the region of loaded data.</span>
+    <span class="n">_min_lon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">)</span>
+
+    <span class="c1"># The current minimum latitude of the region of loaded data.</span>
+    <span class="n">_max_lon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">)</span>
+
+    <span class="c1"># The interpolation method to use (must handle NaN values).</span>
+    <span class="n">_interp_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span>
+
+    <span class="c1"># The gravity correction interpolator for value look-up.</span>
+    <span class="n">_interp</span><span class="p">:</span> <span class="n">RegularGridInterpolator</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_model</span><span class="p">:</span> <span class="n">GravityModel</span><span class="p">,</span>
+                 <span class="n">geoid_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">GeoidModel</span><span class="p">],</span> <span class="n">map_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+                 <span class="n">auto_download</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">margin_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="c1"># Call parent constructor and all record requested margin size</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">base_model</span><span class="p">,</span> <span class="n">geoid_model</span><span class="p">,</span> <span class="n">map_dir</span><span class="p">,</span> <span class="n">auto_download</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">margin_size</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;margin_size must be &gt;= 1&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_margin_size</span> <span class="o">=</span> <span class="n">margin_size</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;GGMPlus (Acceleration)&#39;</span>
+
+<div class="viewcode-block" id="GGMPlusAcc.calc_gravity_z">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusAcc.calc_gravity_z">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_gravity_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+
+        <span class="c1"># TODO: Check implementation</span>
+        <span class="n">base_acc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_map_value</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">grav_0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_model</span><span class="o">.</span><span class="n">calc_gravity_z</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">grav_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_model</span><span class="o">.</span><span class="n">calc_gravity_z</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">base_acc</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">grav_h</span>
+
+        <span class="k">return</span> <span class="n">base_acc</span> <span class="o">+</span> <span class="p">(</span><span class="n">grav_h</span> <span class="o">-</span> <span class="n">grav_0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GGMPlusAcc.calc_gravity_z_vec">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusAcc.calc_gravity_z_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_gravity_z_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+
+        <span class="c1"># TODO: Check implementation</span>
+        <span class="n">base_acc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_map_values</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">alt</span><span class="p">)</span>
+
+        <span class="n">grav_0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_model</span><span class="o">.</span><span class="n">calc_gravity_z_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+        <span class="n">grav_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_model</span><span class="o">.</span><span class="n">calc_gravity_z_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+
+        <span class="n">to_return</span> <span class="o">=</span> <span class="n">base_acc</span> <span class="o">+</span> <span class="p">(</span><span class="n">grav_h</span> <span class="o">-</span> <span class="n">grav_0</span><span class="p">)</span>
+        <span class="n">nan_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">base_acc</span><span class="p">)</span>
+        <span class="n">to_return</span><span class="p">[</span><span class="n">nan_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">grav_h</span><span class="p">[</span><span class="n">nan_indices</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">to_return</span></div>
+
+
+<div class="viewcode-block" id="GGMPlusAcc.get_anomaly">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusAcc.get_anomaly">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_anomaly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">disturbance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_disturbance</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_disturbance_to_anomaly</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">disturbance</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GGMPlusAcc.get_anomaly_vec">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusAcc.get_anomaly_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_anomaly_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">disturbance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_disturbance_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_disturbance_to_anomaly_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">disturbance</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GGMPlusAcc.get_disturbance">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusAcc.get_disturbance">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_disturbance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">g_lambda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_model</span><span class="o">.</span><span class="n">calc_gravity_z</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">g_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_map_value</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">g_model</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">g_model</span> <span class="o">-</span> <span class="n">g_lambda</span></div>
+
+
+<div class="viewcode-block" id="GGMPlusAcc.get_disturbance_vec">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusAcc.get_disturbance_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_disturbance_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="c1"># return self.get_map_values(lat, lon)</span>
+        <span class="n">alt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+        <span class="n">g_lambda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_model</span><span class="o">.</span><span class="n">calc_gravity_z_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+        <span class="n">g_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_map_values</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">to_return</span> <span class="o">=</span>  <span class="n">g_model</span> <span class="o">-</span> <span class="n">g_lambda</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">to_return</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GGMPlusAcc.get_map_value">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusAcc.get_map_value">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_map_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interpolates the gravity acceleration for requested position(.</span>
+<span class="sd">        Looks-up and returns the gravity anomaly value for requested latitude</span>
+<span class="sd">        and longitude position.</span>
+
+<span class="sd">        :param lat: The latitude coordinate in decimal degrees.</span>
+<span class="sd">        :type lat: float</span>
+
+<span class="sd">        :param lon: The longitude coordinate in decimal degrees.</span>
+<span class="sd">        :type lon: float</span>
+
+<span class="sd">        :return: The interpolated gravity map value in m/s^2.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># If required, load the missing data:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_point_loaded</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+
+        <span class="c1"># Result the interpolated result:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_interp</span><span class="p">((</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)))</span></div>
+
+
+
+<div class="viewcode-block" id="GGMPlusAcc.get_map_values">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusAcc.get_map_values">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_map_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Looks-up the correction values using the map.</span>
+<span class="sd">        This will dynamically load data to cover the range, keeping the</span>
+<span class="sd">        maximum number of loaded tiles under the margin value, to conserve</span>
+<span class="sd">        memory constraints.</span>
+
+<span class="sd">        :param lat: The latitude coordinate in decimal degrees.</span>
+<span class="sd">        :type lat: np.ndarray</span>
+
+<span class="sd">        :param lon: The longitude coordinate in decimal degrees.</span>
+<span class="sd">        :type lon: np.ndarray</span>
+
+<span class="sd">        :return: The corresponding values interpolated from the map.</span>
+<span class="sd">        :rtype: np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Validate shape of input:</span>
+        <span class="k">if</span> <span class="n">lat</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">lon</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;lat, lon and alt must have same shape&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Record collected results and</span>
+        <span class="n">has_result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">lat</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">lat</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="c1"># Until completion</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+
+            <span class="c1"># Get values for current loaded region:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_are_points_loaded</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp</span><span class="p">((</span><span class="n">lat</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lon</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                <span class="n">has_result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="c1"># Stop if all results are collected</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">has_result</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">results</span>
+
+            <span class="c1"># Otherwise, load next region and repeat</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="o">~</span><span class="n">has_result</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="n">lat</span><span class="p">[</span><span class="o">*</span><span class="n">j</span><span class="p">],</span> <span class="n">lon</span><span class="p">[</span><span class="o">*</span><span class="n">j</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="GGMPlusAcc.download_data">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusAcc.download_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">download_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin_lat</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Downloads the required marine gravity files from the source.</span>
+<span class="sd">        If allowed and files are not present, will download the required</span>
+<span class="sd">        geosat files to the set directory. Optionally, files can be</span>
+<span class="sd">        overwritten.</span>
+
+<span class="sd">        :param origin_lat: Origin latitude of tile to download.</span>
+<span class="sd">        :type origin_lat: int</span>
+
+<span class="sd">        :param origin_lon: Origin longitude of tile to download.</span>
+<span class="sd">        :type origin_lon: int</span>
+
+<span class="sd">        :param overwrite: Should downloading replace existing files.</span>
+<span class="sd">            By default this is set to false and only missing files</span>
+<span class="sd">            are downloaded.</span>
+<span class="sd">        :type overwrite: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">local_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_local_path</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">local_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">local_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">overwrite</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">local_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="n">download_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_download_url</span><span class="p">(</span>
+                <span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">download_file</span><span class="p">(</span><span class="n">download_url</span><span class="p">,</span> <span class="n">local_path</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">HTTPError</span><span class="p">:</span>
+                <span class="k">pass</span>  <span class="c1"># TODO: Improve error handling</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_is_point_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">lat_check</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_lat</span> <span class="o">&lt;=</span> <span class="n">lat</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_lat</span>
+        <span class="n">lon_check</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_lon</span> <span class="o">&lt;=</span> <span class="n">lon</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_lon</span>
+        <span class="k">return</span> <span class="n">lat_check</span> <span class="ow">and</span> <span class="n">lon_check</span>
+
+    <span class="k">def</span> <span class="nf">_are_points_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">lat_check</span> <span class="o">=</span> <span class="p">(</span><span class="n">lat</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_lat</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">lat</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_lat</span><span class="p">)</span>
+        <span class="n">lon_check</span> <span class="o">=</span> <span class="p">(</span><span class="n">lon</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_lon</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">lon</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_lon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">lat_check</span> <span class="o">&amp;</span> <span class="n">lon_check</span>
+
+    <span class="k">def</span> <span class="nf">_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+
+        <span class="c1"># Unpack properties</span>
+        <span class="n">tile_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tile_size</span>
+        <span class="n">tile_margin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_margin_size</span>
+
+        <span class="c1"># Get the origins of the tiles to acquire</span>
+        <span class="n">tile_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">tile_margin</span><span class="p">,</span> <span class="n">tile_margin</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">tile_size</span>
+        <span class="p">[</span><span class="n">centre_lat</span><span class="p">,</span> <span class="n">centre_lon</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_origin</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">lat_origins</span> <span class="o">=</span> <span class="n">tile_range</span> <span class="o">+</span> <span class="n">centre_lat</span>
+        <span class="n">lon_origins</span> <span class="o">=</span> <span class="n">tile_range</span> <span class="o">+</span> <span class="n">centre_lon</span>
+
+        <span class="c1"># Obtain the position grid</span>
+        <span class="n">centre_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_size</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min_lat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">lat_origins</span><span class="p">))</span> <span class="o">+</span> <span class="n">centre_offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min_lon</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">lon_origins</span><span class="p">))</span> <span class="o">+</span> <span class="n">centre_offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_lat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">lat_origins</span><span class="p">))</span> <span class="o">-</span> <span class="n">centre_offset</span> <span class="o">+</span> <span class="n">tile_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_lon</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">lon_origins</span><span class="p">))</span> <span class="o">-</span> <span class="n">centre_offset</span> <span class="o">+</span> <span class="n">tile_size</span>
+
+        <span class="c1"># Generate grids for each latitude and longitude coordinate</span>
+        <span class="n">lat_ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_lat</span> <span class="o">+</span> <span class="mf">1e-10</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_size</span><span class="p">)</span>
+        <span class="n">lon_ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_lon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_lon</span> <span class="o">+</span> <span class="mf">1e-10</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_size</span><span class="p">)</span>
+        <span class="n">all_tiles</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">tile_lat</span> <span class="ow">in</span> <span class="n">lat_origins</span><span class="p">:</span>
+            <span class="n">lon_tiles</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">tile_lon</span> <span class="ow">in</span> <span class="n">lon_origins</span><span class="p">:</span>
+                <span class="n">tile_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tile</span><span class="p">(</span><span class="n">tile_lat</span><span class="p">,</span> <span class="n">tile_lon</span><span class="p">)</span>
+                <span class="n">lon_tiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tile_data</span><span class="p">)</span>
+
+            <span class="c1"># Append list to full tiles</span>
+            <span class="n">all_tiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lon_tiles</span><span class="p">)</span>
+
+        <span class="c1"># Merge all tiles into single array</span>
+        <span class="n">tile_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">block</span><span class="p">(</span><span class="n">all_tiles</span><span class="p">)</span>
+
+        <span class="c1"># Generate an interpolator for collected data:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interp</span> <span class="o">=</span> <span class="n">RegularGridInterpolator</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">lat_ticks</span><span class="p">,</span> <span class="n">lon_ticks</span><span class="p">),</span> <span class="n">tile_data</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_interp_method</span><span class="p">,</span>
+            <span class="n">fill_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fill_value</span><span class="p">,</span>
+            <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_tile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin_lat</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+
+        <span class="n">local_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_local_path</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">local_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auto_download</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">download_data</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">local_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">get_empty_ggm_tile</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">read_ggm_file</span><span class="p">(</span><span class="n">local_path</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+
+        <span class="n">ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tile_size</span>
+        <span class="n">lat_origin</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">*</span> <span class="p">(</span><span class="n">lat</span> <span class="o">//</span> <span class="n">ts</span><span class="p">)</span>
+        <span class="n">lon_origin</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">*</span> <span class="p">(</span><span class="n">lon</span> <span class="o">//</span> <span class="n">ts</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">lat_origin</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">lon_origin</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_tile_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+        <span class="c1"># Get origin coordinates for the relevant file</span>
+        <span class="n">lat_origin</span><span class="p">,</span> <span class="n">lon_origin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_origin</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+
+        <span class="c1"># Get the direction characters</span>
+        <span class="n">lat_char</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">)[</span><span class="n">lat_origin</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">lon_char</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">)[</span><span class="n">lon_origin</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Remove sign of coordinates</span>
+        <span class="n">lat_origin</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">lat_origin</span><span class="p">)</span>
+        <span class="n">lon_origin</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">lon_origin</span><span class="p">)</span>
+
+        <span class="c1"># Format the file name with origin coordinates</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">lat_char</span><span class="si">}{</span><span class="n">lat_origin</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">&#39;</span>
+                     <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">lon_char</span><span class="si">}{</span><span class="n">lon_origin</span><span class="si">:</span><span class="s1">03d</span><span class="si">}</span><span class="s1">&#39;</span>
+                     <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_suffix</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Finally, return teh full file path</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_ext</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_get_local_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="n">tile_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tile_file</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_dir</span> <span class="o">/</span> <span class="s1">&#39;acc&#39;</span> <span class="o">/</span> <span class="n">tile_name</span>
+
+    <span class="k">def</span> <span class="nf">_get_download_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">tile_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tile_file</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_download_url</span><span class="si">}{</span><span class="n">tile_name</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_file_suffix</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_file_ext</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The file extension of the GGMPlus gravity acceleration data.</span>
+
+<span class="sd">        :return: The file extension of data files used.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;ga&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_download_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The base URL used for downloading GGMPlus acceleration data.</span>
+
+<span class="sd">        :return: The URL where GGMPlus gravity acceleration data can be</span>
+<span class="sd">            downloaded from.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;https://ddfe.blazejbucha.com/models/GGMplus/data/ga/&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_tile_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the dimensions of tiles in decimal degrees.</span>
+<span class="sd">        This is the length of each square tile for latitude and longitude.</span>
+
+<span class="sd">        :return: The size of each time in decimal degrees.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">5</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_step_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the step size between cell in decimal degrees.</span>
+<span class="sd">        This is the distance between records in latitude and longitude</span>
+<span class="sd">        directions.</span>
+
+<span class="sd">        :return: The step size distance between gravity map grid cells.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mf">0.002</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_fill_value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the fill value to use for missing value.</span>
+<span class="sd">        This will replace &#39;NaN&#39; values for interpolation and extrapolation.</span>
+
+<span class="sd">        :return: Returns NaN.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="GGMPlusDist">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusDist">[docs]</a>
+<span class="k">class</span> <span class="nc">GGMPlusDist</span><span class="p">(</span><span class="n">GGMPlusAcc</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Global Gravity Map Plus for Gravity Disturbance Correction.</span>
+<span class="sd">    An implementation of GGMPlus, using the acquired gravity disturbance</span>
+<span class="sd">    values values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;GGMPlus (Disturbance)&#39;</span>
+
+<div class="viewcode-block" id="GGMPlusDist.get_map_value">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusDist.get_map_value">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_map_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_map_value</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="GGMPlusDist.get_map_values">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusDist.get_map_values">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_map_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_map_values</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">values</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GGMPlusDist.calc_gravity_z">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusDist.calc_gravity_z">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_gravity_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+
+        <span class="c1"># TODO: Check implementation</span>
+        <span class="n">grav_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_map_value</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">grav_0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_model</span><span class="o">.</span><span class="n">calc_gravity_z</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">grav_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_model</span><span class="o">.</span><span class="n">calc_gravity_z</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grav_0</span> <span class="o">+</span> <span class="n">grav_dist</span> <span class="o">+</span> <span class="p">(</span><span class="n">grav_h</span> <span class="o">-</span> <span class="n">grav_0</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="GGMPlusDist.calc_gravity_z_vec">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusDist.calc_gravity_z_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_gravity_z_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+
+        <span class="c1"># TODO: Check implementation</span>
+        <span class="n">grav_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_map_values</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">alt</span><span class="p">)</span>
+
+        <span class="n">grav_0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_model</span><span class="o">.</span><span class="n">calc_gravity_z_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+        <span class="n">grav_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_model</span><span class="o">.</span><span class="n">calc_gravity_z_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grav_0</span> <span class="o">+</span> <span class="n">grav_dist</span> <span class="o">+</span> <span class="p">(</span><span class="n">grav_h</span> <span class="o">-</span> <span class="n">grav_0</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_get_tile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin_lat</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">to_return</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_get_tile</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">to_return</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_local_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="n">tile_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tile_file</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_dir</span> <span class="o">/</span> <span class="s1">&#39;dist&#39;</span> <span class="o">/</span> <span class="n">tile_name</span>
+
+<div class="viewcode-block" id="GGMPlusDist.get_disturbance">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusDist.get_disturbance">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_disturbance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_map_value</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GGMPlusDist.get_disturbance_vec">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.GGMPlusDist.get_disturbance_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_disturbance_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_map_values</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_file_ext</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The file extension of the GGMPlus gravity acceleration data.</span>
+
+<span class="sd">        :return: The file extension of data files used.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;dg&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_download_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The base URL used for downloading GGMPlus acceleration data.</span>
+
+<span class="sd">        :return: The URL where GGMPlus gravity acceleration data can be</span>
+<span class="sd">            downloaded from.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;https://ddfe.blazejbucha.com/models/GGMplus/data/dg/&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="read_ggm_file">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.read_ggm_file">[docs]</a>
+<span class="k">def</span> <span class="nf">read_ggm_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads the data from a given GGM_plus file. Once read, the returned</span>
+<span class="sd">    2500-by-2500 matrix data will be in :math:`metres/second^2`. No latitude</span>
+<span class="sd">    or longitude coordinates are contained within any GGM_plus file.</span>
+
+<span class="sd">    :param file_path: The location of the GGM_plus file to read.</span>
+<span class="sd">    :type file_path: Path or str</span>
+
+<span class="sd">    :return: The gravitational acceleration matrix read from the file,</span>
+<span class="sd">        measured in :math:`metres/second^2`</span>
+<span class="sd">    :rtype: NumPy Matrix (2500-by-2500 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Get the expected format of the data:</span>
+    <span class="k">if</span> <span class="n">file_path</span><span class="o">.</span><span class="n">suffix</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;.ga&#39;</span><span class="p">,</span> <span class="s1">&#39;.ha&#39;</span><span class="p">]:</span>
+        <span class="n">data_type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;&gt;i4&#39;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">file_path</span><span class="o">.</span><span class="n">suffix</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;.eta&#39;</span><span class="p">,</span> <span class="s1">&#39;.xi&#39;</span><span class="p">,</span> <span class="s1">&#39;.dg&#39;</span><span class="p">]:</span>
+        <span class="n">data_type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;&gt;i2&#39;</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unrecognised file extension: </span><span class="si">{</span><span class="n">file_path</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Read the contents from the selected file</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+
+    <span class="c1"># Convert from integer to float values</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+    <span class="c1"># Correct NaN values.</span>
+    <span class="n">nan_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span><span class="o">.</span><span class="n">min</span>
+    <span class="n">data</span><span class="p">[</span><span class="n">data</span> <span class="o">&lt;=</span> <span class="n">nan_value</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="c1"># Reshape the data and convert from mGals to m/s^2</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">_TILE_SIZE</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e6</span>
+
+    <span class="c1"># Finally, return the read data</span>
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">T</span></div>
+
+
+<div class="viewcode-block" id="get_empty_ggm_tile">
+<a class="viewcode-back" href="../../../modules/gravity/ggm_plus.html#qnav.gravity.ggm_plus.get_empty_ggm_tile">[docs]</a>
+<span class="k">def</span> <span class="nf">get_empty_ggm_tile</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Produces an empty tile of dimensions of GGM Plus data file.</span>
+<span class="sd">    Used when data is unavailable and cannot be downloaded.</span>
+
+<span class="sd">    :return: Empty GGM Plus tile data for missing files.</span>
+<span class="sd">    :rtype: NumPy Matrix (2500-by-2500 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">_TILE_SIZE</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="kn">from</span> <span class="nn">qnav.gravity.somigliana</span> <span class="kn">import</span> <span class="n">Somigliana</span>
+
+    <span class="n">project_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>
+    <span class="n">grav_dir</span> <span class="o">=</span> <span class="n">project_dir</span> <span class="o">/</span> <span class="s1">&#39;databases&#39;</span> <span class="o">/</span> <span class="s1">&#39;gravity&#39;</span> <span class="o">/</span> <span class="s1">&#39;ggm_plus&#39;</span>
+    <span class="n">som</span> <span class="o">=</span> <span class="n">Somigliana</span><span class="p">()</span>
+
+    <span class="n">ggm_acc</span> <span class="o">=</span> <span class="n">GGMPlusAcc</span><span class="p">(</span><span class="n">som</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">grav_dir</span><span class="p">)</span>
+    <span class="c1"># test_g_acc = ggm_acc.calc_gravity_z(52, -3, 1000)</span>
+
+    <span class="c1"># ggm_dist = GGMPlusDist(som, None, grav_dir)</span>
+    <span class="c1"># test_g_dist = ggm_dist.calc_gravity_z(52, -3, 1000)</span>
+
+    <span class="c1"># test_lat = np.array([54.0232638, 51.41854768, 53.67120925, 53.20008043, 51.04160022,</span>
+    <span class="c1">#                      50.90639821, 52.90216386, 52.09873456, 53.12637224, 51.85739463])</span>
+    <span class="c1">#</span>
+    <span class="c1"># test_lon = np.array([-3.23375375, -2.36566192, -3.61861449, -2.79436671, -1.46919802,</span>
+    <span class="c1">#                      -1.34033806, -3.4074206 , -1.86157922, -1.36622413, -2.38345550])</span>
+    <span class="c1">#</span>
+    <span class="c1"># test_alt = np.array([1383.08959147, 487.31443131, 6816.4005876 , 8499.10171285, 5806.21782301,</span>
+    <span class="c1">#                      7367.69684912, 930.88664461, 2299.53236648, 9965.8192528 , 458.22239443])</span>
+    <span class="c1">#</span>
+    <span class="c1"># ggm_acc = GGMPlusAcc(som, None, grav_dir)</span>
+    <span class="c1"># test_g_acc= ggm_acc.calc_gravity_z_vec(test_lat, test_lon, test_alt)</span>
+
+    <span class="n">error_pos</span> <span class="o">=</span> <span class="p">(</span><span class="mf">50.22312480923596</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.627512029578551</span><span class="p">,</span> <span class="mf">3415.40078975074</span><span class="p">)</span>
+    <span class="n">test_dist</span> <span class="o">=</span> <span class="n">ggm_acc</span><span class="o">.</span><span class="n">get_disturbance</span><span class="p">(</span><span class="n">error_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">error_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">test_dist</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

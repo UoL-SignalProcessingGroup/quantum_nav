@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.2.1. qnav.estimation.state &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="9.3.1. qnav.fusion.ins" href="../fusion/ins.html" />
+    <link rel="prev" title="9.1.4. qnav.earth.utm" href="../earth/utm.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../usage/packages.html">9. Software Components</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#earth">9.1. Earth</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../usage/packages.html#estimation">9.2. Estimation</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">9.2.1. state.py</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#state-py">9.2.1.1. state.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.estimation.state.EstimatedState"><code class="docutils literal notranslate"><span class="pre">EstimatedState</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.estimation.state.KalmanEstimatedState"><code class="docutils literal notranslate"><span class="pre">KalmanEstimatedState</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#fusion">9.3. Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gps">9.4. GPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gravity">9.5. Gravity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#input">9.6. Input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#measurement">9.7. Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#output">9.8. Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#quantum">9.9. Quantum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#simulation">9.10. Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#util">9.11. Util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#waypoints">9.12. Waypoints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../usage/packages.html"><span class="section-number">9. </span>Software Components</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">9.2.1. </span>qnav.estimation.state</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/modules/estimation/state.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qnav.estimation.state">
+<span id="qnav-estimation-state"></span><h1><span class="section-number">9.2.1. </span>qnav.estimation.state<a class="headerlink" href="#module-qnav.estimation.state" title="Link to this heading"></a></h1>
+<section id="state-py">
+<h2><span class="section-number">9.2.1.1. </span>state.py<a class="headerlink" href="#state-py" title="Link to this heading"></a></h2>
+<dl class="field-list">
+<dt class="field-odd">summary<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Supported base estimation state classes used to hold estimated data.
+This module contains classes that handle the estimated state of the
+platform during simulations. These are shared between the employed
+fusion methods. Extensions of the base class are required for the
+handling of addition data (such as error states and kalman matrices).</p>
+</dd>
+<dt class="field-even">authors<span class="colon">:</span></dt>
+<dd class="field-even"><div class="line-block">
+<div class="line">Prof. Jason Ralph - <a class="reference external" href="mailto:jfralph&#37;&#52;&#48;liverpool&#46;ac&#46;uk">jfralph<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></div>
+<div class="line">Michael Wright - <a class="reference external" href="mailto:mjwright&#37;&#52;&#48;liverpool&#46;ac&#46;uk">mjwright<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></div>
+</div>
+</dd>
+<dt class="field-odd">version<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1.0.0 - First full implementation of module.</p>
+</dd>
+</dl>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.estimation.state.EstimatedState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.estimation.state.</span></span><span class="sig-name descname"><span class="pre">EstimatedState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ground_truth:</span> <span class="pre">~qnav.waypoints.trajectory.GroundTruth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity_model:</span> <span class="pre">~qnav.gravity.base.GravityModel</span> <span class="pre">=</span> <span class="pre">&lt;qnav.gravity.simple.SimpleUniform</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/estimation/state.html#EstimatedState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.estimation.state.EstimatedState" title="Link to this definition"></a></dt>
+<dd><p>The base estimated state holding only general state information.
+Simply maintains the estimated time, position, velocity, acceleration,
+attitude and angle rates of the platform. Additionally, this also holds
+a shared gravity model for calculating the expected gravity dynamics.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.estimation.state.EstimatedState.timestamp">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timestamp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.estimation.state.EstimatedState.timestamp" title="Link to this definition"></a></dt>
+<dd><p>Returns the current estimated duration of the simulation (in seconds).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The estimated time (in seconds).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.estimation.state.EstimatedState.position">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#qnav.estimation.state.EstimatedState.position" title="Link to this definition"></a></dt>
+<dd><p>Returns the estimated position (in degrees-degrees-metres).
+This is the estimated position represented by an array of latitude,
+longitude and altitude values respectively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The estimated position (in degrees-degrees-metres).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.estimation.state.EstimatedState.velocity">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">velocity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#qnav.estimation.state.EstimatedState.velocity" title="Link to this definition"></a></dt>
+<dd><p>Returns the estimated velocity (in meters/second).
+This is the estimated velocity in body axis represented as an array
+of along, across and down velocities respectively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The estimated velocity (in meters/second).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.estimation.state.EstimatedState.acceleration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acceleration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#qnav.estimation.state.EstimatedState.acceleration" title="Link to this definition"></a></dt>
+<dd><p>Returns the estimated acceleration (in meters/second^2).
+This is the estimated acceleration in body axis represented as an
+array of along, across and down accelerations respectively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The estimated acceleration (in meters/second^2).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.estimation.state.EstimatedState.attitude">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">attitude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#qnav.estimation.state.EstimatedState.attitude" title="Link to this definition"></a></dt>
+<dd><p>Returns the estimated attitude (in degrees).
+This is the estimated attitude in NED axis represented as an array
+of heading, pitch and yaw angles respectively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The estimated attitude (in degrees).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.estimation.state.EstimatedState.angle_rates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">angle_rates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#qnav.estimation.state.EstimatedState.angle_rates" title="Link to this definition"></a></dt>
+<dd><p>Returns the estimated angle rates (in degrees/second).
+This is the estimated angle rates in body axis represented as an
+array of P, Q and R euler angles respectively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The estimated angle rates (in degrees/second).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.estimation.state.EstimatedState.gravity_model">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gravity_model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../gravity/base.html#qnav.gravity.base.GravityModel" title="qnav.gravity.base.GravityModel"><span class="pre">GravityModel</span></a></em><a class="headerlink" href="#qnav.estimation.state.EstimatedState.gravity_model" title="Link to this definition"></a></dt>
+<dd><p>Returns the shared gravity model.
+This is the gravity model instance used for estimating the
+gravitational effect during estimation and fusion. For consistency,
+this is held in the estimated state so it is shared.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The estimation gravity model.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../gravity/base.html#qnav.gravity.base.GravityModel" title="qnav.gravity.base.GravityModel">GravityModel</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.estimation.state.EstimatedState.update_estimates">
+<span class="sig-name descname"><span class="pre">update_estimates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acceleration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_rates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/estimation/state.html#EstimatedState.update_estimates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.estimation.state.EstimatedState.update_estimates" title="Link to this definition"></a></dt>
+<dd><p>Overwrites selected current estimated states.
+This is namely used when estimation fusion is applied and the
+internal states must be updated. To prevent accidental overwriting of
+estimated states or the setting of invalid data, all changes must be
+submitted through this method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timestamp</strong> (<em>float</em>) – The updated timestamp marking the estimated current
+duration of the simulation (in seconds).</p></li>
+<li><p><strong>position</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The updated position vector containing the
+latitude (in degrees), longitude (in degrees) and altitude
+(in metres) respectively.</p></li>
+<li><p><strong>velocity</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The updated velocity vector for the
+North, East and Down components respectively (in m/s).</p></li>
+<li><p><strong>acceleration</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The updated acceleration vector for
+the North, East and Down components respectively (in m/s^2).</p></li>
+<li><p><strong>attitude</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The updated attitude vector for the Heading,
+Pitch and Roll components respectively (in degrees).</p></li>
+<li><p><strong>angle_rates</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The updated angle rate vector for the
+P, Q and R body rates respectively (in deg/s).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.estimation.state.EstimatedState.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qnav/estimation/state.html#EstimatedState.as_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.estimation.state.EstimatedState.as_dict" title="Link to this definition"></a></dt>
+<dd><p>Represents the state and its content as a dictionary.
+Namely used when a simple representation is needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>States in a python dictionary.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict[str, float | np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.estimation.state.EstimatedState.as_numpy">
+<span class="sig-name descname"><span class="pre">as_numpy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/estimation/state.html#EstimatedState.as_numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.estimation.state.EstimatedState.as_numpy" title="Link to this definition"></a></dt>
+<dd><p>Represents the state and its content as a numpy array.
+Namely used when a simple representation is needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>States in concatenated numpy array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.estimation.state.EstimatedState.clone">
+<span class="sig-name descname"><span class="pre">clone</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/estimation/state.html#EstimatedState.clone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.estimation.state.EstimatedState.clone" title="Link to this definition"></a></dt>
+<dd><p>Generates a cloned instance of itself.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Deep clone of this instance.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>State</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.estimation.state.KalmanEstimatedState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.estimation.state.</span></span><span class="sig-name descname"><span class="pre">KalmanEstimatedState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">ground_truth:</span> <span class="pre">~qnav.waypoints.trajectory.GroundTruth,</span> <span class="pre">h:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">r:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">f:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">q:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">state_errors:</span> <span class="pre">~numpy.ndarray</span> <span class="pre">=</span> <span class="pre">array([[1.e-09,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.e+00,</span> <span class="pre">1.e-09,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">1.e-09,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">1.e-09,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">1.e-09,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">1.e-09,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">1.e-09,</span> <span class="pre">0.e+00,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">1.e-09,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">1.e-09,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.e+00,</span> <span class="pre">1.e-09,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">1.e-09,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">1.e-09,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">1.e-09,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">1.e-09,</span> <span class="pre">0.e+00],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">0.e+00,</span> <span class="pre">1.e-09]]),</span> <span class="pre">gravity_model:</span> <span class="pre">~qnav.gravity.base.GravityModel</span> <span class="pre">=</span> <span class="pre">&lt;qnav.gravity.simple.SimpleUniform</span> <span class="pre">object&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/estimation/state.html#KalmanEstimatedState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.estimation.state.KalmanEstimatedState" title="Link to this definition"></a></dt>
+<dd><p>Extended estimation state featuring Kalman Filter properties.
+This is an extension for the standard estimated state so that Kalman
+states can also be represented. These additions include shared Kalman
+Filter matrices and state errors.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.estimation.state.KalmanEstimatedState.state_vector">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">state_vector</span></span><a class="headerlink" href="#qnav.estimation.state.KalmanEstimatedState.state_vector" title="Link to this definition"></a></dt>
+<dd><p>Returns estimated states in form of state vector.
+A commonly used representation of estimated states in Kalman Filters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Kalman State Vector</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray (15-elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.estimation.state.KalmanEstimatedState.update_estimates">
+<span class="sig-name descname"><span class="pre">update_estimates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acceleration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_rates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_errors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/estimation/state.html#KalmanEstimatedState.update_estimates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.estimation.state.KalmanEstimatedState.update_estimates" title="Link to this definition"></a></dt>
+<dd><p>Overwrites selected current estimated states.
+This is namely used when estimation fusion is applied and the
+internal states must be updated. To prevent accidental overwriting of
+estimated states or the setting of invalid data, all changes must be
+submitted through this method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timestamp</strong> (<em>float</em>) – The updated timestamp marking the estimated current
+duration of the simulation (in seconds).</p></li>
+<li><p><strong>position</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The updated position vector containing the
+latitude (in degrees), longitude (in degrees) and altitude
+(in metres) respectively.</p></li>
+<li><p><strong>velocity</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The updated velocity vector for the
+North, East and Down components respectively (in m/s).</p></li>
+<li><p><strong>acceleration</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The updated acceleration vector for
+the North, East and Down components respectively (in m/s^2).</p></li>
+<li><p><strong>attitude</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The updated attitude vector for the Heading,
+Pitch and Roll components respectively (in degrees).</p></li>
+<li><p><strong>angle_rates</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The updated angle rate vector for the
+P, Q and R body rates respectively (in deg/s).</p></li>
+<li><p><strong>state_errors</strong> (<em>numpy.ndarray</em><em> (</em><em>15-by-15 elements</em><em>)</em>) – The update Kalman state errors.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../earth/utm.html" class="btn btn-neutral float-left" title="9.1.4. qnav.earth.utm" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../fusion/ins.html" class="btn btn-neutral float-right" title="9.3.1. qnav.fusion.ins" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

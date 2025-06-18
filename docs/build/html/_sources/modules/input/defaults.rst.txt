@@ -1,0 +1,8 @@
+:orphan:
+
+nav_toolbox.input.defaults
+==========================
+
+.. automodule:: nav_toolbox.input.defaults
+    :members:
+    :member-order: bysource

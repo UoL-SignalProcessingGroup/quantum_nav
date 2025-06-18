@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>6. Sensor Processing &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="7. Fusion Methods" href="fusion.html" />
+    <link rel="prev" title="5. Gravity Modelling" href="gravity_modelling.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">6. Sensor Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#classic-inertia">6.1. Classic Inertia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#altitude">6.2. Altitude</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gps-gnss">6.3. GPS/GNSS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quantum-inertia">6.4. Quantum Inertia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quantum-gravity">6.5. Quantum Gravity</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><span class="section-number">6. </span>Sensor Processing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/measurement.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sensor-processing">
+<h1><span class="section-number">6. </span>Sensor Processing<a class="headerlink" href="#sensor-processing" title="Link to this heading"></a></h1>
+<p>To acquire information from the ground truth and produce measurement of control noise and errors, the project presents
+a handful of sensors. Each of these implement the base sensor class and feature methods for generating measurements,
+updating internal states and indicating when their next measurement is due. These sensors are categorised below:</p>
+<section id="classic-inertia">
+<h2><span class="section-number">6.1. </span>Classic Inertia<a class="headerlink" href="#classic-inertia" title="Link to this heading"></a></h2>
+<p>Classes representing conventional inertial based sensors are the accelerometer and gyroscope. These are implemented
+as generic sensors, as they are reused internally by other sensors within the toolbox. These are responsible for
+obtaining  acceleration and angle rate measurements respectively.</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="../modules/measurement/accelerometer.html#accelerometer-py"><span class="std std-ref">Generic Accelerometer</span></a> (<code class="docutils literal notranslate"><span class="pre">Accelerometer</span></code>)</p></li>
+<li><p><a class="reference internal" href="../modules/measurement/gyroscope.html#gyroscope-py"><span class="std std-ref">Generic Gyroscope</span></a> (<code class="docutils literal notranslate"><span class="pre">Gyroscope</span></code>)</p></li>
+</ol>
+</section>
+<section id="altitude">
+<h2><span class="section-number">6.2. </span>Altitude<a class="headerlink" href="#altitude" title="Link to this heading"></a></h2>
+<p>For obtaining altitude measurements, an altimeter sensor has been implemented. This simple obtains the measured
+vertical position, following configured noise profiles.</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="../modules/measurement/altimeter.html#altimeter-py"><span class="std std-ref">Generic Altimeter</span></a> (<code class="docutils literal notranslate"><span class="pre">Altimeter</span></code>)</p></li>
+</ol>
+</section>
+<section id="gps-gnss">
+<h2><span class="section-number">6.3. </span>GPS/GNSS<a class="headerlink" href="#gps-gnss" title="Link to this heading"></a></h2>
+<p>For simulating GPS measurements two classes have been implemented. The first class is satellite, which represents a
+satellite in orbit. While not specifically a sensor class, multiple satellite instances are used by the GPS sensor
+class, which is responsible for producing measurements. Measurement information include clock times, pseudo range
+information and estimated position and velocity data.</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="../modules/gps/satellite.html#satellite-py"><span class="std std-ref">GPS Satellite</span></a> (<code class="docutils literal notranslate"><span class="pre">Satellite</span></code>)</p></li>
+<li><p><a class="reference internal" href="../modules/gps/sensor.html#gps-sensor-py"><span class="std std-ref">GPS Sensor</span></a> (<code class="docutils literal notranslate"><span class="pre">GPSSensor</span></code>)</p></li>
+</ol>
+</section>
+<section id="quantum-inertia">
+<h2><span class="section-number">6.4. </span>Quantum Inertia<a class="headerlink" href="#quantum-inertia" title="Link to this heading"></a></h2>
+<p>Two cold-atom quantum based inertia sensors have been implemented. The first one is a basic concept, simply extending
+the use of the generic altimeter by simulating fairly accurate average inertia measurements over a duty cycle. The
+second one improves on this by simulating and processing the movement of atoms to gain measurements.</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="../modules/quantum/base.html#base-py"><span class="std std-ref">Concept Quantum IMU</span></a> (<code class="docutils literal notranslate"><span class="pre">ConceptQuantumImu</span></code>)</p></li>
+<li><p><a class="reference internal" href="../modules/quantum/realistic.html#realistic-py"><span class="std std-ref">Realistic Quantum IMU</span></a> (<code class="docutils literal notranslate"><span class="pre">QuantumIMU</span></code>)</p></li>
+</ol>
+</section>
+<section id="quantum-gravity">
+<h2><span class="section-number">6.5. </span>Quantum Gravity<a class="headerlink" href="#quantum-gravity" title="Link to this heading"></a></h2>
+<p>One cold-atom gravity gradient sensor has been implemented. This simulates a dual-interferometer, acquiring
+measurement signals from the releasing of two vertically stacked clouds of atoms that share a phase. A series of
+signals collected across multiple duty-cycles can be acquired to form an ellipse, used to estiamted the
+vertical gravity gradient.</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="../modules/quantum/base.html#base-py"><span class="std std-ref">Quantum Gravity Gradiometer</span></a> (<code class="docutils literal notranslate"><span class="pre">GravityGradiometer</span></code>)</p></li>
+</ol>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="gravity_modelling.html" class="btn btn-neutral float-left" title="5. Gravity Modelling" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="fusion.html" class="btn btn-neutral float-right" title="7. Fusion Methods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

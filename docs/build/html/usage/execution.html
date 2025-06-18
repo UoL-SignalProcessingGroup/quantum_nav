@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2. Software Usage &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3. Technical Overview" href="technical.html" />
+    <link rel="prev" title="1. Project Structure" href="structure.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="structure.html">1. Project Structure</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Software Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#command-line-usage">2.1. Command Line Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#anaconda-spyder-usage">2.2. Anaconda/Spyder Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pycharm-usage">2.3. PyCharm Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#eclipse-pydev-usage">2.4. Eclipse/PyDev Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><span class="section-number">2. </span>Software Usage</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/execution.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="software-usage">
+<h1><span class="section-number">2. </span>Software Usage<a class="headerlink" href="#software-usage" title="Link to this heading"></a></h1>
+<p>The navigation software can be used in many ways. Firstly, and most commonly, it can simply be executed via command
+line with a selected configuration file. The toolbox can also be executed through Integrated Development Environments
+(IDEs) such as PyCharm, Spyder or IDLE. These are particularly useful for viewing the output values in detail and/or
+performing additional processing steps such as calculating or plotting statistics. Lastly, the toolbox can be
+integrated and employed by other Python projects. The most common ways to use the software are discussed
+in this section.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>During development it was noted that the interface and layouts for the various IDEs used evolved with
+time. There is also small variations between platforms such as Microsoft Windows and MacOS. The names and
+locations of the buttons, menus and settings discussed in this section could have changed slightly.</p>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<section id="command-line-usage">
+<h2><span class="section-number">2.1. </span>Command Line Usage<a class="headerlink" href="#command-line-usage" title="Link to this heading"></a></h2>
+<a class="reference internal image-reference" href="../_images/terminal_icon.png"><img alt="Command Line Icon" class="align-center" src="../_images/terminal_icon.png" style="width: 105px;" /></a>
+<p>For standalone usage, the software simulation can be simply executed from the command line when within the project’s
+root directory. This usage has the advantage of not requiring the software to be installed or invoked via
+Python programming. To run a simulation directly, <em>employing the default configuration settings</em>, the following single
+command can be used. This launch command is identical for Windows, Linux and MacOS systems.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">Execute PNT Toolbox with default settings</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+</div>
+<p>If multiple versions of Python are installed on the host machine it is always best to explicitly state which version
+is to be used to avoid any compatibility issues. To use Python 3.12 replace ‘<strong>python3</strong>’ with ‘<strong>python3.12</strong>’.</p>
+<p>On execution, the software will extract its settings and user preferences from a provided configuration file.
+Configuration files are used to describe all input parameters including the simulated environment, hardware/sensor
+activity and vehicle limitations/restrictions. A requested configuration can be state by supplying its name (and
+location) as the first argument to the run script. If a configuration file is not provided, the default
+configuration <code class="docutils literal notranslate"><span class="pre">default_settings.ini</span></code> will be used automatically.</p>
+<p>An example of using a custom created configuration file named <code class="docutils literal notranslate"><span class="pre">custom_config.ini</span></code> (that is located in the project’s
+root directory) has been generated below.</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">Execute PNT  Toolbox with custom settings</span><a class="headerlink" href="#id4" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="n">custom_settings</span><span class="o">.</span><span class="n">ini</span>
+</pre></div>
+</div>
+</div>
+<p>The expected structure and format of configuration files is discussed in detail under
+<a class="reference internal" href="configuration.html#user-configuration"><span class="std std-ref">User Configuration</span></a> (discussed next).</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="anaconda-spyder-usage">
+<h2><span class="section-number">2.2. </span>Anaconda/Spyder Usage<a class="headerlink" href="#anaconda-spyder-usage" title="Link to this heading"></a></h2>
+<a class="reference internal image-reference" href="../_images/spyder_icon.png"><img alt="Spyder IDE Icon" class="align-center" src="../_images/spyder_icon.png" style="height: 100px;" /></a>
+<p>To run the software through <a class="reference external" href="https://www.anaconda.com/products/individual">Anaconda/Spyder</a> simply open Spyder and
+select “<strong>New Project…</strong>” under the “<strong>Project</strong>” dropdown menu at the top of the page. From there, create a new
+project with an appropriate name such as ‘Nav Toolbox’. After this step, copy or move the entire contents of the
+toolbox’s root directory to the location of the created Spyder project. Once complete, the files should appear on
+the left hand-side in Spyder. To launch the software <strong>right-click</strong> the script <code class="docutils literal notranslate"><span class="pre">run.py</span></code> and select “<strong>run</strong>”.
+The software should now be running with the default settings.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is best to create a new project rather than attempting to open the toolbox as an existing one, since
+creating a new project results in Spyder producing new hidden auxiliary and settings files (based on your
+environment rather than trusting the included ones).</p>
+</div>
+<p>If you wish to select a different configuration file to use rather than the default settings, this can be done so by
+providing the location of a configuration file as the first command line argument. To do this in Spyder simply
+select “<strong>Configuration per file…</strong>” from the “<strong>Run</strong>” dropdown menu at the top. Ensure the execution file
+<code class="docutils literal notranslate"><span class="pre">run.py</span></code> is selected under the dropdown box titled “<strong>Select a run configuration:</strong>”. Then under
+“<strong>General settings</strong>” enable “<strong>Command line options:</strong>” and enter the name/location of the configuration file to use.
+To launch the toolbox with these settings click the “<strong>run</strong>” button located at the bottom of the menu.</p>
+<p>For an example, lets assume we wish to use a configuration file called <code class="docutils literal notranslate"><span class="pre">custom_settings.ini</span></code> which is located in the
+same directory as <code class="docutils literal notranslate"><span class="pre">default_settings.ini</span></code>. To do this, we would enter <strong>custom_settings.ini</strong> into the
+“<strong>Command line options:</strong>” box. The toolbox will then automatically find the configuration file to use.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="pycharm-usage">
+<h2><span class="section-number">2.3. </span>PyCharm Usage<a class="headerlink" href="#pycharm-usage" title="Link to this heading"></a></h2>
+<a class="reference internal image-reference" href="../_images/pycharm_icon.png"><img alt="PyCharm IDE Icon" class="align-center" src="../_images/pycharm_icon.png" style="height: 80px;" /></a>
+<p>To use the software with <a class="reference external" href="https://www.jetbrains.com/pycharm/download/">JetBrain’s PyCharm</a> simply create a new
+project. If not prompted at the home screen, this can be achieved by selected “<strong>New Project…</strong>” from the
+“<strong>File</strong>” dropdown menu at the top of the screen. From there ensure the project is being created in a sensible
+location and given an appropriate name. During the new project’s creation you will be asked to select the
+“<strong>Python Interpreter</strong>” to use. It is recommended to select “<strong>New Environment Using:</strong>” one of the followings:</p>
+<ol class="arabic simple">
+<li><p><strong>Virtualenv</strong> - Isolated virtual environment (highly recommended).</p></li>
+<li><p><strong>Pipenv</strong> - Creates and manages a virtualenv with Pipfiles.</p></li>
+<li><p><strong>Conda</strong> - Anaconda Python distribution (requires Conda to be installed).</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>More information of configuring a Python interpreter in PyCharm is available
+<a class="reference external" href="https://www.jetbrains.com/help/pycharm/configuring-python-interpreter.html">here</a>!</p>
+</div>
+<p>With the project created copy the Quantum Navigation files to the its location. Once complete, the files should
+appear within the left hand-side panel. To launch the software <strong>right-click</strong> the script <code class="docutils literal notranslate"><span class="pre">run.py</span></code>
+inside the root folder and select “<strong>Run ‘run_simulation’</strong>”. The software should now be running with
+the default settings.</p>
+<p>If you wish to select a different configuration file to use rather than the default settings, this can be done so by
+providing the location of a configuration file as the first command line argument. To do this in PyCharm simply
+<strong>right-click</strong> the script and select the <strong>More Run/Debug</strong> menu, then select “<strong>Modify Configurations…</strong>”.
+From this menu enter the name/location of the configuration file to use in the box named “<strong>Script Parameters</strong>” and
+then click “<strong>Apply</strong>”. Each time the <code class="docutils literal notranslate"><span class="pre">run.py</span></code> is executed these settings will now be used.</p>
+<p>Note these settings may reset or change between sessions or when executing other scripts.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="eclipse-pydev-usage">
+<h2><span class="section-number">2.4. </span>Eclipse/PyDev Usage<a class="headerlink" href="#eclipse-pydev-usage" title="Link to this heading"></a></h2>
+<a class="reference internal image-reference" href="../_images/pydev_icon.png"><img alt="PyDev IDE Icon" class="align-center" src="../_images/pydev_icon.png" style="height: 60px;" /></a>
+<p>The project can also be used in <a class="reference external" href="https://www.pydev.org/">PyDev</a> (an <a class="reference external" href="https://www.eclipse.org/ide/">Eclipse</a>
+plug-in for Python development). To use the Quantum Navigation Toolbox in PyDev, simply create a new project. This can
+be done by going to the “<strong>File</strong>” Dropdown menu and selecting “<strong>New</strong>”, “<strong>Project</strong>”, “<strong>PyDev</strong>”, then
+“<strong>PyDev project</strong>”.
+From the PyDev Project creation window ensure the new project is given a suitable name and location. Ensure
+“<strong>Python</strong>” is selected as the “<strong>Project type</strong>” and that a compatible version of Python is chosen
+(i.e. Python 3.8 or above).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>More information of creating and importing Python projects in PyDev is available
+<a class="reference external" href="https://www.pydev.org/manual_101_project_conf.html">here</a>!</p>
+</div>
+<p>With the project created copy the toolbox files to the its location. Once complete, the files should
+appear within the left hand-side panel. To launch the software within PyDev <strong>open the script</strong> <code class="docutils literal notranslate"><span class="pre">run.py</span></code>
+inside the root folder. With the script <code class="docutils literal notranslate"><span class="pre">run.py</span></code> being displayed in the editor, go to the “<strong>Run</strong>” dropdown menu
+and select “<strong>Run As</strong>” followed by “<strong>Python Run</strong>”. Alternatively the shortcut key <strong>F9</strong> can be used to run the
+script currently open. The software should now be running with the default settings.</p>
+<p>If you wish to select a different configuration file to use rather than the default settings, this can be done so by
+providing the location of a configuration file as the first command line argument. To do this in PyDev firstly open the
+main run file <code class="docutils literal notranslate"><span class="pre">run.py</span></code> so it is being displayed in the editor. Then go to the “<strong>Run</strong>” dropdown menu and select
+“<strong>Run Configurations…</strong>” located under the “Run As”. From there ensure the current script is selected
+on the <strong>left-hand side</strong> under “<strong>Python Run</strong>”. Finally, under the “<strong>Arguments</strong>” tab enter the name/location of the
+configuration file to use in the box titled “<strong>Program arguments:</strong>” then click “<strong>apply</strong>” followed by “<strong>Run</strong>”.
+If needed, alternative steps for setting runtime arguments are available
+<a class="reference external" href="https://www.dev2qa.com/how-to-pass-command-line-parameters-to-python-script-in-eclipse-pydev/">here</a>!</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="structure.html" class="btn btn-neutral float-left" title="1. Project Structure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="technical.html" class="btn btn-neutral float-right" title="3. Technical Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

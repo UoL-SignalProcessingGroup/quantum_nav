@@ -1,0 +1,8 @@
+:orphan:
+
+nav_toolbox.output.report
+=========================
+
+.. automodule:: nav_toolbox.output.report
+    :members:
+    :member-order: bysource

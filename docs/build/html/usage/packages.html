@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9. Software Components &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="9.1.1. qnav.util.transformations" href="../modules/util/transformations.html" />
+    <link rel="prev" title="8. User Configuration" href="configuration.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">9. Software Components</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#earth">9.1. Earth</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/util/transformations.html">9.1.1. transformations.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/earth/dted.html">9.1.2. dted.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/earth/geoid.html">9.1.3. geoid.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/earth/utm.html">9.1.4. utm.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#estimation">9.2. Estimation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/estimation/state.html">9.2.1. state.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fusion">9.3. Fusion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/fusion/ins.html">9.3.1. ins.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/fusion/kalman.html">9.3.2. kalman.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/fusion/altimeter.html">9.3.3. altimeter.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gps">9.4. GPS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/gps/ephemeris.html">9.4.1. ephemeris.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/gps/fusion.html">9.4.2. fusion.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/gps/satellite.html">9.4.3. satellite.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/gps/sensor.html">9.4.4. sensor.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/gps/zones.html">9.4.5. zones.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gravity">9.5. Gravity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/gravity/base.html">9.5.1. base.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/gravity/simple.html">9.5.2. simple.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/gravity/somigliana.html">9.5.3. somigliana.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/gravity/nima.html">9.5.4. nima.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/gravity/map.html">9.5.5. map.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/gravity/egm.html">9.5.6. egm.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/gravity/geosat.html">9.5.7. geosat.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/gravity/marine.html">9.5.8. marine.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/gravity/ggm_plus.html">9.5.9. ggm_plus.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/gravity/srtm2gravity.html">9.5.10. srtm2gravity.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/gravity/irish.html">9.5.11. irish.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#input">9.6. Input</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/input/config.html">9.6.1. config.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/input/config_handler.html">9.6.2. config_handler.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#measurement">9.7. Measurement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/measurement/sensor.html">9.7.1. sensor.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/measurement/platform.html">9.7.2. platform.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/measurement/error_properties.html">9.7.3. error_properties.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/measurement/accelerometer.html">9.7.4. accelerometer.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/measurement/gyroscope.html">9.7.5. gyroscope.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/measurement/altimeter.html">9.7.6. altimeter.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/measurement/clock.html">9.7.7. clock.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#output">9.8. Output</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/output/data.html">9.8.1. data.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/output/formats.html">9.8.2. formats.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/output/figures.html">9.8.3. figures.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/output/summary.html">9.8.4. summary.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#quantum">9.9. Quantum</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/quantum/base.html">9.9.1. base.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/quantum/realistic.html">9.9.2. realistic.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/quantum/particle_filter.html">9.9.3. particle_filter.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/quantum/misalignment.html">9.9.4. misalignment.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/quantum/gravity_gradient.html">9.9.5. gravity_gradient.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/quantum/dummy.html">9.9.6. dummy.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#simulation">9.10. Simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/simulation/simulation.html">9.10.1. simulation.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/simulation/scheduling.html">9.10.2. scheduling.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/simulation/holonomic.html">9.10.3. holonomic.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/simulation/results.html">9.10.4. results.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/simulation/display.html">9.10.5. display.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#util">9.11. Util</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/util/constants.html">9.11.1. constants.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/util/connections.html">9.11.2. connections.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/util/system.html">9.11.3. system.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/util/rng.html">9.11.4. rng.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#waypoints">9.12. Waypoints</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/waypoints/generation.html">9.12.1. generation.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/waypoints/trajectory.html">9.12.2. trajectory.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/waypoints/vehicle.html">9.12.3. vehicle.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/waypoints/tracks.html">9.12.4. tracks.py</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><span class="section-number">9. </span>Software Components</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/packages.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="software-components">
+<h1><span class="section-number">9. </span>Software Components<a class="headerlink" href="#software-components" title="Link to this heading"></a></h1>
+<p>The functionality of the produced software has been logically categorised into Python sub-packages. This allows means
+for grouping related elements together and organising the project into manageable components (rather than large amount
+of files and resources). The modules belonging to each sub-package of the project have been outlined below.</p>
+<section id="earth">
+<h2><span class="section-number">9.1. </span>Earth<a class="headerlink" href="#earth" title="Link to this heading"></a></h2>
+<p>Modules relating to core calculations involving the earth:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/util/transformations.html">9.1.1. transformations.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/earth/dted.html">9.1.2. dted.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/earth/geoid.html">9.1.3. geoid.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/earth/utm.html">9.1.4. utm.py</a></li>
+</ul>
+</div>
+</section>
+<section id="estimation">
+<h2><span class="section-number">9.2. </span>Estimation<a class="headerlink" href="#estimation" title="Link to this heading"></a></h2>
+<p>Modules related to state estimation:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/estimation/state.html">9.2.1. state.py</a></li>
+</ul>
+</div>
+</section>
+<section id="fusion">
+<h2><span class="section-number">9.3. </span>Fusion<a class="headerlink" href="#fusion" title="Link to this heading"></a></h2>
+<p>Modules related to standard sensor fusion methods:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/fusion/ins.html">9.3.1. ins.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/fusion/kalman.html">9.3.2. kalman.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/fusion/altimeter.html">9.3.3. altimeter.py</a></li>
+</ul>
+</div>
+</section>
+<section id="gps">
+<h2><span class="section-number">9.4. </span>GPS<a class="headerlink" href="#gps" title="Link to this heading"></a></h2>
+<p>Modules relating to GPS sensor and fusion methods:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gps/ephemeris.html">9.4.1. ephemeris.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gps/fusion.html">9.4.2. fusion.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gps/satellite.html">9.4.3. satellite.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gps/sensor.html">9.4.4. sensor.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gps/zones.html">9.4.5. zones.py</a></li>
+</ul>
+</div>
+</section>
+<section id="gravity">
+<h2><span class="section-number">9.5. </span>Gravity<a class="headerlink" href="#gravity" title="Link to this heading"></a></h2>
+<p>Modules relating to gravitational calculations:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gravity/base.html">9.5.1. base.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gravity/simple.html">9.5.2. simple.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gravity/somigliana.html">9.5.3. somigliana.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gravity/nima.html">9.5.4. nima.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gravity/map.html">9.5.5. map.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gravity/egm.html">9.5.6. egm.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gravity/geosat.html">9.5.7. geosat.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gravity/marine.html">9.5.8. marine.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gravity/ggm_plus.html">9.5.9. ggm_plus.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gravity/srtm2gravity.html">9.5.10. srtm2gravity.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/gravity/irish.html">9.5.11. irish.py</a></li>
+</ul>
+</div>
+</section>
+<section id="input">
+<h2><span class="section-number">9.6. </span>Input<a class="headerlink" href="#input" title="Link to this heading"></a></h2>
+<p>Modules related to reading in input data:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/input/config.html">9.6.1. config.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/input/config_handler.html">9.6.2. config_handler.py</a></li>
+</ul>
+</div>
+</section>
+<section id="measurement">
+<h2><span class="section-number">9.7. </span>Measurement<a class="headerlink" href="#measurement" title="Link to this heading"></a></h2>
+<p>Modules related to standard sensors for measurements:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/measurement/sensor.html">9.7.1. sensor.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/measurement/platform.html">9.7.2. platform.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/measurement/error_properties.html">9.7.3. error_properties.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/measurement/accelerometer.html">9.7.4. accelerometer.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/measurement/gyroscope.html">9.7.5. gyroscope.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/measurement/altimeter.html">9.7.6. altimeter.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/measurement/clock.html">9.7.7. clock.py</a></li>
+</ul>
+</div>
+</section>
+<section id="output">
+<h2><span class="section-number">9.8. </span>Output<a class="headerlink" href="#output" title="Link to this heading"></a></h2>
+<p>Modules related to exporting output data:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/output/data.html">9.8.1. data.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/output/formats.html">9.8.2. formats.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/output/figures.html">9.8.3. figures.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/output/summary.html">9.8.4. summary.py</a></li>
+</ul>
+</div>
+</section>
+<section id="quantum">
+<h2><span class="section-number">9.9. </span>Quantum<a class="headerlink" href="#quantum" title="Link to this heading"></a></h2>
+<p>Modules relating to quantum sensor and fusion methods:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/quantum/base.html">9.9.1. base.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/quantum/realistic.html">9.9.2. realistic.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/quantum/particle_filter.html">9.9.3. particle_filter.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/quantum/misalignment.html">9.9.4. misalignment.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/quantum/gravity_gradient.html">9.9.5. gravity_gradient.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/quantum/dummy.html">9.9.6. dummy.py</a></li>
+</ul>
+</div>
+</section>
+<section id="simulation">
+<h2><span class="section-number">9.10. </span>Simulation<a class="headerlink" href="#simulation" title="Link to this heading"></a></h2>
+<p>Modules relating to simulation loop handling:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/simulation/simulation.html">9.10.1. simulation.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/simulation/scheduling.html">9.10.2. scheduling.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/simulation/holonomic.html">9.10.3. holonomic.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/simulation/results.html">9.10.4. results.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/simulation/display.html">9.10.5. display.py</a></li>
+</ul>
+</div>
+</section>
+<section id="util">
+<h2><span class="section-number">9.11. </span>Util<a class="headerlink" href="#util" title="Link to this heading"></a></h2>
+<p>Modules relating to commonly used utility functions:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/util/constants.html">9.11.1. constants.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/util/connections.html">9.11.2. connections.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/util/system.html">9.11.3. system.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/util/rng.html">9.11.4. rng.py</a></li>
+</ul>
+</div>
+</section>
+<section id="waypoints">
+<h2><span class="section-number">9.12. </span>Waypoints<a class="headerlink" href="#waypoints" title="Link to this heading"></a></h2>
+<p>Modules related to trajectory generation:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/waypoints/generation.html">9.12.1. generation.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/waypoints/trajectory.html">9.12.2. trajectory.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/waypoints/vehicle.html">9.12.3. vehicle.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/waypoints/tracks.html">9.12.4. tracks.py</a></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="configuration.html" class="btn btn-neutral float-left" title="8. User Configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../modules/util/transformations.html" class="btn btn-neutral float-right" title="9.1.1. qnav.util.transformations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

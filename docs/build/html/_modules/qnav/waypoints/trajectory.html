@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.waypoints.trajectory &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.waypoints.trajectory</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.waypoints.trajectory</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=============</span>
+<span class="sd">trajectory.py</span>
+<span class="sd">=============</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Used for the core representation of ground truth trajectory information.</span>
+<span class="sd">    This module is responsible for handling ground truth waypoint</span>
+<span class="sd">    trajectories, including the managing of input data, position and value</span>
+<span class="sd">    calculations and look-up interpolation of ground truth records.</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of this module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">CubicSpline</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">PchipInterpolator</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">Akima1DInterpolator</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">CubicHermiteSpline</span>
+
+<span class="kn">from</span> <span class="nn">qnav.gravity.base</span> <span class="kn">import</span> <span class="n">GravityModel</span>
+<span class="kn">from</span> <span class="nn">qnav.waypoints.vehicle</span> <span class="kn">import</span> <span class="n">Vehicle</span>
+<span class="kn">from</span> <span class="nn">qnav.waypoints.generation</span> <span class="kn">import</span> <span class="n">get_positions</span>
+<span class="kn">from</span> <span class="nn">qnav.waypoints.generation</span> <span class="kn">import</span> <span class="n">get_trajectory</span>
+<span class="kn">from</span> <span class="nn">qnav.util.transformations</span> <span class="kn">import</span> <span class="n">quaternion_to_euler</span>
+<span class="kn">from</span> <span class="nn">qnav.util.transformations</span> <span class="kn">import</span> <span class="n">quaternion_to_euler_vec</span>
+<span class="kn">from</span> <span class="nn">qnav.util.transformations</span> <span class="kn">import</span> <span class="n">haversine_vec</span>
+
+
+<div class="viewcode-block" id="GroundTruth">
+<a class="viewcode-back" href="../../../modules/waypoints/trajectory.html#qnav.waypoints.trajectory.GroundTruth">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">GroundTruth</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A record class for trajectory ground truth a given time.</span>
+<span class="sd">    This class contains the ground truth (the true trajectory values) at a</span>
+<span class="sd">    given time. The purpose of this is to supply the &quot;real-world&quot; data to</span>
+<span class="sd">    sensor models, where simulated noise and errors will then be applied to</span>
+<span class="sd">    produce measurement data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#: The time since initialisation (in seconds).</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span>
+
+    <span class="c1">#: The position as latitude-longitude-altitude (in deg-deg-metres).</span>
+    <span class="n">position</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+
+    <span class="c1">#: The velocity as along-across-down in body axis (in metres/second).</span>
+    <span class="n">velocity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+
+    <span class="c1">#: The acceleration as along-across-down in body axis (in metres/second^2).</span>
+    <span class="n">acceleration</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+
+    <span class="c1">#: The attitude as north-east-down in NED axis (in degrees).</span>
+    <span class="n">attitude</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+
+    <span class="c1">#: The angle rates as north-east-down in NED axis (in degrees/second).</span>
+    <span class="n">angle_rates</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+
+<div class="viewcode-block" id="GroundTruth.as_dict">
+<a class="viewcode-back" href="../../../modules/waypoints/trajectory.html#qnav.waypoints.trajectory.GroundTruth.as_dict">[docs]</a>
+    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns class properties in dictionary form.</span>
+
+<span class="sd">        :return: A dictionary containing ground truth values.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
+            <span class="s1">&#39;velocity&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">,</span>
+            <span class="s1">&#39;acceleration&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">acceleration</span><span class="p">,</span>
+            <span class="s1">&#39;attitude&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">attitude</span><span class="p">,</span>
+            <span class="s1">&#39;angle_rates&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle_rates</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="GroundTruth.as_numpy">
+<a class="viewcode-back" href="../../../modules/waypoints/trajectory.html#qnav.waypoints.trajectory.GroundTruth.as_numpy">[docs]</a>
+    <span class="k">def</span> <span class="nf">as_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns call properties in 1D numpy array form.</span>
+
+<span class="sd">        :return: A numpy array containing ground truth values.</span>
+<span class="sd">        :rtype: np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acceleration</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attitude</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">angle_rates</span>
+        <span class="p">))</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Waypoints">
+<a class="viewcode-back" href="../../../modules/waypoints/trajectory.html#qnav.waypoints.trajectory.Waypoints">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Waypoints</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A container for trajectory waypoint data used to define a course.</span>
+<span class="sd">    This data class will contain the arrival time and positioning records</span>
+<span class="sd">    for core points along a trajectory. These can either represent sparse</span>
+<span class="sd">    base points that a trajectory is to cover, or a series of dense</span>
+<span class="sd">    positions, a fixed frequency, for an already generated trajectory.</span>
+<span class="sd">    Additionally, attitude values can be provided for each position.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">timestamps</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">lat_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">lon_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">alt_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">attitudes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Post-initialisation parameter validation.</span>
+<span class="sd">        Performs checks after the waypoint are initialised to ensure all</span>
+<span class="sd">        given data is valid and usable for trajectory generation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">to_test</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lat_points</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon_points</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt_points</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestamps</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">to_test</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Incomplete waypoint data provided&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">attitudes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">to_test</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attitudes</span><span class="p">)</span>
+
+        <span class="n">exp_size</span> <span class="o">=</span> <span class="n">to_test</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp_size</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">exp_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Records must be one-dimensional&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">exp_size</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">to_test</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Records must be of same size&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">to_test</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Records must be of finite values&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Waypoints.as_array">
+<a class="viewcode-back" href="../../../modules/waypoints/trajectory.html#qnav.waypoints.trajectory.Waypoints.as_array">[docs]</a>
+    <span class="k">def</span> <span class="nf">as_array</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns required records formatted as column arrays.</span>
+<span class="sd">        Specifically returns an n-by-4 array holding the timestamps, latitude,</span>
+<span class="sd">        longitude and altitude records as columns, respectively. Optional</span>
+<span class="sd">        Attitude records are not included in this output.</span>
+
+<span class="sd">        :return: Position data formatted as column array.</span>
+<span class="sd">        :rtype: np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timestamps</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lat_points</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lon_points</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alt_points</span>
+        <span class="p">))</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Trajectory">
+<a class="viewcode-back" href="../../../modules/waypoints/trajectory.html#qnav.waypoints.trajectory.Trajectory">[docs]</a>
+<span class="k">class</span> <span class="nc">Trajectory</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A fully-generated trajectory with ground truth look-up.</span>
+<span class="sd">    On initialization, this generates the full trajectory from given base</span>
+<span class="sd">    waypoints, vehicle model and gravity model. The core trajectory is</span>
+<span class="sd">    generated with base points calculated at fixed frequency. Intermediate</span>
+<span class="sd">    values are then interpolated.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Base data frequency (in Hz).</span>
+    <span class="n">__base_freq</span><span class="p">:</span> <span class="nb">float</span>
+
+    <span class="c1"># The time of the first record (in seconds).</span>
+    <span class="n">__start_time</span><span class="p">:</span> <span class="nb">float</span>
+
+    <span class="c1"># The time of the final record (in seconds).</span>
+    <span class="n">__end_time</span><span class="p">:</span> <span class="nb">float</span>
+
+    <span class="c1"># The base position waypoints used. Maintained for verification.</span>
+    <span class="n">__waypoints</span><span class="p">:</span> <span class="n">Waypoints</span>
+
+    <span class="c1"># The vehicle model used for maneuvering constraints and noise factors.</span>
+    <span class="n">__vehicle_model</span><span class="p">:</span> <span class="n">Vehicle</span>
+
+    <span class="c1"># The gravity model used for true gravity calculations.</span>
+    <span class="n">__gravity_model</span><span class="p">:</span> <span class="n">GravityModel</span>
+
+    <span class="c1"># The trajectory interpolation use for value look-up.</span>
+    <span class="n">__interp</span><span class="p">:</span> <span class="n">CubicHermiteSpline</span>
+
+    <span class="c1"># The selected interpolation method</span>
+    <span class="n">__interp_method</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">waypoints</span><span class="p">:</span> <span class="n">Waypoints</span><span class="p">,</span>
+                 <span class="n">vehicle_model</span><span class="p">:</span> <span class="n">Vehicle</span><span class="p">,</span>
+                 <span class="n">gravity_model</span><span class="p">:</span> <span class="n">GravityModel</span><span class="p">,</span>
+                 <span class="n">base_freq</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">inter_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;pchip&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates the trajectory and look-up interpolation.</span>
+<span class="sd">        Given the base waypoint, vehicle and gravity models and base</span>
+<span class="sd">        frequency, this generates and returns the trajectory. On succession,</span>
+<span class="sd">        this allows direct look-up of the trajectory ground truth values at</span>
+<span class="sd">        any requested time.</span>
+
+<span class="sd">        If the frequency of the waypoint data is sufficiently high-enough,</span>
+<span class="sd">        interpolation of positions will be performed directly.</span>
+
+<span class="sd">        :param waypoints: The waypoints defining positions on the trajectory.</span>
+<span class="sd">        :rtype waypoints: Waypoints</span>
+
+<span class="sd">        :param vehicle_model: The vehicle model used for applying maneuvering</span>
+<span class="sd">            constraints, orientation behaviour and noise factors (the latter</span>
+<span class="sd">            used in advanced settings).</span>
+<span class="sd">        :rtype vehicle_model: Vehicle</span>
+
+<span class="sd">        :param gravity_model: The gravity model used for calculating the</span>
+<span class="sd">            gravitation acceleration at requested positions.</span>
+<span class="sd">        :rtype gravity_model: GravityModel</span>
+
+<span class="sd">        :param base_freq: The frequency of interpolation points (in Hz).</span>
+<span class="sd">            A frequency of around 50-100 Hz is recommended. Higher</span>
+<span class="sd">            frequencies have increased chances of resulting in numerical</span>
+<span class="sd">            instabilities.</span>
+<span class="sd">        :type base_freq: float</span>
+
+<span class="sd">        :param inter_method: The interpolation method to use.</span>
+<span class="sd">            Supported methods are &#39;pchip&#39;, &#39;cubic&#39; and &#39;akima&#39;.</span>
+<span class="sd">        :type inter_method: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">base_freq</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Frequency must be positive&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__vehicle_model</span> <span class="o">=</span> <span class="n">vehicle_model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__waypoints</span> <span class="o">=</span> <span class="n">waypoints</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gravity_model</span> <span class="o">=</span> <span class="n">gravity_model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__base_freq</span> <span class="o">=</span> <span class="n">base_freq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__interp_method</span> <span class="o">=</span> <span class="n">inter_method</span><span class="o">.</span><span class="n">casefold</span><span class="p">()</span>
+
+        <span class="n">interp_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_interp_class</span><span class="p">()</span>
+        <span class="n">waypoint_freq</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">waypoints</span><span class="o">.</span><span class="n">timestamps</span><span class="p">))</span>
+
+        <span class="c1"># TODO: Add fixed minimum thresholding!</span>
+        <span class="c1"># if waypoint_freq &lt; self.__base_freq:</span>
+        <span class="k">if</span> <span class="nb">round</span><span class="p">(</span><span class="n">waypoint_freq</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__base_freq</span> <span class="o">/</span> <span class="mi">10</span><span class="p">):</span>
+            <span class="n">base_points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_positions</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">base_points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interp_positions</span><span class="p">()</span>
+
+        <span class="c1"># TODO: Support use of attitude values</span>
+        <span class="n">data_points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_values</span><span class="p">(</span><span class="n">base_points</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__start_time</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data_points</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__end_time</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data_points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">x_points</span> <span class="o">=</span> <span class="n">data_points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">y_points</span> <span class="o">=</span> <span class="n">data_points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__interp</span> <span class="o">=</span> <span class="n">interp_class</span><span class="p">(</span><span class="n">x_points</span><span class="p">,</span> <span class="n">y_points</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Trajectory.get_record">
+<a class="viewcode-back" href="../../../modules/waypoints/trajectory.html#qnav.waypoints.trajectory.Trajectory.get_record">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_sec</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GroundTruth</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns values of the trajectory at given time (in seconds).</span>
+<span class="sd">        Safely interpolates and returns ground truth at requested time.</span>
+
+<span class="sd">        :param time_sec: A requested time in seconds.</span>
+<span class="sd">        :type time_sec: float</span>
+
+<span class="sd">        :return: The corresponding ground truth record.</span>
+<span class="sd">        :rtype: GroundTruth</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">record</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__interp</span><span class="p">(</span><span class="n">time_sec</span><span class="p">))</span>
+        <span class="n">record</span><span class="o">.</span><span class="n">setflags</span><span class="p">(</span><span class="n">write</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">position</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">velocity</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
+        <span class="n">acceleration</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">9</span><span class="p">]</span>
+        <span class="n">angle_rates</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="mi">12</span><span class="p">:</span><span class="mi">15</span><span class="p">]</span>
+        <span class="n">attitude</span> <span class="o">=</span> <span class="n">quaternion_to_euler</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="mi">15</span><span class="p">:</span><span class="mi">19</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">GroundTruth</span><span class="p">(</span>
+            <span class="n">time_sec</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">acceleration</span><span class="p">,</span>
+            <span class="n">attitude</span><span class="p">,</span> <span class="n">angle_rates</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Trajectory.get_records">
+<a class="viewcode-back" href="../../../modules/waypoints/trajectory.html#qnav.waypoints.trajectory.Trajectory.get_records">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_steps</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Obtains full records of the trajectory for a given times (in seconds).</span>
+<span class="sd">        Essentially performs vectorised interpolation for given time series.</span>
+
+<span class="sd">        :param time_steps: The time steps (in seconds) to obtain records for.</span>
+<span class="sd">        :type time_steps: np.ndarray</span>
+
+<span class="sd">        :return: A dictionary holding the records for each time step.</span>
+<span class="sd">        :rtype: dict[str, np.ndarray]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">record</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__interp</span><span class="p">(</span><span class="n">time_steps</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;time_steps&#39;</span><span class="p">:</span> <span class="n">time_steps</span><span class="p">,</span>
+            <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="n">record</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span>
+            <span class="s1">&#39;velocity&#39;</span><span class="p">:</span> <span class="n">record</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">],</span>
+            <span class="s1">&#39;acceleration&#39;</span><span class="p">:</span> <span class="n">record</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">:</span><span class="mi">9</span><span class="p">],</span>
+            <span class="s1">&#39;angle_rates&#39;</span><span class="p">:</span> <span class="n">record</span><span class="p">[:,</span> <span class="mi">12</span><span class="p">:</span><span class="mi">15</span><span class="p">],</span>
+            <span class="s1">&#39;attitude&#39;</span><span class="p">:</span> <span class="n">quaternion_to_euler_vec</span><span class="p">(</span><span class="n">record</span><span class="p">[:,</span> <span class="mi">15</span><span class="p">:</span><span class="mi">19</span><span class="p">])</span>
+        <span class="p">}</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the time of the first trajectory record (in seconds).</span>
+
+<span class="sd">        :return: The start time of the trajectory</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__start_time</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">end_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the time of the final trajectory record (in seconds).</span>
+
+<span class="sd">        :return: The end time of the trajectory</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__end_time</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interp_method</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The interpolation method used for ground truth generation.</span>
+
+<span class="sd">        :return: Interpolation name.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interp_method</span>
+
+    <span class="k">def</span> <span class="nf">__calculate_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates intermediate positions using additional information.</span>
+<span class="sd">        This calculates and returns all positions of the trajectory at set</span>
+<span class="sd">        frequency, using all information including optional vehicle model and</span>
+<span class="sd">        orientation positions.</span>
+
+<span class="sd">        :return: An array holding time steps and LLA positions.</span>
+<span class="sd">        :rtype: np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">get_positions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__waypoints</span><span class="o">.</span><span class="n">lat_points</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">__waypoints</span><span class="o">.</span><span class="n">lon_points</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">__waypoints</span><span class="o">.</span><span class="n">alt_points</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">__vehicle_model</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">__base_freq</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">),</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">__waypoints</span><span class="o">.</span><span class="n">timestamps</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__interp_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Simply interpolates intermediate positions.</span>
+<span class="sd">        Used as an alternative to fully calculating them with a vehicle</span>
+<span class="sd">        model. This function simply interpolates the data at set frequency.</span>
+<span class="sd">        This is used when the provided data is either of sufficient</span>
+<span class="sd">        resolution or too high of resolution.</span>
+
+<span class="sd">        :return: An array holding time steps and LLA positions.</span>
+<span class="sd">        :rtype: np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">time_step</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">__base_freq</span>
+        <span class="n">old_time_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__waypoints</span><span class="o">.</span><span class="n">timestamps</span>
+
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time_step</span> <span class="o">*</span> <span class="p">(</span><span class="n">old_time_steps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="n">time_step</span><span class="p">)</span>
+        <span class="n">end_time</span> <span class="o">=</span> <span class="n">time_step</span> <span class="o">*</span> <span class="p">(</span><span class="n">old_time_steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="n">time_step</span><span class="p">)</span>
+        <span class="n">new_time_steps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="n">time_step</span><span class="p">)</span>
+
+        <span class="n">interp_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_interp_class</span><span class="p">()</span>
+        <span class="n">interp</span> <span class="o">=</span> <span class="n">interp_class</span><span class="p">(</span><span class="n">old_time_steps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__waypoints</span><span class="o">.</span><span class="n">as_array</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">interp</span><span class="p">(</span><span class="n">new_time_steps</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__calculate_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the trajectory values at all positions.</span>
+<span class="sd">        Given an array of high-resolution and fix frequency base points,</span>
+<span class="sd">        this method will calculate the trajectory values at each step. This</span>
+<span class="sd">        essentially populates the look-up table for the trajectory.</span>
+
+<span class="sd">        :param base_points: High-resolution base points to calculate</span>
+<span class="sd">        trajectory values for. These must be given at uniform</span>
+<span class="sd">        time steps.</span>
+<span class="sd">        :type base_points: np.ndarray (n-by-4 elements)</span>
+
+<span class="sd">        :return: An array holding the trajectory values at each step.</span>
+<span class="sd">        :rtype: np.ndarray (n-by-20 elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">get_trajectory</span><span class="p">(</span><span class="n">base_points</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__gravity_model</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__get_interp_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">CubicSpline</span> <span class="o">|</span> <span class="n">PchipInterpolator</span> <span class="o">|</span> <span class="n">Akima1DInterpolator</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For given interpolation name, returns the class type to use.</span>
+<span class="sd">        A mapping function which returns the CubicHermiteSpline class type that</span>
+<span class="sd">        corresponds to the given interpolation name. If fails to match, a Value</span>
+<span class="sd">        error will be thrown.</span>
+
+<span class="sd">        :return: The interpolation class to use.</span>
+<span class="sd">        :rtype: Type[CubicHermiteSpline]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interp_method</span><span class="p">:</span>
+
+            <span class="k">case</span> <span class="s1">&#39;cubic&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">CubicSpline</span>
+
+            <span class="k">case</span> <span class="s1">&#39;pchip&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">PchipInterpolator</span>
+
+            <span class="k">case</span> <span class="s1">&#39;akima&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Akima1DInterpolator</span>
+
+            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+                <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported interpolation method &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__interp_method</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span></div>
+
+
+
+
+<div class="viewcode-block" id="cumulative_distance">
+<a class="viewcode-back" href="../../../modules/waypoints/trajectory.html#qnav.waypoints.trajectory.cumulative_distance">[docs]</a>
+<span class="k">def</span> <span class="nf">cumulative_distance</span><span class="p">(</span><span class="n">lat_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                        <span class="n">lon_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                        <span class="n">alt_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the cumulative &#39;great-circle&#39; distance between coordinate points.</span>
+<span class="sd">    For a given series of latitude-longitude-altitude points (given in</span>
+<span class="sd">    deg-deg-m), this calculates the cumulative distance between them using</span>
+<span class="sd">    the standard WGS-84 reference ellipsoid.</span>
+
+<span class="sd">    :param lat_points: A series of latitude positions (in decimal degrees).</span>
+<span class="sd">    :type lat_points: np.ndarray (n-elements)</span>
+
+<span class="sd">    :param lon_points: A series of longitude positions (in decimal degrees).</span>
+<span class="sd">    :type lat_points: np.ndarray (n-elements)</span>
+
+<span class="sd">    :param alt_points: A series of altitude positions (in decimal degrees).</span>
+<span class="sd">    :type lat_points: np.ndarray (n-elements)</span>
+
+<span class="sd">    :return: The cumulative distance all points, starting from first.</span>
+<span class="sd">    :rtype: np.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Validate the input to ensure it is of the same one dimensional size</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">lat_points</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">lat_points</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">lon_points</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">lon_points</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;input must be of same 1-dimensional size&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Pre-allocate the return distances</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lat_points</span><span class="p">))</span>
+
+    <span class="c1"># Calculate the distance between the waypoints.</span>
+    <span class="n">distances</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">haversine_vec</span><span class="p">(</span>
+        <span class="n">lat_points</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">lon_points</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">alt_points</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">lat_points</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">lon_points</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">alt_points</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+    <span class="c1"># Calculate the cumulative sum of the times.</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># if __name__ == &#39;__main__&#39;:</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1">#     test_lats = np.array([0.0, 0.10])</span>
+<span class="c1">#     test_lons = np.array([0.0, 0.0])</span>
+<span class="c1">#     test_alts = np.array([0.0, 0.0])</span>
+<span class="c1">#</span>
+<span class="c1">#     vehicle = Vehicle()</span>
+<span class="c1">#     avg_speed = 10.0</span>
+<span class="c1">#     freq = 10.0</span>
+<span class="c1">#</span>
+<span class="c1">#     test_out = get_positions(test_lats, test_lons, test_alts,</span>
+<span class="c1">#                              vehicle, freq, avg_speed)</span>
+<span class="c1">#</span>
+<span class="c1">#     data_out = get_trajectory(test_out, FixedValue())</span>
+
+
+
+
+
+
+
+
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

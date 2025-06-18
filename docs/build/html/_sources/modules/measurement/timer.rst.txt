@@ -1,0 +1,8 @@
+:orphan:
+
+nav_toolbox.measurement.timer
+=============================
+
+.. automodule:: nav_toolbox.measurement.timer
+    :members:
+    :member-order: bysource

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.quantum.particle_filter &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.quantum.particle_filter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.quantum.particle_filter</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">==================</span>
+<span class="sd">particle_filter.py</span>
+<span class="sd">==================</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Particle filter implementations for quantum sensor fusion.</span>
+<span class="sd">    This module contains fusion methods for quantum sensors that employ</span>
+<span class="sd">    particle filter estimation.</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">qnav.measurement.accelerometer</span> <span class="kn">import</span> <span class="n">Accelerometer</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.gyroscope</span> <span class="kn">import</span> <span class="n">Gyroscope</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.platform</span> <span class="kn">import</span> <span class="n">SensorAxis</span>
+<span class="kn">from</span> <span class="nn">qnav.quantum.base</span> <span class="kn">import</span> <span class="n">ConceptQuantumFusion</span>
+<span class="kn">from</span> <span class="nn">qnav.quantum.base</span> <span class="kn">import</span> <span class="n">ConceptQuantumImu</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">isinf</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="ParticleFilterParams">
+<a class="viewcode-back" href="../../../modules/quantum/particle_filter.html#qnav.quantum.particle_filter.ParticleFilterParams">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">ParticleFilterParams</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters for a particle filter fusion for quantum sensors.</span>
+<span class="sd">    This contains the arguments used for applying particle filtering for</span>
+<span class="sd">    position fixing with IMU quantum sensors. This namely contains the</span>
+<span class="sd">    number of particles to use and the expected errors.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The number of particles to use for filtering</span>
+    <span class="n">num_particles</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span>
+
+    <span class="c1"># The sigma value to use for average accelerometer bias</span>
+    <span class="n">sigma_accelerometer</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
+
+    <span class="c1"># The sigma value to use for average gyroscope bias</span>
+    <span class="n">sigma_gyroscope</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
+
+    <span class="c1"># The sigma value to use for axes misalignment</span>
+    <span class="n">sigma_misalignment</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
+
+    <span class="c1"># The seed for random number generation</span>
+    <span class="n">rng_seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># The probability of applying low noise instead of high.</span>
+    <span class="n">low_noise_prob</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span>
+
+    <span class="c1"># The low noise ratio to apply.</span>
+    <span class="n">low_noise</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+    <span class="c1"># The high noise ratio to apply.</span>
+    <span class="n">high_noise</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span>
+
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Supplies post-generation validation for given filtering parameters.</span>
+<span class="sd">        Used to ensure given parameters are valid and usable for performing</span>
+<span class="sd">        particle filtering.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_particles</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">isinf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_particles</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;num_particles must be positive integer&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_accelerometer</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">isinf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma_accelerometer</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sigma_accelerometer must be non-negative and finite&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_gyroscope</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">isinf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma_gyroscope</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sigma_gyroscope must be non-negative and finite&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_misalignment</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">isinf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma_misalignment</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sigma_misalignment must be non-negative and finite&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="QuantumPFFusion">
+<a class="viewcode-back" href="../../../modules/quantum/particle_filter.html#qnav.quantum.particle_filter.QuantumPFFusion">[docs]</a>
+<span class="k">class</span> <span class="nc">QuantumPFFusion</span><span class="p">(</span><span class="n">ConceptQuantumFusion</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Quantum sensor fusion with particle filter estimation.</span>
+<span class="sd">    This provides position correction by using a particle filter approach for</span>
+<span class="sd">    estimating the bias errors within the class IMU sensors. This extends</span>
+<span class="sd">    from the base class, overriding the relevant methods.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qs_imu</span><span class="p">:</span> <span class="n">ConceptQuantumImu</span><span class="p">,</span>
+                 <span class="n">shared_accelerometer</span><span class="p">:</span> <span class="n">Accelerometer</span><span class="p">,</span>
+                 <span class="n">shared_gyroscope</span><span class="p">:</span> <span class="n">Gyroscope</span><span class="p">,</span>
+                 <span class="n">est_qs_imu_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">est_acc_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">est_gyro_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">filter_params</span><span class="p">:</span> <span class="n">ParticleFilterParams</span> <span class="o">=</span> <span class="n">ParticleFilterParams</span><span class="p">()):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a quantum sensor particle filter fusion instance.</span>
+
+<span class="sd">        :param qs_imu: The quantum sensor to use for quantum IMU measurements.</span>
+<span class="sd">        :type qs_imu: ConceptQuantumImu</span>
+
+<span class="sd">        :param shared_accelerometer: The IMU&#39;s accelerometer instance.</span>
+<span class="sd">        :type shared_accelerometer: Accelerometer</span>
+
+<span class="sd">        :param shared_gyroscope: The IMU&#39;s gyroscope instance.</span>
+<span class="sd">        :type shared_gyroscope: Gyroscope</span>
+
+<span class="sd">        :param est_qs_imu_axis: (Optional) Estimated sensor axis for</span>
+<span class="sd">            quantum IMU. If not provided, true axis will be used.</span>
+<span class="sd">        :type est_qs_imu_axis: SensorAxis</span>
+
+<span class="sd">        :param est_acc_axis: (Optional) Estimated sensor axis for</span>
+<span class="sd">            accelerometer. If not provided, true axis will be used.</span>
+<span class="sd">        :type est_acc_axis: SensorAxis</span>
+
+<span class="sd">        :param est_gyro_axis: (Optional) Estimated sensor axis for</span>
+<span class="sd">            gyroscope. If not provided, true axis will be used.</span>
+<span class="sd">        :type est_gyro_axis: SensorAxis</span>
+
+<span class="sd">        :param filter_params: (Optional) Parameter for particle filtering.</span>
+<span class="sd">            This contains all parameter values to use during the filtering</span>
+<span class="sd">             stage. Can be customised to improve accuracy.</span>
+<span class="sd">        :type filter_params: ParticleFilterParams</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Call parent class&#39;s constructor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">qs_imu</span><span class="p">,</span> <span class="n">shared_accelerometer</span><span class="p">,</span> <span class="n">shared_gyroscope</span><span class="p">,</span>
+                         <span class="n">est_qs_imu_axis</span><span class="p">,</span> <span class="n">est_acc_axis</span><span class="p">,</span> <span class="n">est_gyro_axis</span><span class="p">)</span>
+
+        <span class="c1"># Unpack filtering parameters and convert to required units:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span> <span class="o">=</span> <span class="n">filter_params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span> <span class="o">=</span> <span class="n">filter_params</span><span class="o">.</span><span class="n">num_particles</span>
+
+        <span class="c1"># self._sigma_acc = filter_params.sigma_accelerometer * 1e-6 * G</span>
+        <span class="c1"># self._sigma_gyro = filter_params.sigma_gyroscope * 1e-6 * G  # TODO: Radians?</span>
+
+        <span class="c1"># TODO: CHECK?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_acc</span> <span class="o">=</span> <span class="n">filter_params</span><span class="o">.</span><span class="n">sigma_accelerometer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_gyro</span> <span class="o">=</span> <span class="n">filter_params</span><span class="o">.</span><span class="n">sigma_gyroscope</span>
+
+        <span class="c1"># Generate a random number stream for</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">filter_params</span><span class="o">.</span><span class="n">rng_seed</span><span class="p">)</span>
+
+        <span class="c1"># Initialise the particle weights for accelerometer and gyroscope measurements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_gyro</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span>
+
+        <span class="c1"># Initialise particle values for accelerometer and gyroscope measurements</span>
+        <span class="n">record_size</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles_acc</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_acc</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">record_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles_gyro</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_gyro</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">record_size</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_calculate_bias_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceleration_qs_imu</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                               <span class="n">angle_rate_qs_imu</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Estimates and returns the accelerometer and gyroscope bias.</span>
+<span class="sd">        Using the collected IMU measurements and calculated quantum IMU</span>
+<span class="sd">        measurements, this method examines the difference and returns the</span>
+<span class="sd">        estimated bias for each.</span>
+
+<span class="sd">        :param acceleration_qs_imu: The quantum acceleration measurement</span>
+<span class="sd">            (given in converted IMU axis).</span>
+
+<span class="sd">        :param angle_rate_qs_imu: The quantum gyroscope measurement</span>
+<span class="sd">            (given in converted IMU axis).</span>
+
+<span class="sd">        :return: The estimated accelerometer and gyroscope biases, respectively.</span>
+<span class="sd">        :rtype: tuple[np.ndarray, np.ndarray]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Obtain the average acceleration value from the measurement record.</span>
+        <span class="n">mean_imu_acceleration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_imu_acc_data</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Obtain the average angle rate value from the measurement record.</span>
+        <span class="n">mean_imu_angle_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_imu_gyro_data</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># mean_imu_angle_rate = np.radians(mean_imu_angle_rate)</span>
+
+        <span class="c1"># TODO: Vectorise?</span>
+        <span class="c1"># TODO: Fix NaN values when deviations are very high. Caused by sudden jerk movements.</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span><span class="p">):</span>
+
+            <span class="c1"># Correct IMU measurements and realign the QS using the particle values</span>
+            <span class="n">mean_imu_acceleration_0</span> <span class="o">=</span> <span class="n">mean_imu_acceleration</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles_acc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+
+            <span class="c1"># Update weights</span>
+            <span class="n">sigma_1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_acc</span><span class="p">,</span> <span class="mf">1e-10</span><span class="p">)</span>
+            <span class="n">deviation_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">mean_imu_acceleration_0</span> <span class="o">-</span> <span class="n">acceleration_qs_imu</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_acc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">deviation_1</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma_1</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+            <span class="c1"># Correct IMU measurements and realign</span>
+            <span class="c1"># the QS using the particle values</span>
+            <span class="c1"># mean_imu_angle_rate_0 = mean_imu_angle_rate - np.radians(self._x_particles_gyro[i, :])</span>
+            <span class="n">mean_imu_angle_rate_0</span> <span class="o">=</span> <span class="n">mean_imu_angle_rate</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles_gyro</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+
+            <span class="c1"># Update weights</span>
+            <span class="n">sigma_2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_gyro</span><span class="p">,</span> <span class="mf">1e-10</span><span class="p">)</span>
+            <span class="c1"># deviation_2 = np.degrees(np.linalg.norm(mean_imu_angle_rate_0 - angle_rate_qs_imu))</span>
+            <span class="n">deviation_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">mean_imu_angle_rate_0</span> <span class="o">-</span> <span class="n">angle_rate_qs_imu</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_gyro</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">deviation_2</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma_2</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="c1"># Re-weight particles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_acc</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_acc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_gyro</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_gyro</span><span class="p">)</span>
+
+        <span class="c1"># TODO: Remove me after patch!</span>
+        <span class="c1"># self._w_particles_acc = np.nan_to_num(self._w_particles_acc)</span>
+        <span class="c1"># self._w_particles_gyro = np.nan_to_num(self._w_particles_gyro)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_acc</span><span class="p">))</span>
+                <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_gyro</span><span class="p">))):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset_pf</span><span class="p">()</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]))</span>
+
+
+        <span class="c1"># Apply conditional re-sampling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_acc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles_acc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conditional_resample</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_acc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles_acc</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_gyro</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles_gyro</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conditional_resample</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_gyro</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles_gyro</span><span class="p">)</span>
+
+        <span class="c1"># print(f&quot;Acc weights:  MAX={self._w_particles_gyro.max()}\tMIN={self._w_particles_gyro.min()}&quot;)</span>
+
+        <span class="c1"># Add process noise</span>
+        <span class="n">record_size</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles_acc</span> <span class="o">+=</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_acc</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">record_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles_gyro</span> <span class="o">+=</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_gyro</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">record_size</span><span class="p">)</span>
+
+        <span class="c1"># Re-weight particles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_acc</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_acc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_gyro</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_gyro</span><span class="p">)</span>
+
+        <span class="c1"># Replace nan values with zero (prevent numerical errors).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_acc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_gyro</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_gyro</span><span class="p">)</span>
+
+        <span class="c1"># Recalculate the estimated values for the biases</span>
+        <span class="n">accelerometer_biases</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_acc</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles_acc</span>
+        <span class="n">gyroscope_biases</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_gyro</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles_gyro</span>
+        <span class="c1"># accelerometer_biases = np.sum(self._w_particles_acc * self._x_particles_acc)</span>
+        <span class="c1"># gyroscope_biases = np.sum(self._w_particles_gyro * self._x_particles_gyro)</span>
+
+        <span class="c1"># Return the calculated bias errors</span>
+        <span class="k">return</span> <span class="n">accelerometer_biases</span><span class="p">,</span> <span class="n">gyroscope_biases</span>
+
+
+    <span class="k">def</span> <span class="nf">reset_pf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># Initialise the particle weights for accelerometer and gyroscope measurements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles_gyro</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span>
+
+        <span class="c1"># Initialise particle values for accelerometer and gyroscope measurements</span>
+        <span class="n">record_size</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles_acc</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_acc</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">record_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles_gyro</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_gyro</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">record_size</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_conditional_resample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs particle resampling when deemed necessary.</span>
+<span class="sd">        Resamples the given weights and values if required, otherwise returns</span>
+<span class="sd">        the given weights and values.</span>
+
+<span class="sd">        :param weights: A selection of particle weights.</span>
+<span class="sd">        :type weights: np.ndarray</span>
+
+<span class="sd">        :param values: A selection of corresponding particle values.</span>
+<span class="sd">        :type values: np.ndarray</span>
+
+<span class="sd">        :return: The resampled (or original if not deemed necessary)</span>
+<span class="sd">            weights and values, respectively.</span>
+<span class="sd">        :rtype: tuple[np.ndarray, np.ndarray]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span><span class="o">.</span><span class="n">low_noise_prob</span>
+        <span class="n">low_noise</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span><span class="o">.</span><span class="n">low_noise</span>
+        <span class="n">high_noise</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span><span class="o">.</span><span class="n">high_noise</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">values</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">n_pf_thr</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span>
+        <span class="n">n_eff</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n_eff</span> <span class="o">&gt;=</span> <span class="n">n_pf_thr</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">weights</span><span class="p">,</span> <span class="n">values</span>
+
+        <span class="c1"># TODO: REMOVE</span>
+        <span class="n">weights</span><span class="p">[</span><span class="n">weights</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-300</span>
+        <span class="n">co_var_q</span> <span class="o">=</span> <span class="n">weighted_cov</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+        <span class="n">new_weights</span><span class="p">,</span> <span class="n">new_values</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resample</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+
+        <span class="n">l_q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span><span class="n">co_var_q</span><span class="p">)</span>
+
+        <span class="c1"># Add random process noise</span>
+        <span class="c1"># for i in range(self._num_particles):</span>
+        <span class="c1">#     l_q += low_noise if self._rng.random() &lt; prob else high_noise</span>
+        <span class="c1">#     new_values[i, :] += (l_q @ self._rng.normal(size=n))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">prob</span><span class="p">:</span>
+                <span class="n">l_q</span> <span class="o">*=</span> <span class="n">low_noise</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">l_q</span> <span class="o">*=</span> <span class="n">high_noise</span>
+            <span class="n">new_values</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">l_q</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">new_weights</span><span class="p">,</span> <span class="n">new_values</span>
+
+    <span class="k">def</span> <span class="nf">_resample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> \
+            <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs Systematic Resampling:</span>
+<span class="sd">        The function applies the core step for the particle filtering by updating</span>
+<span class="sd">        the weights of approximated particles. This works by dividing the whole</span>
+<span class="sd">        population of particles into subpopulations. It pre-partitions the (0, 1]</span>
+<span class="sd">        interval into N disjoint sub-intervals. Random numbers are then drawn and</span>
+<span class="sd">        then a bounding method based on the cumulative sum of normalized weights</span>
+<span class="sd">        is used. The first random number is taken from the uniform distribution</span>
+<span class="sd">        on (0 1, /N], and the rest of the numbers are obtained deterministically.</span>
+<span class="sd">        Once completed, the updated particles and their new weights are returned.</span>
+
+<span class="sd">        :param weight: An array containing the current particle weights.</span>
+<span class="sd">        :type weight: np.ndarray</span>
+
+<span class="sd">        :param values: An array containing the current particle values.</span>
+<span class="sd">        :type values: np.ndarray</span>
+
+<span class="sd">        :return: The particles, their updated weights and their indices.</span>
+<span class="sd">        :rtype: tuple (3-elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
+        <span class="n">new_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span>
+        <span class="n">new_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">p_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>  <span class="c1"># TODO: CHECK</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">while</span> <span class="n">c</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">u</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span><span class="p">:</span>
+                <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">new_values</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">p_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span>
+
+        <span class="k">return</span> <span class="n">new_weights</span><span class="p">,</span> <span class="n">new_values</span><span class="p">,</span> <span class="n">p_i</span></div>
+
+
+
+<div class="viewcode-block" id="weighted_cov">
+<a class="viewcode-back" href="../../../modules/quantum/particle_filter.html#qnav.quantum.particle_filter.weighted_cov">[docs]</a>
+<span class="k">def</span> <span class="nf">weighted_cov</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">w</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function calculates a Weighted Covariance Matrix.</span>
+<span class="sd">    Given a matrix of observations (rows) and variables (columns) along with</span>
+<span class="sd">    an array of corresponding weights, this function returns a symmetric</span>
+<span class="sd">    matrix of weighted covariances (a positive semi-definite matrix i.e. all</span>
+<span class="sd">    its eigenvalues are non-negative).</span>
+
+<span class="sd">    :param y: A T-by-N matrix of observations (rows) and variables (columns).</span>
+<span class="sd">    :type y: NumPy Array (T-by-N elements)</span>
+
+<span class="sd">    :param w: A T-element array of weights for the observations.</span>
+<span class="sd">    :type w: NumPy Array (T elements)</span>
+
+<span class="sd">    :return: A symmetric matrix of weighted covariances.</span>
+<span class="sd">    :rtype: NumPy Array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+
+    <span class="n">ctrl</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isreal</span><span class="p">(</span><span class="n">w</span><span class="p">))</span> <span class="ow">and</span> \
+           <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">w</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">w</span><span class="p">))</span> \
+           <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">w</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ctrl</span><span class="p">:</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;None finite weight produced&quot;</span><span class="p">)</span>
+
+    <span class="n">ctrl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isreal</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="ow">and</span> \
+           <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ctrl</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;None finite observation produced&quot;</span><span class="p">)</span>
+
+    <span class="n">ctrl</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">==</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ctrl</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Non-uniform shape produced&quot;</span><span class="p">)</span>
+
+    <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+    <span class="n">t</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="n">c</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">w</span> <span class="o">@</span> <span class="n">y</span><span class="p">,</span> <span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">]))</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">c</span> <span class="o">+</span> <span class="n">c</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">c</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.measurement.sensor &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.measurement.sensor</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.measurement.sensor</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=========</span>
+<span class="sd">sensor.py</span>
+<span class="sd">=========</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Defines the abstract base classes for sensor usage in simulations.</span>
+<span class="sd">    This module contains the base classes for both sensors (used for taking</span>
+<span class="sd">    GroundTruth records and producing measurements) and sensor fusion (methods</span>
+<span class="sd">    for applying measurement information to the current estimated states).</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">qnav.estimation.state</span> <span class="kn">import</span> <span class="n">EstimatedState</span>
+<span class="kn">from</span> <span class="nn">qnav.waypoints.trajectory</span> <span class="kn">import</span> <span class="n">GroundTruth</span>
+
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">isfinite</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Flag</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">auto</span>
+
+
+<div class="viewcode-block" id="Sensor">
+<a class="viewcode-back" href="../../../modules/measurement/sensor.html#qnav.measurement.sensor.Sensor">[docs]</a>
+<span class="k">class</span> <span class="nc">Sensor</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for sensors used in navigation.</span>
+<span class="sd">    Defines the format of sensors used in the toolbox, specifically the</span>
+<span class="sd">    methods, inputs and outputs expected for fusion and other classes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Defines all properties used:</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;_last_measurement&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_time_elapsed&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_next_update&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_frequency&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_time_step&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_rng&#39;</span>
+    <span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">frequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">start_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                 <span class="n">rand_seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Base constructor used to initialise the measurement frequency clock,</span>
+<span class="sd">        elapsed time and random number generation.</span>
+
+<span class="sd">        :param frequency: The exact measurement frequency of the sensor in Hz.</span>
+<span class="sd">        :type frequency: float</span>
+
+<span class="sd">        :param start_time: The starting time of the sensor in seconds.</span>
+<span class="sd">        :type start_time: float</span>
+
+<span class="sd">        :param rand_seed: The random number generation seed.</span>
+<span class="sd">        :type rand_seed: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Capture the requested frequency.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frequency</span> <span class="o">=</span> <span class="n">frequency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">frequency</span>
+
+        <span class="c1"># Record the time elapsed.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_elapsed</span> <span class="o">=</span> <span class="n">start_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next_update</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_elapsed</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span>
+
+        <span class="c1"># Initialise a random number generator.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">rand_seed</span><span class="p">)</span>
+
+        <span class="c1"># Validate the requested sensor frequency.</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frequency</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">isfinite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_frequency</span><span class="p">),</span> \
+            <span class="s2">&quot;Sensor frequency must be a positive finite value!&quot;</span>
+
+        <span class="c1"># Validate the requested sensor frequency.</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_elapsed</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">isfinite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_time_elapsed</span><span class="p">),</span> \
+            <span class="s2">&quot;Elapsed time must be a non-negative finite value!&quot;</span>
+
+<div class="viewcode-block" id="Sensor.take_measurement">
+<a class="viewcode-back" href="../../../modules/measurement/sensor.html#qnav.measurement.sensor.Sensor.take_measurement">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">take_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">est_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Produces the measurement captured by the sensor.</span>
+<span class="sd">        Given the current estimated time and the ground truth, this method</span>
+<span class="sd">        shall return the measurement captured at that time. Alternatively, a</span>
+<span class="sd">        None value can be returned to signify a measurement is not ready.</span>
+
+<span class="sd">        :param est_time: The estimated time the measurement of the sensor</span>
+<span class="sd">            is expected to be captured at (in seconds).</span>
+<span class="sd">        :type est_time: float</span>
+
+<span class="sd">        :param ground_truth: The corresponding ground truth data.</span>
+<span class="sd">        :type ground_truth: GroundTruth</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">last_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the latest recorded measurement produced by sensor.</span>
+
+<span class="sd">        :return: Latest measurement produced by sensor.</span>
+<span class="sd">        :rtype: any</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="Sensor.update">
+<a class="viewcode-back" href="../../../modules/measurement/sensor.html#qnav.measurement.sensor.Sensor.update">[docs]</a>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_sec</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called on demand to update the sensor&#39;s state.</span>
+<span class="sd">        Typically called after measurements have been taken. When called</span>
+<span class="sd">        this increases the next measurement time and propagates internal</span>
+<span class="sd">        states, to the time difference.</span>
+
+<span class="sd">        :param time_sec: The current simulation time in seconds.</span>
+<span class="sd">        :type time_sec: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Substitute None value for default time difference</span>
+        <span class="n">time_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span> <span class="k">if</span> <span class="n">time_sec</span> <span class="ow">is</span> <span class="kc">None</span> \
+            <span class="k">else</span> <span class="p">(</span><span class="n">time_sec</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_elapsed</span><span class="p">)</span>
+
+        <span class="c1"># Increase the time elapsed.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_elapsed</span> <span class="o">+=</span> <span class="n">time_diff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next_update</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_elapsed</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span></div>
+
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">last_update</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the time (in seconds) of the last measurement.</span>
+
+<span class="sd">        :return: Time of last measurement (in seconds).</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_elapsed</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">next_update</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the due time (in seconds) of the next measurement.</span>
+
+<span class="sd">        :return: Time of next measurement (in seconds).</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_update</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the sensor&#39;s measurement frequency in Hz.</span>
+
+<span class="sd">        :return: The frequency in Hz.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frequency</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">time_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the sensor&#39;s measurement time step in seconds.</span>
+
+<span class="sd">        :return: The measurement interval in seconds.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span></div>
+
+
+
+<div class="viewcode-block" id="FusionTrigger">
+<a class="viewcode-back" href="../../../modules/measurement/sensor.html#qnav.measurement.sensor.FusionTrigger">[docs]</a>
+<span class="k">class</span> <span class="nc">FusionTrigger</span><span class="p">(</span><span class="n">Flag</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Flags used to indicate the triggering mode for fusion.</span>
+<span class="sd">    These essentially define when fusion is triggered, subject to the sensor</span>
+<span class="sd">    measurements that ara available.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Fusion is triggered when any sensor has a measurement.</span>
+    <span class="n">ANY</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+
+    <span class="c1"># Fusion is triggered when all sensors have measurements.</span>
+    <span class="n">ALL</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+
+    <span class="c1"># Switches from ALL to ANY mode after first reset.</span>
+    <span class="n">ALL_THEN_ANY</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="SensorFusion">
+<a class="viewcode-back" href="../../../modules/measurement/sensor.html#qnav.measurement.sensor.SensorFusion">[docs]</a>
+<span class="k">class</span> <span class="nc">SensorFusion</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for a sensor fusion method used in navigation.</span>
+<span class="sd">    Defines the format of data fusion used in the toolbox, specifically the</span>
+<span class="sd">    methods, inputs and outputs expected.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trigger</span><span class="p">:</span> <span class="n">FusionTrigger</span><span class="p">,</span> <span class="o">*</span><span class="n">sensors</span><span class="p">:</span> <span class="n">Sensor</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Base constructor used to initialise the trigger mode and sensors.</span>
+<span class="sd">        Here a trigger mode must be supplied along with one or more shared</span>
+<span class="sd">        sensors associated with the fusion method.</span>
+
+<span class="sd">        :param trigger: The trigger mode for deciding when to apply fusion.</span>
+<span class="sd">        :type trigger: FusionTrigger</span>
+
+<span class="sd">        :param sensors: All shared sensors used by the fusion method.</span>
+<span class="sd">        :type sensors: Iterable[Sensor]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Obtain input parameters:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trigger</span> <span class="o">=</span> <span class="n">trigger</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sensors</span> <span class="o">=</span> <span class="n">sensors</span>
+
+        <span class="c1"># Validate given sensors:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sensors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No sensors supplied!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">trigger</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FusionTrigger</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The selected trigger method for deciding when to apply fusion.</span>
+<span class="sd">        This decides when fusion can be applied, subject to the available</span>
+<span class="sd">        sensor measurements.</span>
+
+<span class="sd">        :return: The selected fusion trigger method.</span>
+<span class="sd">        :rtype: FusionTrigger</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trigger</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sensors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Sensor</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The provided sensors associated with the fusion method.</span>
+<span class="sd">        This is a collection of all shared sensors whose measurements will be</span>
+<span class="sd">        used by the fusion method.</span>
+
+<span class="sd">        :return: The shared sensors used by the fusion method.</span>
+<span class="sd">        :rtype: Iterable[Sensor]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensors</span>
+
+<div class="viewcode-block" id="SensorFusion.perform_fusion">
+<a class="viewcode-back" href="../../../modules/measurement/sensor.html#qnav.measurement.sensor.SensorFusion.perform_fusion">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">perform_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs the fusion with sensors and updates the estimated state.</span>
+<span class="sd">        When called at scheduled time during a simulation loop, this method</span>
+<span class="sd">        performs the data fusion by extracting last measurements from sensors</span>
+<span class="sd">        and using them with the fusion algorithm to update the given current</span>
+<span class="sd">        estimated state.</span>
+
+<span class="sd">        :param estimated_state: The current estimated states of the platform.</span>
+<span class="sd">                                This is what the fusion method will update.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.util.transformations &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.util.transformations</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.util.transformations</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">==================</span>
+<span class="sd">transformations.py</span>
+<span class="sd">==================</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    This module includes all general transformation calculations that</span>
+<span class="sd">    are required for the Navigation Simulation Study. The output from the</span>
+<span class="sd">    presented functions has been compared with other implementations such as</span>
+<span class="sd">    Python&#39;s NavPy and MATLAB&#39;s mapping toolbox.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Prof. Jason Ralph - jfralph@liverpool.ac.uk</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of this module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">qnav.util.constants</span> <span class="k">as</span> <span class="nn">constants</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="c1"># from qnav.util.constants import OMEGA_E</span>
+
+<span class="c1"># The average radius of the Earth (m).</span>
+<span class="n">_R_E</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">R_E</span>
+
+<span class="c1"># The constant WGS84 flattening value used.</span>
+<span class="n">_F</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">F</span>
+
+<span class="c1"># Semi-major axis (Equator radius) in metres.</span>
+<span class="n">_A</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">POLAR_AXIS_A</span>
+
+<span class="c1"># Semi-minor axis (Pole radius) in metres.</span>
+<span class="n">_B</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">POLAR_AXIS_B</span>  <span class="c1"># B = A * (1 - F)</span>
+
+<span class="c1"># The first eccentricity value.</span>
+<span class="n">_ECC</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">ECC</span>
+
+<span class="c1"># The second eccentricity value.</span>
+<span class="n">_ECC_PRIME</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">ECC_PRIME</span>
+
+<span class="c1"># Approximate rotation rate of the Earth (m/s**2).</span>
+<span class="n">_OMEGA_E</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">OMEGA_E</span>
+
+<span class="c1"># A very small value used to prevent rounding errors.</span>
+<span class="n">_SMALL_VALUE</span> <span class="o">=</span> <span class="mf">1E-9</span>
+
+
+
+
+<div class="viewcode-block" id="deg2rad">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.deg2rad">[docs]</a>
+<span class="k">def</span> <span class="nf">deg2rad</span><span class="p">(</span><span class="n">theta_deg</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A wrapper function for converting from degrees to radians.</span>
+
+<span class="sd">    :param theta_deg: An input value in degrees.</span>
+<span class="sd">    :type theta_deg: float</span>
+
+<span class="sd">    :return: The converted input value in radians.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">theta_deg</span><span class="p">)</span>  <span class="c1"># return theta_deg * np.pi / 180</span></div>
+
+
+
+<div class="viewcode-block" id="rad2deg">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.rad2deg">[docs]</a>
+<span class="k">def</span> <span class="nf">rad2deg</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A wrapper function for converting from radians to degrees.</span>
+
+<span class="sd">    :param theta_rad: An input value in radians.</span>
+<span class="sd">    :type theta_rad: float</span>
+
+<span class="sd">    :return: The converted input value in degrees.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">)</span>  <span class="c1"># return theta_rad * 180 / np.pi</span></div>
+
+
+
+<div class="viewcode-block" id="deg2dec">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.deg2dec">[docs]</a>
+<span class="k">def</span> <span class="nf">deg2dec</span><span class="p">(</span><span class="n">degrees</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">minutes</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">seconds</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a degrees, minutes, seconds coordinate to decimal format.</span>
+
+<span class="sd">    :param degrees: The degrees of the given coordinate.</span>
+<span class="sd">    :type degrees: float</span>
+
+<span class="sd">    :param minutes: The minutes of the given coordinate.</span>
+<span class="sd">    :type minutes: float</span>
+
+<span class="sd">    :param seconds: The seconds of the given coordinate.</span>
+<span class="sd">    :type seconds: float</span>
+
+<span class="sd">    :return: The decimal equivalent of the given coordinate.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">degrees</span> <span class="o">+</span> <span class="p">(</span><span class="n">minutes</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">seconds</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="dec2deg">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.dec2deg">[docs]</a>
+<span class="k">def</span> <span class="nf">dec2deg</span><span class="p">(</span><span class="n">theta_deg</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a decimal coordinate to degrees, minutes, seconds format.</span>
+
+<span class="sd">    :param theta_deg: The decimal format of the given coordinate.</span>
+<span class="sd">    :type theta_deg: float or NumPy Array</span>
+
+<span class="sd">    :return: The degrees, minutes and seconds of the given coordinate.</span>
+<span class="sd">    :rtype: float or NumPy Array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">degrees</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">theta_deg</span><span class="p">)</span>
+    <span class="n">minutes</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="p">(</span><span class="n">theta_deg</span> <span class="o">-</span> <span class="n">degrees</span><span class="p">))</span>
+    <span class="n">seconds</span> <span class="o">=</span> <span class="mi">3600</span> <span class="o">*</span> <span class="p">(</span><span class="n">theta_deg</span> <span class="o">-</span> <span class="n">degrees</span><span class="p">)</span> <span class="o">-</span> <span class="mi">60</span> <span class="o">*</span> <span class="n">minutes</span>
+    <span class="k">return</span> <span class="n">degrees</span><span class="p">,</span> <span class="n">minutes</span><span class="p">,</span> <span class="n">seconds</span></div>
+
+
+
+<div class="viewcode-block" id="radius">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.radius">[docs]</a>
+<span class="k">def</span> <span class="nf">radius</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function calculates the radius (in metres) from the centre of the</span>
+<span class="sd">    Earth for a given latitude position, using WGS84 parameters.</span>
+
+<span class="sd">    :param lat: The latitude of the points of interest.</span>
+<span class="sd">    :type lat: float</span>
+
+<span class="sd">    :return: The calculated radius in metres for the given position.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="n">sin_lat</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+    <span class="n">cos_lat</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+        <span class="p">(((</span><span class="n">_A</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos_lat</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">_B</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span>
+        <span class="p">((</span><span class="n">_A</span> <span class="o">*</span> <span class="n">cos_lat</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">_B</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="radius_vec">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.radius_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">radius_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The vectorised version of the</span>
+<span class="sd">    :func:`~qnav.util.transformations.radius` function. This</span>
+<span class="sd">    calculates the radius (in metres) from the centre of the Earth for a large</span>
+<span class="sd">    series of given latitude positions, using WGS84 parameters.</span>
+
+<span class="sd">    :param lat: The latitude of the points of interest.</span>
+<span class="sd">    :type lat: numpy.ndarray</span>
+
+<span class="sd">    :return: The calculated radius in metres for the given position.</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="n">sin_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+    <span class="n">cos_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+        <span class="p">(((</span><span class="n">_A</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos_lat</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">_B</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span>
+        <span class="p">((</span><span class="n">_A</span> <span class="o">*</span> <span class="n">cos_lat</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">_B</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="rotation_rate">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.rotation_rate">[docs]</a>
+<span class="k">def</span> <span class="nf">rotation_rate</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the rotation rate of earth at given latitude position.</span>
+<span class="sd">    Calculates the rotation rate vector of the earth the given latitude.</span>
+
+<span class="sd">    :param lat: The latitude position (in decimal degrees).</span>
+<span class="sd">    :type lat: float</span>
+
+<span class="sd">    :return: The rotation vector in degrees/second.</span>
+<span class="sd">    :rtype: np.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="n">sin_lat</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+    <span class="n">cos_lat</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_OMEGA_E</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cos_lat</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">sin_lat</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="rotation_rate_vec">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.rotation_rate_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">rotation_rate_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the rotation rate of earth at given latitude position.</span>
+<span class="sd">    Calculates the rotation rate vector of the earth the given latitude.</span>
+
+<span class="sd">    :param lat: The latitude position (in decimal degrees).</span>
+<span class="sd">    :type lat: np.ndarray</span>
+
+<span class="sd">    :return: The rotation vector in degrees/second.</span>
+<span class="sd">    :rtype: np.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="n">sin_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+    <span class="n">cos_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_OMEGA_E</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cos_lat</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">sin_lat</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="radius84">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.radius84">[docs]</a>
+<span class="k">def</span> <span class="nf">radius84</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function calculates the radius (in metres) from the centre of the</span>
+<span class="sd">    Earth for a given latitude position, using WGS84 parameters.</span>
+
+<span class="sd">    :param lat: The latitude of the points of interest.</span>
+<span class="sd">    :type lat: float</span>
+
+<span class="sd">    :return: The calculated radius in metres for the given position.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">_A</span> <span class="o">*</span> <span class="n">_A</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">_A</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">_B</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="radius84_vec">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.radius84_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">radius84_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The vectorised version of the</span>
+<span class="sd">    :func:`~qnav.util.transformations.radius84` function. This</span>
+<span class="sd">    calculates the radius (in metres) from the centre of the Earth for a large</span>
+<span class="sd">    series of given latitude positions, using WGS84 parameters.</span>
+
+<span class="sd">    :param lat: The latitude of the points of interest.</span>
+<span class="sd">    :type lat: numpy.ndarray</span>
+
+<span class="sd">    :return: The calculated radius in metres for the given position.</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">_A</span> <span class="o">*</span> <span class="n">_A</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">_A</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">_B</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
+
+    <span class="c1">#</span>
+    <span class="c1"># lat_rad = np.radians(lat)</span>
+    <span class="c1"># sin_lat = np.sin(lat_rad)</span>
+    <span class="c1"># cos_lat = np.cos(lat_rad)</span>
+    <span class="c1">#</span>
+    <span class="c1"># return np.sqrt(</span>
+    <span class="c1">#     (((_A ** 2) * cos_lat) ** 2 + (_B ** 2 * sin_lat) ** 2) /</span>
+    <span class="c1">#     ((_A * cos_lat) ** 2 + (_B * sin_lat) ** 2)</span>
+    <span class="c1"># )</span>
+
+
+<div class="viewcode-block" id="rotate_3d">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.rotate_3d">[docs]</a>
+<span class="k">def</span> <span class="nf">rotate_3d</span><span class="p">(</span><span class="n">psi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function produces a three-dimensional rotation matrix corresponding</span>
+<span class="sd">    to the Euler angles psi (Heading), theta (Pitch), phi (Roll/Bank).</span>
+
+<span class="sd">    :param psi: The heading angle in radians.</span>
+<span class="sd">    :type psi: float</span>
+
+<span class="sd">    :param theta: The pitch angle in radians.</span>
+<span class="sd">    :type theta: float</span>
+
+<span class="sd">    :param phi: The roll/bank angle in radians.</span>
+<span class="sd">    :type phi: float</span>
+
+<span class="sd">    :return: A matrix corresponding to three rotations in the above order.</span>
+<span class="sd">    :rtype: numpy.ndarray (3-by-3 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dum1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">dum2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">dum3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+    <span class="n">dum1</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span>
+    <span class="n">dum1</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span>
+    <span class="n">dum1</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">dum1</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span>
+    <span class="n">dum1</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span>
+
+    <span class="n">dum2</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="n">dum2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="n">dum2</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">dum2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="n">dum2</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+    <span class="n">dum3</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+    <span class="n">dum3</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+    <span class="n">dum3</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">dum3</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+    <span class="n">dum3</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dum3</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">dum2</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">dum1</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="rotate_3d_vec">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.rotate_3d_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">rotate_3d_vec</span><span class="p">(</span><span class="n">psi</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is the vectorised version of the</span>
+<span class="sd">    :func:`~qnav.util.transformations.rotate_3d` function. This</span>
+<span class="sd">    produces multiple three-dimensional rotation matrices corresponding</span>
+<span class="sd">    to the Euler angles psi (Heading), theta (Pitch), phi (Roll/Bank).</span>
+
+<span class="sd">    :param psi: The heading angles in radians.</span>
+<span class="sd">    :type psi: numpy.ndarray</span>
+
+<span class="sd">    :param theta: The pitch angles in radians.</span>
+<span class="sd">    :type theta: numpy.ndarray</span>
+
+<span class="sd">    :param phi: The roll/bank angles in radians.</span>
+<span class="sd">    :type phi: numpy.ndarray</span>
+
+<span class="sd">    :return: The matrices corresponding to three rotations in the above order.</span>
+<span class="sd">    :rtype: numpy.ndarray (n-3-by-3 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">assert</span> <span class="n">psi</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">theta</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">phi</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> \
+        <span class="s2">&quot;Only 1-dimensional input is supported!&quot;</span>
+
+    <span class="n">amount</span> <span class="o">=</span> <span class="n">psi</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">dum1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">amount</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+    <span class="n">dum2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">amount</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+    <span class="n">dum3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">amount</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+    <span class="n">dum1</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span>
+    <span class="n">dum1</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span>
+    <span class="n">dum1</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">dum1</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span>
+    <span class="n">dum1</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span>
+
+    <span class="n">dum2</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="n">dum2</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="n">dum2</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">dum2</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="n">dum2</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+    <span class="n">dum3</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+    <span class="n">dum3</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+    <span class="n">dum3</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">dum3</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+    <span class="n">dum3</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+
+    <span class="n">temp_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;nij, njk -&gt; nik&#39;</span><span class="p">,</span> <span class="n">dum2</span><span class="p">,</span> <span class="n">dum1</span><span class="p">)</span>
+    <span class="n">to_return</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;nij, njk -&gt; nik&#39;</span><span class="p">,</span> <span class="n">dum3</span><span class="p">,</span> <span class="n">temp_sum</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">to_return</span></div>
+
+
+
+<div class="viewcode-block" id="lla2ned">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.lla2ned">[docs]</a>
+<span class="k">def</span> <span class="nf">lla2ned</span><span class="p">(</span><span class="n">lla</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts a reference Latitude-Longitude-Altitude (LLA)</span>
+<span class="sd">    position from a given centre LLA point and translates its location to</span>
+<span class="sd">    North-East-Down (NED) coordinates.</span>
+
+<span class="sd">    :param lla: The centre location (array containing [lat, lon, alt]) with</span>
+<span class="sd">        lat-lon given in degrees and alt given in metres.</span>
+<span class="sd">    :type lla: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :param ref_lla: The reference location (array containing [lat, lon, alt])</span>
+<span class="sd">        with lat-lon given in degrees and alt given in metres.</span>
+<span class="sd">    :type ref_lla: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: An array containing the calculated North, East and Down</span>
+<span class="sd">        coordinates from the centre position, were all values are given in</span>
+<span class="sd">        metres.</span>
+<span class="sd">    :rtype: numpy.ndarray (3-elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xyz</span> <span class="o">=</span> <span class="n">lla2ecef</span><span class="p">(</span><span class="n">lla</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ecef2ned</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="lla2ned_vec">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.lla2ned_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">lla2ned_vec</span><span class="p">(</span><span class="n">lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is the vectorised version of the</span>
+<span class="sd">    :func:`~qnav.util.transformations.lla2ned` function. This</span>
+<span class="sd">    allows means for converting reference Latitude-Longitude-Altitude (LLA)</span>
+<span class="sd">    positions from given centre LLA points and translates their location to</span>
+<span class="sd">    North-East-Down (NED) coordinates.</span>
+
+<span class="sd">    :param lla: The centre locations (array rows containing [lat, lon, alt])</span>
+<span class="sd">        with lat-lon given in degrees and alt given in metres.</span>
+<span class="sd">    :type lla: numpy.ndarray (n-by-3 elements)</span>
+
+<span class="sd">    :param ref_lla: The reference location (array rows containing</span>
+<span class="sd">        [lat, lon, alt]) with lat-lon given in degrees and alt given in</span>
+<span class="sd">        metres.</span>
+<span class="sd">    :type ref_lla: numpy.ndarray (n-by-3 elements)</span>
+
+<span class="sd">    :return: An array containing the calculated North, East and Down</span>
+<span class="sd">        coordinates from the centre position, were all values are given in</span>
+<span class="sd">        metres.</span>
+<span class="sd">    :rtype: numpy.ndarray (n-by-3 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">xyz</span> <span class="o">=</span> <span class="n">lla2ecef_vec</span><span class="p">(</span><span class="n">lla</span><span class="p">)</span>
+    <span class="n">ref_xyz</span> <span class="o">=</span> <span class="n">lla2ecef_vec</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">ecef2ned_transform_vec</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">)</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">xyz</span> <span class="o">-</span> <span class="n">ref_xyz</span>
+
+    <span class="c1"># if t.ndim == 3:</span>
+    <span class="c1">#     ned = np.einsum(&#39;nji, ni -&gt; nj&#39;, t, diff)</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     ned = np.einsum(&#39;ji, ni -&gt; nj&#39;, t, diff)</span>
+
+    <span class="k">if</span> <span class="n">diff</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">ned</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">t</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">ned</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ji, ni -&gt; nj&#39;</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">diff</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ned</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;nji, ni -&gt; nj&#39;</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">diff</span><span class="p">)</span>
+
+    <span class="n">ned</span><span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">ned</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">_SMALL_VALUE</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">return</span> <span class="n">ned</span></div>
+
+
+
+<div class="viewcode-block" id="ned2lla">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.ned2lla">[docs]</a>
+<span class="k">def</span> <span class="nf">ned2lla</span><span class="p">(</span><span class="n">ned</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts a reference North-East-Down (NED) position from a</span>
+<span class="sd">    given centre position and translates its location to Latitude-Longitude-</span>
+<span class="sd">    Altitude (LLA) coordinates.</span>
+
+<span class="sd">    :param ned: The centre location (array containing [north, east, down])</span>
+<span class="sd">        with all values being given in metres.</span>
+<span class="sd">    :type ned: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :param ref_lla: The reference location (array containing [lat, lon, alt])</span>
+<span class="sd">        with lat-lon given in degrees and alt given in metres.</span>
+<span class="sd">    :type ref_lla: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: An array containing the calculated Latitude, Longitude and</span>
+<span class="sd">        Altitude coordinates from the centre position, with lat-lon is given</span>
+<span class="sd">        in degrees and alt given in metres.</span>
+<span class="sd">    :rtype: numpy.ndarray (3-elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># ref_xyz = lla2ecef(ref_lla)</span>
+    <span class="c1"># t = ecef2ned_transform(ref_lla)</span>
+    <span class="c1">#</span>
+    <span class="c1"># xyz = np.linalg.inv(t).dot(ned) + ref_xyz</span>
+    <span class="c1"># return ecef2lla(xyz)</span>
+
+    <span class="n">xyz</span> <span class="o">=</span> <span class="n">ned2ecef</span><span class="p">(</span><span class="n">ned</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ecef2lla</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ned2lla_vec">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.ned2lla_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">ned2lla_vec</span><span class="p">(</span><span class="n">ned</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is the vectorised version of the</span>
+<span class="sd">    :func:`~qnav.util.transformations.ned2lla` function. This</span>
+<span class="sd">    converts reference North-East-Down (NED) positions from a given centre</span>
+<span class="sd">    positions and translates their location to Latitude-Longitude-Altitude</span>
+<span class="sd">    (LLA) coordinates.</span>
+
+<span class="sd">    :param ned: The centre locations (array rows containing</span>
+<span class="sd">        [north, east, down]) with all values being given in metres.</span>
+<span class="sd">    :type ned: numpy.ndarray (n-by-3 elements)</span>
+
+<span class="sd">    :param ref_lla: The reference location (array rows containing</span>
+<span class="sd">        [lat, lon, alt]) with lat-lon given in degrees and alt given in</span>
+<span class="sd">        metres.</span>
+<span class="sd">    :type ref_lla: numpy.ndarray (n-by-3 elements)</span>
+
+<span class="sd">    :return: Array rows containing the calculated Latitude, Longitude and</span>
+<span class="sd">        Altitude coordinates from the centre positions, with lat-lon is given</span>
+<span class="sd">        in degrees and alt given in metres.</span>
+<span class="sd">    :rtype: numpy.ndarray (n-by-3 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># ref_xyz = lla2ecef_vec(ref_lla)</span>
+    <span class="c1"># t = ecef2ned_transform_vec(ref_lla)</span>
+    <span class="c1"># inv_t = np.linalg.inv(t)</span>
+    <span class="c1">#</span>
+    <span class="c1"># # if ned.ndim == 1:</span>
+    <span class="c1"># #     tmp = np.tensordot(inv_t, ned, axes=1)</span>
+    <span class="c1"># # else:</span>
+    <span class="c1"># #     tmp = np.einsum(&#39;nji, ni -&gt; nj&#39;, inv_t, ned)</span>
+    <span class="c1">#</span>
+    <span class="c1"># if ned.ndim == 1:</span>
+    <span class="c1">#     tmp = np.tensordot(inv_t, ned, axes=1)</span>
+    <span class="c1"># elif inv_t.ndim == 2:</span>
+    <span class="c1">#     tmp = np.einsum(&#39;ij, nj -&gt; ni&#39;, inv_t, ned)</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     tmp = np.einsum(&#39;nji, ni -&gt; nj&#39;, inv_t, ned)</span>
+    <span class="c1">#</span>
+    <span class="c1"># # np.einsum(&#39;ij, nj -&gt; ni&#39;, inv_t, ned)</span>
+    <span class="c1">#</span>
+    <span class="c1"># xyz = tmp + ref_xyz</span>
+
+    <span class="n">xyz</span> <span class="o">=</span> <span class="n">ned2ecef_vec</span><span class="p">(</span><span class="n">ned</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ecef2lla_vec</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="lla2ecef">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.lla2ecef">[docs]</a>
+<span class="k">def</span> <span class="nf">lla2ecef</span><span class="p">(</span><span class="n">lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts a reference Latitude-Longitude-Altitude (LLA)</span>
+<span class="sd">    position to Earth-Centred Earth-Fixed coordinates.</span>
+
+<span class="sd">    :param lla: The reference location (array containing [lat, lon, alt]) with</span>
+<span class="sd">        lat-lon given in degrees and alt given in metres.</span>
+<span class="sd">    :type lla: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: An array containing the calculated X, Y and Z coordinates from</span>
+<span class="sd">        the centre of the Earth, with all values being given in metres.</span>
+<span class="sd">    :rtype: numpy.ndarray (3-elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lat</span> <span class="o">=</span> <span class="n">deg2rad</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lla</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">lon</span> <span class="o">=</span> <span class="n">deg2rad</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lla</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">alt</span> <span class="o">=</span> <span class="n">lla</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="n">_A</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">_ECC</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">_B</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">_A</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+
+    <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+    <span class="n">xyz</span><span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">_SMALL_VALUE</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">return</span> <span class="n">xyz</span></div>
+
+
+
+<div class="viewcode-block" id="lla2ecef_vec">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.lla2ecef_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">lla2ecef_vec</span><span class="p">(</span><span class="n">lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is the vectorised version of the</span>
+<span class="sd">    :func:`~qnav.util.transformations.lla2ecef` function. This</span>
+<span class="sd">    converts a series of reference Latitude-Longitude-Altitude (LLA) positions</span>
+<span class="sd">    to Earth-Centred Earth-Fixed coordinates.</span>
+
+<span class="sd">    :param lla: The reference locations (array rows containing</span>
+<span class="sd">        [lat, lon, alt]) with lat-lon given in degrees and alt given in</span>
+<span class="sd">        metres.</span>
+<span class="sd">    :type lla: numpy.ndarray (n-by-3 elements)</span>
+
+<span class="sd">    :return: An array containing the calculated X, Y and Z coordinates from</span>
+<span class="sd">        the centre of the Earth, with all values being given in metres.</span>
+<span class="sd">    :rtype: numpy.ndarray (n-by-3 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: New</span>
+    <span class="k">if</span> <span class="n">lla</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">lla2ecef</span><span class="p">(</span><span class="n">lla</span><span class="p">)</span>
+
+    <span class="n">lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">lla</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">lla</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">alt</span> <span class="o">=</span> <span class="n">lla</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="n">_A</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">_ECC</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">_B</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">_A</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+
+    <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+    <span class="n">xyz</span><span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">_SMALL_VALUE</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">return</span> <span class="n">xyz</span></div>
+
+
+
+<div class="viewcode-block" id="euler_to_quaternion">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.euler_to_quaternion">[docs]</a>
+<span class="k">def</span> <span class="nf">euler_to_quaternion</span><span class="p">(</span><span class="n">angles</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts given attitude angles to quaternion format.</span>
+<span class="sd">    Given an array representing euler angles, this function converts them to</span>
+<span class="sd">    quaternion format. On succession, an array containing the a, b, c and d</span>
+<span class="sd">    quaternion coefficients (i.e. where a + bi + cj + dk) will be returned.</span>
+
+<span class="sd">    :param angles: Euler angles given in degrees</span>
+<span class="sd">    :type angles: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: The a, b, c, and d quaternion coefficients in columns.</span>
+<span class="sd">    :rtype: numpy.ndarray (4-elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Uses attitude conversion method uses maths described in Diebel, James.</span>
+    <span class="c1"># &quot;Representing attitude: Euler angles, unit quaternions, and rotation vectors.&quot;</span>
+    <span class="c1"># Matrix 58, no. 15-16 (2006): 1-35.</span>
+    <span class="c1"># Specifically using the details in Section 8.2 for rotation 1-2-3.</span>
+
+    <span class="c1"># Validate the shape of the given input array:</span>
+    <span class="k">if</span> <span class="n">angles</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">angles</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input must be array of 3 elements&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Convert angles to radians</span>
+    <span class="n">angles_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">angles</span><span class="p">)</span>
+    <span class="n">cos_d2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angles_rad</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">sin_d2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angles_rad</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># Convert Euler angles (heading-pitch-roll) to quaternions (4D)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">cos_d2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_d2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_d2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">sin_d2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin_d2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin_d2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="n">sin_d2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_d2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_d2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="p">(</span><span class="n">cos_d2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin_d2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin_d2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">cos_d2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin_d2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_d2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">sin_d2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_d2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin_d2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">cos_d2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_d2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin_d2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="p">(</span><span class="n">sin_d2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin_d2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_d2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># Stack the columns and return as single array</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="quaternion_to_euler">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.quaternion_to_euler">[docs]</a>
+<span class="k">def</span> <span class="nf">quaternion_to_euler</span><span class="p">(</span><span class="n">quat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts given quaternions to Euler angle format.</span>
+<span class="sd">    Given an array representing coefficients for quaternions (i.e.</span>
+<span class="sd">    values a, b, c and d where a + bi + cj + dk), this function converts them</span>
+<span class="sd">    to euler angle format. On succession, an array containing the Euler angles</span>
+<span class="sd">    will be returned.</span>
+
+<span class="sd">    :param quat: The a, b, c, and d quaternion coefficients in columns.</span>
+<span class="sd">    :type quat: numpy.ndarray (4-elements)</span>
+
+<span class="sd">    :return: The converted Euler angles given in degrees.</span>
+<span class="sd">    :rtype: numpy.ndarray (3-elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Validate the shape of the given input array:</span>
+    <span class="k">if</span> <span class="n">quat</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">quat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input must be array of 4 elements&quot;</span><span class="p">)</span>
+
+    <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">quat</span>
+
+    <span class="n">sin_y_cos_p</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">z</span> <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">cos_y_cos_p</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="n">y</span> <span class="o">+</span> <span class="n">z</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+    <span class="n">heading</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">sin_y_cos_p</span><span class="p">,</span> <span class="n">cos_y_cos_p</span><span class="p">)</span>
+    <span class="n">heading</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">heading</span><span class="p">)</span>
+
+    <span class="n">sin_p</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">y</span> <span class="o">-</span> <span class="n">x</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+    <span class="n">pitch</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">asin</span><span class="p">(</span><span class="n">sin_p</span><span class="p">)</span>
+    <span class="n">pitch</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span>
+
+    <span class="n">sin_r_cos_p</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+    <span class="n">cos_r_cos_p</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">roll</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">sin_r_cos_p</span><span class="p">,</span> <span class="n">cos_r_cos_p</span><span class="p">)</span>
+    <span class="n">roll</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">heading</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">roll</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="euler_to_quaternion_vec">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.euler_to_quaternion_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">euler_to_quaternion_vec</span><span class="p">(</span><span class="n">angles</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts given attitude angles to quaternion format.</span>
+<span class="sd">    Given an array representing euler angles, this function converts them to</span>
+<span class="sd">    quaternion format. On succession, an array containing the a, b, c and d</span>
+<span class="sd">    quaternion coefficients (i.e. where a + bi + cj + dk) will be returned.</span>
+
+<span class="sd">    :param angles: Euler angles given in degrees</span>
+<span class="sd">    :type angles: numpy.ndarray (n-by-3 elements)</span>
+
+<span class="sd">    :return: The a, b, c, and d quaternion coefficients in columns.</span>
+<span class="sd">    :rtype: numpy.ndarray (n-by-4 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Uses attitude conversion method uses maths described in Diebel, James.</span>
+    <span class="c1"># &quot;Representing attitude: Euler angles, unit quaternions, and rotation vectors.&quot;</span>
+    <span class="c1"># Matrix 58, no. 15-16 (2006): 1-35.</span>
+    <span class="c1"># Specifically using the details in Section 8.2 for rotation 1-2-3.</span>
+
+    <span class="c1"># Validate the shape of the given input array:</span>
+    <span class="k">if</span> <span class="n">angles</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">angles</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input must be of shape n-by-3&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Convert angles to radians</span>
+    <span class="n">angles_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">angles</span><span class="p">)</span>
+    <span class="n">cos_d2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angles_rad</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">sin_d2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angles_rad</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># Convert Euler angles (heading-pitch-roll) to quaternions (4D)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">cos_d2</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_d2</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_d2</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">sin_d2</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin_d2</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin_d2</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="n">sin_d2</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_d2</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_d2</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="p">(</span><span class="n">cos_d2</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin_d2</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin_d2</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">cos_d2</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin_d2</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_d2</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">sin_d2</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_d2</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin_d2</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">cos_d2</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_d2</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin_d2</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="p">(</span><span class="n">sin_d2</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin_d2</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos_d2</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># Stack the columns and return as single array</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="quaternion_to_euler_vec">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.quaternion_to_euler_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">quaternion_to_euler_vec</span><span class="p">(</span><span class="n">quat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts given quaternions to Euler angle format.</span>
+<span class="sd">    Given an array representing coefficients for quaternions (i.e.</span>
+<span class="sd">    values a, b, c and d where a + bi + cj + dk), this function converts them</span>
+<span class="sd">    to euler angle format. On succession, an array containing the Euler angles</span>
+<span class="sd">    will be returned.</span>
+
+<span class="sd">    :param quat: The a, b, c, and d quaternion coefficients in columns.</span>
+<span class="sd">    :type quat: numpy.ndarray (n-by-4 elements)</span>
+
+<span class="sd">    :return: The converted Euler angles given in degrees.</span>
+<span class="sd">    :rtype: numpy.ndarray (n-by-3 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">quat</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">quat</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">quat</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">quat</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+
+    <span class="n">sin_y_cos_p</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">z</span> <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">cos_y_cos_p</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="n">y</span> <span class="o">+</span> <span class="n">z</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+    <span class="n">heading</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">sin_y_cos_p</span><span class="p">,</span> <span class="n">cos_y_cos_p</span><span class="p">)</span>
+
+    <span class="n">sin_p</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">y</span> <span class="o">-</span> <span class="n">x</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+    <span class="n">pitch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">sin_p</span><span class="p">)</span>
+
+    <span class="n">sin_r_cos_p</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+    <span class="n">cos_r_cos_p</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">roll</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">sin_r_cos_p</span><span class="p">,</span> <span class="n">cos_r_cos_p</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">heading</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">roll</span><span class="p">]))</span></div>
+
+
+
+<span class="c1"># TODO: MOVE</span>
+<div class="viewcode-block" id="haversine">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.haversine">[docs]</a>
+<span class="k">def</span> <span class="nf">haversine</span><span class="p">(</span><span class="n">lat1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+              <span class="n">lat2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt2</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the estimated distance in metres between two sets of</span>
+<span class="sd">    latitude-longitude-altitude positions. This function uses the Haversine</span>
+<span class="sd">    formula to calculate the distance between latitude-longitude points, then</span>
+<span class="sd">    employs pythagoras to estimate the actual distance by considering change</span>
+<span class="sd">    in altitude between positions.</span>
+
+<span class="sd">    :param lat1: The latitude position(s) belonging to the first set.</span>
+<span class="sd">    :type lat1: numpy.ndarray (n-elements)</span>
+
+<span class="sd">    :param lon1: The longitude position(s) belonging to the first set.</span>
+<span class="sd">    :type lon1: numpy.ndarray (n-elements)</span>
+
+<span class="sd">    :param alt1: The altitude position(s) belonging to the first set.</span>
+<span class="sd">    :type alt1: numpy.ndarray (n-elements)</span>
+
+<span class="sd">    :param lat2: The latitude position(s) belonging to the second set.</span>
+<span class="sd">    :type lat2: numpy.ndarray (n-elements)</span>
+
+<span class="sd">    :param lon2: The longitude position(s) belonging to the second set.</span>
+<span class="sd">    :type lon2: numpy.ndarray (n-elements)</span>
+
+<span class="sd">    :param alt2: The latitude position(s) belonging to the second set.</span>
+<span class="sd">    :type alt2: numpy.ndarray (n-elements)</span>
+
+<span class="sd">    :return: The distance between the given positions in metres.</span>
+<span class="sd">    :rtype: numpy.array (n-elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Convert the given coordinates into radians.</span>
+    <span class="n">lat1_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span>
+    <span class="n">lon1_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lon1</span><span class="p">)</span>
+    <span class="n">lat2_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span>
+    <span class="n">lon2_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lon2</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the distance between the points using the Haversine formula.</span>
+    <span class="n">tmp1</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">lat2_rad</span> <span class="o">-</span> <span class="n">lat1_rad</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">tmp2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">lon2_rad</span> <span class="o">-</span> <span class="n">lon1_rad</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp1</span> <span class="o">*</span> <span class="n">tmp1</span><span class="p">)</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat1_rad</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat2_rad</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">tmp2</span> <span class="o">*</span> <span class="n">tmp2</span><span class="p">)</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">_R_E</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+
+    <span class="c1"># Obtain the difference in altitudes between positions.</span>
+    <span class="n">alt_diff</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">alt1</span> <span class="o">-</span> <span class="n">alt2</span><span class="p">)</span>
+
+    <span class="c1"># Finally, use pythagoras theorem to estimate the distance between given</span>
+    <span class="c1"># positions by including change in altitude.</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">dist</span> <span class="o">*</span> <span class="n">dist</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">alt_diff</span> <span class="o">*</span> <span class="n">alt_diff</span><span class="p">))</span></div>
+
+
+
+<span class="c1"># TODO: MOVE</span>
+<div class="viewcode-block" id="haversine_vec">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.haversine_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">haversine_vec</span><span class="p">(</span><span class="n">lat1</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">lon1</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">alt1</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
+                  <span class="n">lat2</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">lon2</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">alt2</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the estimated distance in metres between two sets of</span>
+<span class="sd">    latitude-longitude-altitude positions. This function uses the Haversine</span>
+<span class="sd">    formula to calculate the distance between latitude-longitude points, then</span>
+<span class="sd">    employs pythagoras to estimate the actual distance by considering change</span>
+<span class="sd">    in altitude between positions.</span>
+
+<span class="sd">    :param lat1: The latitude position(s) belonging to the first set.</span>
+<span class="sd">    :type lat1: numpy.ndarray (n-elements)</span>
+
+<span class="sd">    :param lon1: The longitude position(s) belonging to the first set.</span>
+<span class="sd">    :type lon1: numpy.ndarray (n-elements)</span>
+
+<span class="sd">    :param alt1: The altitude position(s) belonging to the first set.</span>
+<span class="sd">    :type alt1: numpy.ndarray (n-elements)</span>
+
+<span class="sd">    :param lat2: The latitude position(s) belonging to the second set.</span>
+<span class="sd">    :type lat2: numpy.ndarray (n-elements)</span>
+
+<span class="sd">    :param lon2: The longitude position(s) belonging to the second set.</span>
+<span class="sd">    :type lon2: numpy.ndarray (n-elements)</span>
+
+<span class="sd">    :param alt2: The latitude position(s) belonging to the second set.</span>
+<span class="sd">    :type alt2: numpy.ndarray (n-elements)</span>
+
+<span class="sd">    :return: The distance between the given positions in metres.</span>
+<span class="sd">    :rtype: numpy.array (n-elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Convert the given coordinates into radians.</span>
+    <span class="n">lat1_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span>
+    <span class="n">lon1_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">lon1</span><span class="p">)</span>
+    <span class="n">lat2_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span>
+    <span class="n">lon2_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">lon2</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the distance between the points using the Haversine formula.</span>
+    <span class="n">tmp1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">lat2_rad</span> <span class="o">-</span> <span class="n">lat1_rad</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">tmp2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">lon2_rad</span> <span class="o">-</span> <span class="n">lon1_rad</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp1</span> <span class="o">*</span> <span class="n">tmp1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat1_rad</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat2_rad</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">tmp2</span> <span class="o">*</span> <span class="n">tmp2</span><span class="p">)</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">_R_E</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+
+    <span class="c1"># Obtain the difference in altitudes between positions.</span>
+    <span class="n">alt_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">alt1</span> <span class="o">-</span> <span class="n">alt2</span><span class="p">)</span>
+
+    <span class="c1"># Finally, use pythagoras theorem to estimate the distance between given</span>
+    <span class="c1"># positions by including change in altitude.</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">dist</span> <span class="o">*</span> <span class="n">dist</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">alt_diff</span> <span class="o">*</span> <span class="n">alt_diff</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="get_time_pos_vel">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.get_time_pos_vel">[docs]</a>
+<span class="k">def</span> <span class="nf">get_time_pos_vel</span><span class="p">(</span><span class="n">time</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function calculates the position and velocity matrices for a given</span>
+<span class="sd">    timestamp.</span>
+
+<span class="sd">    :param time: A datetime for the requested time.</span>
+<span class="sd">    :type time: Python datetime instance</span>
+
+<span class="sd">    :return: The position and velocity matrices.</span>
+<span class="sd">    :rtype: tuple (mat_pos, mat_vel)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Earth&#39;s rotation rate (rad/sec):</span>
+    <span class="c1"># omega_rad_sec = 7.2921150e-5</span>
+
+    <span class="c1"># Get total days since Jan 1st 2000, 12:00:00</span>
+    <span class="n">time0</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">time</span> <span class="o">-</span> <span class="n">time0</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+
+    <span class="c1"># Calculate Greenwich Mean Sidereal Time (hours)</span>
+    <span class="n">gmst</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.697374558</span> <span class="o">+</span> <span class="mf">24.06570982441908</span> <span class="o">*</span> <span class="n">d</span> <span class="o">-</span> <span class="mi">12</span><span class="p">)</span> <span class="o">%</span> <span class="mi">24</span>
+
+    <span class="c1"># Convert GMST into radians</span>
+    <span class="n">gmst_rad</span> <span class="o">=</span> <span class="n">gmst</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">24</span>
+
+    <span class="c1"># Calculate the longitude of ascending node of the Moon (radians)</span>
+    <span class="n">omega_rad</span> <span class="o">=</span> <span class="n">deg2rad</span><span class="p">(</span><span class="mf">125.04</span> <span class="o">-</span> <span class="mf">0.052954</span> <span class="o">*</span> <span class="n">d</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the Mean Longitude of the Sun (rad)</span>
+    <span class="n">l_rad</span> <span class="o">=</span> <span class="n">deg2rad</span><span class="p">(</span><span class="mf">280.47</span> <span class="o">+</span> <span class="mf">0.98565</span> <span class="o">*</span> <span class="n">d</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the obliquity</span>
+    <span class="n">eta_rad</span> <span class="o">=</span> <span class="n">deg2rad</span><span class="p">(</span><span class="mf">23.4393</span> <span class="o">-</span> <span class="mf">0.0000004</span> <span class="o">*</span> <span class="n">d</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the Equinox</span>
+    <span class="n">d_phi_rad</span> <span class="o">=</span> <span class="o">-</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">0.000319</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega_rad</span><span class="p">)</span>
+                         <span class="o">-</span> <span class="mf">0.000024</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">l_rad</span><span class="p">))</span>
+
+    <span class="c1"># Calculate the apparent sidereal time (rad)</span>
+    <span class="n">gast_rad</span> <span class="o">=</span> <span class="n">gmst_rad</span> <span class="o">+</span> <span class="n">d_phi_rad</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">eta_rad</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the angular difference between the ECI and ECEF frames (rad)</span>
+    <span class="n">theta_rad</span> <span class="o">=</span> <span class="n">gast_rad</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+    <span class="c1"># Convert between the rotating reference frames</span>
+    <span class="n">mat_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">),</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+
+    <span class="n">mat_vel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">),</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">),</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_rad</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span> <span class="o">*</span> <span class="n">_OMEGA_E</span>
+
+    <span class="k">return</span> <span class="n">mat_pos</span><span class="p">,</span> <span class="n">mat_vel</span></div>
+
+
+
+<div class="viewcode-block" id="ecef2eci">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.ecef2eci">[docs]</a>
+<span class="k">def</span> <span class="nf">ecef2eci</span><span class="p">(</span><span class="n">time</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">r_ecef</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">v_ecef</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts a position and velocity from the ECI frame to the</span>
+<span class="sd">    ECEF frame.</span>
+
+<span class="sd">    :param time: A datetime for the requested time.</span>
+<span class="sd">    :type time: Python datetime instance</span>
+
+<span class="sd">    :param r_ecef: Position in ECI (given in metres).</span>
+<span class="sd">    :type r_ecef: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :param v_ecef: Velocity in ECI (given in metres/second).</span>
+<span class="sd">    :type r_ecef: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: The position and velocity vectors in ECEF. Position is given in</span>
+<span class="sd">        metres and velocity is given in metres/second.</span>
+<span class="sd">    :rtype: tuple (r_eci, v_eci)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mat_pos</span><span class="p">,</span> <span class="n">mat_vel</span> <span class="o">=</span> <span class="n">get_time_pos_vel</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+    <span class="n">r_eci</span> <span class="o">=</span> <span class="n">mat_pos</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r_ecef</span><span class="p">)</span>
+    <span class="n">v_eci</span> <span class="o">=</span> <span class="n">mat_vel</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r_ecef</span><span class="p">)</span> <span class="o">+</span> <span class="n">mat_pos</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v_ecef</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">r_eci</span><span class="p">,</span> <span class="n">v_eci</span></div>
+
+
+
+<div class="viewcode-block" id="eci2ecef">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.eci2ecef">[docs]</a>
+<span class="k">def</span> <span class="nf">eci2ecef</span><span class="p">(</span><span class="n">time</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">r_eci</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">v_eci</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts a position and velocity from the ECEF frame to the</span>
+<span class="sd">    ECI frame.</span>
+
+<span class="sd">    :param time: A datetime for the requested time.</span>
+<span class="sd">    :type time: Python datetime instance</span>
+
+<span class="sd">    :param r_eci: Position in ECEF (given in metres).</span>
+<span class="sd">    :type r_eci: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :param v_eci: Velocity in ECEF (given in metres/second).</span>
+<span class="sd">    :type v_eci: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: The position and velocity vectors in ECI. Position is given in</span>
+<span class="sd">        metres and velocity is given in metres/second.</span>
+<span class="sd">    :rtype: tuple (r_ecef, v_ecef)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mat_pos</span><span class="p">,</span> <span class="n">mat_vel</span> <span class="o">=</span> <span class="n">get_time_pos_vel</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+    <span class="n">r_ecef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">mat_pos</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r_eci</span><span class="p">)</span>
+    <span class="n">v_ecef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">mat_pos</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v_eci</span> <span class="o">-</span> <span class="n">mat_vel</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r_ecef</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">r_ecef</span><span class="p">,</span> <span class="n">v_ecef</span></div>
+
+
+
+<div class="viewcode-block" id="ecef2lla">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.ecef2lla">[docs]</a>
+<span class="k">def</span> <span class="nf">ecef2lla</span><span class="p">(</span><span class="n">xyz</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts the given XYZ Earth Centred Earth Fixed coordinates to</span>
+<span class="sd">    longitude latitude altitude coordinates.</span>
+
+<span class="sd">    :param xyz: A position in ECEF (m-m-m)</span>
+<span class="sd">    :type xyz: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: The given position converted to LLA (deg-deg-m).</span>
+<span class="sd">    :rtype: numpy.ndarray (3-elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">xyz</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan</span><span class="p">((</span><span class="n">z</span> <span class="o">*</span> <span class="n">_A</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">p</span> <span class="o">*</span> <span class="n">_B</span><span class="p">))</span>
+
+    <span class="n">lat</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan</span><span class="p">((</span><span class="n">z</span> <span class="o">+</span> <span class="n">_ECC_PRIME</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">_B</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
+                    <span class="o">/</span> <span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="n">_ECC</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">_A</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span><span class="p">))</span>
+
+    <span class="n">lon</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="n">_A</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">_ECC</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">alt</span> <span class="o">=</span> <span class="n">p</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">lat</span><span class="p">),</span> <span class="n">rad2deg</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="n">alt</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="ecef2lla_vec">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.ecef2lla_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">ecef2lla_vec</span><span class="p">(</span><span class="n">xyz</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is the vectorised version of the</span>
+<span class="sd">    :func:`~qnav.util.transformations.ecef2lla` function.</span>
+<span class="sd">    This converts the given XYZ Earth Centred Earth Fixed coordinates to</span>
+<span class="sd">    longitude latitude altitude coordinates.</span>
+
+<span class="sd">    :param xyz: A series of positions in ECEF (m-m-m)</span>
+<span class="sd">    :type xyz: numpy.ndarray (n-by-3 elements)</span>
+
+<span class="sd">    :return: The given positions converted to LLA (deg-deg-m).</span>
+<span class="sd">    :rtype: numpy.ndarray (n-by-3 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: NEW</span>
+    <span class="k">if</span> <span class="n">xyz</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ecef2lla</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">((</span><span class="n">z</span> <span class="o">*</span> <span class="n">_A</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">p</span> <span class="o">*</span> <span class="n">_B</span><span class="p">))</span>
+
+    <span class="n">lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">((</span><span class="n">z</span> <span class="o">+</span> <span class="n">_ECC_PRIME</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">_B</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
+                    <span class="o">/</span> <span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="n">_ECC</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">_A</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span><span class="p">))</span>
+
+    <span class="n">lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">_A</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">_ECC</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">alt</span> <span class="o">=</span> <span class="n">p</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">lat</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="n">alt</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="ecef2ned_transform">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.ecef2ned_transform">[docs]</a>
+<span class="k">def</span> <span class="nf">ecef2ned_transform</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function generates a transformation matrix for ECEF to</span>
+<span class="sd">    North-East-Down (NED) for an input Latitude-Longitude-Altitude (LLA)</span>
+<span class="sd">    reference.</span>
+
+<span class="sd">    :param ref_lla: The reference position in LLA, with lat-lon given in</span>
+<span class="sd">        degrees and alt given in metres.</span>
+<span class="sd">    :type ref_lla: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: The calculated 3-by-3 transformation matrix.</span>
+<span class="sd">    :rtype: NumPy Matrix (3-by-3 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ref_lat</span> <span class="o">=</span> <span class="n">deg2rad</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">ref_lon</span> <span class="o">=</span> <span class="n">deg2rad</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="n">s_lat</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span>
+    <span class="n">c_lat</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span>
+
+    <span class="n">s_lon</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span>
+    <span class="n">c_lon</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="p">[</span><span class="o">-</span><span class="n">s_lat</span> <span class="o">*</span> <span class="n">c_lon</span><span class="p">,</span> <span class="o">-</span><span class="n">s_lat</span> <span class="o">*</span> <span class="n">s_lon</span><span class="p">,</span> <span class="n">c_lat</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="n">s_lon</span><span class="p">,</span> <span class="n">c_lon</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="n">c_lat</span> <span class="o">*</span> <span class="n">c_lon</span><span class="p">,</span> <span class="o">-</span><span class="n">c_lat</span> <span class="o">*</span> <span class="n">s_lon</span><span class="p">,</span> <span class="o">-</span><span class="n">s_lat</span><span class="p">]</span>
+    <span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="ecef2ned_transform_vec">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.ecef2ned_transform_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">ecef2ned_transform_vec</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is the vectorised version of the</span>
+<span class="sd">    :func:`~qnav.util.transformations.ecef2ned_transform`</span>
+<span class="sd">    function. This generates transformation matrices for ECEF to</span>
+<span class="sd">    North-East-Down (NED) for input Latitude-Longitude-Altitude (LLA)</span>
+<span class="sd">    references.</span>
+
+<span class="sd">    :param ref_lla: The reference position in LLAs, with lat-lon given in</span>
+<span class="sd">        degrees and alt given in metres.</span>
+<span class="sd">    :type ref_lla: numpy.ndarray (n-by-3 elements)</span>
+
+<span class="sd">    :return: The calculated n-by-3-by-3 transformation matrix.</span>
+<span class="sd">    :rtype: numpy.ndarray (n-3-3 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: New</span>
+    <span class="k">if</span> <span class="n">ref_lla</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ecef2ned_transform</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">)</span>
+
+    <span class="n">amount</span> <span class="o">=</span> <span class="n">ref_lla</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">ref_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">ref_lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">s_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span>
+    <span class="n">c_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span>
+
+    <span class="n">s_lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span>
+    <span class="n">c_lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span>
+
+    <span class="n">tmp1</span> <span class="o">=</span> <span class="o">-</span><span class="n">s_lat</span> <span class="o">*</span> <span class="n">c_lon</span>
+    <span class="n">tmp2</span> <span class="o">=</span> <span class="o">-</span><span class="n">s_lat</span> <span class="o">*</span> <span class="n">s_lon</span>
+    <span class="n">tmp3</span> <span class="o">=</span> <span class="n">c_lat</span>
+
+    <span class="n">tmp4</span> <span class="o">=</span> <span class="o">-</span><span class="n">s_lon</span>
+    <span class="n">tmp5</span> <span class="o">=</span> <span class="n">c_lon</span>
+    <span class="n">tmp6</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">c_lon</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="n">tmp7</span> <span class="o">=</span> <span class="o">-</span><span class="n">c_lat</span> <span class="o">*</span> <span class="n">c_lon</span>
+    <span class="n">tmp8</span> <span class="o">=</span> <span class="o">-</span><span class="n">c_lat</span> <span class="o">*</span> <span class="n">s_lon</span>
+    <span class="n">tmp9</span> <span class="o">=</span> <span class="o">-</span><span class="n">s_lat</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">tmp1</span><span class="p">,</span> <span class="n">tmp2</span><span class="p">,</span> <span class="n">tmp3</span><span class="p">,</span>
+                            <span class="n">tmp4</span><span class="p">,</span> <span class="n">tmp5</span><span class="p">,</span> <span class="n">tmp6</span><span class="p">,</span>
+                            <span class="n">tmp7</span><span class="p">,</span> <span class="n">tmp8</span><span class="p">,</span> <span class="n">tmp9</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ecef2ned">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.ecef2ned">[docs]</a>
+<span class="k">def</span> <span class="nf">ecef2ned</span><span class="p">(</span><span class="n">xyz</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function takes an ECEF position and a reference</span>
+<span class="sd">    Latitude-Longitude-Altitude (LLA) position and returns the relative</span>
+<span class="sd">    position of the former from the latter in North-East-Down (NED) reference</span>
+<span class="sd">    frame.</span>
+
+<span class="sd">    :param xyz: Position in ECEF, given in metres.</span>
+<span class="sd">    :type xyz: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :param ref_lla: The reference LLA position, with lat-lon given in degrees</span>
+<span class="sd">        and alt given in metres.</span>
+<span class="sd">    :type ref_lla: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: The given position converted to NED, given in metres.</span>
+<span class="sd">    :rtype: numpy.ndarray (3-elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ref_xyz</span> <span class="o">=</span> <span class="n">lla2ecef</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">ecef2ned_transform</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">)</span>
+
+    <span class="n">ned</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xyz</span> <span class="o">-</span> <span class="n">ref_xyz</span><span class="p">)</span>
+    <span class="n">ned</span><span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">ned</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">_SMALL_VALUE</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">return</span> <span class="n">ned</span></div>
+
+
+<div class="viewcode-block" id="ned2ecef">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.ned2ecef">[docs]</a>
+<span class="k">def</span> <span class="nf">ned2ecef</span><span class="p">(</span><span class="n">ned</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function takes an origin Latitude-Longitude-Altitude (LLA) position</span>
+<span class="sd">    and a relative position in North-East-Down (NED) from this origin and</span>
+<span class="sd">    returns the latter position in ECEF.</span>
+
+<span class="sd">    :param ned: Position in NED, given in metres.</span>
+<span class="sd">    :type ned: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :param ref_lla: The reference LLA position, with lat-lon given in degrees</span>
+<span class="sd">        and alt given in metres.</span>
+<span class="sd">    :type ref_lla: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: The given position converted to ECEF, given in metres.</span>
+<span class="sd">    :rtype: numpy.ndarray (3-elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ref_xyz</span> <span class="o">=</span> <span class="n">lla2ecef</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">ecef2ned_transform</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">ned</span><span class="p">)</span> <span class="o">+</span> <span class="n">ref_xyz</span></div>
+
+
+<div class="viewcode-block" id="ned2ecef_vec">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.ned2ecef_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">ned2ecef_vec</span><span class="p">(</span><span class="n">ned</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function takes a North-East-Down (NED) position along with its</span>
+<span class="sd">    relative Latitude-Longitude-Altitude (LLA) reference position and</span>
+<span class="sd">    returns the latter position in ECEF.</span>
+
+<span class="sd">    :param ned: Positions in NED, given in metres.</span>
+<span class="sd">    :type ned: numpy.ndarray  (n-by-3 elements)</span>
+
+<span class="sd">    :param ref_lla: The reference LLA positions, with lat-lon given in</span>
+<span class="sd">        degrees and alt given in metres.</span>
+<span class="sd">    :type ref_lla: numpy.ndarray (n-by-3 elements)</span>
+
+<span class="sd">    :return: The given position converted to ECEF, given in metres.</span>
+<span class="sd">    :rtype: numpy.ndarray (n-by-3 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ref_xyz</span> <span class="o">=</span> <span class="n">lla2ecef_vec</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">ecef2ned_transform_vec</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">)</span>
+    <span class="n">inv_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ned</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">inv_t</span><span class="p">,</span> <span class="n">ned</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">inv_t</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ij, nj -&gt; ni&#39;</span><span class="p">,</span> <span class="n">inv_t</span><span class="p">,</span> <span class="n">ned</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;nji, ni -&gt; nj&#39;</span><span class="p">,</span> <span class="n">inv_t</span><span class="p">,</span> <span class="n">ned</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">xyz</span> <span class="o">+</span> <span class="n">ref_xyz</span></div>
+
+
+
+<div class="viewcode-block" id="vned2vecef">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.vned2vecef">[docs]</a>
+<span class="k">def</span> <span class="nf">vned2vecef</span><span class="p">(</span><span class="n">vel_ned</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pos_lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function takes an origin Latitude-Longitude-Altitude (LLA) position</span>
+<span class="sd">    and a relative velocity in North-East-Down (NED) components from this</span>
+<span class="sd">    origin and returns the velocity in ECEF format.</span>
+
+<span class="sd">    :param vel_ned: Velocity in NED, given in metres/second.</span>
+<span class="sd">    :type vel_ned: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :param pos_lla: The reference LLA position, with lat-lon given in degrees</span>
+<span class="sd">        and alt given in metres.</span>
+<span class="sd">    :type pos_lla: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: The given velocity vector converted to ECEF, given in metres/sec.</span>
+<span class="sd">    :rtype: NumPy Matrix (3-by-3 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">rne</span> <span class="o">=</span> <span class="n">ecef2ned_transform</span><span class="p">(</span><span class="n">pos_lla</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">rne</span><span class="p">,</span> <span class="n">vel_ned</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+    <span class="c1"># return np.linalg.solve(rne, vel_ned)  # TODO: Use alternative?</span>
+
+
+<div class="viewcode-block" id="utc2gps">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.utc2gps">[docs]</a>
+<span class="k">def</span> <span class="nf">utc2gps</span><span class="p">(</span><span class="n">time</span><span class="p">:</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts a provided time given in Coordinated Universal Time</span>
+<span class="sd">    (UTC) to a Python dictionary containing the corresponding week number, day</span>
+<span class="sd">    number and second.</span>
+
+<span class="sd">    :param time: A requested time in Coordinated Universal Time (UTC) format.</span>
+<span class="sd">    :type time: Python Datetime instance</span>
+
+<span class="sd">    :return: The provided time as a Python dictionary that can be used for</span>
+<span class="sd">        GPS functions.</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">leap_sec</span> <span class="o">=</span> <span class="mi">19</span>  <span class="c1"># Leap seconds between TAI and GPS time</span>
+    <span class="n">leap_sec_atom</span> <span class="o">=</span> <span class="mi">37</span>  <span class="c1"># Leap seconds between UTC and TAI</span>
+
+    <span class="n">sec_in_min</span> <span class="o">=</span> <span class="mi">60</span>
+    <span class="n">sec_in_hour</span> <span class="o">=</span> <span class="mi">60</span> <span class="o">*</span> <span class="n">sec_in_min</span>
+    <span class="n">sec_in_day</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="n">sec_in_hour</span>
+    <span class="n">sec_in_week</span> <span class="o">=</span> <span class="mi">7</span> <span class="o">*</span> <span class="n">sec_in_day</span>
+
+    <span class="n">gps_time_sec</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span> <span class="o">-</span> <span class="mi">315964782</span> <span class="o">+</span> <span class="n">leap_sec</span> <span class="o">-</span> <span class="n">leap_sec_atom</span>
+    <span class="n">gps_week_num</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">gps_time_sec</span> <span class="o">/</span> <span class="n">sec_in_week</span><span class="p">)</span>
+
+    <span class="n">gps_time</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;week&#39;</span><span class="p">:</span> <span class="n">gps_week_num</span><span class="p">,</span>
+        <span class="s1">&#39;day&#39;</span><span class="p">:</span> <span class="n">gps_time_sec</span> <span class="o">/</span> <span class="n">sec_in_day</span><span class="p">,</span>
+        <span class="s1">&#39;seconds&#39;</span><span class="p">:</span> <span class="n">gps_time_sec</span> <span class="o">-</span> <span class="n">gps_week_num</span> <span class="o">*</span> <span class="n">sec_in_week</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">gps_time</span></div>
+
+
+
+<div class="viewcode-block" id="ned2azel">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.ned2azel">[docs]</a>
+<span class="k">def</span> <span class="nf">ned2azel</span><span class="p">(</span><span class="n">ned</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function takes an origin North-East-Down (NED) position and converts</span>
+<span class="sd">    it into an azimuth and elevation value.</span>
+
+<span class="sd">    :param ned: The centre location (array containing [north, east, down])</span>
+<span class="sd">        with all values being given in metres.</span>
+<span class="sd">    :type ned: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: A tuple containing two elements, the corresponding azimuth and</span>
+<span class="sd">        elevation in radians.</span>
+<span class="sd">    :rtype: tuple[float, float]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">az_rad</span> <span class="o">=</span> <span class="n">rad2deg</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">ned</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ned</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">dr</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ned</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ned</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dr</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">el_rad</span> <span class="o">=</span> <span class="n">rad2deg</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">atan</span><span class="p">(</span><span class="o">-</span><span class="n">ned</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">dr</span><span class="p">))</span>
+
+    <span class="k">elif</span> <span class="n">ned</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">el_rad</span> <span class="o">=</span> <span class="o">-</span><span class="mf">90.0</span>
+
+    <span class="k">elif</span> <span class="n">ned</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">el_rad</span> <span class="o">=</span> <span class="mf">90.0</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">el_rad</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">return</span> <span class="n">az_rad</span><span class="p">,</span> <span class="n">el_rad</span></div>
+
+
+
+<div class="viewcode-block" id="get_transport_rate">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.get_transport_rate">[docs]</a>
+<span class="k">def</span> <span class="nf">get_transport_rate</span><span class="p">(</span><span class="n">position_lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">velocity_ned</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function computes the transport rate (in Local NED axes) for given</span>
+<span class="sd">    position and velocity vectors.</span>
+
+<span class="sd">    :param position_lla: The current position vector stating the latitude,</span>
+<span class="sd">        longitude and altitude (degrees-degrees-metres).</span>
+<span class="sd">    :type position_lla: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :param velocity_ned: The current velocity vector stating the velocity</span>
+<span class="sd">        North, East and Down (given in metres/second).</span>
+<span class="sd">    :type velocity_ned: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: The transport rate for the given position and velocity.</span>
+<span class="sd">    :rtype: NumPy Matrix (3-by-3 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Obtain the current latitude and altitude.</span>
+    <span class="n">lat</span> <span class="o">=</span> <span class="n">deg2rad</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">position_lla</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">position_lla</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1"># Obtain A and B Earth radii.</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">POLAR_AXIS_A</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">POLAR_AXIS_B</span>
+
+    <span class="c1"># Calculate eccentricity and sin(latitude) squared.</span>
+    <span class="n">ecc_sq</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">b</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">a</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">sin_lat_sq</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+
+    <span class="n">r_n</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ecc_sq</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ecc_sq</span> <span class="o">*</span> <span class="n">sin_lat_sq</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">r_e_1</span> <span class="o">=</span> <span class="n">a</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ecc_sq</span> <span class="o">*</span> <span class="n">sin_lat_sq</span><span class="p">)</span>
+
+    <span class="c1"># Finally, return the transport rate matrix</span>
+    <span class="c1"># for the given position and velocity.</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="n">velocity_ned</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">r_e_1</span> <span class="o">+</span> <span class="n">h</span><span class="p">),</span>
+        <span class="o">-</span><span class="n">velocity_ned</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">r_n</span> <span class="o">+</span> <span class="n">h</span><span class="p">),</span>
+        <span class="o">-</span><span class="n">velocity_ned</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">r_e_1</span> <span class="o">+</span> <span class="n">h</span><span class="p">)</span>
+    <span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="get_transport_rate_vec">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.get_transport_rate_vec">[docs]</a>
+<span class="k">def</span> <span class="nf">get_transport_rate_vec</span><span class="p">(</span><span class="n">position_lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">velocity_ned</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is the vectorised version of the</span>
+<span class="sd">    :func:`~qnav.util.transformations.get_transport_rate`</span>
+<span class="sd">    function. This computes the transport rate (in Local NED axes)</span>
+<span class="sd">    for a series of given positions and velocity vectors.</span>
+
+<span class="sd">    :param position_lla: The current position vectors stating the latitude,</span>
+<span class="sd">        longitude and altitude (degrees-degrees-metres).</span>
+<span class="sd">    :type position_lla: numpy.ndarray (n-by-3 elements)</span>
+
+<span class="sd">    :param velocity_ned: The current velocity vectors stating the velocity</span>
+<span class="sd">        North, East and Down (given in metres/second).</span>
+<span class="sd">    :type velocity_ned: numpy.ndarray (n-by-3 elements)</span>
+
+<span class="sd">    :return: The transport rate for the given positions and velocities.</span>
+<span class="sd">    :rtype: NumPy Matrix (n-3-3 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Obtain the current latitude and altitude.</span>
+    <span class="n">lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">position_lla</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">position_lla</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1"># Obtain A and B Earth radii.</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">POLAR_AXIS_A</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">POLAR_AXIS_B</span>
+
+    <span class="n">ecc_sq</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">b</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">a</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">sin_lat_sq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+
+    <span class="n">r_n</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ecc_sq</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ecc_sq</span> <span class="o">*</span> <span class="n">sin_lat_sq</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">r_e_1</span> <span class="o">=</span> <span class="n">a</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ecc_sq</span> <span class="o">*</span> <span class="n">sin_lat_sq</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">velocity_ned</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">r_e_1</span> <span class="o">+</span> <span class="n">h</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="n">velocity_ned</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">r_n</span> <span class="o">+</span> <span class="n">h</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="o">-</span><span class="n">velocity_ned</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">r_e_1</span> <span class="o">+</span> <span class="n">h</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="vel_ecef2vel_ned">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.vel_ecef2vel_ned">[docs]</a>
+<span class="k">def</span> <span class="nf">vel_ecef2vel_ned</span><span class="p">(</span><span class="n">vel_ecef</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A function to take ECEF velocity and an LLA location and convert it into</span>
+<span class="sd">    the NED velocity.</span>
+
+<span class="sd">    :param vel_ecef: The velocity given in Earth-Centred Earth-Fixed format.</span>
+<span class="sd">    :type vel_ecef: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :param lla: The current latitude, longitude and altitude (in deg-deg-m).</span>
+<span class="sd">    :type vel_ecef: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: The given Earth-Centred Earth-Fixed (ECEF) velocity converted</span>
+<span class="sd">        into local North-East-Down (NED), subject to the given reference</span>
+<span class="sd">        position.</span>
+<span class="sd">    :rtype: numpy.ndarray (3-elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lat</span> <span class="o">=</span> <span class="n">deg2rad</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lla</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">lon</span> <span class="o">=</span> <span class="n">deg2rad</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lla</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="n">c_lat</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="n">slat</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="n">c_long</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="n">s_long</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+
+    <span class="n">rne</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="p">[</span><span class="o">-</span><span class="n">slat</span> <span class="o">*</span> <span class="n">c_long</span><span class="p">,</span> <span class="o">-</span><span class="n">slat</span> <span class="o">*</span> <span class="n">s_long</span><span class="p">,</span> <span class="n">c_lat</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="n">s_long</span><span class="p">,</span> <span class="n">c_long</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="n">c_lat</span> <span class="o">*</span> <span class="n">c_long</span><span class="p">,</span> <span class="o">-</span><span class="n">c_lat</span> <span class="o">*</span> <span class="n">s_long</span><span class="p">,</span> <span class="o">-</span><span class="n">slat</span><span class="p">]])</span>
+
+    <span class="n">vel_ned</span> <span class="o">=</span> <span class="n">rne</span> <span class="o">@</span> <span class="n">vel_ecef</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">return</span> <span class="n">vel_ned</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">__utm_coefficient</span><span class="p">(</span><span class="n">e</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function calculate the projection coefficients for UTM to</span>
+<span class="sd">    latitude-longitude conversion calculation.</span>
+
+<span class="sd">    :param e: The first ellipsoid eccentricity</span>
+<span class="sd">    :type e: float</span>
+
+<span class="sd">    :param m: The mercator (0 for transverse mercator, 1 for transverse</span>
+<span class="sd">        mercator reverse coefficients and 2 for meridian arc)</span>
+<span class="sd">    :type m: float</span>
+
+<span class="sd">    :return: 5 coefficients.</span>
+<span class="sd">    :rtype: NumPy array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">c0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="o">-</span><span class="mi">175</span> <span class="o">/</span> <span class="mi">16384</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span> <span class="o">/</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mi">105</span> <span class="o">/</span> <span class="mi">4096</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">45</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">525</span> <span class="o">/</span> <span class="mi">16384</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">45</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">15</span> <span class="o">/</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mi">175</span> <span class="o">/</span> <span class="mi">12288</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">35</span> <span class="o">/</span> <span class="mi">3072</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">315</span> <span class="o">/</span> <span class="mi">131072</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="p">])</span>
+
+    <span class="k">elif</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">c0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="o">-</span><span class="mi">175</span> <span class="o">/</span> <span class="mi">16384</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span> <span class="o">/</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">61440</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">7</span> <span class="o">/</span> <span class="mi">2048</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">559</span> <span class="o">/</span> <span class="mi">368640</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">1280</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">768</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">283</span> <span class="o">/</span> <span class="mi">430080</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">17</span> <span class="o">/</span> <span class="mi">30720</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">4397</span> <span class="o">/</span> <span class="mi">41287680</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="p">])</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">c0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="o">-</span><span class="mi">175</span> <span class="o">/</span> <span class="mi">16384</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span> <span class="o">/</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mi">901</span> <span class="o">/</span> <span class="mi">184320</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">9</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">96</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mi">311</span> <span class="o">/</span> <span class="mi">737280</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">17</span> <span class="o">/</span> <span class="mi">5120</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">13</span> <span class="o">/</span> <span class="mi">768</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">899</span> <span class="o">/</span> <span class="mi">430080</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">61</span> <span class="o">/</span> <span class="mi">15360</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">49561</span> <span class="o">/</span> <span class="mi">41287680</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="p">])</span>
+
+    <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">c0</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">c0</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">c0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">e</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">c</span>
+
+
+<span class="c1"># TODO: MOVE</span>
+<div class="viewcode-block" id="cross_prod_xy">
+<a class="viewcode-back" href="../../../modules/util/transformations.html#qnav.util.transformations.cross_prod_xy">[docs]</a>
+<span class="k">def</span> <span class="nf">cross_prod_xy</span><span class="p">(</span><span class="n">vec1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">vec2</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An optimised method for computing the cross-product of two 1-by-3 arrays.</span>
+<span class="sd">    In most cases this method is far quicker that the Numpy cross function.</span>
+
+<span class="sd">    :param vec1: The first 1-by-3 tuple/array.</span>
+<span class="sd">    :type vec1: numpy.ndarray (3 elements)</span>
+
+<span class="sd">    :param vec2: The first 1-by-3 tuple/array.</span>
+<span class="sd">    :type vec2: numpy.ndarray (3 elements)</span>
+
+<span class="sd">    :return: The cross product of the two tuples.</span>
+<span class="sd">    :rtype: numpy.ndarray (3 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span>
+        <span class="n">vec1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">vec2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">vec1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">vec2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">vec1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">vec2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">vec1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">vec2</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+        <span class="n">vec1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">vec2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">vec1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">vec2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="p">))</span></div>
+
+
+
+
+<span class="c1"># if __name__ == &#39;__main__&#39;:</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1">#     min_angle: float = -np.pi</span>
+<span class="c1">#     max_angle: float = np.pi</span>
+<span class="c1">#</span>
+<span class="c1">#     psi_t = np.random.uniform(min_angle, max_angle, (2, 2))</span>
+<span class="c1">#     theta_t = np.random.uniform(min_angle, max_angle, (2, 2))</span>
+<span class="c1">#     phi_t = np.random.uniform(min_angle, max_angle, (2, 2))</span>
+<span class="c1">#</span>
+<span class="c1">#     rotate_3d_vec(psi_t, theta_t, phi_t)</span>
+
+    <span class="c1"># test_lla_points = np.array([</span>
+    <span class="c1">#     [52.0, -3.0, 1000],</span>
+    <span class="c1">#     [52.1, -3.1, 1000],</span>
+    <span class="c1">#     [52.2, -3.2, 1000],</span>
+    <span class="c1"># ])</span>
+    <span class="c1">#</span>
+    <span class="c1"># test_ref_point = np.array([</span>
+    <span class="c1">#     [52.1, -3.1, 1000],</span>
+    <span class="c1">#     [52.1, -3.1, 1000],</span>
+    <span class="c1">#     [52.1, -3.1, 1000],</span>
+    <span class="c1"># ])</span>
+    <span class="c1">#</span>
+    <span class="c1"># print(lla2ned_vec(test_lla_points, test_ref_point))</span>
+    <span class="c1"># print(lla2ned_vec(test_lla_points, test_ref_point[0, :]))</span>
+
+<span class="c1"># if __name__ == &#39;__main__&#39;:</span>
+<span class="c1">#</span>
+<span class="c1">#     test = np.array([10, 20, 30])</span>
+<span class="c1">#     quat = euler_to_quaternion(test)</span>
+<span class="c1">#     euler = quaternion_to_euler(quat)</span>
+<span class="c1">#</span>
+<span class="c1">#     print(f&quot;Input: \t{test}&quot;)</span>
+<span class="c1">#     print(f&quot;Quaternion: \t{quat}&quot;)</span>
+<span class="c1">#     print(f&quot;Output: \t{euler}&quot;)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

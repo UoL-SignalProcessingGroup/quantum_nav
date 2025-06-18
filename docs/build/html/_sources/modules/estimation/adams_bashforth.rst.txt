@@ -1,0 +1,8 @@
+:orphan:
+
+nav_toolbox.estimation.adams_bashforth
+======================================
+
+.. automodule:: nav_toolbox.estimation.adams_bashforth
+    :members:
+    :member-order: bysource

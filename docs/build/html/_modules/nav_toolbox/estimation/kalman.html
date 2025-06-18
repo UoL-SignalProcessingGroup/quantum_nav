@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nav_toolbox.estimation.kalman &mdash; Navigation Toolbox 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Navigation Toolbox
+          </a>
+              <div class="version">
+                Version 1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">1. Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">2. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">3. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">4. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/processing.html">5. Estimation Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">6. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">7. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">8. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">9. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">10. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">11. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">12. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Navigation Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nav_toolbox.estimation.kalman</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nav_toolbox.estimation.kalman</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=========</span>
+<span class="sd">kalman.py</span>
+<span class="sd">=========</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Implementation of a Kalman filter based Inertial Navigation System (INS).</span>
+<span class="sd">    This module contains a Kalman filter INS solution and corresponding</span>
+<span class="sd">    Kalman based functions/equations. This solution inherits from the</span>
+<span class="sd">    standard INS model.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Prof. Jason Ralph - jfralph@liverpool.ac.uk</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">nav_toolbox.core.transformations</span> <span class="k">as</span> <span class="nn">trans</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">tan</span>
+<span class="kn">from</span> <span class="nn">nav_toolbox.core.constants</span> <span class="kn">import</span> <span class="n">OMEGA_E</span>
+<span class="kn">from</span> <span class="nn">nav_toolbox.estimation.ins</span> <span class="kn">import</span> <span class="n">StandardINS</span>
+<span class="kn">from</span> <span class="nn">nav_toolbox.gravity.somigliana</span> <span class="kn">import</span> <span class="n">get_gravity_xyz</span>
+<span class="kn">from</span> <span class="nn">nav_toolbox.core.transformations</span> <span class="kn">import</span> <span class="n">cross_prod_xy</span>
+
+
+<div class="viewcode-block" id="KalmanFilter">
+<a class="viewcode-back" href="../../../modules/estimation/kalman.html#nav_toolbox.estimation.kalman.KalmanFilter">[docs]</a>
+<span class="k">class</span> <span class="nc">KalmanFilter</span><span class="p">(</span><span class="n">StandardINS</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Kalman Filter Inertial Navigation System (INS).</span>
+<span class="sd">    This class represents a Kalman filter that uses linear quadratic</span>
+<span class="sd">    estimations to update the estimated states and estimations of</span>
+<span class="sd">    measurement errors. This solution is known to be more accurate</span>
+<span class="sd">    than the other more basic INS methods provided in the project.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># All added properties of the class</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> \
+        <span class="s1">&#39;_state_vector&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_state_errors&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_h_matrix&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_r_matrix&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_f_matrix&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_q_matrix&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">velocity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">acceleration</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">attitude</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">angle_rates</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">h</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">r</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">f</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">q</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialises a Kalman filter instance using the given initial estimates</span>
+<span class="sd">         and Kalman matrices (H, R, F and Q).</span>
+
+<span class="sd">        :param position: The initial estimated position vector containing the</span>
+<span class="sd">            latitude (in degrees), longitude (in degrees) and altitude (in</span>
+<span class="sd">            metres) respectively.</span>
+<span class="sd">        :type position: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param velocity: The initial estimated velocity vector for the</span>
+<span class="sd">            North, East and Down components respectively (in m/s).</span>
+<span class="sd">        :type velocity: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param acceleration: The initial estimated acceleration vector for</span>
+<span class="sd">            the North, East and Down components respectively (in m/s^2).</span>
+<span class="sd">        :type acceleration: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param attitude: The initial estimated attitude vector for the</span>
+<span class="sd">            Heading, Pitch and Roll components respectively (in degrees).</span>
+<span class="sd">        :type attitude: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param angle_rates: The initial estimated angle rate vector for</span>
+<span class="sd">            the P, Q and R body rates respectively (in deg/s).</span>
+<span class="sd">        :type angle_rates: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param h: The measurement matrix (measurements in Local NED/Earth axes).</span>
+<span class="sd">        :type h: numpy.ndarray (6-by-15 elements)</span>
+
+<span class="sd">        :param r: The measurement noise matrix (measurements in Sensor axes).</span>
+<span class="sd">        :type r: numpy.ndarray (6-by-6 elements)</span>
+
+<span class="sd">        :param f: The predicted state vector and covariance matrices for time step.</span>
+<span class="sd">        :type f: numpy.ndarray (15-by-15 elements)</span>
+
+<span class="sd">        :param q: The process noise matrix (all states in Local NED/Earth axes).</span>
+<span class="sd">        :type q: numpy.ndarray (15-by-15 elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Call the parent class constructor.</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">acceleration</span><span class="p">,</span> <span class="n">attitude</span><span class="p">,</span> <span class="n">angle_rates</span><span class="p">)</span>
+
+        <span class="c1"># Initialise the matrices.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_h_matrix</span> <span class="o">=</span> <span class="n">h</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_r_matrix</span> <span class="o">=</span> <span class="n">r</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_f_matrix</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_q_matrix</span> <span class="o">=</span> <span class="n">q</span>
+
+        <span class="c1"># Initialise the state vector array.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_vector</span> <span class="o">=</span> <span class="n">arrays_to_state_vector</span><span class="p">(</span>
+            <span class="n">position</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">acceleration</span><span class="p">,</span> <span class="n">attitude</span><span class="p">,</span> <span class="n">angle_rates</span><span class="p">)</span>
+
+        <span class="c1"># Initialise the state error matrix.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_errors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-9</span>
+
+<div class="viewcode-block" id="KalmanFilter.take_inertia_measurement">
+<a class="viewcode-back" href="../../../modules/estimation/kalman.html#nav_toolbox.estimation.kalman.KalmanFilter.take_inertia_measurement">[docs]</a>
+    <span class="k">def</span> <span class="nf">take_inertia_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                 <span class="n">measured_acceleration</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                 <span class="n">measured_angle_rates</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Processes given acceleration and angle rate measurements and uses</span>
+<span class="sd">        them to update the internal estimation states.</span>
+
+<span class="sd">        :param time_step: The timestep since the last measurement was</span>
+<span class="sd">            provided (in sqrt seconds)</span>
+<span class="sd">        :type time_step: float</span>
+
+<span class="sd">        :param measured_acceleration: The measured acceleration vector for</span>
+<span class="sd">            the North, East and Down components respectively (in m/s^2).</span>
+<span class="sd">        :type measured_acceleration: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param measured_angle_rates: The measured angle rate vector for</span>
+<span class="sd">            the P, Q and R body rates respectively (in deg/s).</span>
+<span class="sd">        :type measured_angle_rates: numpy.ndarray (3-elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Calculate gravity vector modified by Earth&#39;s rotation (metres/sec^2)</span>
+        <span class="n">ref_lla</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_position</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">alt</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">get_gravity_xyz</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+
+        <span class="c1"># Define Angular velocity for Earth&#39;s rotation (in local NED axes)</span>
+        <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">lat</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+        <span class="n">omega_e</span> <span class="o">=</span> <span class="n">OMEGA_E</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)])</span>
+
+        <span class="c1"># Redefine notation for matrices to simplify the notation later on</span>
+        <span class="n">h_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_h_matrix</span>
+        <span class="n">r_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_r_matrix</span><span class="p">)</span>
+        <span class="n">f_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_f_matrix</span>
+        <span class="n">q_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_q_matrix</span>
+
+        <span class="c1"># Use current LLA position to define local reference axes (Local NED)</span>
+        <span class="n">state_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_state_vector</span><span class="p">)</span>
+        <span class="n">state_errors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_state_errors</span><span class="p">)</span>
+        <span class="n">ref_lla</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">]]</span>
+
+        <span class="c1"># Convert Existing State Vector from LLA-body axes to Local NED axes</span>
+        <span class="n">state_vector</span> <span class="o">=</span> <span class="n">state_vector2ned</span><span class="p">(</span><span class="n">state_vector</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">)</span>
+        <span class="n">velocity_e0</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">]]</span>
+
+        <span class="c1"># Measured Body PQR Angle Rates to Euler Angle Rates</span>
+        <span class="n">psi</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">phi</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">]]</span>
+
+        <span class="c1"># Sensor to Body axes rotation matrix</span>
+        <span class="n">sensor_angles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_angles_rad</span>
+        <span class="n">lever_arm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lever_angles</span>
+
+        <span class="c1"># Rotation matrix from body to sensor axes</span>
+        <span class="n">rot_body2sensor</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">sensor_angles</span><span class="p">)</span>
+
+        <span class="c1"># Rotation matrix from Body axes to Local NED</span>
+        <span class="n">rot_earth2body</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="n">psi</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">)</span>
+
+        <span class="c1"># Rotation matrix from Body Angle Rates (PQR) to Euler Angle Rate</span>
+        <span class="n">rot_pqr2euler</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span> <span class="o">*</span> <span class="n">tan</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span> <span class="o">*</span> <span class="n">tan</span><span class="p">(</span><span class="n">theta</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)),</span> <span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))]</span>
+        <span class="p">])</span>
+
+        <span class="n">measured_angle_rate_s1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">measured_angle_rates</span><span class="p">)</span>
+
+        <span class="c1"># Convert angle rates from sensor axes to body axes</span>
+        <span class="n">measured_angle_rate_b1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_body2sensor</span><span class="p">,</span> <span class="n">measured_angle_rate_s1</span><span class="p">)</span>
+
+        <span class="c1">#  Convert measured accelerations from sensor axes to body axes</span>
+        <span class="n">measured_angle_rate_b0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_est_angle_rates</span><span class="p">)</span>
+        <span class="n">measured_acceleration_b1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_body2sensor</span><span class="p">,</span> <span class="n">measured_acceleration</span><span class="p">)</span> <span class="o">-</span> <span class="n">cross_prod_xy</span><span class="p">(</span>
+            <span class="n">measured_angle_rate_b0</span><span class="p">,</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">measured_angle_rate_b0</span><span class="p">,</span> <span class="n">lever_arm</span><span class="p">))</span>
+        <span class="c1"># measured_acceleration_b1 = np.linalg.solve(rot_body2sensor, measured_acceleration) - np.cross(</span>
+        <span class="c1">#     measured_angle_rate_b0, np.cross(measured_angle_rate_b0, lever_arm))</span>
+
+        <span class="c1"># Convert measured acceleration from body axes to Earth axes and remove Coriolis and gravity terms</span>
+        <span class="n">measured_acceleration_e1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_earth2body</span><span class="p">,</span> <span class="n">measured_acceleration_b1</span><span class="p">)</span> <span class="o">+</span> <span class="n">g</span>
+        <span class="n">measured_angle_rate_b1</span> <span class="o">-=</span> <span class="n">rot_earth2body</span> <span class="o">@</span> <span class="n">omega_e</span>
+
+        <span class="n">omega_tr</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">get_transport_rate</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span>
+            <span class="n">rot_earth2body</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_velocity</span><span class="p">))</span>
+        <span class="n">measured_angle_rate_b1</span> <span class="o">-=</span> <span class="n">rot_earth2body</span> <span class="o">@</span> <span class="n">omega_tr</span>
+        <span class="n">measured_euler_rates</span> <span class="o">=</span> <span class="n">rot_pqr2euler</span> <span class="o">@</span> <span class="n">measured_angle_rate_b1</span>
+
+        <span class="c1"># Remove effect of Coriolis term due to Earth&#39;s rotation and transport rate (in Local NED axes)</span>
+        <span class="n">measured_acceleration</span> <span class="o">=</span> <span class="n">measured_acceleration_e1</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">cross_prod_xy</span><span class="p">(</span>
+            <span class="n">omega_e</span><span class="p">,</span> <span class="n">velocity_e0</span><span class="p">)</span> <span class="o">-</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">omega_tr</span><span class="p">,</span> <span class="n">velocity_e0</span><span class="p">)</span>
+        <span class="c1"># measured_acceleration = measured_acceleration_e1 - 2.0 * np.cross(</span>
+        <span class="c1">#     omega_e, velocity_e0) - np.cross(omega_tr, velocity_e0)</span>
+
+        <span class="c1"># Convert sensor errors to PQR errors</span>
+        <span class="n">r_matrix</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_body2sensor</span><span class="p">,</span> <span class="n">r_matrix</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span> <span class="o">*</span> <span class="n">rot_body2sensor</span>
+
+        <span class="c1"># Convert PQR errors to Euler angle errors</span>
+        <span class="n">r_matrix</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">rot_pqr2euler</span> <span class="o">@</span> <span class="n">r_matrix</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">@</span> <span class="n">rot_pqr2euler</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="c1"># Convert measured sensor acceleration errors to body axes</span>
+        <span class="n">r_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_body2sensor</span><span class="p">,</span> <span class="n">r_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span> <span class="o">*</span> <span class="n">rot_body2sensor</span>
+
+        <span class="c1"># Convert acceleration errors from body axes to Local NED measurement errors</span>
+        <span class="n">r_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_earth2body</span><span class="p">,</span> <span class="n">r_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span> <span class="o">*</span> <span class="n">rot_earth2body</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ======================================================================</span>
+<span class="sd">        Kalman Filter Operations</span>
+<span class="sd">        ======================================================================</span>
+<span class="sd">        1. Measurement</span>
+<span class="sd">            1a. Take New Measurement</span>
+<span class="sd">            1b. Calculate Expected Measurement</span>
+
+<span class="sd">        2. Update State</span>
+<span class="sd">            2a. Calculate Innovation</span>
+<span class="sd">            2b. Calculate Kalman Gain</span>
+<span class="sd">            2c. Calculate Updated State Vector</span>
+<span class="sd">            2d. Calculate Update State Error Matrix</span>
+
+<span class="sd">        3. Predict State and Errors forward one time step</span>
+<span class="sd">            3a. Calculate Predicted State Vector</span>
+<span class="sd">            3b. Calculate Predicted Error Matrix</span>
+
+<span class="sd">        4. Return to 1...</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        1. Measurement</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 1a. Take New Measurement</span>
+        <span class="n">actual_measurement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">measured_acceleration</span><span class="p">,</span> <span class="n">measured_euler_rates</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]])</span>
+
+        <span class="c1"># 1b. Calculate Expected Measurement</span>
+        <span class="n">expected_measurement</span> <span class="o">=</span> <span class="n">h_matrix</span> <span class="o">@</span> <span class="n">state_vector</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        2. Update State</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 2a. Calculate Innovation</span>
+        <span class="n">innovation_vector</span> <span class="o">=</span> <span class="n">actual_measurement</span> <span class="o">-</span> <span class="n">expected_measurement</span>
+
+        <span class="c1"># 2b. Calculate Kalman Gain</span>
+        <span class="n">s_matrix</span> <span class="o">=</span> <span class="n">r_matrix</span> <span class="o">+</span> <span class="n">h_matrix</span> <span class="o">@</span> <span class="n">state_errors</span> <span class="o">@</span> <span class="n">h_matrix</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">k_matrix</span> <span class="o">=</span> <span class="n">state_errors</span> <span class="o">@</span> <span class="n">h_matrix</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">s_matrix</span><span class="p">)</span>
+
+        <span class="c1"># 2c. Calculate Updated State Vector</span>
+        <span class="n">state_vector</span> <span class="o">+=</span> <span class="n">k_matrix</span> <span class="o">@</span> <span class="n">innovation_vector</span>
+
+        <span class="c1"># 2d. Calculate Update State Error Matrix</span>
+        <span class="n">state_errors</span> <span class="o">-=</span> <span class="n">k_matrix</span> <span class="o">@</span> <span class="n">s_matrix</span> <span class="o">@</span> <span class="n">k_matrix</span><span class="o">.</span><span class="n">T</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        3. Predict State and Errors forward one time step</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 3a. Calculate Predicted State Vector</span>
+        <span class="n">state_vector</span> <span class="o">=</span> <span class="n">f_matrix</span> <span class="o">@</span> <span class="n">state_vector</span>
+
+        <span class="c1"># 3b. Calculate Predicted Error Matrix</span>
+        <span class="n">state_errors</span> <span class="o">=</span> <span class="n">f_matrix</span> <span class="o">@</span> <span class="n">state_errors</span> <span class="o">@</span> <span class="n">f_matrix</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">q_matrix</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ======================================================================</span>
+<span class="sd">        Clean Up and Returning Values</span>
+<span class="sd">        ======================================================================</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check the attitude angles (periodicity)</span>
+        <span class="n">state_vector</span><span class="p">[[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span>
+            <span class="n">state_vector</span><span class="p">[[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">]]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+        <span class="n">state_vector</span> <span class="o">=</span> <span class="n">ned2state_vector</span><span class="p">(</span><span class="n">state_vector</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_vector</span> <span class="o">=</span> <span class="n">state_vector</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_errors</span> <span class="o">=</span> <span class="n">state_errors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_position</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_velocity</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_acceleration</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_attitude</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_angle_rates</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">]]</span></div>
+
+
+<div class="viewcode-block" id="KalmanFilter.overwrite_estimates">
+<a class="viewcode-back" href="../../../modules/estimation/kalman.html#nav_toolbox.estimation.kalman.KalmanFilter.overwrite_estimates">[docs]</a>
+    <span class="k">def</span> <span class="nf">overwrite_estimates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="n">velocity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">acceleration</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="n">attitude</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">angle_rates</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overwrites selected current estimated states.</span>
+<span class="sd">        This is namely used when estimation fusion is applied externally.</span>
+
+<span class="sd">        :param position: The replacement position vector containing the</span>
+<span class="sd">            latitude (in degrees), longitude (in degrees) and altitude</span>
+<span class="sd">            (in metres) respectively.</span>
+<span class="sd">        :type position: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param velocity: The replacement velocity vector for the</span>
+<span class="sd">            North, East and Down components respectively (in m/s).</span>
+<span class="sd">        :type velocity: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param acceleration: The replacement acceleration vector for</span>
+<span class="sd">            the North, East and Down components respectively (in m/s^2).</span>
+<span class="sd">        :type acceleration: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param attitude: The replacement attitude vector for the Heading,</span>
+<span class="sd">            Pitch and Roll components respectively (in degrees).</span>
+<span class="sd">        :type attitude: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param angle_rates: The replacement angle rate vector for the</span>
+<span class="sd">            P, Q and R body rates respectively (in deg/s).</span>
+<span class="sd">        :type angle_rates: numpy.ndarray (3-elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Use the parent class updater method.</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">overwrite_estimates</span><span class="p">(</span>
+            <span class="n">position</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">acceleration</span><span class="p">,</span> <span class="n">attitude</span><span class="p">,</span> <span class="n">angle_rates</span><span class="p">)</span>
+
+        <span class="c1"># Update the state vector using the updated states.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_vector</span> <span class="o">=</span> <span class="n">arrays_to_state_vector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_est_position</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_velocity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_acceleration</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_est_attitude</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_angle_rates</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="state_vector2ned">
+<a class="viewcode-back" href="../../../modules/estimation/kalman.html#nav_toolbox.estimation.kalman.state_vector2ned">[docs]</a>
+<span class="k">def</span> <span class="nf">state_vector2ned</span><span class="p">(</span><span class="n">state_vector</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts the state vector array and measurements into local</span>
+<span class="sd">    North-East-Down (NED) coordinates from a given reference location,</span>
+<span class="sd">    suitable for kalman filtering.</span>
+
+<span class="sd">    :param state_vector: The state vector array holding the position,</span>
+<span class="sd">        velocity, acceleration, attitude and angle rate variables.</span>
+<span class="sd">    :type state_vector: numpy.ndarray (15-elements)</span>
+
+<span class="sd">    :param ref_lla: The reference latitude-longitude-altitude vector (given in</span>
+<span class="sd">        degrees-degrees-metres) identifying the centre point.</span>
+<span class="sd">    :type ref_lla: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: The given state vector array and measurements converted to</span>
+<span class="sd">        local NED/Earth axes for Kalman filtering.</span>
+<span class="sd">    :rtype: numpy.ndarray (15-elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Calculate the gravity vector for the current position</span>
+    <span class="n">lat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">alt</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">get_gravity_xyz</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+
+    <span class="c1"># Define Angular velocity for Earth&#39;s rotation (in local NED axes)</span>
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="n">omega_e</span> <span class="o">=</span> <span class="n">OMEGA_E</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)])</span>
+
+    <span class="c1"># Convert Positions from LLA to Local NED</span>
+    <span class="c1"># Fix the reference Lat-Long-Altitude location for conversation from/to LLA and NED coordinates</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">lla2ned</span><span class="p">(</span><span class="n">state_vector</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">]],</span> <span class="n">ref_lla</span><span class="p">)</span>
+
+    <span class="c1"># Convert Velocities and Accelerations from Body to Local NED</span>
+    <span class="c1"># and convert Attitudes from degrees to radians</span>
+    <span class="n">attitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">state_vector</span><span class="p">[[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">]])</span>
+
+    <span class="c1"># Calculate ESTIMATED body axes from Earth-oriented axes</span>
+    <span class="n">rot_earth2body</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">attitude</span><span class="p">)</span>
+
+    <span class="c1"># Convert velocity from Body axes to Earth Axes</span>
+    <span class="n">velocity_b</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">]]</span>
+    <span class="n">acceleration_b</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">]]</span>
+    <span class="n">angle_rate_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">state_vector</span><span class="p">[[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">]])</span>
+
+    <span class="c1"># Convert velocity from body axes to Earth Axes</span>
+    <span class="n">velocity_e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_earth2body</span><span class="p">,</span> <span class="n">velocity_b</span><span class="p">)</span>
+
+    <span class="c1"># Convert measured acceleration from body axes to Earth axes and remove coriolis and gravity terms</span>
+    <span class="n">acceleration_e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_earth2body</span><span class="p">,</span> <span class="n">acceleration_b</span><span class="p">)</span> <span class="o">+</span> <span class="n">g</span>
+
+    <span class="c1"># Remove effect of Coriolis term due to Earth&#39;s rotation and transport rate (in Local NED axes)</span>
+    <span class="n">acceleration_e</span> <span class="o">-=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">omega_e</span><span class="p">,</span> <span class="n">velocity_e</span><span class="p">)</span>
+    <span class="c1"># acceleration_e -= 2.0 * np.cross(omega_e, velocity_e)  # Can change?</span>
+
+    <span class="c1"># Convert PQR Angle Rates from Body to Local NED/Earth Axes</span>
+    <span class="n">rot_pqr2euler</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">sin</span><span class="p">(</span><span class="n">attitude</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="n">tan</span><span class="p">(</span><span class="n">attitude</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">cos</span><span class="p">(</span><span class="n">attitude</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="n">tan</span><span class="p">(</span><span class="n">attitude</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span>
+        <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">cos</span><span class="p">(</span><span class="n">attitude</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">attitude</span><span class="p">[</span><span class="mi">2</span><span class="p">])],</span>
+        <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">sin</span><span class="p">(</span><span class="n">attitude</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">cos</span><span class="p">(</span><span class="n">attitude</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span> <span class="n">cos</span><span class="p">(</span><span class="n">attitude</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">cos</span><span class="p">(</span><span class="n">attitude</span><span class="p">[</span><span class="mi">1</span><span class="p">]))]</span>
+    <span class="p">])</span>
+    <span class="n">euler_rates</span> <span class="o">=</span> <span class="n">rot_pqr2euler</span> <span class="o">@</span> <span class="n">angle_rate_b</span>
+
+    <span class="c1"># Check the attitude angles (periodicity)</span>
+    <span class="n">pi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="n">attitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">attitude</span> <span class="o">+</span> <span class="n">pi</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">pi</span>
+
+    <span class="c1"># Return the converted state vector</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">velocity_e</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">acceleration_e</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">velocity_e</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">acceleration_e</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">position</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">velocity_e</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">acceleration_e</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+        <span class="n">attitude</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">euler_rates</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">attitude</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">euler_rates</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">attitude</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">euler_rates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ned2state_vector">
+<a class="viewcode-back" href="../../../modules/estimation/kalman.html#nav_toolbox.estimation.kalman.ned2state_vector">[docs]</a>
+<span class="k">def</span> <span class="nf">ned2state_vector</span><span class="p">(</span><span class="n">state_vector</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts the state vector array back to Latitude-longitude-</span>
+<span class="sd">    altitude (LLA) coordinates (in degrees-degrees-metres). Please note that</span>
+<span class="sd">    the state error matrix remains in Local North-East-Down (NED) coordinates.</span>
+
+<span class="sd">    :param state_vector: The state vector array holding the position,</span>
+<span class="sd">        velocity, acceleration, attitude and angle rate variables.</span>
+<span class="sd">    :type state_vector: numpy.ndarray (15-elements)</span>
+
+<span class="sd">    :param ref_lla: The reference latitude-longitude-altitude vector (given in</span>
+<span class="sd">        degrees-degrees-metres) identifying the centre point.</span>
+<span class="sd">    :type ref_lla: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: The given state vector array converted to LLA.</span>
+<span class="sd">    :rtype: numpy.ndarray (15-elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Calculate the gravity vector for the current position</span>
+    <span class="n">lat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">alt</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">get_gravity_xyz</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+
+    <span class="c1"># Define Angular velocity for Earth&#39;s rotation (in local NED axes)</span>
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="n">omega_e</span> <span class="o">=</span> <span class="n">OMEGA_E</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)])</span>
+
+    <span class="c1"># Convert Angle Rates from Local NED/Earth Axes to Body PQR Axes</span>
+    <span class="n">rot_euler2pqr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">state_vector</span><span class="p">[</span><span class="mi">11</span><span class="p">])],</span>
+        <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">cos</span><span class="p">(</span><span class="n">state_vector</span><span class="p">[</span><span class="mi">13</span><span class="p">]),</span> <span class="n">sin</span><span class="p">(</span><span class="n">state_vector</span><span class="p">[</span><span class="mi">13</span><span class="p">])</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">state_vector</span><span class="p">[</span><span class="mi">11</span><span class="p">])],</span>
+        <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">state_vector</span><span class="p">[</span><span class="mi">13</span><span class="p">]),</span> <span class="n">cos</span><span class="p">(</span><span class="n">state_vector</span><span class="p">[</span><span class="mi">13</span><span class="p">])</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">state_vector</span><span class="p">[</span><span class="mi">11</span><span class="p">])],</span>
+    <span class="p">])</span>
+    <span class="n">angle_rate_b</span> <span class="o">=</span> <span class="n">rot_euler2pqr</span> <span class="o">@</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">]]</span>
+
+    <span class="c1"># Calculate ESTIMATED body axes from Earth-oriented axes</span>
+    <span class="n">rot_earth2body</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">state_vector</span><span class="p">[[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">]])</span>
+    <span class="n">velocity_e</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">]]</span>
+    <span class="n">acceleration_e</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">]]</span>
+
+    <span class="n">acceleration_e</span> <span class="o">+=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">omega_e</span><span class="p">,</span> <span class="n">velocity_e</span><span class="p">)</span>
+    <span class="c1"># acceleration_e += 2.0 * np.cross(omega_e, velocity_e)</span>
+
+    <span class="c1"># Convert Velocities from Earth Axes to Body Axes</span>
+    <span class="n">velocity_b</span> <span class="o">=</span> <span class="n">rot_earth2body</span> <span class="o">@</span> <span class="n">velocity_e</span>
+
+    <span class="c1"># Add Coriolis and gravity terms and convert acceleration from Earth axes to Body Axes</span>
+    <span class="n">acceleration_b</span> <span class="o">=</span> <span class="n">rot_earth2body</span> <span class="o">@</span> <span class="p">(</span><span class="n">acceleration_e</span> <span class="o">-</span> <span class="n">g</span><span class="p">)</span>
+
+    <span class="c1"># Convert Positions from Local NED to LLA</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">ned2lla</span><span class="p">(</span><span class="n">state_vector</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">]],</span> <span class="n">ref_lla</span><span class="p">)</span>
+
+    <span class="c1"># Convert back to degrees</span>
+    <span class="n">angle_rate_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">angle_rate_b</span><span class="p">)</span>
+
+    <span class="c1"># Update the state vector</span>
+    <span class="n">state_vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">state_vector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">velocity_b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">state_vector</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">acceleration_b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">state_vector</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">state_vector</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">velocity_b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">state_vector</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">acceleration_b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">state_vector</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">position</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">state_vector</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">velocity_b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">state_vector</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="n">acceleration_b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">state_vector</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">state_vector</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span>
+    <span class="n">state_vector</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="n">angle_rate_b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">state_vector</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">state_vector</span><span class="p">[</span><span class="mi">11</span><span class="p">])</span>
+    <span class="n">state_vector</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span> <span class="o">=</span> <span class="n">angle_rate_b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">state_vector</span><span class="p">[</span><span class="mi">13</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">state_vector</span><span class="p">[</span><span class="mi">13</span><span class="p">])</span>
+    <span class="n">state_vector</span><span class="p">[</span><span class="mi">14</span><span class="p">]</span> <span class="o">=</span> <span class="n">angle_rate_b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Finally, return the state vector</span>
+    <span class="k">return</span> <span class="n">state_vector</span></div>
+
+
+
+<div class="viewcode-block" id="generate_matrices">
+<a class="viewcode-back" href="../../../modules/estimation/kalman.html#nav_toolbox.estimation.kalman.generate_matrices">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_matrices</span><span class="p">(</span><span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">acc_meas_error</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">gyro_meas_error</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                      <span class="n">acc_process_noise</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="n">vel_process_noise</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
+                      <span class="n">angr_process_noise</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="n">att_process_noise</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates the H, R, F and Q Kalman matrices from expected errors.</span>
+<span class="sd">    This function generates and returns a tuple containing the kalman</span>
+<span class="sd">    matrices. Specifically:</span>
+<span class="sd">    * H: Measurement Matrix (measurements in Local NED/Earth axes)</span>
+<span class="sd">    * R: Measurement Noise Matrix (measurements in Sensor axes)</span>
+<span class="sd">    * F: Predict State Vector and Covariance Matrices for time step</span>
+<span class="sd">    * Q: Process Noise Matrix (all states in Local NED/Earth axes)</span>
+
+<span class="sd">    :param dt: The time difference between time steps.</span>
+<span class="sd">    :type dt: float</span>
+
+<span class="sd">    :param acc_meas_error: The expected accelerometer measurement error.</span>
+<span class="sd">    :type acc_meas_error: float</span>
+
+<span class="sd">    :param gyro_meas_error: The expected gyroscope measurement error.</span>
+<span class="sd">    :type gyro_meas_error: float</span>
+
+<span class="sd">    :param acc_process_noise: The expected acceleration noise.</span>
+<span class="sd">    :type acc_process_noise: float</span>
+
+<span class="sd">    :param vel_process_noise: The expected velocity noise.</span>
+<span class="sd">    :type vel_process_noise: float</span>
+
+<span class="sd">    :param angr_process_noise: The expected angle rate noise.</span>
+<span class="sd">    :type angr_process_noise: float</span>
+
+<span class="sd">    :param att_process_noise: The expected attitude noise.</span>
+<span class="sd">    :type att_process_noise: float</span>
+
+<span class="sd">    :return: A tuple holding the H, R, F and Q Kalman matrices.</span>
+<span class="sd">    :rtype: tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Ensure expected measurement errors are non-zeros to prevent mathematical errors.</span>
+    <span class="n">acc_meas_error</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">acc_meas_error</span><span class="p">,</span> <span class="mf">1e-9</span><span class="p">)</span>
+    <span class="n">gyro_meas_error</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">gyro_meas_error</span><span class="p">,</span> <span class="mf">1e-9</span><span class="p">)</span>
+
+    <span class="c1"># Measurement error factor to allow for other non-random measurement error</span>
+    <span class="c1"># sources (scaling errors, biases, non-orthogonality)</span>
+    <span class="n">measure_factor</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">acc_noise</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1e-6</span> <span class="o">*</span> <span class="n">measure_factor</span> <span class="o">*</span> <span class="n">acc_meas_error</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">gyro_noise</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1e-6</span> <span class="o">*</span> <span class="n">measure_factor</span> <span class="o">*</span> <span class="n">gyro_meas_error</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c1"># Define Measurement Matrix for Kalman Filter (measurements in Local NED/Earth axes)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">6</span><span class="p">,</span> <span class="mi">15</span><span class="p">])</span>
+    <span class="n">h</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">14</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># Define Measurement Noise Matrix for Kalman Filter (measurements in Sensor axes)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>  <span class="c1"># Modified by function (not constant)</span>
+    <span class="n">r</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">acc_noise</span>
+    <span class="n">r</span><span class="p">[[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]]</span> <span class="o">=</span> <span class="n">gyro_noise</span>
+
+    <span class="c1"># Define the Predict State Vector and Covariance Matrices for time step</span>
+    <span class="c1"># TODO: Adapt to use different time steps?</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+    <span class="n">f</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">14</span><span class="p">]]</span> <span class="o">=</span> <span class="n">dt</span>
+    <span class="n">f</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">]]</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c1"># Define Process Noise Matrix for Kalman Filter (all states in Local NED/Earth axes)</span>
+    <span class="n">process_acceleration_noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="p">[</span><span class="mf">0.25</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">**</span> <span class="mi">4</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">**</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span> <span class="n">dt</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dt</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">acc_process_noise</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">process_velocity_noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="p">[</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dt</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">dt</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">vel_process_noise</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">process_angle_rate_noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="p">[</span><span class="mf">0.25</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">**</span> <span class="mi">4</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">**</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span> <span class="n">dt</span> <span class="o">**</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">angr_process_noise</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">process_angular_noise</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">att_process_noise</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1">#  Build Process noise matrix</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">])</span>
+    <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">process_acceleration_noise</span>
+    <span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">process_acceleration_noise</span>
+    <span class="n">q</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">9</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="n">process_acceleration_noise</span>
+    <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">process_velocity_noise</span>
+    <span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">+=</span> <span class="n">process_velocity_noise</span>
+    <span class="n">q</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span> <span class="o">+=</span> <span class="n">process_velocity_noise</span>
+    <span class="n">q</span><span class="p">[</span><span class="mi">9</span><span class="p">:</span><span class="mi">11</span><span class="p">,</span> <span class="mi">9</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span> <span class="o">=</span> <span class="n">process_angle_rate_noise</span>
+    <span class="n">q</span><span class="p">[</span><span class="mi">11</span><span class="p">:</span><span class="mi">13</span><span class="p">,</span> <span class="mi">11</span><span class="p">:</span><span class="mi">13</span><span class="p">]</span> <span class="o">=</span> <span class="n">process_angle_rate_noise</span>
+    <span class="n">q</span><span class="p">[</span><span class="mi">13</span><span class="p">:</span><span class="mi">15</span><span class="p">,</span> <span class="mi">13</span><span class="p">:</span><span class="mi">15</span><span class="p">]</span> <span class="o">=</span> <span class="n">process_angle_rate_noise</span>
+    <span class="n">q</span><span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">]</span> <span class="o">+=</span> <span class="n">process_angular_noise</span>
+    <span class="n">q</span><span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">11</span><span class="p">]</span> <span class="o">+=</span> <span class="n">process_angular_noise</span>
+    <span class="n">q</span><span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">13</span><span class="p">]</span> <span class="o">+=</span> <span class="n">process_angular_noise</span>
+
+    <span class="c1"># Finally, return the assembled matrices</span>
+    <span class="k">return</span> <span class="n">h</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">q</span></div>
+
+
+
+<div class="viewcode-block" id="arrays_to_state_vector">
+<a class="viewcode-back" href="../../../modules/estimation/kalman.html#nav_toolbox.estimation.kalman.arrays_to_state_vector">[docs]</a>
+<span class="k">def</span> <span class="nf">arrays_to_state_vector</span><span class="p">(</span><span class="n">position</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                           <span class="n">velocity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                           <span class="n">acceleration</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                           <span class="n">attitude</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                           <span class="n">angle_rates</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts individual arrays to state vector format.</span>
+
+<span class="sd">    :param position: The estimated position vector containing the</span>
+<span class="sd">        latitude (in degrees), longitude (in degrees) and altitude (in</span>
+<span class="sd">        metres) respectively.</span>
+<span class="sd">    :type position: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :param velocity: The estimated velocity vector for the</span>
+<span class="sd">        North, East and Down components respectively (in m/s).</span>
+<span class="sd">    :type velocity: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :param acceleration: The estimated acceleration vector for</span>
+<span class="sd">        the North, East and Down components respectively (in m/s^2).</span>
+<span class="sd">    :type acceleration: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :param attitude: The estimated attitude vector for the</span>
+<span class="sd">        Heading, Pitch and Roll components respectively (in degrees).</span>
+<span class="sd">    :type attitude: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :param angle_rates: The estimated angle rate vector for</span>
+<span class="sd">        the P, Q and R body rates respectively (in deg/s).</span>
+<span class="sd">    :type angle_rates: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: A state vector array containing the above.</span>
+<span class="sd">    :rtype: numpy.ndarray (15-elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">state_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+    <span class="n">state_vector</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">]]</span> <span class="o">=</span> <span class="n">position</span>
+    <span class="n">state_vector</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">]]</span> <span class="o">=</span> <span class="n">velocity</span>
+    <span class="n">state_vector</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">]]</span> <span class="o">=</span> <span class="n">acceleration</span>
+    <span class="n">state_vector</span><span class="p">[[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">]]</span> <span class="o">=</span> <span class="n">attitude</span>
+    <span class="n">state_vector</span><span class="p">[[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">]]</span> <span class="o">=</span> <span class="n">angle_rates</span>
+    <span class="k">return</span> <span class="n">state_vector</span></div>
+
+
+
+<div class="viewcode-block" id="state_vector_to_arrays">
+<a class="viewcode-back" href="../../../modules/estimation/kalman.html#nav_toolbox.estimation.kalman.state_vector_to_arrays">[docs]</a>
+<span class="k">def</span> <span class="nf">state_vector_to_arrays</span><span class="p">(</span><span class="n">state_vector</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts from state vector format to individual arrays.</span>
+
+<span class="sd">    :param state_vector: A state vector array to be converted.</span>
+<span class="sd">    :type state_vector: numpy.array (15-elements)</span>
+
+<span class="sd">    :return: A tuple containing the position, velocity, acceleration,</span>
+<span class="sd">        attitude and angle rate vectors respectively.</span>
+<span class="sd">    :rtype: tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">]]</span>
+    <span class="n">velocity</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">]]</span>
+    <span class="n">acceleration</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">]]</span>
+    <span class="n">attitude</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">]]</span>
+    <span class="n">angle_rates</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="n">position</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">acceleration</span><span class="p">,</span> <span class="n">attitude</span><span class="p">,</span> <span class="n">angle_rates</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

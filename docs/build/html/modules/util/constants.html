@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.11.1. qnav.util.constants &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="9.11.2. qnav.util.connections" href="connections.html" />
+    <link rel="prev" title="9.10.5. qnav.simulation.display" href="../simulation/display.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../usage/packages.html">9. Software Components</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#earth">9.1. Earth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#estimation">9.2. Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#fusion">9.3. Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gps">9.4. GPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gravity">9.5. Gravity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#input">9.6. Input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#measurement">9.7. Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#output">9.8. Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#quantum">9.9. Quantum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#simulation">9.10. Simulation</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../usage/packages.html#util">9.11. Util</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">9.11.1. constants.py</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#constants-py">9.11.1.1. constants.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.constants.G"><code class="docutils literal notranslate"><span class="pre">G</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.constants.F"><code class="docutils literal notranslate"><span class="pre">F</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.constants.POLAR_AXIS_A"><code class="docutils literal notranslate"><span class="pre">POLAR_AXIS_A</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.constants.R_E"><code class="docutils literal notranslate"><span class="pre">R_E</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.constants.ECC_SQ"><code class="docutils literal notranslate"><span class="pre">ECC_SQ</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.constants.ECC"><code class="docutils literal notranslate"><span class="pre">ECC</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.constants.ECC_PRIME"><code class="docutils literal notranslate"><span class="pre">ECC_PRIME</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.constants.G_E"><code class="docutils literal notranslate"><span class="pre">G_E</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.constants.G_P"><code class="docutils literal notranslate"><span class="pre">G_P</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.constants.OMEGA_E"><code class="docutils literal notranslate"><span class="pre">OMEGA_E</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.constants.GM"><code class="docutils literal notranslate"><span class="pre">GM</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.constants.M"><code class="docutils literal notranslate"><span class="pre">M</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="connections.html">9.11.2. connections.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="system.html">9.11.3. system.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rng.html">9.11.4. rng.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#waypoints">9.12. Waypoints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../usage/packages.html"><span class="section-number">9. </span>Software Components</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">9.11.1. </span>qnav.util.constants</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/modules/util/constants.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qnav.util.constants">
+<span id="qnav-util-constants"></span><h1><span class="section-number">9.11.1. </span>qnav.util.constants<a class="headerlink" href="#module-qnav.util.constants" title="Link to this heading"></a></h1>
+<section id="constants-py">
+<h2><span class="section-number">9.11.1.1. </span>constants.py<a class="headerlink" href="#constants-py" title="Link to this heading"></a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">summary<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of calculation constants that are across the toolbox.
+This shared module contains a collection of geological constants that are
+repeatedly used by multiple functions within the toolbox</p>
+</dd>
+<dt class="field-even">author<span class="colon">:</span></dt>
+<dd class="field-even"><p>Michael Wright - <a class="reference external" href="mailto:mjwright&#37;&#52;&#48;liverpool&#46;ac&#46;uk">mjwright<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></p>
+</dd>
+<dt class="field-odd">version<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1.0.0 - First implementation of this module.</p>
+</dd>
+</dl>
+</section>
+<dl class="py data">
+<dt class="sig sig-object py" id="qnav.util.constants.G">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.constants.</span></span><span class="sig-name descname"><span class="pre">G</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9.81</span></em><a class="headerlink" href="#qnav.util.constants.G" title="Link to this definition"></a></dt>
+<dd><p><span class="math notranslate nohighlight">\(g\)</span> - The average gravitation acceleration.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="qnav.util.constants.F">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.constants.</span></span><span class="sig-name descname"><span class="pre">F</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.0033528106647474805</span></em><a class="headerlink" href="#qnav.util.constants.F" title="Link to this definition"></a></dt>
+<dd><p><span class="math notranslate nohighlight">\(f\)</span> - Flattening measure of the WGS84 spheroid.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="qnav.util.constants.POLAR_AXIS_A">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.constants.</span></span><span class="sig-name descname"><span class="pre">POLAR_AXIS_A</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6378137.0</span></em><a class="headerlink" href="#qnav.util.constants.POLAR_AXIS_A" title="Link to this definition"></a></dt>
+<dd><p><span class="math notranslate nohighlight">\(a\)</span> - Semi-major axis equator radius (m).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="qnav.util.constants.R_E">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.constants.</span></span><span class="sig-name descname"><span class="pre">R_E</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6367444.65712259</span></em><a class="headerlink" href="#qnav.util.constants.R_E" title="Link to this definition"></a></dt>
+<dd><p><span class="math notranslate nohighlight">\(R_e\)</span> - The average radius of the Earth (m).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="qnav.util.constants.ECC_SQ">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.constants.</span></span><span class="sig-name descname"><span class="pre">ECC_SQ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.006694379990141316</span></em><a class="headerlink" href="#qnav.util.constants.ECC_SQ" title="Link to this definition"></a></dt>
+<dd><p><span class="math notranslate nohighlight">\(e^2\)</span> - The squared first eccentricity value for the Earth.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>#</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="qnav.util.constants.ECC">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.constants.</span></span><span class="sig-name descname"><span class="pre">ECC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.08181919084262149</span></em><a class="headerlink" href="#qnav.util.constants.ECC" title="Link to this definition"></a></dt>
+<dd><p><span class="math notranslate nohighlight">\(e\)</span> - The first eccentricity value for the Earth.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="qnav.util.constants.ECC_PRIME">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.constants.</span></span><span class="sig-name descname"><span class="pre">ECC_PRIME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.08209443794969568</span></em><a class="headerlink" href="#qnav.util.constants.ECC_PRIME" title="Link to this definition"></a></dt>
+<dd><p><span class="math notranslate nohighlight">\(e'\)</span> - The second eccentricity value for the Earth.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="qnav.util.constants.G_E">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.constants.</span></span><span class="sig-name descname"><span class="pre">G_E</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9.78032533590389</span></em><a class="headerlink" href="#qnav.util.constants.G_E" title="Link to this definition"></a></dt>
+<dd><p><span class="math notranslate nohighlight">\({\gamma}_e\)</span> - Normal gravity at Equator (m/s**2).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="qnav.util.constants.G_P">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.constants.</span></span><span class="sig-name descname"><span class="pre">G_P</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9.832184937863401</span></em><a class="headerlink" href="#qnav.util.constants.G_P" title="Link to this definition"></a></dt>
+<dd><p><span class="math notranslate nohighlight">\({\gamma}_b\)</span> - Normal gravity at Poles (m/s**2).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="qnav.util.constants.OMEGA_E">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.constants.</span></span><span class="sig-name descname"><span class="pre">OMEGA_E</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7.2921159e-05</span></em><a class="headerlink" href="#qnav.util.constants.OMEGA_E" title="Link to this definition"></a></dt>
+<dd><p><span class="math notranslate nohighlight">\({\omega}_e\)</span> - Approximate rotation rate of the Earth (m/s**2).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="qnav.util.constants.GM">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.constants.</span></span><span class="sig-name descname"><span class="pre">GM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">398600441880000.0</span></em><a class="headerlink" href="#qnav.util.constants.GM" title="Link to this definition"></a></dt>
+<dd><p><span class="math notranslate nohighlight">\(GM\)</span> - The Geocentric gravitational constant (m**3/s**2)</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="qnav.util.constants.M">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.constants.</span></span><span class="sig-name descname"><span class="pre">M</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.0034497873577006006</span></em><a class="headerlink" href="#qnav.util.constants.M" title="Link to this definition"></a></dt>
+<dd><p><span class="math notranslate nohighlight">\(M\)</span> - Somigliana constant, used for calculation normal gravity.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../simulation/display.html" class="btn btn-neutral float-left" title="9.10.5. qnav.simulation.display" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="connections.html" class="btn btn-neutral float-right" title="9.11.2. qnav.util.connections" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

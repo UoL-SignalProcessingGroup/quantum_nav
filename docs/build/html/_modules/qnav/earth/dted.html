@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.earth.dted &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.earth.dted</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.earth.dted</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=======</span>
+<span class="sd">dted.py</span>
+<span class="sd">=======</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    A module for managing Digital Terrain Elevation Data (DTED).</span>
+<span class="sd">    This is responsible for the reading and dynamic loading of DTED files for</span>
+<span class="sd">    extracting and interpolating elevation from a locally stored Digital</span>
+<span class="sd">    Elevation Map (DEM). This allows the extraction of the terrain height</span>
+<span class="sd">    above the WSG84 ellipsoid, excluding man-made features. This is namely</span>
+<span class="sd">    used for waypoint/trajectory generation of man-made features.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of this module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">qnav.util.transformations</span> <span class="k">as</span> <span class="nn">trans</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">RegularGridInterpolator</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+
+<div class="viewcode-block" id="DtedTile">
+<a class="viewcode-back" href="../../../modules/earth/dted.html#qnav.earth.dted.DtedTile">[docs]</a>
+<span class="k">class</span> <span class="nc">DtedTile</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Holds and handles the read content for a single DTED file.</span>
+<span class="sd">    Manages the data contained in a DTED tile (1-degree by 1-degree region).</span>
+<span class="sd">    This allows local interpolation and other relevant calculations. Instances</span>
+<span class="sd">    of this are used by :class:`~dted.DtedHandler` for dynamic loading and</span>
+<span class="sd">    management of terrain information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> \
+        <span class="s1">&#39;__origin_lat&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;__origin_lon&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;__centre_lat&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;__centre_lon&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;__dted_version&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;__lat_ticks&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;__lon_ticks&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;__dted_elevation&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;__dted_interp&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin_lat</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">dted_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+                 <span class="n">dted_version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+                 <span class="n">interp_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span><span class="p">,</span>
+                 <span class="n">is_empty_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates DTED tile holding corresponding DTED information.</span>
+<span class="sd">        On creation this will attempt to load the corresponding DTED</span>
+<span class="sd">        information covered by the region. The methods supplied by this class</span>
+<span class="sd">        can then be used to extract the relevant data. By default, if the</span>
+<span class="sd">        corresponding DTED cannot be read, substitute information will be</span>
+<span class="sd">        used that assumes the terrain to be flat.</span>
+
+<span class="sd">        :param origin_lat: The integer latitude value (south-most coordinate).</span>
+<span class="sd">        :type origin_lat: int</span>
+
+<span class="sd">        :param origin_lon: The integer longitude value (west-most coordinate).</span>
+<span class="sd">        :type origin_lon: int</span>
+
+<span class="sd">        :param dted_dir: The local database_dir where DTED file are stored.</span>
+<span class="sd">        :type dted_dir: Path</span>
+
+<span class="sd">        :param dted_version: The version of the DTED data to use (default=2).</span>
+<span class="sd">        :type dted_version: int</span>
+
+<span class="sd">        :param interp_method: The interpolation method to use (default=&#39;linear&#39;).</span>
+<span class="sd">            Supported values are: &#39;linear&#39;, &#39;nearest&#39;, &#39;slinear&#39;, &#39;cubic&#39;,</span>
+<span class="sd">            &#39;quintic&#39; and &#39;pchip&#39;.</span>
+<span class="sd">        :type interp_method: str</span>
+
+<span class="sd">        :param is_empty_on_error: Should empty/flat terrain be assumed if the</span>
+<span class="sd">            corresponding DTED file cannot be read (default=True).</span>
+<span class="sd">        :type is_empty_on_error: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get the full path for the DTED file:</span>
+        <span class="n">dted_file</span> <span class="o">=</span> <span class="n">get_dted_file_path</span><span class="p">(</span>
+            <span class="n">dted_dir</span><span class="p">,</span> <span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">,</span> <span class="n">dted_version</span><span class="p">)</span>
+
+        <span class="c1"># The value to use for points outside the data range.</span>
+        <span class="n">fill_value</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Attempt to read the file contents:</span>
+        <span class="k">if</span> <span class="n">dted_file</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="n">dted_dict</span> <span class="o">=</span> <span class="n">read_dted_file</span><span class="p">(</span><span class="n">dted_file</span><span class="p">)</span>
+            <span class="n">fill_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="k">elif</span> <span class="n">is_empty_on_error</span><span class="p">:</span>
+            <span class="n">dted_dict</span> <span class="o">=</span> <span class="n">get_template_dted_data</span><span class="p">(</span>
+                <span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">,</span>
+                <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">dted_file</span><span class="p">)</span>
+
+        <span class="c1"># Extract the read contents:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__origin_lat</span> <span class="o">=</span> <span class="n">dted_dict</span><span class="p">[</span><span class="s1">&#39;lat_origin&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__origin_lon</span> <span class="o">=</span> <span class="n">dted_dict</span><span class="p">[</span><span class="s1">&#39;lon_origin&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lat_ticks</span> <span class="o">=</span> <span class="n">dted_dict</span><span class="p">[</span><span class="s1">&#39;lat_ticks&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lon_ticks</span> <span class="o">=</span> <span class="n">dted_dict</span><span class="p">[</span><span class="s1">&#39;lon_ticks&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dted_elevation</span> <span class="o">=</span> <span class="n">dted_dict</span><span class="p">[</span><span class="s1">&#39;elevation&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__centre_lat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__origin_lat</span> <span class="o">+</span> <span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__centre_lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__origin_lon</span> <span class="o">+</span> <span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dted_version</span> <span class="o">=</span> <span class="n">dted_version</span>
+
+        <span class="c1"># Create an interpolator for the DTED data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dted_interp</span> <span class="o">=</span> <span class="n">RegularGridInterpolator</span><span class="p">(</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__lat_ticks</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lon_ticks</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__dted_elevation</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">interp_method</span><span class="p">,</span>
+            <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DtedTile.get_elevation">
+<a class="viewcode-back" href="../../../modules/earth/dted.html#qnav.earth.dted.DtedTile.get_elevation">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_elevation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interpolates the terrain elevation for the requested position.</span>
+<span class="sd">        Given a latitude and longitude, the interpolated terrain elevation</span>
+<span class="sd">        will be return (in metres). Optionally, an overriding interpolation</span>
+<span class="sd">        method to use can be provided.</span>
+
+<span class="sd">        :param lat: The latitude coordinate of the reference position.</span>
+<span class="sd">        :type lat: float</span>
+
+<span class="sd">        :param lon: The longitude coordinate of the reference position.</span>
+<span class="sd">        :type lon: float</span>
+
+<span class="sd">        :param method: An alternative interpolation method to use. Supported</span>
+<span class="sd">            values are: &#39;linear&#39;, &#39;nearest&#39;, &#39;slinear&#39;, &#39;cubic&#39;,</span>
+<span class="sd">                &#39;quintic&#39; and &#39;pchip&#39;.</span>
+<span class="sd">        :type method: str</span>
+
+<span class="sd">        :return: The interpolated terrain elevation (in metres)</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">xi</span> <span class="o">=</span> <span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">yi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dted_interp</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">yi</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="DtedTile.get_elevation_vec">
+<a class="viewcode-back" href="../../../modules/earth/dted.html#qnav.earth.dted.DtedTile.get_elevation_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_elevation_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat_points</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">lon_points</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interpolates the terrain elevation for the requested positions.</span>
+<span class="sd">        Given latitude and longitude coordinates, the interpolated terrain</span>
+<span class="sd">        elevations will be return (in metres). Optionally, an overriding</span>
+<span class="sd">        interpolation method to use can be provided.</span>
+
+<span class="sd">        :param lat_points: The latitude coordinates of the reference positions.</span>
+<span class="sd">        :type lat_points: npt.ArrayLike</span>
+
+<span class="sd">        :param lon_points: The longitude coordinates of the reference positions.</span>
+<span class="sd">        :type lon_points: npt.ArrayLike</span>
+
+<span class="sd">        :param method: An alternative interpolation method to use. Supported</span>
+<span class="sd">            values are: &#39;linear&#39;, &#39;nearest&#39;, &#39;slinear&#39;, &#39;cubic&#39;,</span>
+<span class="sd">                &#39;quintic&#39; and &#39;pchip&#39;.</span>
+<span class="sd">        :type method: str</span>
+
+<span class="sd">        :return: The interpolated terrain elevations (in metres)</span>
+<span class="sd">        :rtype: npt.ArrayLike</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dted_interp</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">lat_points</span><span class="p">,</span> <span class="n">lon_points</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DtedTile.is_position_covered">
+<a class="viewcode-back" href="../../../modules/earth/dted.html#qnav.earth.dted.DtedTile.is_position_covered">[docs]</a>
+    <span class="k">def</span> <span class="nf">is_position_covered</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A method for checking if a requested point is covered by the tile.</span>
+<span class="sd">        Performs a check to see if the position is encompassed by the tile,</span>
+<span class="sd">        allowing its terrain heights to be interpolated.</span>
+
+<span class="sd">        :param lat: The latitude coordinate of the reference position.</span>
+<span class="sd">        :type lat: float</span>
+
+<span class="sd">        :param lon: The longitude coordinate of the reference position.</span>
+<span class="sd">        :type lon: float</span>
+
+<span class="sd">        :return: True if the point is covered by the tile.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__origin_lat</span> <span class="o">&lt;=</span> <span class="n">lat</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__origin_lat</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> \
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__origin_lat</span> <span class="o">&lt;=</span> <span class="n">lon</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__origin_lon</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DtedTile.is_position_covered_vec">
+<a class="viewcode-back" href="../../../modules/earth/dted.html#qnav.earth.dted.DtedTile.is_position_covered_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">is_position_covered_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A vectorised method for checking if points are covered by the tile.</span>
+<span class="sd">        Performs a check to see which positions are encompassed by the tile,</span>
+<span class="sd">        supporting their terrain heights to be interpolated.</span>
+
+<span class="sd">        :param lat: The latitude coordinates of the reference positions.</span>
+<span class="sd">        :type lat: npt.ArrayLike</span>
+
+<span class="sd">        :param lon: The longitude coordinates of the reference positions.</span>
+<span class="sd">        :type lon: npt.ArrayLike</span>
+
+<span class="sd">        :return: A boolean array indicating which points are covered by the</span>
+<span class="sd">            tile. True is used for points inside the tile.</span>
+<span class="sd">        :rtype: np.ndarray.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lat_check</span> <span class="o">=</span> <span class="n">lat</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__origin_lat</span> <span class="o">&amp;</span> <span class="n">lat</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__origin_lat</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">lon_check</span> <span class="o">=</span> <span class="n">lon</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__origin_lon</span> <span class="o">&amp;</span> <span class="n">lon</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__origin_lon</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">lat_check</span> <span class="o">&amp;</span> <span class="n">lon_check</span></div>
+
+
+<div class="viewcode-block" id="DtedTile.distance_to_centre">
+<a class="viewcode-back" href="../../../modules/earth/dted.html#qnav.earth.dted.DtedTile.distance_to_centre">[docs]</a>
+    <span class="k">def</span> <span class="nf">distance_to_centre</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns approximation to distance from centre of tile (in metres).</span>
+<span class="sd">        Calculates the approximate to distance from centre of tile for the</span>
+<span class="sd">        given position. Namely used to identify the most distant tile.</span>
+
+<span class="sd">        :param lat: The latitude coordinate of the reference position.</span>
+<span class="sd">        :type lat: float</span>
+
+<span class="sd">        :param lon: The longitude coordinate of the reference position.</span>
+<span class="sd">        :type lon: float</span>
+
+<span class="sd">        :return: The distance from the centre of the tile (in metres).</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">centre_lat</span><span class="p">,</span> <span class="n">centre_lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__centre_lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__centre_lon</span>
+        <span class="k">return</span> <span class="n">trans</span><span class="o">.</span><span class="n">haversine</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">centre_lat</span><span class="p">,</span> <span class="n">centre_lon</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DtedHandler">
+<a class="viewcode-back" href="../../../modules/earth/dted.html#qnav.earth.dted.DtedHandler">[docs]</a>
+<span class="k">class</span> <span class="nc">DtedHandler</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Manages the dynamic loading and handling of regions of DTED data.</span>
+<span class="sd">    This class is use dynamically load DTED data for extracting elevation.</span>
+<span class="sd">    This automatically determines the required DTED files and loads into</span>
+<span class="sd">    memory. Constraints on the maximum amount of data to load can be set to</span>
+<span class="sd">    conserve resources.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># All properties of the class.</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> \
+        <span class="s1">&#39;__max_tiles&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;__interp_method&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;__dted_tiles&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;__dted_version&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;__dted_dir&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dted_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">dted_version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+                 <span class="n">max_tiles</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a DTED handler instance for dynamically managing DTED data.</span>
+<span class="sd">        Given a path to a local DTED dataset and the DTED version to use, a</span>
+<span class="sd">        DtedHandler instance will be returned allowing data to be dynamically</span>
+<span class="sd">        queried.</span>
+
+<span class="sd">        :param dted_dir: The location of the local DTED database.</span>
+<span class="sd">        :type dted_dir: Path</span>
+
+<span class="sd">        :param dted_version: The DTED data version to use (default=2).</span>
+<span class="sd">        :type dted_version: int</span>
+
+<span class="sd">        :param max_tiles: An optional maximum number of DTED tiles/file to</span>
+<span class="sd">            hold in memory at a time (default=None).</span>
+<span class="sd">        :type max_tiles: int</span>
+
+<span class="sd">        :param method: The interpolation method to use. Supported methods:</span>
+<span class="sd">            &#39;linear&#39;, &#39;nearest&#39;, &#39;slinear&#39;, &#39;cubic&#39;, &#39;quintic&#39; and &#39;pchip&#39;.</span>
+<span class="sd">        :type method: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dted_tiles</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dted_dir</span> <span class="o">=</span> <span class="n">dted_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dted_version</span> <span class="o">=</span> <span class="n">dted_version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__max_tiles</span> <span class="o">=</span> <span class="n">max_tiles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__interp_method</span> <span class="o">=</span> <span class="n">method</span>
+
+<div class="viewcode-block" id="DtedHandler.get_elevation">
+<a class="viewcode-back" href="../../../modules/earth/dted.html#qnav.earth.dted.DtedHandler.get_elevation">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_elevation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interpolates the terrain elevation for the requested position.</span>
+<span class="sd">        Performed interpolation of the terrain elevation for the given</span>
+<span class="sd">        latitude and longitude location. Optionally an overriding</span>
+<span class="sd">        interpolation method can be used.</span>
+
+<span class="sd">        :param lat: The latitude coordinates of the reference positions.</span>
+<span class="sd">        :type lat: float</span>
+
+<span class="sd">        :param lon: The longitude coordinates of the reference positions.</span>
+<span class="sd">        :type lon: float</span>
+
+<span class="sd">        :param method: The overriding interpolation method to use. Supported</span>
+<span class="sd">            methods are: &#39;linear&#39;, &#39;nearest&#39;, &#39;slinear&#39;, &#39;cubic&#39;,</span>
+<span class="sd">            &#39;quintic&#39; and &#39;pchip&#39;.</span>
+<span class="sd">        :type method: str</span>
+
+<span class="sd">        :return: The interpolated terrain elevation (in metres).</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dted_tile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_dted_tile</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dted_tile</span><span class="o">.</span><span class="n">get_elevation</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DtedHandler.get_elevation_vec">
+<a class="viewcode-back" href="../../../modules/earth/dted.html#qnav.earth.dted.DtedHandler.get_elevation_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_elevation_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interpolates the terrain elevation at given positions.</span>
+<span class="sd">        Performed vectorised interpolation of the terrain elevation for the</span>
+<span class="sd">        given latitude and longitude locations. Optionally an overriding</span>
+<span class="sd">         interpolation method can be used.</span>
+
+<span class="sd">        :param lat_points: The latitude coordinates of the reference positions.</span>
+<span class="sd">        :type lat_points: np.ndarray</span>
+
+<span class="sd">        :param lon_points: The longitude coordinates of the reference positions.</span>
+<span class="sd">        :type lon_points: np.ndarray</span>
+
+<span class="sd">        :param method: The overriding interpolation method to use. Supported</span>
+<span class="sd">            methods are: &#39;linear&#39;, &#39;nearest&#39;, &#39;slinear&#39;, &#39;cubic&#39;,</span>
+<span class="sd">            &#39;quintic&#39; and &#39;pchip&#39;.</span>
+<span class="sd">        :type method: str</span>
+
+<span class="sd">        :return: The interpolated terrain elevation (in metres).</span>
+<span class="sd">        :rtype: np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Pre-allocate memory for returning</span>
+        <span class="n">to_return</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">lat_points</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+        <span class="c1"># Obtain the origin positions for each coordinate</span>
+        <span class="n">lat_origins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">lat_points</span><span class="p">)</span>
+        <span class="n">lon_origins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">lon_points</span><span class="p">)</span>
+
+        <span class="c1"># Obtain all unique origin positions:</span>
+        <span class="n">origins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">lat_origins</span><span class="p">,</span> <span class="n">lon_origins</span><span class="p">])</span>
+        <span class="n">u_coords</span><span class="p">,</span> <span class="n">u_indices</span><span class="p">,</span> <span class="n">rev_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
+            <span class="n">origins</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># For each unique origin position and tile:</span>
+        <span class="k">for</span> <span class="n">coords</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">u_coords</span><span class="p">,</span> <span class="n">u_indices</span><span class="p">):</span>
+
+            <span class="c1"># Get the required DTED tile.</span>
+            <span class="n">dted_tile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_dted_tile</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">index</span> <span class="o">==</span> <span class="n">rev_indices</span>
+
+            <span class="c1"># Extract the required elevations.</span>
+            <span class="n">to_return</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dted_tile</span><span class="o">.</span><span class="n">get_elevation_vec</span><span class="p">(</span>
+                <span class="n">lat_points</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lon_points</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">method</span><span class="p">)</span>
+
+        <span class="c1"># Return the results.</span>
+        <span class="k">return</span> <span class="n">to_return</span></div>
+
+
+<div class="viewcode-block" id="DtedHandler.set_max_tiles">
+<a class="viewcode-back" href="../../../modules/earth/dted.html#qnav.earth.dted.DtedHandler.set_max_tiles">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_max_tiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A setter method for the maximum number of tiles.</span>
+<span class="sd">        Can use the value None to remove limit on number of tiles to hold.</span>
+
+<span class="sd">        :param value: The maximum number of DTED tiles to hold in the cache.</span>
+<span class="sd">        :type value: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Max tiles limit must be positive integer&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__max_tiles</span> <span class="o">=</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="DtedHandler.clear_cache">
+<a class="viewcode-back" href="../../../modules/earth/dted.html#qnav.earth.dted.DtedHandler.clear_cache">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clears all cached DTED from memory.</span>
+<span class="sd">        Simply removes all DTED tiles from the cache.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dted_tiles</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__get_dted_tile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">to_remove</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DtedTile</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the corresponding DTED tile from cache or disk.</span>
+<span class="sd">        Attempts to fetch the corresponding DTED tile from the cache. If not</span>
+<span class="sd">        present, the DTED tile will be generated and added to the cache</span>
+<span class="sd">        before being returned. If set, any size limits of the cache will be</span>
+<span class="sd">        maintained.</span>
+
+<span class="sd">        :param lat: The latitude position of the corresponding DTED tile.</span>
+<span class="sd">        :type lat: float</span>
+
+<span class="sd">        :param lon: The longitude position of the corresponding DTED tile.</span>
+<span class="sd">        :type lon: float</span>
+
+<span class="sd">        :param to_remove: The number of cache entries to remove if size is exceeded.</span>
+<span class="sd">        :type to_remove: int</span>
+
+<span class="sd">        :return: The corresponding DTED Tile covering the given position.</span>
+<span class="sd">        :rtype: DtedTile</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get the look-up key for the DTED tile</span>
+        <span class="n">lat_origin</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+        <span class="n">lon_origin</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+        <span class="n">tile_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">lat_origin</span><span class="p">,</span> <span class="n">lon_origin</span><span class="p">)</span>
+
+        <span class="c1"># If the tile is not already in the cache:</span>
+        <span class="k">if</span> <span class="n">tile_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dted_tiles</span><span class="p">:</span>
+
+            <span class="c1"># Ensure there is space for it:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__max_tiles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__dted_tiles</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__max_tiles</span><span class="p">):</span>
+                <span class="n">new_cache_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__max_tiles</span> <span class="o">-</span> <span class="n">to_remove</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__reduce_tile_cache</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">new_cache_size</span><span class="p">)</span>
+
+            <span class="c1"># Add the required DTED tile to the cache:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__dted_tiles</span><span class="p">[</span><span class="n">tile_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">DtedTile</span><span class="p">(</span>
+                <span class="n">lat_origin</span><span class="p">,</span> <span class="n">lon_origin</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__dted_dir</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__dted_version</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__interp_method</span><span class="p">)</span>
+
+        <span class="c1"># Return the corresponding DTED tile.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dted_tiles</span><span class="p">[</span><span class="n">tile_key</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__reduce_tile_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">new_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reduces size of the cache to the requested size.</span>
+<span class="sd">        Removes the most distant DTED tiles from the given position so that</span>
+<span class="sd">        the cache if of requested size with little probability of reloading</span>
+<span class="sd">        previosuly cleared tiles.</span>
+
+<span class="sd">        :param lat: The latitude coordinate of the current position.</span>
+<span class="sd">        :type lat: float</span>
+
+<span class="sd">        :param lon: The longitude coordinate of the current position.</span>
+<span class="sd">        :type lon: float</span>
+
+<span class="sd">        :param new_size: The new requested size of the tile cache.</span>
+<span class="sd">        :type new_size: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Only continue if required:</span>
+        <span class="k">if</span> <span class="n">new_size</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__dted_tiles</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Get a list of (key, distance) tuples</span>
+        <span class="n">key_dist</span> <span class="o">=</span> <span class="p">[(</span><span class="n">key</span><span class="p">,</span> <span class="n">tile</span><span class="o">.</span><span class="n">distance_to_centre</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">))</span>
+                    <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">tile</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dted_tiles</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+
+        <span class="c1"># Ensure the list is sorted by distance in ascending order.</span>
+        <span class="n">key_dist</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Remove the most distant entries in the dictionary:</span>
+        <span class="k">for</span> <span class="n">to_remove</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">key_dist</span><span class="p">[</span><span class="n">new_size</span><span class="p">:]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__dted_tiles</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">to_remove</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_dted_file_path">
+<a class="viewcode-back" href="../../../modules/earth/dted.html#qnav.earth.dted.get_dted_file_path">[docs]</a>
+<span class="k">def</span> <span class="nf">get_dted_file_path</span><span class="p">(</span><span class="n">dted_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">origin_lat</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dted_version</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Give a latitude, longitude and optional DTED version number,</span>
+<span class="sd">    this function generates the file path of the DTED file that would</span>
+<span class="sd">    contain information for the given position.</span>
+
+<span class="sd">    :param dted_dir: The parent database_dir of the DTED files.</span>
+<span class="sd">    :type dted_dir: Path</span>
+
+<span class="sd">    :param origin_lat: The integer latitude value (south-most coordinate).</span>
+<span class="sd">    :type origin_lat: int</span>
+
+<span class="sd">    :param origin_lon: The integer longitude value (west-most coordinate).</span>
+<span class="sd">    :type origin_lon: int</span>
+
+<span class="sd">    :param dted_version: The version of the DTED data.</span>
+<span class="sd">    :type dted_version: int</span>
+
+<span class="sd">    :return the location of a corresponding DTED file.</span>
+<span class="sd">    :rtype: Path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Calculate the letters/ characters within the local path.</span>
+    <span class="n">lat_char</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">)[</span><span class="nb">int</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">lon_char</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;e&quot;</span><span class="p">)[</span><span class="nb">int</span><span class="p">(</span><span class="n">origin_lon</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Round down the given latitude and longitude.</span>
+    <span class="n">origin_lat</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">))</span>
+    <span class="n">origin_lon</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">origin_lon</span><span class="p">))</span>
+
+    <span class="c1"># Format strings containing the  database_dir and data_file.</span>
+    <span class="n">lon_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lon_char</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">)</span>
+    <span class="n">lat_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}{:02d}</span><span class="s2">.dt</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lat_char</span><span class="p">,</span> <span class="n">origin_lat</span><span class="p">,</span> <span class="n">dted_version</span><span class="p">)</span>
+
+    <span class="c1"># Return the completed path.</span>
+    <span class="k">return</span> <span class="n">dted_dir</span> <span class="o">/</span> <span class="n">lon_str</span> <span class="o">/</span> <span class="n">lat_str</span></div>
+
+
+
+<div class="viewcode-block" id="read_dted_file">
+<a class="viewcode-back" href="../../../modules/earth/dted.html#qnav.earth.dted.read_dted_file">[docs]</a>
+<span class="k">def</span> <span class="nf">read_dted_file</span><span class="p">(</span><span class="n">file_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts elevation information from a provided DTED file (in metres).</span>
+<span class="sd">    When provided with the location of a DTED file (of any level), this</span>
+<span class="sd">    function will return an elevation matrix and latitude-longitude spacing</span>
+<span class="sd">    of each point. This function reads DTED files of format version 1.1.</span>
+
+<span class="sd">    :param file_dir: The location of the DTED file to be read.</span>
+<span class="sd">    :type file_dir: Path</span>
+
+<span class="sd">    :return: A dictionary containing the contents of the DTED file.</span>
+<span class="sd">        This contains the extracted origin coordinates, step sizes,</span>
+<span class="sd">        coordinate ticks and elevation matrix.</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">uhl_len</span> <span class="o">=</span> <span class="mi">80</span>  <span class="c1"># The &quot;User Header Label&quot; length in bytes.</span>
+    <span class="n">dsi_len</span> <span class="o">=</span> <span class="mi">648</span>  <span class="c1"># The &quot;Data Set Identification Record&quot; length in bytes.</span>
+    <span class="n">acc_len</span> <span class="o">=</span> <span class="mi">2700</span>  <span class="c1"># The &quot;Accuracy Description Record&quot; length in bytes.</span>
+
+    <span class="n">data_rec_head_len</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># The header length for each DTED record.</span>
+    <span class="n">data_rec_check_len</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># The checksum length appended to each DTED record.</span>
+    <span class="n">data_rec_start_pos</span> <span class="o">=</span> <span class="n">uhl_len</span> <span class="o">+</span> <span class="n">dsi_len</span> <span class="o">+</span> <span class="n">acc_len</span>  <span class="c1"># The total length of previous sections.</span>
+
+    <span class="c1"># Attempt to open the given file and read in binary:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">dted</span><span class="p">:</span>
+
+        <span class="c1"># Skip the first 4 bytes.</span>
+        <span class="n">dted</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Obtain the origin longitude (make negative if west).</span>
+        <span class="n">lon_origin</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">deg2dec</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">dted</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">3</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">dted</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">dted</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">dted</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;W&#39;</span><span class="p">:</span>
+            <span class="n">lon_origin</span> <span class="o">=</span> <span class="o">-</span><span class="n">lon_origin</span>
+
+        <span class="c1"># Obtain the origin latitude (make negative if west).</span>
+        <span class="n">lat_origin</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">deg2dec</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">dted</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">3</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">dted</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">dted</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">dted</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;S&#39;</span><span class="p">:</span>
+            <span class="n">lat_origin</span> <span class="o">=</span> <span class="o">-</span><span class="n">lat_origin</span>
+
+        <span class="c1"># Obtain the latitude and longitude separation intervals (in seconds).</span>
+        <span class="n">lon_step</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">deg2dec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">dted</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="n">lat_step</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">deg2dec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">dted</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="n">dted</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">47</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Obtain the number of latitude and longitude lines (store as a string).</span>
+        <span class="n">num_lon_lines</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dted</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="n">num_lat_lines</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dted</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+
+        <span class="c1"># Initialise the return matrix and move the seek position to the first record.</span>
+        <span class="n">dted_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">num_lat_lines</span><span class="p">,</span> <span class="n">num_lon_lines</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+        <span class="n">dted</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">data_rec_start_pos</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># For each (longitude) record within the DTED file:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_lon_lines</span><span class="p">):</span>
+            <span class="c1"># Skip the header information.</span>
+            <span class="n">dted</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">data_rec_head_len</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># Set the read datatype as 2-byte signed-integers.</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;&gt;i2&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Read in the elevation points for the current longitude.</span>
+            <span class="n">dted_matrix</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">dted</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">num_lat_lines</span><span class="p">)</span>
+
+            <span class="c1"># Skip the check-sum.</span>
+            <span class="n">dted</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">data_rec_check_len</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the latitude-longitude separation spacing using the origin locations and known number of lines.</span>
+        <span class="n">lon_ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">lon_origin</span><span class="p">,</span> <span class="n">lon_origin</span> <span class="o">+</span> <span class="n">num_lon_lines</span> <span class="o">*</span> <span class="n">lon_step</span><span class="p">,</span> <span class="n">num_lon_lines</span><span class="p">)</span>
+        <span class="n">lat_ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">lat_origin</span><span class="p">,</span> <span class="n">lat_origin</span> <span class="o">+</span> <span class="n">num_lat_lines</span> <span class="o">*</span> <span class="n">lat_step</span><span class="p">,</span> <span class="n">num_lat_lines</span><span class="p">)</span>
+
+        <span class="c1"># Replace values of -32,767 (or less) with the given (or default) nan value.</span>
+        <span class="c1"># Within DTED files the smallest integer value is used as a placeholder for nan.</span>
+        <span class="n">dted_matrix</span><span class="p">[</span><span class="n">dted_matrix</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">dted_matrix</span><span class="p">[</span><span class="n">dted_matrix</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">32768</span><span class="p">)</span>
+        <span class="n">dted_matrix</span> <span class="o">=</span> <span class="n">dted_matrix</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">dted_matrix</span><span class="p">[</span><span class="n">dted_matrix</span> <span class="o">==</span> <span class="o">-</span><span class="mi">32767</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="c1"># Check the data contains NaN values:</span>
+        <span class="c1"># has_nan = np.any(np.isnan(dted_matrix))</span>
+
+        <span class="c1"># Finally, return the collected data:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;lat_origin&#39;</span><span class="p">:</span> <span class="n">lon_origin</span><span class="p">,</span>
+            <span class="s1">&#39;lon_origin&#39;</span><span class="p">:</span> <span class="n">lat_origin</span><span class="p">,</span>
+            <span class="s1">&#39;lat_step&#39;</span><span class="p">:</span> <span class="n">lat_step</span><span class="p">,</span>
+            <span class="s1">&#39;lon_step&#39;</span><span class="p">:</span> <span class="n">lon_step</span><span class="p">,</span>
+            <span class="s1">&#39;lat_ticks&#39;</span><span class="p">:</span> <span class="n">lat_ticks</span><span class="p">,</span>
+            <span class="s1">&#39;lon_ticks&#39;</span><span class="p">:</span> <span class="n">lon_ticks</span><span class="p">,</span>
+            <span class="s1">&#39;elevation&#39;</span><span class="p">:</span> <span class="n">dted_matrix</span>
+        <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="get_template_dted_data">
+<a class="viewcode-back" href="../../../modules/earth/dted.html#qnav.earth.dted.get_template_dted_data">[docs]</a>
+<span class="k">def</span> <span class="nf">get_template_dted_data</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                           <span class="n">num_lat_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+                           <span class="n">num_lon_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a template DTED data dictionary as if read from a file.</span>
+<span class="sd">    Simulates the output of :func:`~dted.read_dted_file` by generating</span>
+<span class="sd">    identical output structure with flat elevation. This is to be used as</span>
+<span class="sd">    substitution for missing/unavailable DTED files.</span>
+
+<span class="sd">    :param origin_lat: The integer latitude value (south-most coordinate).</span>
+<span class="sd">    :type origin_lat: int</span>
+
+<span class="sd">    :param origin_lon: The integer longitude value (west-most coordinate).</span>
+<span class="sd">    :type origin_lon: int</span>
+
+<span class="sd">    :param num_lat_points: The number of latitude points (rows) to generate.</span>
+<span class="sd">    :type num_lat_points: int</span>
+
+<span class="sd">    :param num_lon_points: The number of longitude points (columns) to generate.</span>
+<span class="sd">    :type num_lon_points: int</span>
+
+<span class="sd">    :return: A dictionary containing contents of a DTED file.</span>
+<span class="sd">        This contains the imitated origin coordinates, step sizes,</span>
+<span class="sd">        coordinate ticks and elevation matrix that would be read.</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">assert</span> <span class="n">num_lat_points</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Number of lat points must be greater than 1!&#39;</span>
+    <span class="k">assert</span> <span class="n">num_lon_points</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Number of lon points must be greater than 1!&#39;</span>
+
+    <span class="n">lat_ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lat</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_lat_points</span><span class="p">)</span>
+    <span class="n">lon_ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">origin_lon</span><span class="p">,</span> <span class="n">origin_lon</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_lon_points</span><span class="p">)</span>
+    <span class="n">dted_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_lat_points</span><span class="p">,</span> <span class="n">num_lon_points</span><span class="p">))</span>
+
+    <span class="n">lat_step</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_lat_points</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">lon_step</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_lon_points</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Finally, return the collected data:</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;lat_origin&#39;</span><span class="p">:</span> <span class="n">origin_lat</span><span class="p">,</span>
+        <span class="s1">&#39;lon_origin&#39;</span><span class="p">:</span> <span class="n">origin_lon</span><span class="p">,</span>
+        <span class="s1">&#39;lat_step&#39;</span><span class="p">:</span> <span class="n">lat_step</span><span class="p">,</span>
+        <span class="s1">&#39;lon_step&#39;</span><span class="p">:</span> <span class="n">lon_step</span><span class="p">,</span>
+        <span class="s1">&#39;lat_ticks&#39;</span><span class="p">:</span> <span class="n">lat_ticks</span><span class="p">,</span>
+        <span class="s1">&#39;lon_ticks&#39;</span><span class="p">:</span> <span class="n">lon_ticks</span><span class="p">,</span>
+        <span class="s1">&#39;elevation&#39;</span><span class="p">:</span> <span class="n">dted_matrix</span>
+    <span class="p">}</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

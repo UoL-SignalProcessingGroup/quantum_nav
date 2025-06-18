@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.util.rng &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.util.rng</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.util.rng</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">======</span>
+<span class="sd">rng.py</span>
+<span class="sd">======</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Provides alternative means for pseudo-random number generation.</span>
+<span class="sd">    This module contains implementations for controlled random number</span>
+<span class="sd">    generation, subject to realistic factors. Currently, this only</span>
+<span class="sd">    supplies gaussian-markov random walk based number generation.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First implementation of module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="GaussianMarkov">
+<a class="viewcode-back" href="../../../modules/util/rng.html#qnav.util.rng.GaussianMarkov">[docs]</a>
+<span class="k">class</span> <span class="nc">GaussianMarkov</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gaussian Markov First-Order Random Walk Model.</span>
+<span class="sd">    Generates controlled random numbers following a Gaussian Markov random</span>
+<span class="sd">    walk. Can be used to replace typical normal random number generation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">corr_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">psd</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">output_shape</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">start_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct a Gaussian Markov Random Walk Model.</span>
+<span class="sd">        This model can be used for sequential random number generation.</span>
+
+<span class="sd">        :param corr_time: (T) The correlation time in seconds.</span>
+<span class="sd">        :type corr_time: float</span>
+
+<span class="sd">        :param psd: (q) The power spectral density of the random walk.</span>
+<span class="sd">        :type psd: float</span>
+
+<span class="sd">        :param output_shape: The output shape for the random numbers.</span>
+<span class="sd">            By default only a single number is generated and returned.</span>
+<span class="sd">        :type output_shape: int | tuple[int]</span>
+
+<span class="sd">        :param start_time: (t) The start time of the random walk.</span>
+<span class="sd">        :type start_time: float</span>
+
+<span class="sd">        :param seed: Seed to use for random number generation.</span>
+<span class="sd">        :type seed: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Unpack given arguments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">start_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_corr_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">corr_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">output_shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_psd</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">psd</span>
+
+        <span class="c1"># Initialise random number generation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Validate class parameters</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corr_time</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;Correlation time must be a positive number&#39;</span>
+
+<div class="viewcode-block" id="GaussianMarkov.get_random">
+<a class="viewcode-back" href="../../../modules/util/rng.html#qnav.util.rng.GaussianMarkov.get_random">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_random</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clock_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates random number(s) for requested time and shape.</span>
+<span class="sd">        Calling this method continues the random walk to the given time in</span>
+<span class="sd">        seconds. Calling with a time earlier than that of the last</span>
+<span class="sd">        measurement will result in a value error due to illegal state.</span>
+
+<span class="sd">        :param clock_time: The current simulation clock time.</span>
+<span class="sd">        :type clock_time: float</span>
+
+<span class="sd">        :return: Randomly generated number(s).</span>
+<span class="sd">        :rtype: float | np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Calculate the time difference</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">clock_time</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_time</span>
+
+        <span class="k">if</span> <span class="n">dt</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Clock time is less than time of last generation&#39;</span><span class="p">)</span>
+
+        <span class="c1"># if dt == 0:</span>
+        <span class="c1">#     return self._last_value</span>
+
+        <span class="n">normal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_psd</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corr_time</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">normal</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rand</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_value</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">dt</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corr_time</span><span class="p">)</span> \
+                <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_psd</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corr_time</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+                    <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corr_time</span><span class="p">)))</span> <span class="o">*</span> <span class="n">normal</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_time</span> <span class="o">=</span> <span class="n">clock_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_value</span> <span class="o">=</span> <span class="n">rand</span>
+        <span class="k">return</span> <span class="n">rand</span></div>
+
+
+<div class="viewcode-block" id="GaussianMarkov.reset">
+<a class="viewcode-back" href="../../../modules/util/rng.html#qnav.util.rng.GaussianMarkov.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clock_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resets the internal state of the random walk, clearing previous</span>
+<span class="sd">        history and information.</span>
+
+<span class="sd">        :param clock_time: Optional new initialisation clock time.</span>
+<span class="sd">            By default this is 0 seconds.</span>
+<span class="sd">        :type clock_time: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_time</span> <span class="o">=</span> <span class="n">clock_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_value</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">output_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the output shape numbers are being generated for.</span>
+<span class="sd">        This is the dimensions of the output of the number generator.</span>
+
+<span class="sd">        :return: Output shape for random number generation.</span>
+<span class="sd">        :rtype: int | tuple[int]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">last_value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the last random value generated.</span>
+
+<span class="sd">        :return: Last value returned by generator.</span>
+<span class="sd">        :rtype: float | np.ndarray | None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">last_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns time of last number(s) generated in seconds.</span>
+
+<span class="sd">        :return: Time of last number(s) generated.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_time</span></div>
+
+
+
+<span class="c1"># For debugging and testing:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="c1"># Specify the number of values to produce.</span>
+    <span class="n">num_time_steps</span> <span class="o">=</span> <span class="mi">10000</span>
+    <span class="n">num_values</span> <span class="o">=</span> <span class="mi">6</span>
+
+    <span class="c1"># Create a new time correlated random number generator.</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">GaussianMarkov</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">num_values</span><span class="p">)</span>
+
+    <span class="c1"># Specify the times at which to produce values.</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">num_time_steps</span><span class="p">)</span>
+
+    <span class="c1"># Initialise an array to record the random values produced.</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">num_time_steps</span><span class="p">,</span> <span class="n">num_values</span><span class="p">])</span>
+
+    <span class="c1"># Produce random values for each time step.</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">times</span><span class="p">):</span>
+        <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">get_random</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+    <span class="c1"># Create a figure plot to show the values produced.</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">11.51</span><span class="p">,</span> <span class="mf">8.14</span><span class="p">))</span>
+
+    <span class="c1"># Plot each of the random values produced at their given times.</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_values</span><span class="p">):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">values</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Random </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Plot the average random values on top of the random values.</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Average&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Add labels and legends.</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Random Values Produced&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time (seconds)&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Finally, show the figure.</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

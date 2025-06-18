@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.quantum.gravity_gradient &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.quantum.gravity_gradient</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.quantum.gravity_gradient</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">===================</span>
+<span class="sd">gravity_gradient.py</span>
+<span class="sd">===================</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Provides implementation for Quantum gravity gradient sensing and fusion.</span>
+<span class="sd">    Implementation is mainly based on Peters et al, &#39;High precision gravity</span>
+<span class="sd">    measurements using atom interferometry&#39;, Metrologia, Vol.38,</span>
+<span class="sd">    pp.25-61 (2001).</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Prof. Jason Ralph - jfralph@liverpool.ac.uk</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">qnav.util.transformations</span> <span class="k">as</span> <span class="nn">trans</span>
+
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">qnav.estimation.state</span> <span class="kn">import</span> <span class="n">EstimatedState</span>
+<span class="kn">from</span> <span class="nn">qnav.gravity.base</span> <span class="kn">import</span> <span class="n">GravityModel</span>
+<span class="kn">from</span> <span class="nn">qnav.quantum.particle_filter</span> <span class="kn">import</span> <span class="n">weighted_cov</span>
+<span class="kn">from</span> <span class="nn">qnav.util.transformations</span> <span class="kn">import</span> <span class="n">cross_prod_xy</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.accelerometer</span> <span class="kn">import</span> <span class="n">Accelerometer</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.error_properties</span> <span class="kn">import</span> <span class="n">ErrorProperties</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.platform</span> <span class="kn">import</span> <span class="n">SensorAxis</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">Sensor</span><span class="p">,</span> <span class="n">SensorFusion</span><span class="p">,</span> <span class="n">FusionTrigger</span>
+<span class="kn">from</span> <span class="nn">qnav.waypoints.trajectory</span> <span class="kn">import</span> <span class="n">GroundTruth</span>
+
+<span class="c1"># Atomic mass (kg) - Rubidium-87 (86.909184 amu s)</span>
+<span class="n">_RUBIDIUM_ATOM_MASS</span> <span class="o">=</span> <span class="mf">1.4431608262e-25</span>
+
+<span class="c1"># Planck&#39;s Constant (Joules*seconds, Js)</span>
+<span class="n">_H_BAR</span> <span class="o">=</span> <span class="mf">1.054571817e-34</span>
+
+
+<div class="viewcode-block" id="GravityGradInterferometer">
+<a class="viewcode-back" href="../../../modules/quantum/gravity_gradient.html#qnav.quantum.gravity_gradient.GravityGradInterferometer">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">GravityGradInterferometer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters used by the Cold Atom Gravity Gradient Interferometer.</span>
+<span class="sd">    These properties describe the qualities of an ultra-cold atom</span>
+<span class="sd">    interferometer, which is used for capturing gravity gradient</span>
+<span class="sd">    estimations from the local environment.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: Merge with ColdAtomInterferometer class?</span>
+
+    <span class="c1"># The number of atoms to use for each measurement</span>
+    <span class="n">num_of_atoms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200000</span>
+
+    <span class="c1"># The mass of each of the atoms (in kilograms)</span>
+    <span class="n">atom_mass</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">_RUBIDIUM_ATOM_MASS</span>
+
+    <span class="c1"># The recoil velocity of the cold atoms when absorbing/emitting a photon</span>
+    <span class="n">recoil_velocity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.8845e-3</span> <span class="c1"># 7.0e-3</span>
+
+    <span class="c1"># Average vertical velocity of the atoms during the interferometer cycle</span>
+    <span class="c1"># when the system is stationary (m/s)</span>
+    <span class="n">stationary_velocity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.57</span>
+
+    <span class="c1"># First height offset of interferometer sensor (m)</span>
+    <span class="n">sensor_z_top</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="c1"># Second height offset of interferometer sensor (m)</span>
+    <span class="n">sensor_z_bottom</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+
+    <span class="c1"># The detection efficiency for measurements (decimal percentage)</span>
+    <span class="n">eta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.25</span>
+
+    <span class="c1"># The time between measurement pulses (in seconds)</span>
+    <span class="n">time_pulse</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span>
+
+    <span class="c1"># Relative phase noise for between paired interferometers</span>
+    <span class="n">sigma_phi</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">25e-3</span>
+
+    <span class="c1"># Relative scale of white noise for each interferometers.</span>
+    <span class="n">sigma_n</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="c1"># Interferometer beam width (metres)</span>
+    <span class="n">beam_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
+
+    <span class="c1"># Length of interferometer (metres)</span>
+    <span class="n">sensor_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.5</span>
+
+    <span class="c1"># The probability for purely random measurement failure</span>
+    <span class="n">rand_failure_prob</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs validation of properties after initialisation.</span>
+<span class="sd">        Ensure property values supplied are valid and usable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_z_top</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_z_bottom</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;sensor_z_top must be larger than sensor_z_bottom&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k_eff</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Effective wave number, the number of wave cycles per unit distance.</span>
+<span class="sd">        A property provided for a value commonly calculated.</span>
+
+<span class="sd">        :return: A measure of the spatial frequency of a wave.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">recoil_velocity</span> <span class="o">/</span> <span class="n">_H_BAR</span></div>
+
+
+
+<div class="viewcode-block" id="GravityGradiometer">
+<a class="viewcode-back" href="../../../modules/quantum/gravity_gradient.html#qnav.quantum.gravity_gradient.GravityGradiometer">[docs]</a>
+<span class="k">class</span> <span class="nc">GravityGradiometer</span><span class="p">(</span><span class="n">Sensor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Quantum Gravity Gradiometer Sensor for estimating vertical gravity gradient.</span>
+<span class="sd">    A Quantum sensor that features two ultra-cold atom accelerometers, measuring</span>
+<span class="sd">    the change in the vertical gravity gradient.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">full_frequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">imu_frequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">accelerometer_errors</span><span class="p">:</span> <span class="n">ErrorProperties</span><span class="p">,</span>
+                 <span class="n">interferometer</span><span class="p">:</span> <span class="n">GravityGradInterferometer</span><span class="p">,</span>
+                 <span class="n">gravity_model</span><span class="p">:</span> <span class="n">GravityModel</span><span class="p">,</span>
+                 <span class="n">sensor_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="n">SensorAxis</span><span class="p">(),</span>
+                 <span class="n">duty_cycle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+                 <span class="n">start_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                 <span class="n">rand_seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a gravity gradiometer sensor instance.</span>
+
+<span class="sd">        :param full_frequency: The full frequency for complete measurements</span>
+<span class="sd">            to be produced at (in Hz).</span>
+<span class="sd">        :type full_frequency: float</span>
+
+<span class="sd">        :param imu_frequency: The frequency of IMU measurements (in Hz)</span>
+<span class="sd">        :type imu_frequency: float</span>
+
+<span class="sd">        :param accelerometer_errors: The error profile for the internal</span>
+<span class="sd">            accelerometers of the interferometer.</span>
+<span class="sd">        :type accelerometer_errors: ErrorProperties</span>
+
+<span class="sd">        :param interferometer: The interferometer parameters to use.</span>
+<span class="sd">        :type interferometer: GravityGradInterferometer</span>
+
+<span class="sd">        :param gravity_model: The gravity model to use to acquire real</span>
+<span class="sd">            gravity gradient measurements from.</span>
+<span class="sd">        :type gravity_model: GravityModel</span>
+
+<span class="sd">        :param sensor_axis: The sensor axis of the sensor.</span>
+<span class="sd">        :type sensor_axis: SensorAxis</span>
+
+<span class="sd">        :param duty_cycle: The decimal percentage of time the sensor samples</span>
+<span class="sd">            from the ground truth to collect a measurement.</span>
+<span class="sd">        :type duty_cycle: float</span>
+
+<span class="sd">        :param start_time: The starting time of the sensor in seconds.</span>
+<span class="sd">        :type start_time: float</span>
+
+<span class="sd">        :param rand_seed: The random number generation seed.</span>
+<span class="sd">        :type rand_seed: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Call parent class&#39;s constructor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">imu_frequency</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">rand_seed</span><span class="p">)</span>
+
+        <span class="c1"># Ensure the duty cycle is suitable:</span>
+        <span class="k">if</span> <span class="n">duty_cycle</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">duty_cycle</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Duty cycle must be positive between 0 and 1&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Ensure the frequency is suitable:</span>
+        <span class="k">if</span> <span class="n">full_frequency</span> <span class="o">&gt;</span> <span class="n">imu_frequency</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;full_frequency cannot be higher than imu_frequency&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Obtain the measurement amounts required:</span>
+        <span class="n">freq_ratio</span> <span class="o">=</span> <span class="n">imu_frequency</span> <span class="o">/</span> <span class="n">full_frequency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_total_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">freq_ratio</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_active_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">duty_cycle</span> <span class="o">*</span> <span class="n">freq_ratio</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Get the interferometer properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span> <span class="o">=</span> <span class="n">interferometer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_model</span> <span class="o">=</span> <span class="n">gravity_model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_axis</span> <span class="o">=</span> <span class="n">sensor_axis</span>
+
+        <span class="c1"># Get the internal accelerometer sensor axes</span>
+        <span class="n">z_top_axis</span> <span class="o">=</span> <span class="n">_offset_vertical_axis</span><span class="p">(</span><span class="n">sensor_axis</span><span class="p">,</span> <span class="n">interferometer</span><span class="o">.</span><span class="n">sensor_z_top</span><span class="p">)</span>
+        <span class="n">z_btm_axis</span> <span class="o">=</span> <span class="n">_offset_vertical_axis</span><span class="p">(</span><span class="n">sensor_axis</span><span class="p">,</span> <span class="n">interferometer</span><span class="o">.</span><span class="n">sensor_z_bottom</span><span class="p">)</span>
+
+        <span class="c1"># Initialise internal accelerometer sensors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_top_accelerometer</span> <span class="o">=</span> <span class="n">Accelerometer</span><span class="p">(</span><span class="n">imu_frequency</span><span class="p">,</span> <span class="n">accelerometer_errors</span><span class="p">,</span> <span class="n">z_top_axis</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_btm_accelerometer</span> <span class="o">=</span> <span class="n">Accelerometer</span><span class="p">(</span><span class="n">imu_frequency</span><span class="p">,</span> <span class="n">accelerometer_errors</span><span class="p">,</span> <span class="n">z_btm_axis</span><span class="p">)</span>
+
+        <span class="c1"># Pre-allocate array for holding measurement data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_measurement_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_active_steps</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_active_steps</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+
+        <span class="c1"># Define the last measurement produced</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_measurement</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="GravityGradiometer.take_measurement">
+<a class="viewcode-back" href="../../../modules/quantum/gravity_gradient.html#qnav.quantum.gravity_gradient.GravityGradiometer.take_measurement">[docs]</a>
+    <span class="k">def</span> <span class="nf">take_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">est_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Samples from the ground truth to collect data to produce measurements.</span>
+<span class="sd">        Using the current ground truth, captures the</span>
+
+<span class="sd">        :param est_time: The estimated time the measurement of the sensor</span>
+<span class="sd">            is expected to be captured at (in seconds).</span>
+<span class="sd">        :type est_time: float</span>
+
+<span class="sd">        :param ground_truth: The corresponding ground truth data.</span>
+<span class="sd">        :type ground_truth: GroundTruth</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># While within the duty cycle for measurements:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_active_steps</span><span class="p">:</span>
+
+            <span class="c1"># Produce gravity gradient values from ground truth</span>
+            <span class="n">gravity_grads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_gravity_gradients</span><span class="p">(</span><span class="n">ground_truth</span><span class="p">)</span>
+
+            <span class="c1"># Obtain the local sensor accelerations and measurements for each</span>
+            <span class="n">accelerations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_to_sensor_axis</span><span class="p">(</span><span class="n">ground_truth</span><span class="p">,</span> <span class="o">*</span><span class="n">gravity_grads</span><span class="p">)</span>
+            <span class="n">measurements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_to_measurements</span><span class="p">(</span><span class="n">ground_truth</span><span class="p">,</span> <span class="o">*</span><span class="n">gravity_grads</span><span class="p">)</span>
+
+            <span class="c1"># Record each for the current step</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">accelerations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">accelerations</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_measurement_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_measurement_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># If the final step:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_total_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+
+            <span class="c1"># Get the quantum measurements from the sensor</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_measurement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_measurement</span><span class="p">()</span>
+            <span class="c1"># TODO: Use random failure chance?</span>
+
+        <span class="c1"># Increment the measurement step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="GravityGradiometer.reset">
+<a class="viewcode-back" href="../../../modules/quantum/gravity_gradient.html#qnav.quantum.gravity_gradient.GravityGradiometer.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resets the sensor, clearing all previous measurements.</span>
+<span class="sd">        Normally used directly after fusion.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_measurement</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_measurement_data</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration_data</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="GravityGradiometer.update">
+<a class="viewcode-back" href="../../../modules/quantum/gravity_gradient.html#qnav.quantum.gravity_gradient.GravityGradiometer.update">[docs]</a>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_sec</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called on demand to update the sensor&#39;s state.</span>
+<span class="sd">        Typically called after measurements have been taken. When called</span>
+<span class="sd">        this increases the next measurement time and propagates internal</span>
+<span class="sd">        states, to the time difference.</span>
+
+<span class="sd">        :param time_sec: The current simulation time in seconds.</span>
+<span class="sd">        :type time_sec: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Update using parent class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">time_sec</span><span class="p">)</span>
+
+        <span class="c1"># Then update the internal sensors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_top_accelerometer</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">time_sec</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_btm_accelerometer</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">time_sec</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_get_gravity_gradients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts partial gravity gradient accelerations from ground truth.</span>
+<span class="sd">        Given a current ground truth record, this calculates the current</span>
+<span class="sd">        gravity gradient for both the top and bottom quantum accelerometers. On</span>
+<span class="sd">        succession two sets of values are produced. A series of these</span>
+<span class="sd">        measurements are later collected to form realistic measurements.</span>
+
+<span class="sd">        :param ground_truth: The corresponding ground truth data.</span>
+<span class="sd">        :type ground_truth: GroundTruth</span>
+
+<span class="sd">        :return: The partial gravity gradient accelerations,</span>
+<span class="sd">            for top and bottom accelerometers respectively.</span>
+<span class="sd">        :rtype: tuple[np.ndarray, np.ndarray]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Obtain the true gravity gradient</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="o">.</span><span class="n">position</span>
+        <span class="n">dgz_dz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_model</span><span class="o">.</span><span class="n">calc_vertical_grad</span><span class="p">(</span><span class="o">*</span><span class="n">position</span><span class="p">)</span>
+
+        <span class="c1"># Rotate from body to earth axis</span>
+        <span class="n">attitude_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">ground_truth</span><span class="o">.</span><span class="n">attitude</span><span class="p">)</span>
+        <span class="n">rot_earth2body</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">attitude_rad</span><span class="p">)</span>
+        <span class="n">gravity_top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_earth2body</span><span class="p">,</span> <span class="n">ground_truth</span><span class="o">.</span><span class="n">acceleration</span><span class="p">)</span>
+        <span class="n">gravity_btm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">gravity_top</span><span class="p">)</span>
+
+        <span class="c1"># Add vertical gradient term for each acceleration</span>
+        <span class="n">gravity_top</span> <span class="o">+=</span> <span class="n">dgz_dz</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">sensor_z_top</span>
+        <span class="n">gravity_btm</span> <span class="o">+=</span> <span class="n">dgz_dz</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">sensor_z_bottom</span>
+
+        <span class="c1"># Rotate back from earth to body</span>
+        <span class="n">gravity_top</span> <span class="o">=</span> <span class="n">rot_earth2body</span> <span class="o">@</span> <span class="n">gravity_top</span>
+        <span class="n">gravity_btm</span> <span class="o">=</span> <span class="n">rot_earth2body</span> <span class="o">@</span> <span class="n">gravity_btm</span>
+        <span class="k">return</span> <span class="n">gravity_top</span><span class="p">,</span> <span class="n">gravity_btm</span>
+
+
+    <span class="k">def</span> <span class="nf">_gravity_to_sensor_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">,</span> <span class="n">gravity_top</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                <span class="n">gravity_btm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts partial gravity gradients values from body to sensor axis.</span>
+<span class="sd">        On succession, aligns and returns the gravity gradient measurements</span>
+<span class="sd">        with the top and bottom accelerometer axes. Used for calculating the</span>
+<span class="sd">        deviation of atoms in the interferometer.</span>
+
+<span class="sd">        :param ground_truth: The corresponding ground truth data.</span>
+<span class="sd">        :type ground_truth: GroundTruth</span>
+
+<span class="sd">        :param gravity_top: The gravity acceleration at the top accelerometer.</span>
+<span class="sd">        :type gravity_top: np.ndarray</span>
+
+<span class="sd">        :param gravity_btm: The gravity acceleration at the bottom accelerometer.</span>
+<span class="sd">        :type gravity_btm: np.ndarray</span>
+
+<span class="sd">        :return: The gravity acceleration aligned with accelerometer axes,</span>
+<span class="sd">            for top and bottom accelerometers respectively.</span>
+<span class="sd">        :rtype: tuple[np.ndarray, np.ndarray]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Unpack the true angle rates</span>
+        <span class="n">angle_rates</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="o">.</span><span class="n">angle_rates</span>
+
+        <span class="c1"># Obtain the sensor axis for each sensor</span>
+        <span class="n">top_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qs_top_accelerometer</span><span class="o">.</span><span class="n">sensor_axis</span>
+        <span class="n">btm_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qs_btm_accelerometer</span><span class="o">.</span><span class="n">sensor_axis</span>
+
+        <span class="c1"># Obtain the angle rate acceleration for top and bottom sensors</span>
+        <span class="n">angle_rates_top</span> <span class="o">=</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">angle_rates</span><span class="p">,</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">angle_rates</span><span class="p">,</span> <span class="n">top_axis</span><span class="o">.</span><span class="n">lever_arm</span><span class="p">))</span>
+        <span class="n">angle_rates_btm</span> <span class="o">=</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">angle_rates</span><span class="p">,</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">angle_rates</span><span class="p">,</span> <span class="n">btm_axis</span><span class="o">.</span><span class="n">lever_arm</span><span class="p">))</span>
+
+        <span class="c1"># Convert given values to sensor axis</span>
+        <span class="n">acceleration_top</span> <span class="o">=</span> <span class="n">top_axis</span><span class="o">.</span><span class="n">body2sensor_mat</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">gravity_top</span> <span class="o">+</span> <span class="n">angle_rates_top</span><span class="p">)</span>
+        <span class="n">acceleration_btm</span> <span class="o">=</span> <span class="n">btm_axis</span><span class="o">.</span><span class="n">body2sensor_mat</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">gravity_btm</span> <span class="o">+</span> <span class="n">angle_rates_btm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">acceleration_top</span><span class="p">,</span> <span class="n">acceleration_btm</span>
+
+
+    <span class="k">def</span> <span class="nf">_gravity_to_measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">,</span> <span class="n">gravity_top</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                 <span class="n">gravity_btm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts partial gravity gradients values to sensor measurements.</span>
+<span class="sd">        On succession, produces the partial measurements from top and</span>
+<span class="sd">        bottom accelerometers, using expected error/noise behaviours.</span>
+
+<span class="sd">        :param ground_truth: The corresponding ground truth data.</span>
+<span class="sd">        :type ground_truth: GroundTruth</span>
+
+<span class="sd">        :param gravity_top: The gravity acceleration at the top accelerometer.</span>
+<span class="sd">        :type gravity_top: np.ndarray</span>
+
+<span class="sd">        :param gravity_btm: The gravity acceleration at the bottom accelerometer.</span>
+<span class="sd">        :type gravity_btm: np.ndarray</span>
+
+<span class="sd">        :return: The acceleration measurements for top and bottom</span>
+<span class="sd">            accelerometers respectively.</span>
+<span class="sd">        :rtype: tuple[np.ndarray, np.ndarray]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Unpack ground truth values</span>
+        <span class="n">time_step</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="o">.</span><span class="n">timestamp</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="o">.</span><span class="n">position</span>
+        <span class="n">velocity</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="o">.</span><span class="n">velocity</span>
+        <span class="n">attitude</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="o">.</span><span class="n">attitude</span>
+        <span class="n">angle_rates</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="o">.</span><span class="n">angle_rates</span>
+
+        <span class="c1"># Generate a state for upper sensor measurement.</span>
+        <span class="n">tmp_gt_up</span> <span class="o">=</span> <span class="n">GroundTruth</span><span class="p">(</span><span class="n">time_step</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span>
+                                <span class="n">gravity_top</span><span class="p">,</span> <span class="n">attitude</span><span class="p">,</span> <span class="n">angle_rates</span><span class="p">)</span>
+
+        <span class="c1"># Generate a state for lower sensor measurement.</span>
+        <span class="n">tmp_gt_down</span> <span class="o">=</span> <span class="n">GroundTruth</span><span class="p">(</span><span class="n">time_step</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span>
+                                  <span class="n">gravity_btm</span><span class="p">,</span> <span class="n">attitude</span><span class="p">,</span> <span class="n">angle_rates</span><span class="p">)</span>
+
+        <span class="c1"># Take the produced ground truth input</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_top_accelerometer</span><span class="o">.</span><span class="n">take_measurement</span><span class="p">(</span><span class="n">time_step</span><span class="p">,</span> <span class="n">tmp_gt_up</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_btm_accelerometer</span><span class="o">.</span><span class="n">take_measurement</span><span class="p">(</span><span class="n">time_step</span><span class="p">,</span> <span class="n">tmp_gt_down</span><span class="p">)</span>
+
+        <span class="c1"># Finally, return the captured measurements</span>
+        <span class="n">top_measurement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qs_top_accelerometer</span><span class="o">.</span><span class="n">last_measurement</span>
+        <span class="n">bottom_measurement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qs_btm_accelerometer</span><span class="o">.</span><span class="n">last_measurement</span>
+        <span class="k">return</span> <span class="n">top_measurement</span><span class="p">,</span> <span class="n">bottom_measurement</span>
+
+    <span class="k">def</span> <span class="nf">_get_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Produces measurement signal using collected partial measurements.</span>
+<span class="sd">        Using the collected partial accelerometer measurements, this</span>
+<span class="sd">        generates a signal for the top and bottom accelerometers. This is</span>
+<span class="sd">        then used by the appointed fusion method.</span>
+
+<span class="sd">        :return: Generated signal for the top and bottom accelerometers.</span>
+<span class="sd">        :rtype: tuple[float, float]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">num_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">num_of_atoms</span>
+        <span class="n">sigma_phi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">sigma_phi</span>
+        <span class="n">sigma_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">sigma_n</span>
+        <span class="n">t_pulse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">time_pulse</span>
+        <span class="n">k_eff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">k_eff</span>
+        <span class="n">eta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">eta</span>
+
+        <span class="n">num_atoms_sqrt</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">num_atoms</span><span class="p">)</span>
+        <span class="n">t_pulse_2</span> <span class="o">=</span> <span class="n">t_pulse</span> <span class="o">*</span> <span class="n">t_pulse</span>
+
+        <span class="c1"># Get the top and bottom measurements</span>
+        <span class="n">top_measurements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_measurement_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">btm_measurements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_measurement_data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
+
+        <span class="c1"># Validate both sets of measurements</span>
+        <span class="c1"># TODO: Use somewhere with acceleration measurements (Jason doesn&#39;t)</span>
+        <span class="c1"># valid_top_measurements = self._validate_readings(top_measurements)</span>
+        <span class="c1"># valid_btm_measurements = self._validate_readings(btm_measurements)</span>
+
+        <span class="c1"># Get the average measurement value for each</span>
+        <span class="n">mean_top_measurement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">top_measurements</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">mean_btm_measurement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">btm_measurements</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Calculate phase shifts</span>
+        <span class="n">delta_phi_top</span> <span class="o">=</span> <span class="n">k_eff</span> <span class="o">*</span> <span class="n">mean_top_measurement</span> <span class="o">*</span> <span class="n">t_pulse_2</span>
+        <span class="n">delta_phi_btm</span> <span class="o">=</span> <span class="n">k_eff</span> <span class="o">*</span> <span class="n">mean_btm_measurement</span> <span class="o">*</span> <span class="n">t_pulse_2</span>
+
+        <span class="c1"># Apply random phase for each interferometer measurement</span>
+        <span class="c1"># (This is common for both accelerometers)</span>
+        <span class="n">phi_z0</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+
+        <span class="c1"># Acquire the top accelerometer&#39;s measured signals</span>
+        <span class="n">s_top</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">delta_phi_top</span> <span class="o">+</span> <span class="n">phi_z0</span> <span class="o">+</span> <span class="n">sigma_phi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">())</span>
+        <span class="c1"># s_top *= eta * (num_atoms + self._rng.normal() * num_atoms_sqrt)</span>
+        <span class="n">s_top</span> <span class="o">*=</span> <span class="n">eta</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_atoms</span> <span class="o">+</span> <span class="n">sigma_n</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">()</span> <span class="o">*</span> <span class="n">num_atoms_sqrt</span><span class="p">)</span>  <span class="c1"># TODO: NEW</span>
+        <span class="n">s_top</span> <span class="o">=</span> <span class="n">s_top</span> <span class="o">/</span> <span class="n">eta</span> <span class="o">/</span> <span class="n">num_atoms</span>
+
+        <span class="c1"># Acquire the bottom accelerometer&#39;s measured signals</span>
+        <span class="n">s_btm</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">delta_phi_btm</span> <span class="o">+</span> <span class="n">phi_z0</span> <span class="o">+</span> <span class="n">sigma_phi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">())</span>
+        <span class="c1"># s_btm *= eta * (num_atoms + self._rng.normal() * num_atoms_sqrt)</span>
+        <span class="n">s_btm</span> <span class="o">*=</span> <span class="n">eta</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_atoms</span> <span class="o">+</span> <span class="n">sigma_n</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">()</span> <span class="o">*</span> <span class="n">num_atoms_sqrt</span><span class="p">)</span>  <span class="c1"># TODO: NEW</span>
+        <span class="n">s_btm</span> <span class="o">=</span> <span class="n">s_btm</span> <span class="o">/</span> <span class="n">eta</span> <span class="o">/</span> <span class="n">num_atoms</span>
+
+        <span class="c1"># Finally, return the signals</span>
+        <span class="k">return</span> <span class="n">s_top</span><span class="p">,</span> <span class="n">s_btm</span>
+
+
+    <span class="k">def</span> <span class="nf">_validate_readings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceleration_record</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validates if readings for the acceleration values are usable.</span>
+<span class="sd">        Performs a check for each acceleration record (in sensor axis) to</span>
+<span class="sd">        ensure atoms remain in the beam for usable reading. Used to detect</span>
+<span class="sd">        when invalid measurements are likely to occur due to</span>
+
+<span class="sd">        :return: Whether the X, Y and Z axis readings are valid, respectively.</span>
+<span class="sd">        :rtype: tuple[bool, bool, bool]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Unpack the interferometer parameters</span>
+        <span class="n">delta_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">beam_width</span>
+        <span class="n">delta_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">sensor_length</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">delta_x</span><span class="p">,</span> <span class="n">delta_x</span><span class="p">,</span> <span class="n">delta_z</span><span class="p">])</span>
+
+        <span class="c1"># The time step and time step squared</span>
+        <span class="n">ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span>
+        <span class="n">ts_sq</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">*</span> <span class="n">ts</span>
+
+        <span class="c1"># The initial position and velocity</span>
+        <span class="n">position_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">velocity_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">acceleration_s</span> <span class="ow">in</span> <span class="n">acceleration_record</span><span class="p">:</span>
+
+            <span class="c1"># Calculate the deviations in each axis</span>
+            <span class="n">position_s</span> <span class="o">+=</span> <span class="p">(</span><span class="n">velocity_s</span> <span class="o">*</span> <span class="n">ts</span> <span class="o">+</span>  <span class="mf">0.5</span> <span class="o">*</span> <span class="n">acceleration_s</span> <span class="o">*</span> <span class="n">ts_sq</span><span class="p">)</span>
+            <span class="n">velocity_s</span> <span class="o">+=</span> <span class="n">acceleration_s</span> <span class="o">*</span> <span class="n">ts</span>
+            <span class="n">deviations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">position_s</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">deviations</span> <span class="o">&gt;</span> <span class="n">bounds</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">last_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the latest measurement produced from the sensor.</span>
+
+<span class="sd">        :return: The last produced gravity gradient signal.</span>
+<span class="sd">        :rtype: tuple[float, float]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_measurement</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the total number of internal measurement steps required.</span>
+<span class="sd">        Used namely for sharing array sizes.</span>
+
+<span class="sd">        :return: The number of internal measurement steps used.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_total_steps</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interferometer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GravityGradInterferometer</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the interferometer properties used by the sensor.</span>
+
+<span class="sd">        :return: Interferometer properties.</span>
+<span class="sd">        :rtype: GravityGradInterferometer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gravity_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GravityModel</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the internal gravity model used by the sensor.</span>
+<span class="sd">        Can be accessed for testing or producing similar measurements.</span>
+
+<span class="sd">        :return: Gravity Model instance used by the sensor.</span>
+<span class="sd">        :rtype: GravityModel</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_model</span></div>
+
+
+
+<div class="viewcode-block" id="ParticleFilterParams">
+<a class="viewcode-back" href="../../../modules/quantum/gravity_gradient.html#qnav.quantum.gravity_gradient.ParticleFilterParams">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">ParticleFilterParams</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Particle Filter Properties for the gravity gradient fusion methods.</span>
+<span class="sd">    A list of properties relating to the particle filter processing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">num_particles</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span>
+
+    <span class="n">init_position_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span>
+    <span class="n">init_velocity_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-5</span>
+    <span class="n">init_attitude_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-5</span>
+
+    <span class="n">weight_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.00126</span>
+
+    <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span>
+    <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span>
+    <span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span>
+
+    <span class="n">position_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span>
+    <span class="n">velocity_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.005</span>
+    <span class="n">attitude_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001</span>
+
+    <span class="n">ellipse_intervals</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">361</span>
+    <span class="n">ellipse_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span></div>
+
+
+
+<div class="viewcode-block" id="GravityGradientPF">
+<a class="viewcode-back" href="../../../modules/quantum/gravity_gradient.html#qnav.quantum.gravity_gradient.GravityGradientPF">[docs]</a>
+<span class="k">class</span> <span class="nc">GravityGradientPF</span><span class="p">(</span><span class="n">SensorFusion</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gravity Gradient Particle Filter Fusion.</span>
+<span class="sd">    Applies position correction using gravity gradient signals,</span>
+<span class="sd">    via a particle filter approach.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">qs_gravity_grad</span><span class="p">:</span> <span class="n">GravityGradiometer</span><span class="p">,</span>
+                 <span class="n">filter_params</span><span class="p">:</span> <span class="n">ParticleFilterParams</span> <span class="o">=</span> <span class="n">ParticleFilterParams</span><span class="p">(),</span>
+                 <span class="n">est_interferometer</span><span class="p">:</span> <span class="n">GravityGradInterferometer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">rng_seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a gravity gradient particle fusion instance.</span>
+
+<span class="sd">        :param qs_gravity_grad: The gravity gradient sensor to use for</span>
+<span class="sd">            acquiring vertical gravity gradient measurements from.</span>
+<span class="sd">        :type qs_gravity_grad: GravityGradiometer</span>
+
+<span class="sd">        :param filter_params: The particle filtering parameters to use.</span>
+<span class="sd">        :type filter_params: ParticleFilterParams</span>
+
+<span class="sd">        :param est_interferometer: The estimated interferometer parameters to</span>
+<span class="sd">            use. If not provided the real sensor parameters will be used.</span>
+<span class="sd">        :type est_interferometer: GravityGradInterferometer</span>
+
+<span class="sd">        :param rng_seed: The random number generator seed to use.</span>
+<span class="sd">        :type rng_seed: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Call parent class&#39;s constructor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">FusionTrigger</span><span class="o">.</span><span class="n">ALL</span><span class="p">,</span> <span class="n">qs_gravity_grad</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_gradiometer</span> <span class="o">=</span> <span class="n">qs_gravity_grad</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span> <span class="o">=</span> <span class="n">filter_params</span>
+
+        <span class="c1"># Obtain the interferometer properties to use:</span>
+        <span class="k">if</span> <span class="n">est_interferometer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span> <span class="o">=</span> <span class="n">qs_gravity_grad</span><span class="o">.</span><span class="n">interferometer</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span> <span class="o">=</span> <span class="n">est_interferometer</span>
+
+        <span class="c1"># Initialise local random number generation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">rng_seed</span><span class="p">)</span>
+
+        <span class="c1"># Initialise particle filter properties</span>
+        <span class="n">num_particles</span> <span class="o">=</span> <span class="n">filter_params</span><span class="o">.</span><span class="n">num_particles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">num_particles</span><span class="p">)</span> <span class="o">/</span> <span class="n">num_particles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_particles</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v_particles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_particles</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_a_particles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_particles</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span> <span class="o">=</span> <span class="n">num_particles</span>
+
+        <span class="c1"># Indicates particle filterer requires initialising</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_first_iteration</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="GravityGradientPF.perform_fusion">
+<a class="viewcode-back" href="../../../modules/quantum/gravity_gradient.html#qnav.quantum.gravity_gradient.GravityGradientPF.perform_fusion">[docs]</a>
+    <span class="k">def</span> <span class="nf">perform_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs the fusion with sensors and updates the estimated state.</span>
+<span class="sd">        When called performs fusion when gravity gradient sensor</span>
+<span class="sd">        measurements are ready. When so, the particle filter algorithms is</span>
+<span class="sd">        employed and the estimated state is updated.</span>
+
+<span class="sd">        :param estimated_state: The current estimated states of the platform.</span>
+<span class="sd">                                This is what the fusion method will update.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get the latest measurement from the sensor</span>
+        <span class="n">qs_measurement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_gradiometer</span><span class="o">.</span><span class="n">last_measurement</span>
+        <span class="k">if</span> <span class="n">qs_measurement</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Initialise particle filter if not already</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_iteration</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">init_particle_filter</span><span class="p">(</span><span class="n">estimated_state</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_first_iteration</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Perform weighting and conditional resampling of particles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weight_particles</span><span class="p">(</span><span class="n">estimated_state</span><span class="p">,</span> <span class="n">qs_measurement</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resample_particles</span><span class="p">()</span>
+
+        <span class="c1"># Update the estimation and particle states</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_estimation</span><span class="p">(</span><span class="n">estimated_state</span><span class="p">)</span>
+        <span class="c1"># self._propagate_particles(estimated_state)</span>
+
+        <span class="c1"># Reset sensor and measurement table</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="GravityGradientPF.init_particle_filter">
+<a class="viewcode-back" href="../../../modules/quantum/gravity_gradient.html#qnav.quantum.gravity_gradient.GravityGradientPF.init_particle_filter">[docs]</a>
+    <span class="k">def</span> <span class="nf">init_particle_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialises the particle filter using current estimate.</span>
+<span class="sd">        This is called during the first iteration, setting the particles&#39;</span>
+<span class="sd">        estimated position, velocity and attitude values based around the</span>
+<span class="sd">        current estimated state. The range of estimation is based on the</span>
+<span class="sd">        initial sigma values set in the filter properties for each.</span>
+
+<span class="sd">        :param estimated_state: The current estimated states of the platform.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Use estimate as reference position</span>
+        <span class="n">array_size</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+        <span class="c1"># Unpack relevant filter properties</span>
+        <span class="n">pos_sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span><span class="o">.</span><span class="n">init_position_sigma</span>
+        <span class="n">vel_sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span><span class="o">.</span><span class="n">init_velocity_sigma</span>
+        <span class="n">att_sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span><span class="o">.</span><span class="n">init_attitude_sigma</span>
+
+        <span class="c1"># Create random offset from reference LLA</span>
+        <span class="n">ned_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">array_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">pos_sigma</span>
+        <span class="n">ned_offset</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Randomise particles for position, velocity and attitude</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles</span> <span class="o">=</span> <span class="n">ned_offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v_particles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">array_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">vel_sigma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_a_particles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">array_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">att_sigma</span></div>
+
+
+        <span class="c1"># Ensure there is particle for current estimate</span>
+        <span class="c1"># self._x_particles[0, :] = 0</span>
+        <span class="c1"># self._v_particles[0, :] = 0</span>
+        <span class="c1"># self._a_particles[0, :] = 0</span>
+
+
+    <span class="k">def</span> <span class="nf">_weight_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">,</span>
+                          <span class="n">measurements</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Weights particles against given measurements.</span>
+<span class="sd">        For the given (upper and lower) sensor measurements, this re-weighs</span>
+<span class="sd">        the particles subject to their minimum ellipse distance. On</span>
+<span class="sd">        succession, new weights are assigned to each particle.</span>
+
+<span class="sd">        :param estimated_state: The current estimated states of the platform.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+
+<span class="sd">        :param measurements: The upper and lower measurements received</span>
+<span class="sd">            from the vertical gravity gradient sensor.</span>
+<span class="sd">        :type measurements: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">est_position</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">position</span>
+        <span class="n">est_acceleration</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">acceleration</span>
+        <span class="n">est_attitude</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">attitude</span>
+        <span class="n">est_angle_rates</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">angle_rates</span>
+
+        <span class="c1"># Convert from candidate NEDs to LLA positions</span>
+        <span class="n">cand_position</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">ned2lla_vec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x_particles</span><span class="p">,</span> <span class="n">est_position</span><span class="p">)</span>
+        <span class="n">cand_position</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">est_position</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># Obtain the candidate values from particles</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">cand_position</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">cand_position</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">alt</span> <span class="o">=</span> <span class="n">cand_position</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># Calculate the gravity gradient for each</span>
+        <span class="n">gravity_model</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">gravity_model</span>
+        <span class="n">cand_gradients</span> <span class="o">=</span> <span class="n">gravity_model</span><span class="o">.</span><span class="n">calc_vertical_grad_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+        <span class="n">cand_attitudes</span> <span class="o">=</span> <span class="n">est_attitude</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a_particles</span>
+
+        <span class="c1"># Calculate the distances from ellipsoid</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span><span class="p">):</span>
+            <span class="n">distances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_ellipse_distance</span><span class="p">(</span>
+                <span class="n">measurements</span><span class="p">,</span> <span class="n">est_acceleration</span><span class="p">,</span> <span class="n">cand_attitudes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">est_angle_rates</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">cand_gradients</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+        <span class="n">sigma2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span><span class="o">.</span><span class="n">weight_sigma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">distances</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sigma2</span><span class="p">))</span>
+
+        <span class="c1"># if np.any(self._w_particles == 0):</span>
+        <span class="c1">#     print(&#39;GGMA Error: Some weights are zero. Adjusting...&#39;)</span>
+        <span class="c1">#     self._w_particles += 1 / len(self._w_particles)</span>
+
+        <span class="c1"># if np.sum(self._w_particles) == 0:</span>
+        <span class="c1">#     print(&#39;Gravity Gradient PF Error: All weights are zero. Resetting!&#39;)</span>
+        <span class="c1">#     self.init_particle_filter(estimated_state)</span>
+        <span class="c1">#     self._weight_particles(estimated_state, measurements)</span>
+        <span class="c1">#     return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w_particles</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_resample_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs conditional particle resampling.</span>
+<span class="sd">        If the combined weight of particles is below a given threshold,</span>
+<span class="sd">        resampling of values and weights is applied.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">n_eff</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w_particles</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles</span><span class="p">)</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span> <span class="o">/</span> <span class="mf">3.0</span>
+
+        <span class="k">if</span> <span class="n">n_eff</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">new_particles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v_particles</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a_particles</span><span class="p">])</span>
+        <span class="n">w_particles</span><span class="p">,</span> <span class="n">new_particles</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w_particles</span><span class="p">,</span> <span class="n">new_particles</span><span class="p">)</span>
+
+        <span class="c1"># num_states = 8</span>
+        <span class="c1"># a = const.POLAR_AXIS_A</span>
+        <span class="c1"># tmp = math.degrees(1 / a) ** 2</span>
+        <span class="c1"># min_cov = np.eye(num_states) * 1e-6</span>
+        <span class="c1"># min_cov[0, 0] = tmp</span>
+        <span class="c1"># min_cov[1, 1] = tmp</span>
+
+        <span class="n">num_states</span> <span class="o">=</span> <span class="mi">8</span>
+        <span class="n">min_cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">num_states</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-6</span>
+
+        <span class="n">co_var_q</span> <span class="o">=</span> <span class="n">weighted_cov</span><span class="p">(</span><span class="n">new_particles</span><span class="p">,</span> <span class="n">w_particles</span><span class="p">)</span> <span class="o">+</span> <span class="n">min_cov</span>
+        <span class="n">l_q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span><span class="n">co_var_q</span><span class="p">)</span>
+
+        <span class="n">prob</span> <span class="o">=</span> <span class="mf">0.85</span>
+        <span class="n">low_noise</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="n">high_noise</span> <span class="o">=</span> <span class="mf">2.0</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">prob</span><span class="p">:</span>
+                <span class="n">l_q</span> <span class="o">*=</span> <span class="n">low_noise</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">l_q</span> <span class="o">*=</span> <span class="n">high_noise</span>
+
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">l_q</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_states</span><span class="p">)</span>
+            <span class="n">new_particles</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+=</span> <span class="n">dx</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_particles</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v_particles</span> <span class="o">=</span> <span class="n">new_particles</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_a_particles</span> <span class="o">=</span> <span class="n">new_particles</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_update_estimation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Using the particle filter values and weights, updates the estimation.</span>
+<span class="sd">        Updates the current estimated position, velocity and attitude using</span>
+<span class="sd">        the associated particle values and weights. On succession, the</span>
+<span class="sd">        particle values  are also updated by this change.</span>
+
+<span class="sd">        :param estimated_state: The current estimated states of the platform.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Unpack required parameters</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span><span class="o">.</span><span class="n">alpha</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span><span class="o">.</span><span class="n">beta</span>
+        <span class="n">gamma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span><span class="o">.</span><span class="n">gamma</span>
+
+        <span class="c1"># Obtain weighted average</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w_particles</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">sum_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w_particles</span><span class="p">)</span>
+        <span class="n">mean_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles</span> <span class="o">/</span> <span class="n">sum_weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">mean_v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v_particles</span> <span class="o">/</span> <span class="n">sum_weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">mean_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a_particles</span> <span class="o">/</span> <span class="n">sum_weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Apply fixed gain to updates</span>
+        <span class="n">est_d_position</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">mean_x</span>
+        <span class="n">est_d_velocity</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">mean_v</span>
+        <span class="n">est_d_attitude</span> <span class="o">=</span> <span class="n">gamma</span> <span class="o">*</span> <span class="n">mean_a</span>
+
+        <span class="c1"># Adjustment position for accidental altitude drift</span>
+        <span class="n">old_alt</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">new_position</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">ned2lla</span><span class="p">(</span><span class="n">est_d_position</span><span class="p">,</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+        <span class="n">new_position</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_alt</span>
+
+        <span class="c1"># TODO: REMOVE THIS</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Adjustment: </span><span class="si">{</span><span class="n">est_d_position</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Apply update to estimated state</span>
+        <span class="n">estimated_state</span><span class="o">.</span><span class="n">update_estimates</span><span class="p">(</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">new_position</span><span class="p">,</span>
+            <span class="n">velocity</span><span class="o">=</span><span class="p">(</span><span class="n">est_d_velocity</span> <span class="o">+</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">velocity</span><span class="p">),</span>
+            <span class="n">attitude</span><span class="o">=</span><span class="p">(</span><span class="n">est_d_attitude</span> <span class="o">+</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">attitude</span><span class="p">))</span>
+
+        <span class="c1"># Adjust particle values for update applied</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles</span> <span class="o">-=</span> <span class="n">est_d_position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v_particles</span> <span class="o">-=</span> <span class="n">est_d_velocity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_a_particles</span> <span class="o">-=</span> <span class="n">est_d_attitude</span>
+
+    <span class="k">def</span> <span class="nf">_propagate_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Propagates particles and add process noise.</span>
+
+<span class="sd">        :param estimated_state: The current estimated states of the platform.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sigma_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span><span class="o">.</span><span class="n">position_sigma</span>  <span class="c1"># metres</span>
+        <span class="n">sigma_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span><span class="o">.</span><span class="n">velocity_sigma</span>  <span class="c1"># metres/s</span>
+        <span class="n">sigma_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span><span class="o">.</span><span class="n">attitude_sigma</span>  <span class="c1"># degrees</span>
+
+        <span class="n">est_attitude</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">attitude</span>
+        <span class="n">attitude_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">est_attitude</span><span class="p">)</span>
+        <span class="n">rot_earth2body</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">attitude_rad</span><span class="p">)</span>
+
+        <span class="n">sensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_gradiometer</span>
+        <span class="n">num_steps</span> <span class="o">=</span> <span class="n">sensor</span><span class="o">.</span><span class="n">num_steps</span>
+        <span class="n">time_step</span> <span class="o">=</span> <span class="n">sensor</span><span class="o">.</span><span class="n">time_step</span>
+
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">time_step</span> <span class="o">*</span> <span class="n">num_steps</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_particles</span><span class="p">):</span>
+
+            <span class="c1"># Define the random noise amounts to add</span>
+            <span class="n">position_noise</span> <span class="o">=</span> <span class="n">sigma_x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">velocity_noise</span> <span class="o">=</span> <span class="n">sigma_v</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">attitude_noise</span> <span class="o">=</span> <span class="n">sigma_a</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+            <span class="c1"># Update position</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_earth2body</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v_particles</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">dt</span>
+            <span class="n">position</span> <span class="o">+=</span> <span class="n">position_noise</span>
+
+            <span class="c1"># Update particles</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_x_particles</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_v_particles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">velocity_noise</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_a_particles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">attitude_noise</span>
+
+
+    <span class="k">def</span> <span class="nf">_resample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> \
+            <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs weighted random resampling of the particles.</span>
+
+<span class="sd">        :param weights: An array containing the current particle weights.</span>
+<span class="sd">        :type weights: np.ndarray</span>
+
+<span class="sd">        :param values: An array containing the current particle values.</span>
+<span class="sd">        :type values: np.ndarray</span>
+
+<span class="sd">        :return: The particles, their updated weights and their indices.</span>
+<span class="sd">        :rtype: tuple (3-elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Obtain the normalised weights</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="n">weights</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+
+        <span class="c1"># Select Points for Resampling</span>
+        <span class="n">new_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span>
+        <span class="n">new_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">p_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">probs</span><span class="p">)</span>
+            <span class="n">new_values</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">p_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span>
+
+        <span class="k">return</span> <span class="n">new_weights</span><span class="p">,</span> <span class="n">new_values</span><span class="p">,</span> <span class="n">p_i</span>
+
+    <span class="k">def</span> <span class="nf">_min_ellipse_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurements</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span>
+                              <span class="n">acceleration</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                              <span class="n">attitude</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                              <span class="n">angle_rates</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                              <span class="n">grav_grad_z</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Finds the minimum ellipse distance between measurements and candidate</span>
+<span class="sd">        estimated states. Given the measurements produced by the sensor, and</span>
+<span class="sd">        a particle&#39;s estimated acceleration, attitude and vertical gravity</span>
+<span class="sd">        gradient (generated from its estimated position), this function</span>
+<span class="sd">        computes the closest distance to an ellipsoid. The distance</span>
+<span class="sd">        generated is employed for the re-weighing of particles for</span>
+<span class="sd">        the particle filter.</span>
+
+<span class="sd">        :param measurements: The upper and lower measurements received</span>
+<span class="sd">            from the vertical gravity gradient sensor.</span>
+<span class="sd">        :type measurements: tuple</span>
+
+<span class="sd">        :param acceleration: The candidate acceleration values of the</span>
+<span class="sd">            current particle (in m/s^2).</span>
+<span class="sd">        :type acceleration: np.ndarray (3-elements)</span>
+
+<span class="sd">        :param attitude: The candidate attitude values of the current</span>
+<span class="sd">            particle (in degrees).</span>
+<span class="sd">        :type attitude: np.ndarray (3-elements)</span>
+
+<span class="sd">        :param grav_grad_z: The computed vertical gravity gradient</span>
+<span class="sd">            for the position of the current particle (in m/s^2). This is</span>
+<span class="sd">            computed externally to benefit from vectorisation.</span>
+<span class="sd">        :type grav_grad_z: float</span>
+
+<span class="sd">        :return: The minimum distance to the ellipsoid.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Unpack interferometer parameters</span>
+        <span class="n">num_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">num_of_atoms</span>
+        <span class="n">t_pulse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">time_pulse</span>
+        <span class="n">sigma_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">sigma_n</span>
+        <span class="n">k_eff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">k_eff</span>
+        <span class="n">eta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">eta</span>
+        <span class="n">z0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">sensor_z_top</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interferometer</span><span class="o">.</span><span class="n">sensor_z_bottom</span>
+
+        <span class="c1"># Rotation matrix from earth to body axes</span>
+        <span class="n">rot_earth2body</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">attitude</span><span class="p">))</span>
+
+        <span class="c1"># Convert actual acceleration from body to earth axes</span>
+        <span class="n">acceleration_b_z0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_earth2body</span><span class="p">,</span> <span class="n">acceleration</span><span class="p">)</span>
+        <span class="n">acceleration_b_z1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">acceleration_b_z0</span><span class="p">)</span>
+
+        <span class="c1"># Add vertical gradient term</span>
+        <span class="n">acceleration_b_z0</span> <span class="o">+=</span> <span class="n">grav_grad_z</span> <span class="o">*</span> <span class="n">z0</span>
+        <span class="n">acceleration_b_z1</span> <span class="o">+=</span> <span class="n">grav_grad_z</span> <span class="o">*</span> <span class="n">z1</span>
+
+        <span class="c1"># Convert acceleration from earth back to body axes</span>
+        <span class="n">acceleration_b_z0</span> <span class="o">=</span> <span class="n">rot_earth2body</span> <span class="o">@</span> <span class="n">acceleration_b_z0</span>
+        <span class="n">acceleration_b_z1</span> <span class="o">=</span> <span class="n">rot_earth2body</span> <span class="o">@</span> <span class="n">acceleration_b_z1</span>
+
+        <span class="c1"># TODO: Experimental - Added recently</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration_to_sensor_axis</span><span class="p">(</span>
+            <span class="n">angle_rates</span><span class="p">,</span> <span class="n">acceleration_b_z0</span><span class="p">,</span> <span class="n">acceleration_b_z1</span><span class="p">)</span>
+        <span class="n">acceleration_b_z0</span><span class="p">,</span> <span class="n">acceleration_b_z1</span> <span class="o">=</span> <span class="n">tmp</span>
+
+        <span class="c1"># Calculate phase shifts</span>
+        <span class="n">t_pulse_2</span> <span class="o">=</span> <span class="n">t_pulse</span> <span class="o">*</span> <span class="n">t_pulse</span>
+        <span class="n">delta_phi_z_0</span> <span class="o">=</span> <span class="n">k_eff</span> <span class="o">*</span> <span class="n">acceleration_b_z0</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">t_pulse_2</span>
+        <span class="n">delta_phi_z_1</span> <span class="o">=</span> <span class="n">k_eff</span> <span class="o">*</span> <span class="n">acceleration_b_z1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">t_pulse_2</span>
+
+        <span class="c1"># Phase for each interferometer measurement</span>
+        <span class="c1"># phi_z0 = np.linspace(0, 2 * math.pi, num_points)</span>
+        <span class="c1"># num_atoms_sqrt = math.sqrt(num_atoms)</span>
+        <span class="c1">#</span>
+        <span class="c1"># # Acquire the top accelerometer&#39;s measured signals</span>
+        <span class="c1"># top_signal = np.sin(delta_phi_z_0 + phi_z0)</span>
+        <span class="c1"># # top_signal *= eta * (num_atoms + self._rng.normal() * num_atoms_sqrt)</span>
+        <span class="c1"># top_signal *= eta * (num_atoms + sigma_n * self._rng.normal() * num_atoms_sqrt)</span>
+        <span class="c1"># top_signal = top_signal / eta / num_atoms</span>
+        <span class="c1">#</span>
+        <span class="c1"># # Acquire the bottom accelerometer&#39;s measured signals</span>
+        <span class="c1"># btm_signal = np.sin(delta_phi_z_1 + phi_z0)</span>
+        <span class="c1"># # btm_signal *= eta * (num_atoms + self._rng.normal() * num_atoms_sqrt)</span>
+        <span class="c1"># btm_signal *= eta * (num_atoms + sigma_n * self._rng.normal() * num_atoms_sqrt)</span>
+        <span class="c1"># btm_signal = btm_signal / eta / num_atoms</span>
+
+        <span class="c1"># Calculate the closest distance to ellipsoid</span>
+        <span class="c1"># signals = np.column_stack((top_signal, btm_signal))</span>
+        <span class="c1"># dists = np.linalg.norm(measurements - signals, axis=1)</span>
+        <span class="c1"># return np.min(dists)</span>
+        <span class="c1">#</span>
+
+        <span class="c1"># Calculate expected levels of noise (fixed per particle)</span>
+        <span class="n">num_atoms_sqrt</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">num_atoms</span><span class="p">)</span>
+        <span class="n">top_noise</span> <span class="o">=</span> <span class="n">sigma_n</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">()</span> <span class="o">*</span> <span class="n">num_atoms_sqrt</span>
+        <span class="n">btm_noise</span> <span class="o">=</span> <span class="n">sigma_n</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">()</span> <span class="o">*</span> <span class="n">num_atoms_sqrt</span>
+
+        <span class="c1"># Set current search range and minimum distance</span>
+        <span class="n">range_start</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">range_end</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span>
+        <span class="n">min_dist</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span>
+
+        <span class="c1"># Unpack settings from particle filter properties</span>
+        <span class="n">num_intervals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span><span class="o">.</span><span class="n">ellipse_intervals</span>
+        <span class="n">num_attempts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_params</span><span class="o">.</span><span class="n">ellipse_iterations</span>
+
+        <span class="c1"># Iteratively solve closest point:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_attempts</span><span class="p">):</span>
+
+            <span class="c1"># Phase for each interferometer measurement</span>
+            <span class="n">phi_z0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">range_start</span><span class="p">,</span> <span class="n">range_end</span><span class="p">,</span> <span class="n">num_intervals</span><span class="p">)</span>
+
+            <span class="c1"># Acquire the top accelerometer&#39;s measured signals</span>
+            <span class="n">top_signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">delta_phi_z_0</span> <span class="o">+</span> <span class="n">phi_z0</span><span class="p">)</span>
+            <span class="n">top_signal</span> <span class="o">*=</span> <span class="n">eta</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_atoms</span> <span class="o">+</span> <span class="n">top_noise</span><span class="p">)</span>
+
+            <span class="c1"># Acquire the bottom accelerometer&#39;s measured signals</span>
+            <span class="n">btm_signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">delta_phi_z_1</span> <span class="o">+</span> <span class="n">phi_z0</span><span class="p">)</span>
+            <span class="n">btm_signal</span> <span class="o">*=</span> <span class="n">eta</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_atoms</span> <span class="o">+</span> <span class="n">btm_noise</span><span class="p">)</span>
+
+            <span class="c1"># Measure and obtain the distance between signals and measurement</span>
+            <span class="n">signals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">top_signal</span><span class="p">,</span> <span class="n">btm_signal</span><span class="p">))</span> <span class="o">/</span> <span class="n">eta</span> <span class="o">/</span> <span class="n">num_atoms</span>
+            <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">measurements</span> <span class="o">-</span> <span class="n">signals</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">ranks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
+
+            <span class="c1"># Adjust the search range</span>
+            <span class="n">min_dist</span> <span class="o">=</span> <span class="n">dists</span><span class="p">[</span><span class="n">ranks</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">closest_pair</span> <span class="o">=</span> <span class="n">phi_z0</span><span class="p">[</span><span class="n">ranks</span><span class="p">[:</span><span class="mi">2</span><span class="p">]]</span>
+            <span class="n">range_start</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">closest_pair</span><span class="p">)</span>
+            <span class="n">range_end</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">closest_pair</span><span class="p">)</span>
+
+            <span class="c1"># Adjustment for if between first and last interval.</span>
+            <span class="k">if</span> <span class="n">range_start</span> <span class="o">==</span> <span class="n">phi_z0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">range_end</span> <span class="o">==</span> <span class="n">phi_z0</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">range_start</span> <span class="o">=</span> <span class="n">range_end</span>
+                <span class="n">range_end</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span>
+
+        <span class="c1"># Return the distance of the closest point found</span>
+        <span class="k">return</span> <span class="n">min_dist</span>
+
+    <span class="k">def</span> <span class="nf">_acceleration_to_sensor_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle_rates</span><span class="p">,</span> <span class="n">acceleration_b_z0</span><span class="p">,</span> <span class="n">acceleration_b_z1</span><span class="p">):</span>
+
+        <span class="c1"># Obtain the sensor axis for each sensor</span>
+        <span class="n">top_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_gradiometer</span><span class="o">.</span><span class="n">_qs_top_accelerometer</span><span class="o">.</span><span class="n">sensor_axis</span>
+        <span class="n">btm_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_gradiometer</span><span class="o">.</span><span class="n">_qs_btm_accelerometer</span><span class="o">.</span><span class="n">sensor_axis</span>
+
+        <span class="c1"># Obtain the angle rate acceleration for top and bottom sensors</span>
+        <span class="n">angle_rates_top</span> <span class="o">=</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">angle_rates</span><span class="p">,</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">angle_rates</span><span class="p">,</span> <span class="n">top_axis</span><span class="o">.</span><span class="n">lever_arm</span><span class="p">))</span>
+        <span class="n">angle_rates_btm</span> <span class="o">=</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">angle_rates</span><span class="p">,</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">angle_rates</span><span class="p">,</span> <span class="n">btm_axis</span><span class="o">.</span><span class="n">lever_arm</span><span class="p">))</span>
+
+        <span class="c1"># Convert given values to sensor axis</span>
+        <span class="n">acceleration_top</span> <span class="o">=</span> <span class="n">top_axis</span><span class="o">.</span><span class="n">body2sensor_mat</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">acceleration_b_z0</span> <span class="o">+</span> <span class="n">angle_rates_top</span><span class="p">)</span>
+        <span class="n">acceleration_btm</span> <span class="o">=</span> <span class="n">btm_axis</span><span class="o">.</span><span class="n">body2sensor_mat</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">acceleration_b_z1</span> <span class="o">+</span> <span class="n">angle_rates_btm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">acceleration_top</span><span class="p">,</span> <span class="n">acceleration_btm</span>
+
+<div class="viewcode-block" id="GravityGradientPF.reset">
+<a class="viewcode-back" href="../../../modules/quantum/gravity_gradient.html#qnav.quantum.gravity_gradient.GravityGradientPF.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resets the state of the fusion, clearing internal temporary states.</span>
+<span class="sd">        When call the fusion will return to expecting the first measurement,</span>
+<span class="sd">        then continuing from there.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gravity_gradiometer</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
+</div>
+
+
+
+<span class="k">def</span> <span class="nf">_offset_vertical_axis</span><span class="p">(</span><span class="n">sensor_axis</span><span class="p">:</span> <span class="n">SensorAxis</span><span class="p">,</span> <span class="n">vertical_offset</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SensorAxis</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies vertical offset to sensor axis&#39;s.</span>
+<span class="sd">    Creates a copy of given SensorAxis and applies the given offset amounts</span>
+<span class="sd">    to its vertical lever arm. Required for accelerometer displacement.</span>
+
+<span class="sd">    :param sensor_axis: The sensor axis instance to effectively copy.</span>
+<span class="sd">    :type sensor_axis: SensorAxis</span>
+
+<span class="sd">    :param vertical_offset: The amount to offset the vertical axis by (in metres)</span>
+<span class="sd">    :type vertical_offset: float</span>
+
+<span class="sd">    :return: A copy of given sensor axis with vertical offset applied.</span>
+<span class="sd">    :rtype: SensorAxis</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sensor_angles</span> <span class="o">=</span> <span class="n">sensor_axis</span><span class="o">.</span><span class="n">sensor_angles_deg</span>
+    <span class="n">sensor_angles_rad</span> <span class="o">=</span> <span class="n">sensor_axis</span><span class="o">.</span><span class="n">sensor_angles_rad</span>
+    <span class="n">lever_arm</span> <span class="o">=</span> <span class="n">sensor_axis</span><span class="o">.</span><span class="n">lever_arm</span>
+
+    <span class="n">lever_offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">vertical_offset</span><span class="p">])</span>
+    <span class="n">rot_body2sensor</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">sensor_angles_rad</span><span class="p">)</span>
+    <span class="n">new_lever_arm</span> <span class="o">=</span> <span class="n">lever_arm</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_body2sensor</span><span class="p">,</span> <span class="n">lever_offset</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">SensorAxis</span><span class="p">(</span><span class="n">sensor_angles</span><span class="p">,</span> <span class="n">new_lever_arm</span><span class="p">)</span>
+
+
+
+<span class="c1"># class GravityGradientPS(GravityGradientPF):</span>
+<span class="c1">#</span>
+<span class="c1">#     def _weight_particles(self, estimated_state: EstimatedState,</span>
+<span class="c1">#                           measurements: tuple) -&gt; None:</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         Weights particles against given measurements.</span>
+<span class="c1">#         For the given (upper and lower) sensor measurements, this re-weighs</span>
+<span class="c1">#         the particles subject to their minimum ellipse distance. On</span>
+<span class="c1">#         succession, new weights are assigned to each particle.</span>
+<span class="c1">#</span>
+<span class="c1">#         :param estimated_state: The current estimated states of the platform.</span>
+<span class="c1">#         :type estimated_state: EstimatedState</span>
+<span class="c1">#</span>
+<span class="c1">#         :param measurements: The upper and lower measurements received</span>
+<span class="c1">#             from the vertical gravity gradient sensor.</span>
+<span class="c1">#         :type measurements: tuple</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#         est_position = estimated_state.position</span>
+<span class="c1">#         est_acceleration = estimated_state.acceleration</span>
+<span class="c1">#         est_attitude = estimated_state.attitude</span>
+<span class="c1">#         est_angle_rates = estimated_state.angle_rates</span>
+<span class="c1">#</span>
+<span class="c1">#         step_size = 1.0</span>
+<span class="c1">#         north_step = np.array([1.0, 0.0, 0.0]) * step_size</span>
+<span class="c1">#         east_step = np.array([0.0, 1.0, 0.0]) * step_size</span>
+<span class="c1">#         down_step = np.array([0.0, 0.0, 1.0]) * step_size</span>
+<span class="c1">#</span>
+<span class="c1">#         is_done = False</span>
+<span class="c1">#         while not is_done:</span>
+<span class="c1">#</span>
+<span class="c1">#             centre_lla = trans.ned2lla_vec(self._x_particles, est_position)</span>
+<span class="c1">#             north_lla = trans.ned2lla_vec(self._x_particles + north_step, est_position)</span>
+<span class="c1">#             east_lla = trans.ned2lla_vec(self._x_particles + east_step, est_position)</span>
+<span class="c1">#             down_lla = trans.ned2lla_vec(self._x_particles + down_step, est_position)</span>
+<span class="c1">#</span>
+<span class="c1">#             gravity_model = estimated_state.gravity_model</span>
+<span class="c1">#             centre_grad = gravity_model.calc_vertical_grad_vec(centre_lla[:, 0], centre_lla[:, 1], centre_lla[:, 2])</span>
+<span class="c1">#             north_grad = gravity_model.calc_vertical_grad_vec(north_lla[:, 0], north_lla[:, 1], north_lla[:, 2])</span>
+<span class="c1">#             east_grad = gravity_model.calc_vertical_grad_vec(east_lla[:, 0], east_lla[:, 1], east_lla[:, 2])</span>
+<span class="c1">#             down_grad = gravity_model.calc_vertical_grad_vec(down_lla[:, 0], down_lla[:, 1], down_lla[:, 2])</span>
+<span class="c1">#</span>
+<span class="c1">#             # Calculate the gravity gradient for each</span>
+<span class="c1">#             cand_attitudes = est_attitude + self._a_particles</span>
+<span class="c1">#</span>
+<span class="c1">#             # Calculate the distances from ellipsoid</span>
+<span class="c1">#             centre_distances = np.zeros(self._num_particles)</span>
+<span class="c1">#             north_distances = np.zeros(self._num_particles)</span>
+<span class="c1">#             east_distances = np.zeros(self._num_particles)</span>
+<span class="c1">#             down_distances = np.zeros(self._num_particles)</span>
+<span class="c1">#</span>
+<span class="c1">#             for i in range(self._num_particles):</span>
+<span class="c1">#</span>
+<span class="c1">#                 centre_distances[i] = self._min_ellipse_distance(</span>
+<span class="c1">#                     measurements, est_acceleration, cand_attitudes[i],</span>
+<span class="c1">#                     est_angle_rates, float(centre_grad[i]))</span>
+<span class="c1">#</span>
+<span class="c1">#                 north_distances[i] = self._min_ellipse_distance(</span>
+<span class="c1">#                     measurements, est_acceleration, cand_attitudes[i],</span>
+<span class="c1">#                     est_angle_rates, float(north_grad[i]))</span>
+<span class="c1">#</span>
+<span class="c1">#                 east_distances[i] = self._min_ellipse_distance(</span>
+<span class="c1">#                     measurements, est_acceleration, cand_attitudes[i],</span>
+<span class="c1">#                     est_angle_rates, float(east_grad[i]))</span>
+<span class="c1">#</span>
+<span class="c1">#                 down_distances[i] = self._min_ellipse_distance(</span>
+<span class="c1">#                     measurements, est_acceleration, cand_attitudes[i],</span>
+<span class="c1">#                     est_angle_rates, float(down_grad[i]))</span>
+<span class="c1">#</span>
+<span class="c1">#             opt_north = centre_distances - north_distances</span>
+<span class="c1">#             opt_east = centre_distances - east_distances</span>
+<span class="c1">#             opt_down = centre_distances - down_distances</span>
+<span class="c1">#</span>
+<span class="c1">#             opts = np.column_stack((opt_north, opt_east, opt_down))</span>
+<span class="c1">#             opts /= np.max(np.abs(opts)) * step_size</span>
+<span class="c1">#</span>
+<span class="c1">#             self._x_particles[:, 0:2] += opts[:, 0:2]</span>
+<span class="c1">#</span>
+<span class="c1">#             sigma2 = self._filter_params.weight_sigma</span>
+<span class="c1">#             self._w_particles *= np.exp(-centre_distances ** 2 / (2 * sigma2))</span>
+<span class="c1">#             self._w_particles /= np.sum(self._w_particles)</span>
+<span class="c1">#</span>
+<span class="c1">#             weights = self._w_particles[:, None]</span>
+<span class="c1">#             sum_weights = np.sum(self._w_particles)</span>
+<span class="c1">#             mean_x = np.sum(weights * self._x_particles / sum_weights, axis=0)</span>
+<span class="c1">#             print(mean_x)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

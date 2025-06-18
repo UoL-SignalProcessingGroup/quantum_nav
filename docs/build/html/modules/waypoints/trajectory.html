@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.12.2. qnav.waypoints.trajectory &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="9.12.3. qnav.waypoints.vehicle" href="vehicle.html" />
+    <link rel="prev" title="9.12.1. qnav.waypoints.generation" href="generation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../usage/packages.html">9. Software Components</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#earth">9.1. Earth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#estimation">9.2. Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#fusion">9.3. Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gps">9.4. GPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gravity">9.5. Gravity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#input">9.6. Input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#measurement">9.7. Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#output">9.8. Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#quantum">9.9. Quantum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#simulation">9.10. Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#util">9.11. Util</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../usage/packages.html#waypoints">9.12. Waypoints</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="generation.html">9.12.1. generation.py</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">9.12.2. trajectory.py</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#trajectory-py">9.12.2.1. trajectory.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.trajectory.GroundTruth"><code class="docutils literal notranslate"><span class="pre">GroundTruth</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.trajectory.Waypoints"><code class="docutils literal notranslate"><span class="pre">Waypoints</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.trajectory.Trajectory"><code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.trajectory.cumulative_distance"><code class="docutils literal notranslate"><span class="pre">cumulative_distance()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="vehicle.html">9.12.3. vehicle.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tracks.html">9.12.4. tracks.py</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../usage/packages.html"><span class="section-number">9. </span>Software Components</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">9.12.2. </span>qnav.waypoints.trajectory</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/modules/waypoints/trajectory.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qnav.waypoints.trajectory">
+<span id="qnav-waypoints-trajectory"></span><h1><span class="section-number">9.12.2. </span>qnav.waypoints.trajectory<a class="headerlink" href="#module-qnav.waypoints.trajectory" title="Link to this heading"></a></h1>
+<section id="trajectory-py">
+<h2><span class="section-number">9.12.2.1. </span>trajectory.py<a class="headerlink" href="#trajectory-py" title="Link to this heading"></a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">summary<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Used for the core representation of ground truth trajectory information.
+This module is responsible for handling ground truth waypoint
+trajectories, including the managing of input data, position and value
+calculations and look-up interpolation of ground truth records.</p>
+</dd>
+<dt class="field-even">author<span class="colon">:</span></dt>
+<dd class="field-even"><p>Michael Wright - <a class="reference external" href="mailto:mjwright&#37;&#52;&#48;liverpool&#46;ac&#46;uk">mjwright<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></p>
+</dd>
+<dt class="field-odd">version<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1.0.0 - First full implementation of this module.</p>
+</dd>
+</dl>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.GroundTruth">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.waypoints.trajectory.</span></span><span class="sig-name descname"><span class="pre">GroundTruth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acceleration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_rates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/trajectory.html#GroundTruth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.trajectory.GroundTruth" title="Link to this definition"></a></dt>
+<dd><p>A record class for trajectory ground truth a given time.
+This class contains the ground truth (the true trajectory values) at a
+given time. The purpose of this is to supply the “real-world” data to
+sensor models, where simulated noise and errors will then be applied to
+produce measurement data.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.GroundTruth.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.trajectory.GroundTruth.timestamp" title="Link to this definition"></a></dt>
+<dd><p>The time since initialisation (in seconds).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.GroundTruth.position">
+<span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#qnav.waypoints.trajectory.GroundTruth.position" title="Link to this definition"></a></dt>
+<dd><p>The position as latitude-longitude-altitude (in deg-deg-metres).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.GroundTruth.velocity">
+<span class="sig-name descname"><span class="pre">velocity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#qnav.waypoints.trajectory.GroundTruth.velocity" title="Link to this definition"></a></dt>
+<dd><p>The velocity as along-across-down in body axis (in metres/second).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.GroundTruth.acceleration">
+<span class="sig-name descname"><span class="pre">acceleration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#qnav.waypoints.trajectory.GroundTruth.acceleration" title="Link to this definition"></a></dt>
+<dd><p>The acceleration as along-across-down in body axis (in metres/second^2).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.GroundTruth.attitude">
+<span class="sig-name descname"><span class="pre">attitude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#qnav.waypoints.trajectory.GroundTruth.attitude" title="Link to this definition"></a></dt>
+<dd><p>The attitude as north-east-down in NED axis (in degrees).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.GroundTruth.angle_rates">
+<span class="sig-name descname"><span class="pre">angle_rates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#qnav.waypoints.trajectory.GroundTruth.angle_rates" title="Link to this definition"></a></dt>
+<dd><p>The angle rates as north-east-down in NED axis (in degrees/second).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.GroundTruth.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../_modules/qnav/waypoints/trajectory.html#GroundTruth.as_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.trajectory.GroundTruth.as_dict" title="Link to this definition"></a></dt>
+<dd><p>Returns class properties in dictionary form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary containing ground truth values.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.GroundTruth.as_numpy">
+<span class="sig-name descname"><span class="pre">as_numpy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/waypoints/trajectory.html#GroundTruth.as_numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.trajectory.GroundTruth.as_numpy" title="Link to this definition"></a></dt>
+<dd><p>Returns call properties in 1D numpy array form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A numpy array containing ground truth values.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.Waypoints">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.waypoints.trajectory.</span></span><span class="sig-name descname"><span class="pre">Waypoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alt_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attitudes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/trajectory.html#Waypoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.trajectory.Waypoints" title="Link to this definition"></a></dt>
+<dd><p>A container for trajectory waypoint data used to define a course.
+This data class will contain the arrival time and positioning records
+for core points along a trajectory. These can either represent sparse
+base points that a trajectory is to cover, or a series of dense
+positions, a fixed frequency, for an already generated trajectory.
+Additionally, attitude values can be provided for each position.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.Waypoints.as_array">
+<span class="sig-name descname"><span class="pre">as_array</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/waypoints/trajectory.html#Waypoints.as_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.trajectory.Waypoints.as_array" title="Link to this definition"></a></dt>
+<dd><p>Returns required records formatted as column arrays.
+Specifically returns an n-by-4 array holding the timestamps, latitude,
+longitude and altitude records as columns, respectively. Optional
+Attitude records are not included in this output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Position data formatted as column array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.Trajectory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.waypoints.trajectory.</span></span><span class="sig-name descname"><span class="pre">Trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waypoints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qnav.waypoints.trajectory.Waypoints" title="qnav.waypoints.trajectory.Waypoints"><span class="pre">Waypoints</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vehicle_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="vehicle.html#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle"><span class="pre">Vehicle</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../gravity/base.html#qnav.gravity.base.GravityModel" title="qnav.gravity.base.GravityModel"><span class="pre">GravityModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inter_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pchip'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/trajectory.html#Trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.trajectory.Trajectory" title="Link to this definition"></a></dt>
+<dd><p>A fully-generated trajectory with ground truth look-up.
+On initialization, this generates the full trajectory from given base
+waypoints, vehicle model and gravity model. The core trajectory is
+generated with base points calculated at fixed frequency. Intermediate
+values are then interpolated.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.Trajectory.get_record">
+<span class="sig-name descname"><span class="pre">get_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_sec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qnav.waypoints.trajectory.GroundTruth" title="qnav.waypoints.trajectory.GroundTruth"><span class="pre">GroundTruth</span></a></span></span><a class="reference internal" href="../../_modules/qnav/waypoints/trajectory.html#Trajectory.get_record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.trajectory.Trajectory.get_record" title="Link to this definition"></a></dt>
+<dd><p>Returns values of the trajectory at given time (in seconds).
+Safely interpolates and returns ground truth at requested time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time_sec</strong> (<em>float</em>) – A requested time in seconds.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The corresponding ground truth record.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qnav.waypoints.trajectory.GroundTruth" title="qnav.waypoints.trajectory.GroundTruth">GroundTruth</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.Trajectory.get_records">
+<span class="sig-name descname"><span class="pre">get_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qnav/waypoints/trajectory.html#Trajectory.get_records"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.trajectory.Trajectory.get_records" title="Link to this definition"></a></dt>
+<dd><p>Obtains full records of the trajectory for a given times (in seconds).
+Essentially performs vectorised interpolation for given time series.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time_steps</strong> (<em>np.ndarray</em>) – The time steps (in seconds) to obtain records for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary holding the records for each time step.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict[str, np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.Trajectory.start_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.trajectory.Trajectory.start_time" title="Link to this definition"></a></dt>
+<dd><p>Returns the time of the first trajectory record (in seconds).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The start time of the trajectory</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.Trajectory.end_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.waypoints.trajectory.Trajectory.end_time" title="Link to this definition"></a></dt>
+<dd><p>Returns the time of the final trajectory record (in seconds).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The end time of the trajectory</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.Trajectory.interp_method">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">interp_method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qnav.waypoints.trajectory.Trajectory.interp_method" title="Link to this definition"></a></dt>
+<dd><p>The interpolation method used for ground truth generation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Interpolation name.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.trajectory.cumulative_distance">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.trajectory.</span></span><span class="sig-name descname"><span class="pre">cumulative_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alt_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/waypoints/trajectory.html#cumulative_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.trajectory.cumulative_distance" title="Link to this definition"></a></dt>
+<dd><p>Calculate the cumulative ‘great-circle’ distance between coordinate points.
+For a given series of latitude-longitude-altitude points (given in
+deg-deg-m), this calculates the cumulative distance between them using
+the standard WGS-84 reference ellipsoid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat_points</strong> (<em>np.ndarray</em><em> (</em><em>n-elements</em><em>)</em>) – A series of latitude positions (in decimal degrees).</p></li>
+<li><p><strong>lon_points</strong> – A series of longitude positions (in decimal degrees).</p></li>
+<li><p><strong>alt_points</strong> – A series of altitude positions (in decimal degrees).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The cumulative distance all points, starting from first.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="generation.html" class="btn btn-neutral float-left" title="9.12.1. qnav.waypoints.generation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="vehicle.html" class="btn btn-neutral float-right" title="9.12.3. qnav.waypoints.vehicle" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

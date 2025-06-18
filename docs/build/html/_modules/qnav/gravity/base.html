@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.gravity.base &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.gravity.base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.gravity.base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=======</span>
+<span class="sd">base.py</span>
+<span class="sd">=======</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Gravity model template class interfaces that supported gravity models</span>
+<span class="sd">    must extend from. The purpose of this is to define the functions, input</span>
+<span class="sd">    arguments and outputs that gravity models must incorporate to be used</span>
+<span class="sd">    in the toolbox. This also simplifies the ability to add new gravity</span>
+<span class="sd">    models future.</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First implementation of this module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Self</span>
+
+<span class="kn">import</span> <span class="nn">qnav.util.constants</span> <span class="k">as</span> <span class="nn">const</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="GravityModel">
+<a class="viewcode-back" href="../../../modules/gravity/base.html#qnav.gravity.base.GravityModel">[docs]</a>
+<span class="k">class</span> <span class="nc">GravityModel</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The abstract class that gravity models are to follow.</span>
+<span class="sd">    This defines the interface that all gravity models in the project must</span>
+<span class="sd">    follow, outlining the necessary functions they must supply for</span>
+<span class="sd">    calculating various gravity components at requested positions. For a</span>
+<span class="sd">    gravity model to be used by the toolbox, it must correctly extend from</span>
+<span class="sd">    this abstract base class.</span>
+
+<span class="sd">    In short, each gravity model must supply the following methods:</span>
+<span class="sd">        • __str__ - The descriptive name for the gravity model.</span>
+<span class="sd">        • calc_gravity_z - Calculate downwards gravitational acceleration.</span>
+<span class="sd">        • calc_gravity_xyz - Calculate gravitational acceleration vector.</span>
+<span class="sd">        • calc_gravity_grad - Calculate gravitational gradient tensor.</span>
+
+<span class="sd">    In addition to this, there are also optional methods they can supply:</span>
+<span class="sd">        • calc_gravity_z_vec - Vectorised downwards gravitational acceleration.</span>
+<span class="sd">        • calc_gravity_xyz_vec - Vectorised gravitational acceleration vector.</span>
+<span class="sd">        • calc_gravity_grad_vec - Vectorised gravitational gradient tensor.</span>
+
+<span class="sd">    These are used to efficiently calculate gravity for a large range of</span>
+<span class="sd">    positions. To enforce compatibility, if not implemented, calling these</span>
+<span class="sd">    methods will execute the scalar corresponding methods in a loop.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an identifiable descriptive name for the gravity model.</span>
+
+<span class="sd">        :return: A descriptive string for the gravity model.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="GravityModel.calc_gravity_z">
+<a class="viewcode-back" href="../../../modules/gravity/base.html#qnav.gravity.base.GravityModel.calc_gravity_z">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">calc_gravity_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates and returns the total gravitational acceleration.</span>
+<span class="sd">        Computes the gravity along the Z/Down axis (in m/s^2) for</span>
+<span class="sd">        the given location and altitude offset.</span>
+
+<span class="sd">        :param lat: The latitude coordinate for the position of interest.</span>
+<span class="sd">            The latitude position value given in decimal degrees.</span>
+<span class="sd">        :type lat: float</span>
+
+<span class="sd">        :param lon: The longitude coordinate for the position of interest.</span>
+<span class="sd">            The longitude position value given in decimal degrees.</span>
+<span class="sd">        :type lon: float</span>
+
+<span class="sd">        :param alt: The altitude offset for the position of interest.</span>
+<span class="sd">            The elevation from the WGS-84 reference ellipsoid in metres.</span>
+<span class="sd">        :type alt: float</span>
+
+<span class="sd">        :return: The downwards gravitational acceleration for each location.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="GravityModel.calc_gravity_xyz">
+<a class="viewcode-back" href="../../../modules/gravity/base.html#qnav.gravity.base.GravityModel.calc_gravity_xyz">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_gravity_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates and returns the gravitational acceleration vector.</span>
+<span class="sd">        Computes the gravity acceleration X/North, Y/East and Z/Down</span>
+<span class="sd">        components (in m/s^2) for the given location and altitude offset.</span>
+
+<span class="sd">        :param lat: The latitude coordinate for the position of interest.</span>
+<span class="sd">            The latitude position value given in decimal degrees.</span>
+<span class="sd">        :type lat: float</span>
+
+<span class="sd">        :param lon: The longitude coordinate for the position of interest.</span>
+<span class="sd">            The longitude position value given in decimal degrees.</span>
+<span class="sd">        :type lon: float</span>
+
+<span class="sd">        :param alt: The altitude offset for the position of interest.</span>
+<span class="sd">            The elevation from the WGS-84 reference ellipsoid in metres.</span>
+<span class="sd">        :type alt: float</span>
+
+<span class="sd">        :return: The local gravity vector for the XYZ components (in m/s^2).</span>
+<span class="sd">        :rtype: numpy.ndarray (3-elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># g_z = self.calc_gravity_z(lat, lon, alt)</span>
+        <span class="c1"># return apply_coriolis_terms(lat, g_z, alt)</span>
+        <span class="n">g_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_gravity_z</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">g_z</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="GravityModel.calc_vertical_grad">
+<a class="viewcode-back" href="../../../modules/gravity/base.html#qnav.gravity.base.GravityModel.calc_vertical_grad">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_vertical_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                           <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the vertical gradient of gravity.</span>
+<span class="sd">        Computes the vertical change in gravity (∂g/∂r) of the Z/Down</span>
+<span class="sd">        component (in m/s^2). This is primary used for gravity map-matching</span>
+<span class="sd">        related calculations.</span>
+
+<span class="sd">        :param lat: The latitude coordinate for the position of interest.</span>
+<span class="sd">            The latitude position value given in decimal degrees.</span>
+<span class="sd">        :type lat: float</span>
+
+<span class="sd">        :param lon: The longitude coordinate for the position of interest.</span>
+<span class="sd">            The longitude position value given in decimal degrees.</span>
+<span class="sd">        :type lon: float</span>
+
+<span class="sd">        :param alt: The altitude offset for the position of interest.</span>
+<span class="sd">            The elevation from the WGS-84 reference ellipsoid in metres.</span>
+<span class="sd">        :type alt: float</span>
+
+<span class="sd">        :param step: The step size (in metres) for calculating the gradient.</span>
+<span class="sd">            To be used when the gradient cannot be computed directly.</span>
+<span class="sd">        :type step: float</span>
+
+<span class="sd">        :return: The vertical gravity gradient (in m/s^2).</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">half_step</span> <span class="o">=</span> <span class="n">step</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">gz_0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_gravity_z</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span> <span class="o">-</span> <span class="n">half_step</span><span class="p">)</span>
+        <span class="n">gz_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_gravity_z</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span> <span class="o">+</span> <span class="n">half_step</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">gz_1</span> <span class="o">-</span> <span class="n">gz_0</span><span class="p">)</span> <span class="o">/</span> <span class="n">step</span></div>
+
+
+
+    <span class="c1"># def calc_gravity_grad(self, lat: float, lon: float, alt: float, step_size: float = 10) -&gt; np.ndarray:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Calculates and returns the gravitational gradient tensor of the</span>
+    <span class="c1">#     X/North, Y/East and Z/Down components for the given location</span>
+    <span class="c1">#     and altitude offset. These are flattened into a 1D array.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param lat: The latitude coordinate for the position of interest.</span>
+    <span class="c1">#         The latitude position value given in decimal degrees.</span>
+    <span class="c1">#     :type lat: float</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param lon: The longitude coordinate for the position of interest.</span>
+    <span class="c1">#         The longitude position value given in decimal degrees.</span>
+    <span class="c1">#     :type lon: float</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param alt: The altitude offset for the position of interest.</span>
+    <span class="c1">#         The elevation from the WGS-84 reference ellipsoid in metres.</span>
+    <span class="c1">#     :type alt: float</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param step_size: The step size used in the X and Y directions for</span>
+    <span class="c1">#         calculating the change in gravity (in metres). Default is 10.</span>
+    <span class="c1">#     :type alt: step_size</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :return: The gravity gradients of the XYZ components. Specifically,</span>
+    <span class="c1">#         an array containing the</span>
+    <span class="c1">#     :rtype: numpy.ndarray (9-elements)</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#</span>
+    <span class="c1">#     # Calculate the gravity for the current location.</span>
+    <span class="c1">#     ref_lla = np.array((lat, lon, alt))</span>
+    <span class="c1">#     g_ref = self.calc_gravity_xyz(lat, lon, alt)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     # Calculate the gravity for an offset in the X direction.</span>
+    <span class="c1">#     ned_x = np.array((step_size, 0, 0))</span>
+    <span class="c1">#     lla_x = trans.ned2lla(ned_x, ref_lla)</span>
+    <span class="c1">#     g_dx = self.calc_gravity_xyz(*lla_x)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     # Calculate the gravity for an offset in the X direction.</span>
+    <span class="c1">#     ned_x = np.array((0, step_size, 0))</span>
+    <span class="c1">#     lla_y = trans.ned2lla(ned_x, ref_lla)</span>
+    <span class="c1">#     g_dy = self.calc_gravity_xyz(*lla_y)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     # Obtain the gradient in the X and Y directions.</span>
+    <span class="c1">#     dh_dx = (g_dx - g_ref) / step_size</span>
+    <span class="c1">#     dh_dy = (g_dy - g_ref) / step_size</span>
+    <span class="c1">#</span>
+    <span class="c1">#     # Obtain the radius of the earth for the given latitude.</span>
+    <span class="c1">#     r_e = trans.radius(lat)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     # Define Angular velocity for Earth&#39;s rotation (in local NED axes).</span>
+    <span class="c1">#     omega_e = trans.rotation_rate(lat)</span>
+    <span class="c1">#     radii_offset = np.array([0, 0, -r_e - alt])</span>
+    <span class="c1">#     rotation_array = np.array([0, 0, -1])</span>
+    <span class="c1">#</span>
+    <span class="c1">#     g = self.calc_gravity_xyz(lat, lon, alt)</span>
+    <span class="c1">#     dg_norm_dh = - g * (2 * r_e ** 2 / ((r_e + alt) ** 3)) \</span>
+    <span class="c1">#                  - 2 * np.cross(omega_e, radii_offset) \</span>
+    <span class="c1">#                  - np.cross(omega_e, np.cross(omega_e, rotation_array))</span>
+    <span class="c1">#</span>
+    <span class="c1">#     # Obtain the gradient for the Z directions.</span>
+    <span class="c1">#     dh_dz = np.array([</span>
+    <span class="c1">#         dh_dx[2],</span>
+    <span class="c1">#         dh_dy[2],</span>
+    <span class="c1">#         -(dh_dx[0] + dh_dy[1]) - dg_norm_dh[2]</span>
+    <span class="c1">#     ])</span>
+    <span class="c1">#</span>
+    <span class="c1">#     # Finally format and return the gravity gradients.</span>
+    <span class="c1">#     return np.concatenate([dh_dx, dh_dy, dh_dz])</span>
+
+<div class="viewcode-block" id="GravityModel.calc_gravity_z_vec">
+<a class="viewcode-back" href="../../../modules/gravity/base.html#qnav.gravity.base.GravityModel.calc_gravity_z_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_gravity_z_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        In a vectorised batch, calculates and returns the gravitational</span>
+<span class="sd">        acceleration along the Z/Down axis (in m/s^2) for the given location</span>
+<span class="sd">        and altitude offset. Ideal when calculating gravity for a large</span>
+<span class="sd">        number of positions.</span>
+
+<span class="sd">        :param lat: The latitude coordinate for the position of interest.</span>
+<span class="sd">            The latitude position value given in decimal degrees.</span>
+<span class="sd">        :type lat: np.array</span>
+
+<span class="sd">        :param lon: The longitude coordinate for the position of interest.</span>
+<span class="sd">            The longitude position value given in decimal degrees.</span>
+<span class="sd">        :type lon: np.array</span>
+
+<span class="sd">        :param alt: The altitude offset for the position of interest.</span>
+<span class="sd">            The elevation from the WGS-84 reference ellipsoid in metres.</span>
+<span class="sd">        :type alt: np.array</span>
+
+<span class="sd">        :return: The downwards gravitational acceleration for each location</span>
+<span class="sd">            (in m/s^2).</span>
+<span class="sd">        :rtype: np.array (N-elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Simple wrapper for methods that do not support vectorisation.</span>
+        <span class="n">g_z</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_gravity_z</span><span class="p">(</span><span class="o">*</span><span class="n">pos</span><span class="p">)</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">g_z</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GravityModel.calc_gravity_xyz_vec">
+<a class="viewcode-back" href="../../../modules/gravity/base.html#qnav.gravity.base.GravityModel.calc_gravity_xyz_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_gravity_xyz_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        In a vectorised batch, calculates and returns the gravitational</span>
+<span class="sd">        acceleration for the X/North, Y/East and Z/Down axes (in m/s^2)</span>
+<span class="sd">        for the given location and altitude offset. Ideal when calculating</span>
+<span class="sd">        gravity for a large number of positions.</span>
+
+<span class="sd">        :param lat: The latitude coordinate for the position of interest.</span>
+<span class="sd">            The latitude position value given in decimal degrees.</span>
+<span class="sd">        :type lat: np.array</span>
+
+<span class="sd">        :param lon: The longitude coordinate for the position of interest.</span>
+<span class="sd">            The longitude position value given in decimal degrees.</span>
+<span class="sd">        :type lon: np.array</span>
+
+<span class="sd">        :param alt: The altitude offset for the position of interest.</span>
+<span class="sd">            The elevation from the WGS-84 reference ellipsoid in metres.</span>
+<span class="sd">        :type alt: np.array</span>
+
+<span class="sd">        :return: The local gravity vector for the XYZ components (in m/s^2).</span>
+<span class="sd">        :rtype: numpy.ndarray (N-by-3 elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Simple wrapper for methods that do not support vectorisation.</span>
+        <span class="n">g_xyz</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_gravity_xyz</span><span class="p">(</span><span class="o">*</span><span class="n">pos</span><span class="p">)</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">g_xyz</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GravityModel.calc_vertical_grad_vec">
+<a class="viewcode-back" href="../../../modules/gravity/base.html#qnav.gravity.base.GravityModel.calc_vertical_grad_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_vertical_grad_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                               <span class="n">alt</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        In a vectorised batch, calculates the vertical gradient of gravity.</span>
+<span class="sd">        Computes the vertical change in gravity (∂g/∂r) of the Z/Down</span>
+<span class="sd">        component (in m/s^2). This is primary used for gravity map-matching</span>
+<span class="sd">        related calculations.</span>
+
+<span class="sd">        :param lat: The latitude coordinate for the position of interest.</span>
+<span class="sd">            The latitude position value given in decimal degrees.</span>
+<span class="sd">        :type lat: np.ndarray</span>
+
+<span class="sd">        :param lon: The longitude coordinate for the position of interest.</span>
+<span class="sd">            The longitude position value given in decimal degrees.</span>
+<span class="sd">        :type lon: np.ndarray</span>
+
+<span class="sd">        :param alt: The altitude offset for the position of interest.</span>
+<span class="sd">            The elevation from the WGS-84 reference ellipsoid in metres.</span>
+<span class="sd">        :type alt: np.ndarray</span>
+
+<span class="sd">        :param step: The step size (in metres) for calculating the gradient.</span>
+<span class="sd">            To be used when the gradient cannot be computed directly.</span>
+<span class="sd">        :type step: float</span>
+
+<span class="sd">        :return: The vertical gravity gradient (in m/s^2).</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">half_step</span> <span class="o">=</span> <span class="n">step</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">gz_0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_gravity_z_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span> <span class="o">-</span> <span class="n">half_step</span><span class="p">)</span>
+        <span class="n">gz_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_gravity_z_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span> <span class="o">+</span> <span class="n">half_step</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">gz_1</span> <span class="o">-</span> <span class="n">gz_0</span><span class="p">)</span> <span class="o">/</span> <span class="n">step</span></div>
+
+
+    <span class="c1"># def calc_gravity_grad_vec(self, lat: np.ndarray, lon: np.ndarray,</span>
+    <span class="c1">#                           alt: np.ndarray, step_size: float = 10) -&gt; np.ndarray:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     In a vectorised batch, calculates and returns the gravitational</span>
+    <span class="c1">#     gradient tensor of the X/North, Y/East and Z/Down components</span>
+    <span class="c1">#     for the given location and altitude offset. These are flattened</span>
+    <span class="c1">#     into a 1D array. Ideal when calculating gravity for a large number</span>
+    <span class="c1">#     of positions.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param lat: The latitude coordinate for the position of interest.</span>
+    <span class="c1">#         The latitude position value given in decimal degrees.</span>
+    <span class="c1">#     :type lat: np.array</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param lon: The longitude coordinate for the position of interest.</span>
+    <span class="c1">#         The longitude position value given in decimal degrees.</span>
+    <span class="c1">#     :type lon: np.array</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param alt: The altitude offset for the position of interest.</span>
+    <span class="c1">#         The elevation from the WGS-84 reference ellipsoid in metres.</span>
+    <span class="c1">#     :type alt: np.array</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param step_size: The step size used in the X and Y directions for</span>
+    <span class="c1">#         calculating the change in gravity (in metres). Default is 10.</span>
+    <span class="c1">#     :type alt: step_size</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :return: The local gravity vector for the XYZ components (in m/s^2).</span>
+    <span class="c1">#     :rtype: numpy.ndarray (N-by-3-by-3 elements)</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#</span>
+    <span class="c1">#     # Simple wrapper for methods that do not support vectorisation.</span>
+    <span class="c1">#     g_grad = [self.calc_gravity_grad(*pos) for pos in zip(lat, lon, alt)]</span>
+    <span class="c1">#     return np.stack(g_grad)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">base_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the base gravity model the model extends from.</span>
+<span class="sd">        Allows access to the base function/model the instance is</span>
+<span class="sd">        using (if any).</span>
+
+<span class="sd">        :return: Either the base gravity model or None.</span>
+<span class="sd">        :rtype: GravityModel | None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="calculate_curvature">
+<a class="viewcode-back" href="../../../modules/gravity/base.html#qnav.gravity.base.calculate_curvature">[docs]</a>
+<span class="k">def</span> <span class="nf">calculate_curvature</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the mean curvature of the ellipsoid J at given position.</span>
+<span class="sd">    Using equations from Physical Geodesy 2006, this function calculates</span>
+<span class="sd">    J for given positions.</span>
+
+<span class="sd">    :param lat: The latitude of the point(s) of interest (in decimal degrees).</span>
+<span class="sd">    :type lat: float | np.ndarray</span>
+
+<span class="sd">    :return: The mean curvature of the ellipsoid.</span>
+<span class="sd">    :rtype: float | np.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">e_prime</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">ECC_PRIME</span>
+    <span class="n">e_prime_sq</span> <span class="o">=</span> <span class="n">e_prime</span> <span class="o">*</span> <span class="n">e_prime</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">POLAR_AXIS_A</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">POLAR_AXIS_B</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="n">b</span>
+
+    <span class="c1"># Calculate variables M and N using equation (2–149)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">lat</span><span class="p">):</span>
+        <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">e_prime_sq</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span> <span class="o">*</span> <span class="n">lat_rad</span><span class="p">))</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">e_prime_sq</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span> <span class="o">*</span> <span class="n">lat_rad</span><span class="p">))</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="c1"># Calculate and return J using equation (2–148)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">m</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span></div>
+
+
+
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

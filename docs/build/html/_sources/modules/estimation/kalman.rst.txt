@@ -1,0 +1,8 @@
+:orphan:
+
+nav_toolbox.estimation.kalman
+=============================
+
+.. automodule:: nav_toolbox.estimation.kalman
+    :members:
+    :member-order: bysource

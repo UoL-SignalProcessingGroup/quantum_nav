@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nav_toolbox.input.validate &mdash; Navigation Toolbox 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Navigation Toolbox
+          </a>
+              <div class="version">
+                Version 1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">1. Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">2. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">3. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">4. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/processing.html">5. Estimation Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">6. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">7. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">8. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">9. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">10. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">11. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">12. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Navigation Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nav_toolbox.input.validate</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nav_toolbox.input.validate</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">===========</span>
+<span class="sd">validate.py</span>
+<span class="sd">===========</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Performs input validation for the provided configuration file.</span>
+<span class="sd">    This module contains functions for validating each section of a</span>
+<span class="sd">    configuration file. This is namely used for identifying invalid input</span>
+<span class="sd">    and outlining the errors to the user, before faults can occur later,</span>
+<span class="sd">    i.e. during long simulations. Functions in this module will not return</span>
+<span class="sd">    anything on valid input, but may throw errors or raise warnings on</span>
+<span class="sd">    invalid input.</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    0.0.0 - Skeleton class awaiting implementation.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">nav_toolbox.input.defaults</span> <span class="k">as</span> <span class="nn">default</span>
+
+<span class="kn">from</span> <span class="nn">nav_toolbox.input.config_handler</span> <span class="kn">import</span> <span class="n">ConfigHandler</span>
+<span class="kn">from</span> <span class="nn">nav_toolbox.input.config_handler</span> <span class="kn">import</span> <span class="n">NavConfigError</span>
+
+
+<div class="viewcode-block" id="validate_all">
+<a class="viewcode-back" href="../../../modules/input/validate.html#nav_toolbox.input.validate.validate_all">[docs]</a>
+<span class="k">def</span> <span class="nf">validate_all</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigHandler</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs validation for all sections of a configuration file.</span>
+<span class="sd">    This is a shorthand method that saves calling all validation</span>
+<span class="sd">    functions independently.</span>
+
+<span class="sd">    :param config: The ConfigHandler instance to perform validation for.</span>
+<span class="sd">    :type config: ConfigHandler</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">validate_output_section</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">validate_waypoint_section</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">validate_vehicle_section</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">validate_measurement_section</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">validate_estimation_section</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">validate_racetrack_section</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="validate_output_section">
+<a class="viewcode-back" href="../../../modules/input/validate.html#nav_toolbox.input.validate.validate_output_section">[docs]</a>
+<span class="k">def</span> <span class="nf">validate_output_section</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigHandler</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs validation for the output section of a configuration file.</span>
+
+<span class="sd">    :param config: The ConfigHandler instance to perform validation for.</span>
+<span class="sd">    :type config: ConfigHandler</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>  <span class="c1"># TODO: Add implementation!</span></div>
+
+
+
+<div class="viewcode-block" id="validate_waypoint_section">
+<a class="viewcode-back" href="../../../modules/input/validate.html#nav_toolbox.input.validate.validate_waypoint_section">[docs]</a>
+<span class="k">def</span> <span class="nf">validate_waypoint_section</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigHandler</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs validation for the waypoint section of a configuration file.</span>
+
+<span class="sd">    :param config: The ConfigHandler instance to perform validation for.</span>
+<span class="sd">    :type config: ConfigHandler</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">get_value_float</span><span class="p">(</span><span class="s2">&quot;Waypoints&quot;</span><span class="p">,</span> <span class="s2">&quot;maxTime&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">.</span><span class="n">MAX_TIME</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">NavConfigError</span><span class="p">(</span>
+            <span class="s2">&quot;Waypoints&quot;</span><span class="p">,</span> <span class="s2">&quot;maxTime&quot;</span><span class="p">,</span> <span class="s2">&quot;Must Be Positive&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;The maximum time must be a positive numerical value&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="validate_vehicle_section">
+<a class="viewcode-back" href="../../../modules/input/validate.html#nav_toolbox.input.validate.validate_vehicle_section">[docs]</a>
+<span class="k">def</span> <span class="nf">validate_vehicle_section</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigHandler</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs validation for the vehicle section of a configuration file.</span>
+
+<span class="sd">    :param config: The ConfigHandler instance to perform validation for.</span>
+<span class="sd">    :type config: ConfigHandler</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>  <span class="c1"># TODO: Add implementation!</span></div>
+
+
+
+<div class="viewcode-block" id="validate_measurement_section">
+<a class="viewcode-back" href="../../../modules/input/validate.html#nav_toolbox.input.validate.validate_measurement_section">[docs]</a>
+<span class="k">def</span> <span class="nf">validate_measurement_section</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigHandler</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs validation for the measurement section of a configuration file.</span>
+
+<span class="sd">    :param config: The ConfigHandler instance to perform validation for.</span>
+<span class="sd">    :type config: ConfigHandler</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>  <span class="c1"># TODO: Add implementation!</span></div>
+
+
+
+<div class="viewcode-block" id="validate_estimation_section">
+<a class="viewcode-back" href="../../../modules/input/validate.html#nav_toolbox.input.validate.validate_estimation_section">[docs]</a>
+<span class="k">def</span> <span class="nf">validate_estimation_section</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigHandler</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs validation for the estimation section of a configuration file.</span>
+
+<span class="sd">    :param config: The ConfigHandler instance to perform validation for.</span>
+<span class="sd">    :type config: ConfigHandler</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>  <span class="c1"># TODO: Add implementation!</span></div>
+
+
+
+<div class="viewcode-block" id="validate_racetrack_section">
+<a class="viewcode-back" href="../../../modules/input/validate.html#nav_toolbox.input.validate.validate_racetrack_section">[docs]</a>
+<span class="k">def</span> <span class="nf">validate_racetrack_section</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigHandler</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs validation for the racetrack section of a configuration file.</span>
+
+<span class="sd">    :param config: The ConfigHandler instance to perform validation for.</span>
+<span class="sd">    :type config: ConfigHandler</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>  <span class="c1"># TODO: Add implementation!</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

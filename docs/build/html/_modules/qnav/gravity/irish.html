@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.gravity.irish &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.gravity.irish</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.gravity.irish</h1><div class="highlight"><pre>
+<span></span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">LinearNDInterpolator</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">Delaunay</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span> <span class="nn">qnav.earth.geoid</span> <span class="kn">import</span> <span class="n">GeoidModel</span>
+<span class="kn">from</span> <span class="nn">qnav.gravity.base</span> <span class="kn">import</span> <span class="n">GravityModel</span>
+<span class="kn">from</span> <span class="nn">qnav.gravity.map</span> <span class="kn">import</span> <span class="n">GravityMap</span>
+<span class="kn">from</span> <span class="nn">qnav.earth.utm</span> <span class="kn">import</span> <span class="n">utm2lla</span>
+
+
+<div class="viewcode-block" id="IrishSeaGravity">
+<a class="viewcode-back" href="../../../modules/gravity/irish.html#qnav.gravity.irish.IrishSeaGravity">[docs]</a>
+<span class="k">class</span> <span class="nc">IrishSeaGravity</span><span class="p">(</span><span class="n">GravityMap</span><span class="p">):</span>
+
+    <span class="c1"># The raster file containing the gravity data.</span>
+    <span class="n">_DATA_FILE</span> <span class="o">=</span> <span class="s1">&#39;zone3_freeair_500_all&#39;</span>
+
+    <span class="c1"># The ERS file containing the meta data.</span>
+    <span class="n">_ERS_FILE</span> <span class="o">=</span> <span class="s1">&#39;zone3_freeair_500_all.ers&#39;</span>
+
+    <span class="n">_anom_interp</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_model</span><span class="p">:</span> <span class="n">GravityModel</span><span class="p">,</span>
+                 <span class="n">geoid_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">GeoidModel</span><span class="p">],</span>
+                 <span class="n">map_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">base_model</span><span class="p">,</span> <span class="n">geoid_model</span><span class="p">,</span> <span class="n">map_dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;IrishSeaGravity&#39;</span>
+
+<div class="viewcode-block" id="IrishSeaGravity.load_data">
+<a class="viewcode-back" href="../../../modules/gravity/irish.html#qnav.gravity.irish.IrishSeaGravity.load_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads the Marine Gravity data and generates interpolator for look-up.</span>
+<span class="sd">        Called on initialisation to load the required data to allow for</span>
+<span class="sd">        correction interpolation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Specify the files to load</span>
+        <span class="n">data_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_dir</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DATA_FILE</span>
+        <span class="n">meta_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_dir</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ERS_FILE</span>
+
+        <span class="c1"># Check files exist to produce clean errors:</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="n">meta_file</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">file</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;missing irish sea file </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Read the corresponding meta data file</span>
+        <span class="n">meta_data</span> <span class="o">=</span> <span class="n">read_irish_ers_file</span><span class="p">(</span><span class="n">meta_file</span><span class="p">)</span>
+        <span class="n">nan_value</span> <span class="o">=</span> <span class="n">meta_data</span><span class="p">[</span><span class="s1">&#39;null_value&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Read and reshape the gravity data file</span>
+        <span class="n">grav_data</span> <span class="o">=</span> <span class="n">read_irish_gravity_file</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="n">nan_value</span><span class="p">)</span>
+        <span class="n">grid_size</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">meta_data</span><span class="p">[</span><span class="s1">&#39;num_rows&#39;</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">meta_data</span><span class="p">[</span><span class="s1">&#39;num_cols&#39;</span><span class="p">]))</span>
+        <span class="n">grav_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">grav_data</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">)</span>
+
+        <span class="c1"># Obtain the east and north grid points</span>
+        <span class="n">east_grid</span><span class="p">,</span> <span class="n">north_grid</span> <span class="o">=</span> <span class="n">get_easting_northing_grid</span><span class="p">(</span><span class="n">meta_data</span><span class="p">)</span>
+
+        <span class="c1"># Remove NaN values</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">grav_data</span><span class="p">)</span>
+        <span class="n">grav_points</span> <span class="o">=</span> <span class="n">grav_data</span><span class="p">[</span><span class="n">is_valid</span><span class="p">]</span>
+        <span class="c1"># east_points = east_grid[is_valid]</span>
+        <span class="c1"># north_points = north_grid[is_valid]</span>
+
+        <span class="c1"># TODO: Improve performance of correct conversion</span>
+        <span class="c1"># # Convert from UTM to LLA</span>
+        <span class="c1"># lla_points = np.zeros([north_points.size, 2])</span>
+        <span class="c1"># for i, (x, y) in enumerate(zip(east_points, north_points)):</span>
+        <span class="c1">#     lla_points[i, :] = utm2lla(x, y, meta_data[&#39;zone&#39;])</span>
+
+        <span class="c1"># TODO: Remove temporary approx conversion</span>
+        <span class="c1"># ------------------------------------------------------ #</span>
+
+        <span class="c1"># Get the corner points of the grid</span>
+        <span class="n">nw_point</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">east_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">north_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+        <span class="n">se_point</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">east_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">north_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="c1"># Convert corner points to latitude and longitude</span>
+        <span class="n">nw_ll</span> <span class="o">=</span> <span class="n">utm2lla</span><span class="p">(</span><span class="n">nw_point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nw_point</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">meta_data</span><span class="p">[</span><span class="s1">&#39;zone&#39;</span><span class="p">])</span>
+        <span class="n">se_ll</span> <span class="o">=</span> <span class="n">utm2lla</span><span class="p">(</span><span class="n">se_point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">se_point</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">meta_data</span><span class="p">[</span><span class="s1">&#39;zone&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Generate a grid of latitude and longitude points</span>
+        <span class="n">grid_size</span> <span class="o">=</span> <span class="n">north_grid</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">lat_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">nw_ll</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nw_ll</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">grid_size</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">lon_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">se_ll</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">se_ll</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">grid_size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">lon_grid</span><span class="p">,</span> <span class="n">lat_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">lon_grid</span><span class="p">,</span> <span class="n">lat_grid</span><span class="p">)</span>
+
+        <span class="c1"># Remove</span>
+        <span class="n">lat_points</span> <span class="o">=</span> <span class="n">lat_grid</span><span class="p">[</span><span class="n">is_valid</span><span class="p">]</span>
+        <span class="n">lon_points</span> <span class="o">=</span> <span class="n">lon_grid</span><span class="p">[</span><span class="n">is_valid</span><span class="p">]</span>
+        <span class="n">lla_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">lat_points</span><span class="p">,</span> <span class="n">lon_points</span><span class="p">))</span>
+
+        <span class="c1"># ------------------------------------------------------ #</span>
+
+        <span class="c1"># Generate an interpolation instance for the geosat data.</span>
+        <span class="n">lla_tri</span> <span class="o">=</span> <span class="n">Delaunay</span><span class="p">(</span><span class="n">lla_points</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_anom_interp</span> <span class="o">=</span> <span class="n">LinearNDInterpolator</span><span class="p">(</span>
+            <span class="n">lla_tri</span><span class="p">,</span> <span class="n">grav_points</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">rescale</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="IrishSeaGravity.get_map_value">
+<a class="viewcode-back" href="../../../modules/gravity/irish.html#qnav.gravity.irish.IrishSeaGravity.get_map_value">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_map_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interpolates the gravity anomaly for requested position(s).</span>
+<span class="sd">        Looks-up and returns the gravity anomaly value for requested latitude</span>
+<span class="sd">        and longitude positions. Supports both scalar and array input.</span>
+
+<span class="sd">        :param lat: The latitude coordinate(s) in decimal degrees.</span>
+<span class="sd">        :type lat: float | np.ndarray</span>
+
+<span class="sd">        :param lon: The longitude coordinate(s) in decimal degrees.</span>
+<span class="sd">        :type lon: float | np.ndarray</span>
+
+<span class="sd">        :return: The interpolated gravity anomaly value(s) in m/s^2.</span>
+<span class="sd">        :rtype: float | np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">anom_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_anom_interp</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">lon</span><span class="p">):</span>
+            <span class="n">anom_values</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">anom_values</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">anom_values</span></div>
+
+
+<div class="viewcode-block" id="IrishSeaGravity.calc_gravity_z">
+<a class="viewcode-back" href="../../../modules/gravity/irish.html#qnav.gravity.irish.IrishSeaGravity.calc_gravity_z">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_gravity_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">grav_anom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_map_value</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_model</span><span class="o">.</span><span class="n">calc_gravity_z</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp_anomaly</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">grav_anom</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">g</span></div>
+
+
+<div class="viewcode-block" id="IrishSeaGravity.calc_gravity_z_vec">
+<a class="viewcode-back" href="../../../modules/gravity/irish.html#qnav.gravity.irish.IrishSeaGravity.calc_gravity_z_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_gravity_z_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">grav_anom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_map_value</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_model</span><span class="o">.</span><span class="n">calc_gravity_z_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp_anomaly_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">grav_anom</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">g</span></div>
+
+
+<div class="viewcode-block" id="IrishSeaGravity.get_anomaly">
+<a class="viewcode-back" href="../../../modules/gravity/irish.html#qnav.gravity.irish.IrishSeaGravity.get_anomaly">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_anomaly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_map_value</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="IrishSeaGravity.get_anomaly_vec">
+<a class="viewcode-back" href="../../../modules/gravity/irish.html#qnav.gravity.irish.IrishSeaGravity.get_anomaly_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_anomaly_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_map_value</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="IrishSeaGravity.get_disturbance">
+<a class="viewcode-back" href="../../../modules/gravity/irish.html#qnav.gravity.irish.IrishSeaGravity.get_disturbance">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_disturbance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">anomaly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_anomaly</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_anomaly_to_disturbance</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">anomaly</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="IrishSeaGravity.get_disturbance_vec">
+<a class="viewcode-back" href="../../../modules/gravity/irish.html#qnav.gravity.irish.IrishSeaGravity.get_disturbance_vec">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_disturbance_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">anomaly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_anomaly_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_anomaly_to_disturbance_vec</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">anomaly</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="read_irish_gravity_file">
+<a class="viewcode-back" href="../../../modules/gravity/irish.html#qnav.gravity.irish.read_irish_gravity_file">[docs]</a>
+<span class="k">def</span> <span class="nf">read_irish_gravity_file</span><span class="p">(</span><span class="n">data_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">null_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mi">99999</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts the data from a given Irish Sea Gravity Map data file, using</span>
+<span class="sd">    values read from its corresponding header file. On succession, the read</span>
+<span class="sd">    gravitational anomaly matrix will be returned (measured in m/s^2). No axis</span>
+<span class="sd">    information is contained within data files.</span>
+
+<span class="sd">    :param data_file: The location of the Irish Sea Gravity Map data file.</span>
+<span class="sd">    :type data_file: str or Path</span>
+
+<span class="sd">    :param null_value: Data values less than or equal to this value will be</span>
+<span class="sd">        converted to NaN values (default=-99999).</span>
+<span class="sd">    :type null_value: float</span>
+
+<span class="sd">    :return: The extracted gravitational anomaly matrix (measured in m/s^2).</span>
+<span class="sd">    :rtype: 2D NumPy Array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Read the data from the file and convert to floats</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="s1">&#39;&lt;f4&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="c1"># data = data.reshape([num_rows, num_cols])</span>
+
+    <span class="c1"># Insert NaN values and convert from mGals to m/s^2.</span>
+    <span class="n">data</span><span class="p">[</span><span class="n">data</span> <span class="o">&lt;=</span> <span class="n">null_value</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="n">data</span> <span class="o">/=</span> <span class="mf">1e5</span>
+
+    <span class="c1"># Finally, return the extracted matrix.</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="read_irish_ers_file">
+<a class="viewcode-back" href="../../../modules/gravity/irish.html#qnav.gravity.irish.read_irish_ers_file">[docs]</a>
+<span class="k">def</span> <span class="nf">read_irish_ers_file</span><span class="p">(</span><span class="n">header_file</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function will read a given Irish Sea Gravity Map header file (a file</span>
+<span class="sd">    normally with the extension &#39;.ers&#39;) and extract the relevant information</span>
+<span class="sd">    from it.</span>
+
+<span class="sd">    :param header_file: The location of the header corresponding file.</span>
+<span class="sd">    :type header_file: str or Path</span>
+
+<span class="sd">    :return: A dictionary holding the extracted northings and eastings</span>
+<span class="sd">        origin coordinates, data dimensions, and cell spacing information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The results to return</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># The search patterns to find within the file</span>
+    <span class="n">to_match</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;Eastings</span><span class="se">\\</span><span class="s1">s*=</span><span class="se">\\</span><span class="s1">s*(.[0-9-.]+)&#39;</span><span class="p">,</span> <span class="s1">&#39;eastings&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;Northings</span><span class="se">\\</span><span class="s1">s*=</span><span class="se">\\</span><span class="s1">s*(.[0-9-.]+)&#39;</span><span class="p">,</span> <span class="s1">&#39;northings&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;NrOfCellsPerLine</span><span class="se">\\</span><span class="s1">s*=</span><span class="se">\\</span><span class="s1">s*(.[0-9-.]+)&#39;</span><span class="p">,</span> <span class="s1">&#39;num_cols&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;NrOfLines</span><span class="se">\\</span><span class="s1">s*=</span><span class="se">\\</span><span class="s1">s*(.[0-9-.]+)&#39;</span><span class="p">,</span> <span class="s1">&#39;num_rows&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;Xdimension</span><span class="se">\\</span><span class="s1">s*=</span><span class="se">\\</span><span class="s1">s*(.[0-9-.]+)&#39;</span><span class="p">,</span> <span class="s1">&#39;x_dim&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;Ydimension</span><span class="se">\\</span><span class="s1">s*=</span><span class="se">\\</span><span class="s1">s*(.[0-9-.]+)&#39;</span><span class="p">,</span> <span class="s1">&#39;y_dim&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;Projection</span><span class="se">\\</span><span class="s1">s*=</span><span class="se">\\</span><span class="s1">s*(.[</span><span class="se">\\</span><span class="s1">w</span><span class="se">\\</span><span class="s1">&quot;]+)&#39;</span><span class="p">,</span> <span class="s1">&#39;zone&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;NullCellValue</span><span class="se">\\</span><span class="s1">s*=</span><span class="se">\\</span><span class="s1">s*(.[0-9-.]+)&#39;</span><span class="p">,</span> <span class="s1">&#39;null_value&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Using the contents of the given file:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">header_file</span><span class="p">),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+
+            <span class="c1"># For each of the search patterns:</span>
+            <span class="k">for</span> <span class="n">regex</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">to_match</span><span class="p">:</span>
+
+                <span class="c1"># Search for the current pattern.</span>
+                <span class="n">finder</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">finder</span><span class="p">:</span>
+                    <span class="n">results</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_str2num</span><span class="p">(</span><span class="n">finder</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="c1"># Finally, return the found values as their required format.</span>
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+<span class="k">def</span> <span class="nf">get_easting_northing_grid</span><span class="p">(</span><span class="n">ers_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+
+    <span class="n">x_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ers_data</span><span class="p">[</span><span class="s1">&#39;num_cols&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">x_points</span> <span class="o">*=</span> <span class="n">ers_data</span><span class="p">[</span><span class="s1">&#39;x_dim&#39;</span><span class="p">]</span>
+    <span class="n">x_points</span> <span class="o">+=</span> <span class="n">ers_data</span><span class="p">[</span><span class="s1">&#39;eastings&#39;</span><span class="p">]</span>
+
+    <span class="n">y_points</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ers_data</span><span class="p">[</span><span class="s1">&#39;num_rows&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">y_points</span> <span class="o">*=</span> <span class="n">ers_data</span><span class="p">[</span><span class="s1">&#39;y_dim&#39;</span><span class="p">]</span>
+    <span class="n">y_points</span> <span class="o">+=</span> <span class="n">ers_data</span><span class="p">[</span><span class="s1">&#39;northings&#39;</span><span class="p">]</span>
+
+    <span class="n">x_grid</span><span class="p">,</span> <span class="n">y_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x_points</span><span class="p">,</span> <span class="n">y_points</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x_grid</span><span class="p">,</span> <span class="n">y_grid</span>
+
+
+<span class="k">def</span> <span class="nf">_str2num</span><span class="p">(</span><span class="n">str_value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A simple function that converts a given string to an integer, subject to</span>
+<span class="sd">    the numerical values contained within the string. The function supports</span>
+<span class="sd">    both positive and negative values. The first match/ instance</span>
+
+<span class="sd">    :param str_value: The string to extract the integer value from.</span>
+<span class="sd">    :type str_value: str</span>
+
+<span class="sd">    :return: The first whole integer found within the given string.</span>
+<span class="sd">    :rtype: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># If a None value is given, simply return None.</span>
+    <span class="k">if</span> <span class="n">str_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Find all integer values within the given string.</span>
+    <span class="c1"># matches = re.findall(r&quot;-?\d+&quot;, str_value)</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[-+]?\d*\.\d+|\d+&#39;</span><span class="p">,</span> <span class="n">str_value</span><span class="p">)</span>
+
+    <span class="c1"># Raise value error if no match is found:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;The string &#39;</span><span class="si">{</span><span class="n">str_value</span><span class="si">}</span><span class="s2">&#39; could not be converted to number!&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Otherwise, return teh first occurrence.</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="kn">from</span> <span class="nn">qnav.gravity.somigliana</span> <span class="kn">import</span> <span class="n">Somigliana</span>
+
+    <span class="n">project_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>
+    <span class="n">grav_dir</span> <span class="o">=</span> <span class="n">project_dir</span> <span class="o">/</span> <span class="s1">&#39;databases&#39;</span> <span class="o">/</span> <span class="s1">&#39;gravity&#39;</span> <span class="o">/</span> <span class="s1">&#39;irish_sea&#39;</span>
+
+    <span class="n">som</span> <span class="o">=</span> <span class="n">Somigliana</span><span class="p">()</span>
+    <span class="n">irish</span> <span class="o">=</span> <span class="n">IrishSeaGravity</span><span class="p">(</span><span class="n">som</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">grav_dir</span><span class="p">)</span>
+    <span class="n">test_g</span> <span class="o">=</span> <span class="n">irish</span><span class="o">.</span><span class="n">calc_gravity_z</span><span class="p">(</span><span class="mi">52</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

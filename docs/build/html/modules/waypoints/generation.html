@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.12.1. qnav.waypoints.generation &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="9.12.2. qnav.waypoints.trajectory" href="trajectory.html" />
+    <link rel="prev" title="9.11.4. qnav.util.rng" href="../util/rng.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../usage/packages.html">9. Software Components</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#earth">9.1. Earth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#estimation">9.2. Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#fusion">9.3. Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gps">9.4. GPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gravity">9.5. Gravity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#input">9.6. Input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#measurement">9.7. Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#output">9.8. Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#quantum">9.9. Quantum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#simulation">9.10. Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#util">9.11. Util</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../usage/packages.html#waypoints">9.12. Waypoints</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">9.12.1. generation.py</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#generation-py">9.12.1.1. generation.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.generation.get_positions"><code class="docutils literal notranslate"><span class="pre">get_positions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.generation.interpolate_positions"><code class="docutils literal notranslate"><span class="pre">interpolate_positions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.generation.produce_noise"><code class="docutils literal notranslate"><span class="pre">produce_noise()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.generation.moving_average"><code class="docutils literal notranslate"><span class="pre">moving_average()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.generation.rescale_values"><code class="docutils literal notranslate"><span class="pre">rescale_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.generation.get_simple_trajectory_values"><code class="docutils literal notranslate"><span class="pre">get_simple_trajectory_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.generation.get_trajectory_values"><code class="docutils literal notranslate"><span class="pre">get_trajectory_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.generation.plot_waypoints"><code class="docutils literal notranslate"><span class="pre">plot_waypoints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.generation.plot_figures"><code class="docutils literal notranslate"><span class="pre">plot_figures()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.generation.load_waypoint_csv"><code class="docutils literal notranslate"><span class="pre">load_waypoint_csv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.generation.crop_waypoints"><code class="docutils literal notranslate"><span class="pre">crop_waypoints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.generation.save_waypoints"><code class="docutils literal notranslate"><span class="pre">save_waypoints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.generation.load_waypoints"><code class="docutils literal notranslate"><span class="pre">load_waypoints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.generation.get_trajectory"><code class="docutils literal notranslate"><span class="pre">get_trajectory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.waypoints.generation.read_csv_waypoints"><code class="docutils literal notranslate"><span class="pre">read_csv_waypoints()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="trajectory.html">9.12.2. trajectory.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vehicle.html">9.12.3. vehicle.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tracks.html">9.12.4. tracks.py</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../usage/packages.html"><span class="section-number">9. </span>Software Components</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">9.12.1. </span>qnav.waypoints.generation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/modules/waypoints/generation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qnav.waypoints.generation">
+<span id="qnav-waypoints-generation"></span><h1><span class="section-number">9.12.1. </span>qnav.waypoints.generation<a class="headerlink" href="#module-qnav.waypoints.generation" title="Link to this heading"></a></h1>
+<section id="generation-py">
+<h2><span class="section-number">9.12.1.1. </span>generation.py<a class="headerlink" href="#generation-py" title="Link to this heading"></a></h2>
+<dl class="field-list">
+<dt class="field-odd">summary<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Handles all interpolation and generation of waypoint trajectory data.
+This module contains a collection of functions for generating waypoint
+trajectories for various vehicle models. In addition to this, waypoint
+data can be imported from CSV files or binary numpy files.</p>
+</dd>
+<dt class="field-even">authors<span class="colon">:</span></dt>
+<dd class="field-even"><div class="line-block">
+<div class="line">Prof. Jason Ralph - <a class="reference external" href="mailto:jfralph&#37;&#52;&#48;liverpool&#46;ac&#46;uk">jfralph<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></div>
+<div class="line">Michael Wright - <a class="reference external" href="mailto:mjwright&#37;&#52;&#48;liverpool&#46;ac&#46;uk">mjwright<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></div>
+</div>
+</dd>
+<dt class="field-odd">version<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1.1.0 - Includes fixes and improvements.</p>
+</dd>
+</dl>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.generation.get_positions">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.generation.</span></span><span class="sig-name descname"><span class="pre">get_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alt_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vehicle_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="vehicle.html#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle"><span class="pre">Vehicle</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_speed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">travel_times</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/generation.html#get_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.generation.get_positions" title="Link to this definition"></a></dt>
+<dd><p>This function interpolates positions (latitude, longitude and altitude)
+between provided waypoints that are separated by either stated distance or
+time (not both). The generated route is subject to the limitations of the
+vehicle. The produced route can then be used for calculating the
+required trajectory for simulations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat_points</strong> (<em>numpy.ndarray</em>) – The decimal latitude points for the given waypoints.
+Use negative values for southern coordinates (in degrees).</p></li>
+<li><p><strong>lon_points</strong> (<em>numpy.ndarray</em>) – The decimal longitude points for the given waypoints.
+Use negative values for western coordinates (in degrees).</p></li>
+<li><p><strong>alt_points</strong> (<em>numpy.ndarray</em>) – The altitude for the given waypoints (in metres).</p></li>
+<li><p><strong>vehicle_model</strong> (<a class="reference internal" href="vehicle.html#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle"><em>Vehicle</em></a>) – An initialised vehicle model containing the
+manoeuvring limitations to consider when generating the waypoint
+positions.</p></li>
+<li><p><strong>frequency</strong> (<em>float</em>) – The simulation’s update frequency. This is used for
+calculating the number of intermediate points and total number of
+waypoints to return.</p></li>
+<li><p><strong>avg_speed</strong> (<em>float</em>) – The average vehicle speed for the given waypoints. This
+is used to calculate the travel times between waypoints. This value is
+replaced by ‘travel_times’. Therefore, a value for this is not
+required if the travel times are known.</p></li>
+<li><p><strong>travel_times</strong> (<em>numpy.ndarray</em>) – The time (in seconds) when each waypoint is reached.
+This is required for interpolating the position between points.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array containing column for latitude, longitude and altitude
+of the vehicle at each time step.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (n-by-4 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.generation.interpolate_positions">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.generation.</span></span><span class="sig-name descname"><span class="pre">interpolate_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/waypoints/generation.html#interpolate_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.generation.interpolate_positions" title="Link to this definition"></a></dt>
+<dd><p>Interpolates the base waypoints at the new higher frequency.
+This function can be used to speed up and stabilise the calculation of
+the waypoint positions, by interpolating the intermediate steps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_points</strong> (<em>np.ndarray</em>) – The base waypoint data to interpolate.</p></li>
+<li><p><strong>frequency</strong> (<em>float</em>) – The frequency to interpolate the waypoint data by.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The interpolated version of the given waypoint positions.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.generation.produce_noise">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.generation.</span></span><span class="sig-name descname"><span class="pre">produce_noise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt_vdp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/generation.html#produce_noise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.generation.produce_noise" title="Link to this definition"></a></dt>
+<dd><p>This function generated random noise that can be added to various aspects.
+For instance, this function can be used to produce noise for position,
+attitude and oscillation displacement. This function is required so that
+the noise generated is done so in a self-balancing manner such that the
+displacements do not cause permanent or increasing drift.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_rows</strong> (<em>int</em>) – The number of noise values to produce.</p></li>
+<li><p><strong>first_val</strong> (<em>float</em><em> or </em><em>numpy.array</em>) – The first generated noise value(s).</p></li>
+<li><p><strong>noise_val</strong> (<em>float</em>) – The scale of the noise values.</p></li>
+<li><p><strong>dt_vdp</strong> – The dampening factor to apply. This is used to prevent the
+noise from causing permanent or excessive drift.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The generated noise subject to the given parameters.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.generation.moving_average">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.generation.</span></span><span class="sig-name descname"><span class="pre">moving_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/generation.html#moving_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.generation.moving_average" title="Link to this definition"></a></dt>
+<dd><p>Obtains the “sliding window average” for values of an array.
+This function calculates the moving average of a given 1D array using the
+same approach as MATLAB. A sliding window is passed over the given array.
+For the centre (right) element the moving average is calculated using the
+values covered by the window. This means that fewer elements are covered
+at the start and end of the array. The returned values are the same size
+as the given array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_array</strong> (<em>NumPy array</em>) – The values which the moving average is going to be
+calculated for. This must be a 1D array.</p></li>
+<li><p><strong>window_size</strong> (<em>int</em>) – The size of the sliding window. Must be an integer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The calculated moving averages for the given array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NumPy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.generation.rescale_values">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.generation.</span></span><span class="sig-name descname"><span class="pre">rescale_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/generation.html#rescale_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.generation.rescale_values" title="Link to this definition"></a></dt>
+<dd><p>A simple function that allows angles to be re-scaled to prevent inaccuracy
+calculations between angles differences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values</strong> (<em>numpy.array</em>) – The angle values to be rescaled.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The given values re-scaled between -pi/2 and pi/2.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.generation.get_simple_trajectory_values">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.generation.</span></span><span class="sig-name descname"><span class="pre">get_simple_trajectory_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waypoints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../gravity/base.html#qnav.gravity.base.GravityModel" title="qnav.gravity.base.GravityModel"><span class="pre">GravityModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">given_attitudes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attitude_times</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_window_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_passes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">virtual_mem_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/generation.html#get_simple_trajectory_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.generation.get_simple_trajectory_values" title="Link to this definition"></a></dt>
+<dd><p>Calculates the trajectory information and properties from given waypoints.
+This function calculates the trajectory properties for each position for
+a given set of waypoints. Only simple properties are generated, without
+any added noise, vibrations or oscillations of the platform. In previous
+releases this function was refereed to as legacy waypoint generation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>waypoints</strong> (<em>NumPy Matrix</em><em> (</em><em>n-by-4 elements</em><em>)</em>) – The interpolated waypoint array previously generated. It
+is important any changes/updates to the waypoints (such as altitude
+changes) are applied to the waypoints before using this function.</p></li>
+<li><p><strong>gravity_model</strong> (<a class="reference internal" href="../gravity/base.html#qnav.gravity.base.GravityModel" title="qnav.gravity.base.GravityModel"><em>GravityModel</em></a>) – The gravity model used to calculate local gravity.
+This is required for calculating the downwards gravitation
+acceleration and its impact on the platform for each axis.</p></li>
+<li><p><strong>given_attitudes</strong> (<em>numpy.array</em><em> (</em><em>n-elements</em><em>)</em>) – (Optional) The requested attitude of the vehicle at
+given times. Intermediate attitude values will be interpolated.</p></li>
+<li><p><strong>attitude_times</strong> (<em>numpy.array</em><em> (</em><em>n-elements</em><em>)</em>) – (Optional) The requested corresponding times for
+the given attitudes. These timestamps are used to interpolate
+intermediate attitude values.</p></li>
+<li><p><strong>smoothing_window_time</strong> (<em>float</em>) – (Optional) The size of the smoothing
+(moving average) window to use for smoothing the calculated
+waypoint velocities. This is useful for removing noise.</p></li>
+<li><p><strong>smoothing_passes</strong> (<em>int</em>) – (Optional) The number of smoothing passes
+(iterations) to perform on the calculated waypoint velocities.</p></li>
+<li><p><strong>step_size</strong> (<em>int</em>) – (Optional) The step size used for calculating the
+velocity between upcoming waypoints (default=1).</p></li>
+<li><p><strong>virtual_mem_file</strong> (<em>bool</em>) – The on-disk file to use for virtual memory.
+Will be created or overwritten</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A matrix containing the position, velocity, acceleration,
+attitude, angle rates and gravitational acceleration (and gradient)
+for each time step.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NumPy Matrix (n-by-16 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.generation.get_trajectory_values">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.generation.</span></span><span class="sig-name descname"><span class="pre">get_trajectory_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waypoints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../gravity/base.html#qnav.gravity.base.GravityModel" title="qnav.gravity.base.GravityModel"><span class="pre">GravityModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vehicle_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="vehicle.html#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle"><span class="pre">Vehicle</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">given_attitudes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attitude_times</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_window_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_passes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">virtual_mem_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/generation.html#get_trajectory_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.generation.get_trajectory_values" title="Link to this definition"></a></dt>
+<dd><p>Using waypoints route information generated prior, this function will
+calculate the velocity, acceleration, attitude, angle rates and
+gravitational acceleration (and gradient) for each time step. This
+function calculates said values in an efficient vectorised manner
+while ensuring they abide by the given vehicle model’s limitations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>waypoints</strong> (<em>NumPy Matrix</em><em> (</em><em>n-by-4 elements</em><em>)</em>) – The interpolated waypoint array previously generated. It
+is important any changes/updates to the waypoints (such as altitude
+changes) are applied to the waypoints before using this function.</p></li>
+<li><p><strong>gravity_model</strong> (<a class="reference internal" href="../gravity/base.html#qnav.gravity.base.GravityModel" title="qnav.gravity.base.GravityModel"><em>GravityModel</em></a>) – The gravity model used to calculate local gravity.
+This is required for calculating the downwards gravitation
+acceleration and its impact on the platform for each axis.</p></li>
+<li><p><strong>vehicle_model</strong> (<a class="reference internal" href="vehicle.html#qnav.waypoints.vehicle.Vehicle" title="qnav.waypoints.vehicle.Vehicle"><em>Vehicle</em></a>) – An initialised vehicle model containing the
+manoeuvring limitations to consider when generating the waypoint
+positions.</p></li>
+<li><p><strong>given_attitudes</strong> (<em>numpy.array</em><em> (</em><em>n-elements</em><em>)</em>) – (Optional) The requested attitude of the vehicle at
+given times. Intermediate attitude values will be interpolated.</p></li>
+<li><p><strong>attitude_times</strong> (<em>numpy.array</em><em> (</em><em>n-elements</em><em>)</em>) – (Optional) The requested corresponding times for
+the given attitudes. These timestamps are used to interpolate
+intermediate attitude values.</p></li>
+<li><p><strong>smoothing_window_time</strong> (<em>float</em>) – (Optional) The size of the smoothing
+(moving average) window to use for smoothing the calculated
+waypoint velocities. This is useful for removing noise.</p></li>
+<li><p><strong>smoothing_passes</strong> (<em>int</em>) – (Optional) The number of smoothing passes
+(iterations) to perform on the calculated waypoint velocities.</p></li>
+<li><p><strong>step_size</strong> (<em>int</em>) – (Optional) The step size used for calculating the
+velocity between upcoming waypoints (default=1).</p></li>
+<li><p><strong>virtual_mem_file</strong> (<em>bool</em>) – The on-disk file to use for virtual memory.
+Will be created or overwritten</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A matrix containing the position, velocity, acceleration,
+attitude, angle rates and gravitational acceleration (and gradient)
+for each time step.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NumPy Matrix (n-by-16 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.generation.plot_waypoints">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.generation.</span></span><span class="sig-name descname"><span class="pre">plot_waypoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/generation.html#plot_waypoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.generation.plot_waypoints" title="Link to this definition"></a></dt>
+<dd><p>A simple function to plot the generated waypoints.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_values</strong> (<em>numpy.ndarray</em><em> (</em><em>n-by-3 elements</em><em>)</em>) – The array of values returned by the generator
+function.</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – (Optional) Saves the produced plot under the given file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.generation.plot_figures">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.generation.</span></span><span class="sig-name descname"><span class="pre">plot_figures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/generation.html#plot_figures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.generation.plot_figures" title="Link to this definition"></a></dt>
+<dd><p>A simple function to plot the change in variables during the waypoint
+generation. Each of these is presented within a sub-figure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_values</strong> (<em>numpy.ndarray</em><em> (</em><em>n-by-16 elements</em><em>)</em>) – The array of values returned by the generator
+function.</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – (Optional) Saves the produced plot under the given file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.generation.load_waypoint_csv">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.generation.</span></span><span class="sig-name descname"><span class="pre">load_waypoint_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">down_sample_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/generation.html#load_waypoint_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.generation.load_waypoint_csv" title="Link to this definition"></a></dt>
+<dd><p>This function will extract the values from a given trajectory file,
+formatted as comma-separated-values. Once the relevant information is
+extracted, 7 rows will be returned containing information of the extracted
+timestamps, latitude points, longitude points, altitude points and three
+attitude angles. These rows are returned within a list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<em>str</em><em> or </em><em>Path</em>) – The location of the CSV trajectory file to read.</p></li>
+<li><p><strong>down_sample_rate</strong> (<em>int</em>) – The down sampling multiplier to apply.
+This can be used to skip rows for cases where CSV waypoints are
+given too frequently or spaced too closely together.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list containing 7 arrays holding the extracted timestamps,
+latitude points, longitude points, altitude points and attitude
+angles from the given CSV trajectory file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NumPy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.generation.crop_waypoints">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.generation.</span></span><span class="sig-name descname"><span class="pre">crop_waypoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waypoints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/generation.html#crop_waypoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.generation.crop_waypoints" title="Link to this definition"></a></dt>
+<dd><p>Crops waypoint data between time ranges (in seconds).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>waypoints</strong> (<em>numpy.ndarray</em>) – The waypoint data to crop.</p></li>
+<li><p><strong>max_time</strong> (<em>float</em>) – The maximum time for the return waypoint data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The cropped waypoint data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.generation.save_waypoints">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.generation.</span></span><span class="sig-name descname"><span class="pre">save_waypoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waypoints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/generation.html#save_waypoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.generation.save_waypoints" title="Link to this definition"></a></dt>
+<dd><p>Exports waypoint data to disk, allowing for reuse.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>waypoints</strong> (<em>numpy.array</em>) – The waypoint data to save.</p></li>
+<li><p><strong>file_path</strong> (<em>pathlib.Path</em>) – The file location to save the waypoint data to.</p></li>
+<li><p><strong>allow_overwrite</strong> (<em>bool</em>) – Should file overwriting be permitted? This
+safeguards against accidental overwriting (default=False).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.generation.load_waypoints">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.generation.</span></span><span class="sig-name descname"><span class="pre">load_waypoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_virtual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/generation.html#load_waypoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.generation.load_waypoints" title="Link to this definition"></a></dt>
+<dd><p>Imports waypoint data from disk, reusing saved values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>pathlib.Path</em>) – The file location to load the waypoint data from.</p></li>
+<li><p><strong>as_virtual</strong> (<em>bool</em>) – If set to True prevent all the data being loaded at
+once and use virtual memory. This reduces RAM usage, but impacts
+runtime (default=False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The loaded waypoint data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.array (n-by-16 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.generation.get_trajectory">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.generation.</span></span><span class="sig-name descname"><span class="pre">get_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waypoints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../gravity/base.html#qnav.gravity.base.GravityModel" title="qnav.gravity.base.GravityModel"><span class="pre">GravityModel</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/waypoints/generation.html#get_trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.generation.get_trajectory" title="Link to this definition"></a></dt>
+<dd><p>TODO: Add documentation
+:param waypoints:
+:param gravity_model:
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.waypoints.generation.read_csv_waypoints">
+<span class="sig-prename descclassname"><span class="pre">qnav.waypoints.generation.</span></span><span class="sig-name descname"><span class="pre">read_csv_waypoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">','</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qnav/waypoints/generation.html#read_csv_waypoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.waypoints.generation.read_csv_waypoints" title="Link to this definition"></a></dt>
+<dd><p>Reads given CSV waypoint file and returns the records contained within it.
+For a given file path, attempts to read its content and return it’s
+extracted records inside a dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>Path</em>) – The CSV file to attempt to read waypoint data from.</p></li>
+<li><p><strong>delimiter</strong> (<em>str</em>) – The delimiter used to represent column breaks.
+By default, this is a comma, but other characters can be used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary holding the extracted data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict[str, np.ndarray | None]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../util/rng.html" class="btn btn-neutral float-left" title="9.11.4. qnav.util.rng" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trajectory.html" class="btn btn-neutral float-right" title="9.12.2. qnav.waypoints.trajectory" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

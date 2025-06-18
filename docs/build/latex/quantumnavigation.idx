@@ -1,0 +1,647 @@
+\indexentry{module@\spxentry{module}!qnav.util.transformations@\spxentry{qnav.util.transformations}|hyperpage}{24}
+\indexentry{qnav.util.transformations@\spxentry{qnav.util.transformations}!module@\spxentry{module}|hyperpage}{24}
+\indexentry{deg2rad() (in module qnav.util.transformations)@\spxentry{deg2rad()}\spxextra{in module qnav.util.transformations}|hyperpage}{24}
+\indexentry{rad2deg() (in module qnav.util.transformations)@\spxentry{rad2deg()}\spxextra{in module qnav.util.transformations}|hyperpage}{25}
+\indexentry{deg2dec() (in module qnav.util.transformations)@\spxentry{deg2dec()}\spxextra{in module qnav.util.transformations}|hyperpage}{25}
+\indexentry{dec2deg() (in module qnav.util.transformations)@\spxentry{dec2deg()}\spxextra{in module qnav.util.transformations}|hyperpage}{25}
+\indexentry{radius() (in module qnav.util.transformations)@\spxentry{radius()}\spxextra{in module qnav.util.transformations}|hyperpage}{25}
+\indexentry{radius\_vec() (in module qnav.util.transformations)@\spxentry{radius\_vec()}\spxextra{in module qnav.util.transformations}|hyperpage}{25}
+\indexentry{rotation\_rate() (in module qnav.util.transformations)@\spxentry{rotation\_rate()}\spxextra{in module qnav.util.transformations}|hyperpage}{26}
+\indexentry{rotation\_rate\_vec() (in module qnav.util.transformations)@\spxentry{rotation\_rate\_vec()}\spxextra{in module qnav.util.transformations}|hyperpage}{26}
+\indexentry{radius84() (in module qnav.util.transformations)@\spxentry{radius84()}\spxextra{in module qnav.util.transformations}|hyperpage}{26}
+\indexentry{radius84\_vec() (in module qnav.util.transformations)@\spxentry{radius84\_vec()}\spxextra{in module qnav.util.transformations}|hyperpage}{26}
+\indexentry{rotate\_3d() (in module qnav.util.transformations)@\spxentry{rotate\_3d()}\spxextra{in module qnav.util.transformations}|hyperpage}{26}
+\indexentry{rotate\_3d\_vec() (in module qnav.util.transformations)@\spxentry{rotate\_3d\_vec()}\spxextra{in module qnav.util.transformations}|hyperpage}{27}
+\indexentry{lla2ned() (in module qnav.util.transformations)@\spxentry{lla2ned()}\spxextra{in module qnav.util.transformations}|hyperpage}{27}
+\indexentry{lla2ned\_vec() (in module qnav.util.transformations)@\spxentry{lla2ned\_vec()}\spxextra{in module qnav.util.transformations}|hyperpage}{27}
+\indexentry{ned2lla() (in module qnav.util.transformations)@\spxentry{ned2lla()}\spxextra{in module qnav.util.transformations}|hyperpage}{28}
+\indexentry{ned2lla\_vec() (in module qnav.util.transformations)@\spxentry{ned2lla\_vec()}\spxextra{in module qnav.util.transformations}|hyperpage}{28}
+\indexentry{lla2ecef() (in module qnav.util.transformations)@\spxentry{lla2ecef()}\spxextra{in module qnav.util.transformations}|hyperpage}{28}
+\indexentry{lla2ecef\_vec() (in module qnav.util.transformations)@\spxentry{lla2ecef\_vec()}\spxextra{in module qnav.util.transformations}|hyperpage}{29}
+\indexentry{euler\_to\_quaternion() (in module qnav.util.transformations)@\spxentry{euler\_to\_quaternion()}\spxextra{in module qnav.util.transformations}|hyperpage}{29}
+\indexentry{quaternion\_to\_euler() (in module qnav.util.transformations)@\spxentry{quaternion\_to\_euler()}\spxextra{in module qnav.util.transformations}|hyperpage}{29}
+\indexentry{euler\_to\_quaternion\_vec() (in module qnav.util.transformations)@\spxentry{euler\_to\_quaternion\_vec()}\spxextra{in module qnav.util.transformations}|hyperpage}{29}
+\indexentry{quaternion\_to\_euler\_vec() (in module qnav.util.transformations)@\spxentry{quaternion\_to\_euler\_vec()}\spxextra{in module qnav.util.transformations}|hyperpage}{30}
+\indexentry{haversine() (in module qnav.util.transformations)@\spxentry{haversine()}\spxextra{in module qnav.util.transformations}|hyperpage}{30}
+\indexentry{haversine\_vec() (in module qnav.util.transformations)@\spxentry{haversine\_vec()}\spxextra{in module qnav.util.transformations}|hyperpage}{30}
+\indexentry{get\_time\_pos\_vel() (in module qnav.util.transformations)@\spxentry{get\_time\_pos\_vel()}\spxextra{in module qnav.util.transformations}|hyperpage}{31}
+\indexentry{ecef2eci() (in module qnav.util.transformations)@\spxentry{ecef2eci()}\spxextra{in module qnav.util.transformations}|hyperpage}{32}
+\indexentry{eci2ecef() (in module qnav.util.transformations)@\spxentry{eci2ecef()}\spxextra{in module qnav.util.transformations}|hyperpage}{32}
+\indexentry{ecef2lla() (in module qnav.util.transformations)@\spxentry{ecef2lla()}\spxextra{in module qnav.util.transformations}|hyperpage}{32}
+\indexentry{ecef2lla\_vec() (in module qnav.util.transformations)@\spxentry{ecef2lla\_vec()}\spxextra{in module qnav.util.transformations}|hyperpage}{32}
+\indexentry{ecef2ned\_transform() (in module qnav.util.transformations)@\spxentry{ecef2ned\_transform()}\spxextra{in module qnav.util.transformations}|hyperpage}{33}
+\indexentry{ecef2ned\_transform\_vec() (in module qnav.util.transformations)@\spxentry{ecef2ned\_transform\_vec()}\spxextra{in module qnav.util.transformations}|hyperpage}{33}
+\indexentry{ecef2ned() (in module qnav.util.transformations)@\spxentry{ecef2ned()}\spxextra{in module qnav.util.transformations}|hyperpage}{33}
+\indexentry{ned2ecef() (in module qnav.util.transformations)@\spxentry{ned2ecef()}\spxextra{in module qnav.util.transformations}|hyperpage}{33}
+\indexentry{ned2ecef\_vec() (in module qnav.util.transformations)@\spxentry{ned2ecef\_vec()}\spxextra{in module qnav.util.transformations}|hyperpage}{34}
+\indexentry{vned2vecef() (in module qnav.util.transformations)@\spxentry{vned2vecef()}\spxextra{in module qnav.util.transformations}|hyperpage}{34}
+\indexentry{utc2gps() (in module qnav.util.transformations)@\spxentry{utc2gps()}\spxextra{in module qnav.util.transformations}|hyperpage}{34}
+\indexentry{ned2azel() (in module qnav.util.transformations)@\spxentry{ned2azel()}\spxextra{in module qnav.util.transformations}|hyperpage}{34}
+\indexentry{get\_transport\_rate() (in module qnav.util.transformations)@\spxentry{get\_transport\_rate()}\spxextra{in module qnav.util.transformations}|hyperpage}{35}
+\indexentry{get\_transport\_rate\_vec() (in module qnav.util.transformations)@\spxentry{get\_transport\_rate\_vec()}\spxextra{in module qnav.util.transformations}|hyperpage}{35}
+\indexentry{vel\_ecef2vel\_ned() (in module qnav.util.transformations)@\spxentry{vel\_ecef2vel\_ned()}\spxextra{in module qnav.util.transformations}|hyperpage}{35}
+\indexentry{cross\_prod\_xy() (in module qnav.util.transformations)@\spxentry{cross\_prod\_xy()}\spxextra{in module qnav.util.transformations}|hyperpage}{35}
+\indexentry{module@\spxentry{module}!qnav.earth.dted@\spxentry{qnav.earth.dted}|hyperpage}{36}
+\indexentry{qnav.earth.dted@\spxentry{qnav.earth.dted}!module@\spxentry{module}|hyperpage}{36}
+\indexentry{DtedTile (class in qnav.earth.dted)@\spxentry{DtedTile}\spxextra{class in qnav.earth.dted}|hyperpage}{36}
+\indexentry{get\_elevation() (qnav.earth.dted.DtedTile method)@\spxentry{get\_elevation()}\spxextra{qnav.earth.dted.DtedTile method}|hyperpage}{36}
+\indexentry{get\_elevation\_vec() (qnav.earth.dted.DtedTile method)@\spxentry{get\_elevation\_vec()}\spxextra{qnav.earth.dted.DtedTile method}|hyperpage}{36}
+\indexentry{is\_position\_covered() (qnav.earth.dted.DtedTile method)@\spxentry{is\_position\_covered()}\spxextra{qnav.earth.dted.DtedTile method}|hyperpage}{37}
+\indexentry{is\_position\_covered\_vec() (qnav.earth.dted.DtedTile method)@\spxentry{is\_position\_covered\_vec()}\spxextra{qnav.earth.dted.DtedTile method}|hyperpage}{37}
+\indexentry{distance\_to\_centre() (qnav.earth.dted.DtedTile method)@\spxentry{distance\_to\_centre()}\spxextra{qnav.earth.dted.DtedTile method}|hyperpage}{38}
+\indexentry{DtedHandler (class in qnav.earth.dted)@\spxentry{DtedHandler}\spxextra{class in qnav.earth.dted}|hyperpage}{38}
+\indexentry{get\_elevation() (qnav.earth.dted.DtedHandler method)@\spxentry{get\_elevation()}\spxextra{qnav.earth.dted.DtedHandler method}|hyperpage}{38}
+\indexentry{get\_elevation\_vec() (qnav.earth.dted.DtedHandler method)@\spxentry{get\_elevation\_vec()}\spxextra{qnav.earth.dted.DtedHandler method}|hyperpage}{38}
+\indexentry{set\_max\_tiles() (qnav.earth.dted.DtedHandler method)@\spxentry{set\_max\_tiles()}\spxextra{qnav.earth.dted.DtedHandler method}|hyperpage}{39}
+\indexentry{clear\_cache() (qnav.earth.dted.DtedHandler method)@\spxentry{clear\_cache()}\spxextra{qnav.earth.dted.DtedHandler method}|hyperpage}{39}
+\indexentry{get\_dted\_file\_path() (in module qnav.earth.dted)@\spxentry{get\_dted\_file\_path()}\spxextra{in module qnav.earth.dted}|hyperpage}{39}
+\indexentry{read\_dted\_file() (in module qnav.earth.dted)@\spxentry{read\_dted\_file()}\spxextra{in module qnav.earth.dted}|hyperpage}{39}
+\indexentry{get\_template\_dted\_data() (in module qnav.earth.dted)@\spxentry{get\_template\_dted\_data()}\spxextra{in module qnav.earth.dted}|hyperpage}{39}
+\indexentry{module@\spxentry{module}!qnav.earth.geoid@\spxentry{qnav.earth.geoid}|hyperpage}{40}
+\indexentry{qnav.earth.geoid@\spxentry{qnav.earth.geoid}!module@\spxentry{module}|hyperpage}{40}
+\indexentry{GeoidModel (class in qnav.earth.geoid)@\spxentry{GeoidModel}\spxextra{class in qnav.earth.geoid}|hyperpage}{40}
+\indexentry{get\_height() (qnav.earth.geoid.GeoidModel method)@\spxentry{get\_height()}\spxextra{qnav.earth.geoid.GeoidModel method}|hyperpage}{40}
+\indexentry{get\_height\_vec() (qnav.earth.geoid.GeoidModel method)@\spxentry{get\_height\_vec()}\spxextra{qnav.earth.geoid.GeoidModel method}|hyperpage}{40}
+\indexentry{get\_dov() (qnav.earth.geoid.GeoidModel method)@\spxentry{get\_dov()}\spxextra{qnav.earth.geoid.GeoidModel method}|hyperpage}{40}
+\indexentry{get\_dov\_vec() (qnav.earth.geoid.GeoidModel method)@\spxentry{get\_dov\_vec()}\spxextra{qnav.earth.geoid.GeoidModel method}|hyperpage}{41}
+\indexentry{GeoidPGM (class in qnav.earth.geoid)@\spxentry{GeoidPGM}\spxextra{class in qnav.earth.geoid}|hyperpage}{41}
+\indexentry{get\_height() (qnav.earth.geoid.GeoidPGM method)@\spxentry{get\_height()}\spxextra{qnav.earth.geoid.GeoidPGM method}|hyperpage}{41}
+\indexentry{get\_height\_vec() (qnav.earth.geoid.GeoidPGM method)@\spxentry{get\_height\_vec()}\spxextra{qnav.earth.geoid.GeoidPGM method}|hyperpage}{41}
+\indexentry{get\_dov() (qnav.earth.geoid.GeoidPGM method)@\spxentry{get\_dov()}\spxextra{qnav.earth.geoid.GeoidPGM method}|hyperpage}{41}
+\indexentry{get\_dov\_vec() (qnav.earth.geoid.GeoidPGM method)@\spxentry{get\_dov\_vec()}\spxextra{qnav.earth.geoid.GeoidPGM method}|hyperpage}{42}
+\indexentry{resolution (qnav.earth.geoid.GeoidPGM property)@\spxentry{resolution}\spxextra{qnav.earth.geoid.GeoidPGM property}|hyperpage}{42}
+\indexentry{GeoidDummy (class in qnav.earth.geoid)@\spxentry{GeoidDummy}\spxextra{class in qnav.earth.geoid}|hyperpage}{42}
+\indexentry{get\_height() (qnav.earth.geoid.GeoidDummy method)@\spxentry{get\_height()}\spxextra{qnav.earth.geoid.GeoidDummy method}|hyperpage}{42}
+\indexentry{get\_height\_vec() (qnav.earth.geoid.GeoidDummy method)@\spxentry{get\_height\_vec()}\spxextra{qnav.earth.geoid.GeoidDummy method}|hyperpage}{42}
+\indexentry{get\_dov() (qnav.earth.geoid.GeoidDummy method)@\spxentry{get\_dov()}\spxextra{qnav.earth.geoid.GeoidDummy method}|hyperpage}{43}
+\indexentry{get\_dov\_vec() (qnav.earth.geoid.GeoidDummy method)@\spxentry{get\_dov\_vec()}\spxextra{qnav.earth.geoid.GeoidDummy method}|hyperpage}{43}
+\indexentry{read\_pgm\_data() (in module qnav.earth.geoid)@\spxentry{read\_pgm\_data()}\spxextra{in module qnav.earth.geoid}|hyperpage}{43}
+\indexentry{read\_pgm\_header() (in module qnav.earth.geoid)@\spxentry{read\_pgm\_header()}\spxextra{in module qnav.earth.geoid}|hyperpage}{44}
+\indexentry{module@\spxentry{module}!qnav.earth.utm@\spxentry{qnav.earth.utm}|hyperpage}{44}
+\indexentry{qnav.earth.utm@\spxentry{qnav.earth.utm}!module@\spxentry{module}|hyperpage}{44}
+\indexentry{utm2lla() (in module qnav.earth.utm)@\spxentry{utm2lla()}\spxextra{in module qnav.earth.utm}|hyperpage}{44}
+\indexentry{module@\spxentry{module}!qnav.estimation.state@\spxentry{qnav.estimation.state}|hyperpage}{45}
+\indexentry{qnav.estimation.state@\spxentry{qnav.estimation.state}!module@\spxentry{module}|hyperpage}{45}
+\indexentry{EstimatedState (class in qnav.estimation.state)@\spxentry{EstimatedState}\spxextra{class in qnav.estimation.state}|hyperpage}{45}
+\indexentry{timestamp (qnav.estimation.state.EstimatedState property)@\spxentry{timestamp}\spxextra{qnav.estimation.state.EstimatedState property}|hyperpage}{45}
+\indexentry{position (qnav.estimation.state.EstimatedState property)@\spxentry{position}\spxextra{qnav.estimation.state.EstimatedState property}|hyperpage}{45}
+\indexentry{velocity (qnav.estimation.state.EstimatedState property)@\spxentry{velocity}\spxextra{qnav.estimation.state.EstimatedState property}|hyperpage}{45}
+\indexentry{acceleration (qnav.estimation.state.EstimatedState property)@\spxentry{acceleration}\spxextra{qnav.estimation.state.EstimatedState property}|hyperpage}{45}
+\indexentry{attitude (qnav.estimation.state.EstimatedState property)@\spxentry{attitude}\spxextra{qnav.estimation.state.EstimatedState property}|hyperpage}{46}
+\indexentry{angle\_rates (qnav.estimation.state.EstimatedState property)@\spxentry{angle\_rates}\spxextra{qnav.estimation.state.EstimatedState property}|hyperpage}{46}
+\indexentry{gravity\_model (qnav.estimation.state.EstimatedState property)@\spxentry{gravity\_model}\spxextra{qnav.estimation.state.EstimatedState property}|hyperpage}{46}
+\indexentry{update\_estimates() (qnav.estimation.state.EstimatedState method)@\spxentry{update\_estimates()}\spxextra{qnav.estimation.state.EstimatedState method}|hyperpage}{46}
+\indexentry{as\_dict() (qnav.estimation.state.EstimatedState method)@\spxentry{as\_dict()}\spxextra{qnav.estimation.state.EstimatedState method}|hyperpage}{46}
+\indexentry{as\_numpy() (qnav.estimation.state.EstimatedState method)@\spxentry{as\_numpy()}\spxextra{qnav.estimation.state.EstimatedState method}|hyperpage}{47}
+\indexentry{clone() (qnav.estimation.state.EstimatedState method)@\spxentry{clone()}\spxextra{qnav.estimation.state.EstimatedState method}|hyperpage}{47}
+\indexentry{KalmanEstimatedState (class in qnav.estimation.state)@\spxentry{KalmanEstimatedState}\spxextra{class in qnav.estimation.state}|hyperpage}{47}
+\indexentry{state\_vector (qnav.estimation.state.KalmanEstimatedState property)@\spxentry{state\_vector}\spxextra{qnav.estimation.state.KalmanEstimatedState property}|hyperpage}{48}
+\indexentry{update\_estimates() (qnav.estimation.state.KalmanEstimatedState method)@\spxentry{update\_estimates()}\spxextra{qnav.estimation.state.KalmanEstimatedState method}|hyperpage}{49}
+\indexentry{module@\spxentry{module}!qnav.fusion.ins@\spxentry{qnav.fusion.ins}|hyperpage}{49}
+\indexentry{qnav.fusion.ins@\spxentry{qnav.fusion.ins}!module@\spxentry{module}|hyperpage}{49}
+\indexentry{NumericalINS (class in qnav.fusion.ins)@\spxentry{NumericalINS}\spxextra{class in qnav.fusion.ins}|hyperpage}{49}
+\indexentry{perform\_fusion() (qnav.fusion.ins.NumericalINS method)@\spxentry{perform\_fusion()}\spxextra{qnav.fusion.ins.NumericalINS method}|hyperpage}{50}
+\indexentry{RungeKutta (class in qnav.fusion.ins)@\spxentry{RungeKutta}\spxextra{class in qnav.fusion.ins}|hyperpage}{50}
+\indexentry{perform\_fusion() (qnav.fusion.ins.RungeKutta method)@\spxentry{perform\_fusion()}\spxextra{qnav.fusion.ins.RungeKutta method}|hyperpage}{50}
+\indexentry{AdamsBashforth (class in qnav.fusion.ins)@\spxentry{AdamsBashforth}\spxextra{class in qnav.fusion.ins}|hyperpage}{50}
+\indexentry{perform\_fusion() (qnav.fusion.ins.AdamsBashforth method)@\spxentry{perform\_fusion()}\spxextra{qnav.fusion.ins.AdamsBashforth method}|hyperpage}{51}
+\indexentry{module@\spxentry{module}!qnav.fusion.kalman@\spxentry{qnav.fusion.kalman}|hyperpage}{51}
+\indexentry{qnav.fusion.kalman@\spxentry{qnav.fusion.kalman}!module@\spxentry{module}|hyperpage}{51}
+\indexentry{KalmanINS (class in qnav.fusion.kalman)@\spxentry{KalmanINS}\spxextra{class in qnav.fusion.kalman}|hyperpage}{52}
+\indexentry{perform\_fusion() (qnav.fusion.kalman.KalmanINS method)@\spxentry{perform\_fusion()}\spxextra{qnav.fusion.kalman.KalmanINS method}|hyperpage}{52}
+\indexentry{state\_vector2ned() (in module qnav.fusion.kalman)@\spxentry{state\_vector2ned()}\spxextra{in module qnav.fusion.kalman}|hyperpage}{52}
+\indexentry{ned2state\_vector() (in module qnav.fusion.kalman)@\spxentry{ned2state\_vector()}\spxextra{in module qnav.fusion.kalman}|hyperpage}{52}
+\indexentry{module@\spxentry{module}!qnav.fusion.altimeter@\spxentry{qnav.fusion.altimeter}|hyperpage}{53}
+\indexentry{qnav.fusion.altimeter@\spxentry{qnav.fusion.altimeter}!module@\spxentry{module}|hyperpage}{53}
+\indexentry{FixedGainAltimeter (class in qnav.fusion.altimeter)@\spxentry{FixedGainAltimeter}\spxextra{class in qnav.fusion.altimeter}|hyperpage}{53}
+\indexentry{perform\_fusion() (qnav.fusion.altimeter.FixedGainAltimeter method)@\spxentry{perform\_fusion()}\spxextra{qnav.fusion.altimeter.FixedGainAltimeter method}|hyperpage}{53}
+\indexentry{fixed\_gain (qnav.fusion.altimeter.FixedGainAltimeter property)@\spxentry{fixed\_gain}\spxextra{qnav.fusion.altimeter.FixedGainAltimeter property}|hyperpage}{53}
+\indexentry{AlphaBetaAltimeter (class in qnav.fusion.altimeter)@\spxentry{AlphaBetaAltimeter}\spxextra{class in qnav.fusion.altimeter}|hyperpage}{53}
+\indexentry{perform\_fusion() (qnav.fusion.altimeter.AlphaBetaAltimeter method)@\spxentry{perform\_fusion()}\spxextra{qnav.fusion.altimeter.AlphaBetaAltimeter method}|hyperpage}{53}
+\indexentry{alpha (qnav.fusion.altimeter.AlphaBetaAltimeter property)@\spxentry{alpha}\spxextra{qnav.fusion.altimeter.AlphaBetaAltimeter property}|hyperpage}{53}
+\indexentry{beta (qnav.fusion.altimeter.AlphaBetaAltimeter property)@\spxentry{beta}\spxextra{qnav.fusion.altimeter.AlphaBetaAltimeter property}|hyperpage}{53}
+\indexentry{module@\spxentry{module}!qnav.gps.ephemeris@\spxentry{qnav.gps.ephemeris}|hyperpage}{54}
+\indexentry{qnav.gps.ephemeris@\spxentry{qnav.gps.ephemeris}!module@\spxentry{module}|hyperpage}{54}
+\indexentry{SatelliteType (class in qnav.gps.ephemeris)@\spxentry{SatelliteType}\spxextra{class in qnav.gps.ephemeris}|hyperpage}{54}
+\indexentry{get\_rinex\_path() (in module qnav.gps.ephemeris)@\spxentry{get\_rinex\_path()}\spxextra{in module qnav.gps.ephemeris}|hyperpage}{54}
+\indexentry{download\_rinex\_file() (in module qnav.gps.ephemeris)@\spxentry{download\_rinex\_file()}\spxextra{in module qnav.gps.ephemeris}|hyperpage}{54}
+\indexentry{download\_rinex\_files() (in module qnav.gps.ephemeris)@\spxentry{download\_rinex\_files()}\spxextra{in module qnav.gps.ephemeris}|hyperpage}{55}
+\indexentry{read\_rinex\_file() (in module qnav.gps.ephemeris)@\spxentry{read\_rinex\_file()}\spxextra{in module qnav.gps.ephemeris}|hyperpage}{55}
+\indexentry{rinex\_to\_satellite\_params() (in module qnav.gps.ephemeris)@\spxentry{rinex\_to\_satellite\_params()}\spxextra{in module qnav.gps.ephemeris}|hyperpage}{55}
+\indexentry{module@\spxentry{module}!qnav.gps.fusion@\spxentry{qnav.gps.fusion}|hyperpage}{56}
+\indexentry{qnav.gps.fusion@\spxentry{qnav.gps.fusion}!module@\spxentry{module}|hyperpage}{56}
+\indexentry{GpsFusion (class in qnav.gps.fusion)@\spxentry{GpsFusion}\spxextra{class in qnav.gps.fusion}|hyperpage}{56}
+\indexentry{solve() (qnav.gps.fusion.GpsFusion method)@\spxentry{solve()}\spxextra{qnav.gps.fusion.GpsFusion method}|hyperpage}{56}
+\indexentry{GpsFixedGainFusion (class in qnav.gps.fusion)@\spxentry{GpsFixedGainFusion}\spxextra{class in qnav.gps.fusion}|hyperpage}{56}
+\indexentry{perform\_fusion() (qnav.gps.fusion.GpsFixedGainFusion method)@\spxentry{perform\_fusion()}\spxextra{qnav.gps.fusion.GpsFixedGainFusion method}|hyperpage}{56}
+\indexentry{GpsLooseFusion (class in qnav.gps.fusion)@\spxentry{GpsLooseFusion}\spxextra{class in qnav.gps.fusion}|hyperpage}{56}
+\indexentry{perform\_fusion() (qnav.gps.fusion.GpsLooseFusion method)@\spxentry{perform\_fusion()}\spxextra{qnav.gps.fusion.GpsLooseFusion method}|hyperpage}{56}
+\indexentry{GpsTightFusion (class in qnav.gps.fusion)@\spxentry{GpsTightFusion}\spxextra{class in qnav.gps.fusion}|hyperpage}{56}
+\indexentry{perform\_fusion() (qnav.gps.fusion.GpsTightFusion method)@\spxentry{perform\_fusion()}\spxextra{qnav.gps.fusion.GpsTightFusion method}|hyperpage}{57}
+\indexentry{calculate\_cov\_mat() (in module qnav.gps.fusion)@\spxentry{calculate\_cov\_mat()}\spxextra{in module qnav.gps.fusion}|hyperpage}{57}
+\indexentry{module@\spxentry{module}!qnav.gps.satellite@\spxentry{qnav.gps.satellite}|hyperpage}{57}
+\indexentry{qnav.gps.satellite@\spxentry{qnav.gps.satellite}!module@\spxentry{module}|hyperpage}{57}
+\indexentry{satellite\_param\_fields (in module qnav.gps.satellite)@\spxentry{satellite\_param\_fields}\spxextra{in module qnav.gps.satellite}|hyperpage}{57}
+\indexentry{SatelliteParams (class in qnav.gps.satellite)@\spxentry{SatelliteParams}\spxextra{class in qnav.gps.satellite}|hyperpage}{57}
+\indexentry{c\_ic (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{c\_ic}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{c\_is (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{c\_is}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{c\_rc (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{c\_rc}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{c\_rs (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{c\_rs}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{c\_uc (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{c\_uc}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{c\_us (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{c\_us}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{clock\_bias (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{clock\_bias}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{day (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{day}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{delta\_n (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{delta\_n}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{drift\_freq\_bias (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{drift\_freq\_bias}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{drift\_rate\_message\_time (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{drift\_rate\_message\_time}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{e (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{e}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{hour (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{hour}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{i\_0 (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{i\_0}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{i\_dot (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{i\_dot}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{id (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{id}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{m\_bar\_0 (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{m\_bar\_0}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{minute (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{minute}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{month (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{month}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{omega\_0 (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{omega\_0}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{58}
+\indexentry{omega\_dot (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{omega\_dot}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{59}
+\indexentry{prn (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{prn}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{59}
+\indexentry{second (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{second}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{59}
+\indexentry{sqrt\_a (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{sqrt\_a}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{59}
+\indexentry{t\_0e (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{t\_0e}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{59}
+\indexentry{type (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{type}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{59}
+\indexentry{w (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{w}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{59}
+\indexentry{year (qnav.gps.satellite.SatelliteParams attribute)@\spxentry{year}\spxextra{qnav.gps.satellite.SatelliteParams attribute}|hyperpage}{59}
+\indexentry{Satellite (class in qnav.gps.satellite)@\spxentry{Satellite}\spxextra{class in qnav.gps.satellite}|hyperpage}{59}
+\indexentry{update() (qnav.gps.satellite.Satellite method)@\spxentry{update()}\spxextra{qnav.gps.satellite.Satellite method}|hyperpage}{59}
+\indexentry{get\_location\_azimuth\_elevation() (qnav.gps.satellite.Satellite method)@\spxentry{get\_location\_azimuth\_elevation()}\spxextra{qnav.gps.satellite.Satellite method}|hyperpage}{59}
+\indexentry{get\_measurements() (qnav.gps.satellite.Satellite method)@\spxentry{get\_measurements()}\spxextra{qnav.gps.satellite.Satellite method}|hyperpage}{59}
+\indexentry{sat\_id (qnav.gps.satellite.Satellite property)@\spxentry{sat\_id}\spxextra{qnav.gps.satellite.Satellite property}|hyperpage}{60}
+\indexentry{sat\_time (qnav.gps.satellite.Satellite property)@\spxentry{sat\_time}\spxextra{qnav.gps.satellite.Satellite property}|hyperpage}{60}
+\indexentry{position (qnav.gps.satellite.Satellite property)@\spxentry{position}\spxextra{qnav.gps.satellite.Satellite property}|hyperpage}{60}
+\indexentry{velocity (qnav.gps.satellite.Satellite property)@\spxentry{velocity}\spxextra{qnav.gps.satellite.Satellite property}|hyperpage}{60}
+\indexentry{pseudo\_range\_noise (qnav.gps.satellite.Satellite property)@\spxentry{pseudo\_range\_noise}\spxextra{qnav.gps.satellite.Satellite property}|hyperpage}{60}
+\indexentry{pseudo\_range\_rate\_noise (qnav.gps.satellite.Satellite property)@\spxentry{pseudo\_range\_rate\_noise}\spxextra{qnav.gps.satellite.Satellite property}|hyperpage}{60}
+\indexentry{module@\spxentry{module}!qnav.gps.sensor@\spxentry{qnav.gps.sensor}|hyperpage}{61}
+\indexentry{qnav.gps.sensor@\spxentry{qnav.gps.sensor}!module@\spxentry{module}|hyperpage}{61}
+\indexentry{GpsSensor (class in qnav.gps.sensor)@\spxentry{GpsSensor}\spxextra{class in qnav.gps.sensor}|hyperpage}{61}
+\indexentry{take\_measurement() (qnav.gps.sensor.GpsSensor method)@\spxentry{take\_measurement()}\spxextra{qnav.gps.sensor.GpsSensor method}|hyperpage}{61}
+\indexentry{last\_measurement (qnav.gps.sensor.GpsSensor property)@\spxentry{last\_measurement}\spxextra{qnav.gps.sensor.GpsSensor property}|hyperpage}{61}
+\indexentry{update() (qnav.gps.sensor.GpsSensor method)@\spxentry{update()}\spxextra{qnav.gps.sensor.GpsSensor method}|hyperpage}{61}
+\indexentry{module@\spxentry{module}!qnav.gps.zones@\spxentry{qnav.gps.zones}|hyperpage}{62}
+\indexentry{qnav.gps.zones@\spxentry{qnav.gps.zones}!module@\spxentry{module}|hyperpage}{62}
+\indexentry{Polygon (class in qnav.gps.zones)@\spxentry{Polygon}\spxextra{class in qnav.gps.zones}|hyperpage}{62}
+\indexentry{is\_point\_inside() (qnav.gps.zones.Polygon method)@\spxentry{is\_point\_inside()}\spxextra{qnav.gps.zones.Polygon method}|hyperpage}{62}
+\indexentry{is\_points\_inside() (qnav.gps.zones.Polygon method)@\spxentry{is\_points\_inside()}\spxextra{qnav.gps.zones.Polygon method}|hyperpage}{62}
+\indexentry{lat\_points (qnav.gps.zones.Polygon property)@\spxentry{lat\_points}\spxextra{qnav.gps.zones.Polygon property}|hyperpage}{62}
+\indexentry{lon\_points (qnav.gps.zones.Polygon property)@\spxentry{lon\_points}\spxextra{qnav.gps.zones.Polygon property}|hyperpage}{62}
+\indexentry{priority (qnav.gps.zones.Polygon property)@\spxentry{priority}\spxextra{qnav.gps.zones.Polygon property}|hyperpage}{63}
+\indexentry{FlaggedPolygon (class in qnav.gps.zones)@\spxentry{FlaggedPolygon}\spxextra{class in qnav.gps.zones}|hyperpage}{63}
+\indexentry{is\_active\_area (qnav.gps.zones.FlaggedPolygon property)@\spxentry{is\_active\_area}\spxextra{qnav.gps.zones.FlaggedPolygon property}|hyperpage}{63}
+\indexentry{FlaggedPolygonGroup (class in qnav.gps.zones)@\spxentry{FlaggedPolygonGroup}\spxextra{class in qnav.gps.zones}|hyperpage}{63}
+\indexentry{get\_point\_flag() (qnav.gps.zones.FlaggedPolygonGroup method)@\spxentry{get\_point\_flag()}\spxextra{qnav.gps.zones.FlaggedPolygonGroup method}|hyperpage}{63}
+\indexentry{polygons (qnav.gps.zones.FlaggedPolygonGroup property)@\spxentry{polygons}\spxextra{qnav.gps.zones.FlaggedPolygonGroup property}|hyperpage}{63}
+\indexentry{num\_polygons (qnav.gps.zones.FlaggedPolygonGroup property)@\spxentry{num\_polygons}\spxextra{qnav.gps.zones.FlaggedPolygonGroup property}|hyperpage}{64}
+\indexentry{get\_point\_flags() (qnav.gps.zones.FlaggedPolygonGroup method)@\spxentry{get\_point\_flags()}\spxextra{qnav.gps.zones.FlaggedPolygonGroup method}|hyperpage}{64}
+\indexentry{is\_inside\_polygon() (in module qnav.gps.zones)@\spxentry{is\_inside\_polygon()}\spxextra{in module qnav.gps.zones}|hyperpage}{64}
+\indexentry{is\_inside\_polygon\_vec() (in module qnav.gps.zones)@\spxentry{is\_inside\_polygon\_vec()}\spxextra{in module qnav.gps.zones}|hyperpage}{64}
+\indexentry{module@\spxentry{module}!qnav.gravity.base@\spxentry{qnav.gravity.base}|hyperpage}{65}
+\indexentry{qnav.gravity.base@\spxentry{qnav.gravity.base}!module@\spxentry{module}|hyperpage}{65}
+\indexentry{GravityModel (class in qnav.gravity.base)@\spxentry{GravityModel}\spxextra{class in qnav.gravity.base}|hyperpage}{65}
+\indexentry{calc\_gravity\_z() (qnav.gravity.base.GravityModel method)@\spxentry{calc\_gravity\_z()}\spxextra{qnav.gravity.base.GravityModel method}|hyperpage}{65}
+\indexentry{calc\_gravity\_xyz() (qnav.gravity.base.GravityModel method)@\spxentry{calc\_gravity\_xyz()}\spxextra{qnav.gravity.base.GravityModel method}|hyperpage}{66}
+\indexentry{calc\_vertical\_grad() (qnav.gravity.base.GravityModel method)@\spxentry{calc\_vertical\_grad()}\spxextra{qnav.gravity.base.GravityModel method}|hyperpage}{66}
+\indexentry{calc\_gravity\_z\_vec() (qnav.gravity.base.GravityModel method)@\spxentry{calc\_gravity\_z\_vec()}\spxextra{qnav.gravity.base.GravityModel method}|hyperpage}{67}
+\indexentry{calc\_gravity\_xyz\_vec() (qnav.gravity.base.GravityModel method)@\spxentry{calc\_gravity\_xyz\_vec()}\spxextra{qnav.gravity.base.GravityModel method}|hyperpage}{67}
+\indexentry{calc\_vertical\_grad\_vec() (qnav.gravity.base.GravityModel method)@\spxentry{calc\_vertical\_grad\_vec()}\spxextra{qnav.gravity.base.GravityModel method}|hyperpage}{67}
+\indexentry{base\_model (qnav.gravity.base.GravityModel property)@\spxentry{base\_model}\spxextra{qnav.gravity.base.GravityModel property}|hyperpage}{68}
+\indexentry{calculate\_curvature() (in module qnav.gravity.base)@\spxentry{calculate\_curvature()}\spxextra{in module qnav.gravity.base}|hyperpage}{68}
+\indexentry{module@\spxentry{module}!qnav.gravity.simple@\spxentry{qnav.gravity.simple}|hyperpage}{68}
+\indexentry{qnav.gravity.simple@\spxentry{qnav.gravity.simple}!module@\spxentry{module}|hyperpage}{68}
+\indexentry{FixedValue (class in qnav.gravity.simple)@\spxentry{FixedValue}\spxextra{class in qnav.gravity.simple}|hyperpage}{68}
+\indexentry{calc\_gravity\_z() (qnav.gravity.simple.FixedValue method)@\spxentry{calc\_gravity\_z()}\spxextra{qnav.gravity.simple.FixedValue method}|hyperpage}{68}
+\indexentry{calc\_gravity\_z\_vec() (qnav.gravity.simple.FixedValue method)@\spxentry{calc\_gravity\_z\_vec()}\spxextra{qnav.gravity.simple.FixedValue method}|hyperpage}{69}
+\indexentry{SimpleUniform (class in qnav.gravity.simple)@\spxentry{SimpleUniform}\spxextra{class in qnav.gravity.simple}|hyperpage}{69}
+\indexentry{calc\_gravity\_z() (qnav.gravity.simple.SimpleUniform method)@\spxentry{calc\_gravity\_z()}\spxextra{qnav.gravity.simple.SimpleUniform method}|hyperpage}{69}
+\indexentry{calc\_gravity\_z\_vec() (qnav.gravity.simple.SimpleUniform method)@\spxentry{calc\_gravity\_z\_vec()}\spxextra{qnav.gravity.simple.SimpleUniform method}|hyperpage}{69}
+\indexentry{module@\spxentry{module}!qnav.gravity.somigliana@\spxentry{qnav.gravity.somigliana}|hyperpage}{70}
+\indexentry{qnav.gravity.somigliana@\spxentry{qnav.gravity.somigliana}!module@\spxentry{module}|hyperpage}{70}
+\indexentry{Somigliana (class in qnav.gravity.somigliana)@\spxentry{Somigliana}\spxextra{class in qnav.gravity.somigliana}|hyperpage}{70}
+\indexentry{calc\_gravity\_z() (qnav.gravity.somigliana.Somigliana method)@\spxentry{calc\_gravity\_z()}\spxextra{qnav.gravity.somigliana.Somigliana method}|hyperpage}{70}
+\indexentry{calc\_gravity\_xyz() (qnav.gravity.somigliana.Somigliana method)@\spxentry{calc\_gravity\_xyz()}\spxextra{qnav.gravity.somigliana.Somigliana method}|hyperpage}{70}
+\indexentry{calc\_gravity\_z\_vec() (qnav.gravity.somigliana.Somigliana method)@\spxentry{calc\_gravity\_z\_vec()}\spxextra{qnav.gravity.somigliana.Somigliana method}|hyperpage}{71}
+\indexentry{calc\_gravity\_xyz\_vec() (qnav.gravity.somigliana.Somigliana method)@\spxentry{calc\_gravity\_xyz\_vec()}\spxextra{qnav.gravity.somigliana.Somigliana method}|hyperpage}{71}
+\indexentry{module@\spxentry{module}!qnav.gravity.nima@\spxentry{qnav.gravity.nima}|hyperpage}{72}
+\indexentry{qnav.gravity.nima@\spxentry{qnav.gravity.nima}!module@\spxentry{module}|hyperpage}{72}
+\indexentry{WGS84Gravity (class in qnav.gravity.nima)@\spxentry{WGS84Gravity}\spxextra{class in qnav.gravity.nima}|hyperpage}{72}
+\indexentry{calc\_gravity\_z() (qnav.gravity.nima.WGS84Gravity method)@\spxentry{calc\_gravity\_z()}\spxextra{qnav.gravity.nima.WGS84Gravity method}|hyperpage}{72}
+\indexentry{calc\_gravity\_xyz() (qnav.gravity.nima.WGS84Gravity method)@\spxentry{calc\_gravity\_xyz()}\spxextra{qnav.gravity.nima.WGS84Gravity method}|hyperpage}{72}
+\indexentry{module@\spxentry{module}!qnav.gravity.map@\spxentry{qnav.gravity.map}|hyperpage}{73}
+\indexentry{qnav.gravity.map@\spxentry{qnav.gravity.map}!module@\spxentry{module}|hyperpage}{73}
+\indexentry{CircularGrid (class in qnav.gravity.map)@\spxentry{CircularGrid}\spxextra{class in qnav.gravity.map}|hyperpage}{73}
+\indexentry{generate\_grid() (qnav.gravity.map.CircularGrid method)@\spxentry{generate\_grid()}\spxextra{qnav.gravity.map.CircularGrid method}|hyperpage}{73}
+\indexentry{set\_default\_grid() (in module qnav.gravity.map)@\spxentry{set\_default\_grid()}\spxextra{in module qnav.gravity.map}|hyperpage}{73}
+\indexentry{GravityMap (class in qnav.gravity.map)@\spxentry{GravityMap}\spxextra{class in qnav.gravity.map}|hyperpage}{74}
+\indexentry{get\_anomaly() (qnav.gravity.map.GravityMap method)@\spxentry{get\_anomaly()}\spxextra{qnav.gravity.map.GravityMap method}|hyperpage}{74}
+\indexentry{get\_disturbance() (qnav.gravity.map.GravityMap method)@\spxentry{get\_disturbance()}\spxextra{qnav.gravity.map.GravityMap method}|hyperpage}{74}
+\indexentry{get\_anomaly\_vec() (qnav.gravity.map.GravityMap method)@\spxentry{get\_anomaly\_vec()}\spxextra{qnav.gravity.map.GravityMap method}|hyperpage}{74}
+\indexentry{get\_disturbance\_vec() (qnav.gravity.map.GravityMap method)@\spxentry{get\_disturbance\_vec()}\spxextra{qnav.gravity.map.GravityMap method}|hyperpage}{74}
+\indexentry{calc\_gravity\_xyz() (qnav.gravity.map.GravityMap method)@\spxentry{calc\_gravity\_xyz()}\spxextra{qnav.gravity.map.GravityMap method}|hyperpage}{75}
+\indexentry{calc\_gravity\_xyz\_vec() (qnav.gravity.map.GravityMap method)@\spxentry{calc\_gravity\_xyz\_vec()}\spxextra{qnav.gravity.map.GravityMap method}|hyperpage}{75}
+\indexentry{calc\_vertical\_grad() (qnav.gravity.map.GravityMap method)@\spxentry{calc\_vertical\_grad()}\spxextra{qnav.gravity.map.GravityMap method}|hyperpage}{75}
+\indexentry{calc\_vertical\_grad\_vec() (qnav.gravity.map.GravityMap method)@\spxentry{calc\_vertical\_grad\_vec()}\spxextra{qnav.gravity.map.GravityMap method}|hyperpage}{76}
+\indexentry{base\_model (qnav.gravity.map.GravityMap property)@\spxentry{base\_model}\spxextra{qnav.gravity.map.GravityMap property}|hyperpage}{76}
+\indexentry{module@\spxentry{module}!qnav.gravity.egm@\spxentry{qnav.gravity.egm}|hyperpage}{77}
+\indexentry{qnav.gravity.egm@\spxentry{qnav.gravity.egm}!module@\spxentry{module}|hyperpage}{77}
+\indexentry{GeoidCorrection (class in qnav.gravity.egm)@\spxentry{GeoidCorrection}\spxextra{class in qnav.gravity.egm}|hyperpage}{77}
+\indexentry{calc\_gravity\_z() (qnav.gravity.egm.GeoidCorrection method)@\spxentry{calc\_gravity\_z()}\spxextra{qnav.gravity.egm.GeoidCorrection method}|hyperpage}{77}
+\indexentry{calc\_gravity\_z\_vec() (qnav.gravity.egm.GeoidCorrection method)@\spxentry{calc\_gravity\_z\_vec()}\spxextra{qnav.gravity.egm.GeoidCorrection method}|hyperpage}{77}
+\indexentry{get\_anomaly() (qnav.gravity.egm.GeoidCorrection method)@\spxentry{get\_anomaly()}\spxextra{qnav.gravity.egm.GeoidCorrection method}|hyperpage}{77}
+\indexentry{get\_anomaly\_vec() (qnav.gravity.egm.GeoidCorrection method)@\spxentry{get\_anomaly\_vec()}\spxextra{qnav.gravity.egm.GeoidCorrection method}|hyperpage}{78}
+\indexentry{get\_disturbance() (qnav.gravity.egm.GeoidCorrection method)@\spxentry{get\_disturbance()}\spxextra{qnav.gravity.egm.GeoidCorrection method}|hyperpage}{78}
+\indexentry{get\_disturbance\_vec() (qnav.gravity.egm.GeoidCorrection method)@\spxentry{get\_disturbance\_vec()}\spxextra{qnav.gravity.egm.GeoidCorrection method}|hyperpage}{78}
+\indexentry{module@\spxentry{module}!qnav.gravity.geosat@\spxentry{qnav.gravity.geosat}|hyperpage}{79}
+\indexentry{qnav.gravity.geosat@\spxentry{qnav.gravity.geosat}!module@\spxentry{module}|hyperpage}{79}
+\indexentry{Geosat44 (class in qnav.gravity.geosat)@\spxentry{Geosat44}\spxextra{class in qnav.gravity.geosat}|hyperpage}{79}
+\indexentry{calc\_gravity\_z() (qnav.gravity.geosat.Geosat44 method)@\spxentry{calc\_gravity\_z()}\spxextra{qnav.gravity.geosat.Geosat44 method}|hyperpage}{79}
+\indexentry{calc\_gravity\_z\_vec() (qnav.gravity.geosat.Geosat44 method)@\spxentry{calc\_gravity\_z\_vec()}\spxextra{qnav.gravity.geosat.Geosat44 method}|hyperpage}{79}
+\indexentry{get\_map\_value() (qnav.gravity.geosat.Geosat44 method)@\spxentry{get\_map\_value()}\spxextra{qnav.gravity.geosat.Geosat44 method}|hyperpage}{80}
+\indexentry{get\_anomaly() (qnav.gravity.geosat.Geosat44 method)@\spxentry{get\_anomaly()}\spxextra{qnav.gravity.geosat.Geosat44 method}|hyperpage}{80}
+\indexentry{get\_anomaly\_vec() (qnav.gravity.geosat.Geosat44 method)@\spxentry{get\_anomaly\_vec()}\spxextra{qnav.gravity.geosat.Geosat44 method}|hyperpage}{80}
+\indexentry{get\_disturbance() (qnav.gravity.geosat.Geosat44 method)@\spxentry{get\_disturbance()}\spxextra{qnav.gravity.geosat.Geosat44 method}|hyperpage}{81}
+\indexentry{get\_disturbance\_vec() (qnav.gravity.geosat.Geosat44 method)@\spxentry{get\_disturbance\_vec()}\spxextra{qnav.gravity.geosat.Geosat44 method}|hyperpage}{81}
+\indexentry{load\_data() (qnav.gravity.geosat.Geosat44 method)@\spxentry{load\_data()}\spxextra{qnav.gravity.geosat.Geosat44 method}|hyperpage}{81}
+\indexentry{download\_data() (qnav.gravity.geosat.Geosat44 method)@\spxentry{download\_data()}\spxextra{qnav.gravity.geosat.Geosat44 method}|hyperpage}{81}
+\indexentry{read\_geosat\_file() (in module qnav.gravity.geosat)@\spxentry{read\_geosat\_file()}\spxextra{in module qnav.gravity.geosat}|hyperpage}{81}
+\indexentry{create\_interp\_grid() (in module qnav.gravity.geosat)@\spxentry{create\_interp\_grid()}\spxextra{in module qnav.gravity.geosat}|hyperpage}{82}
+\indexentry{module@\spxentry{module}!qnav.gravity.marine@\spxentry{qnav.gravity.marine}|hyperpage}{82}
+\indexentry{qnav.gravity.marine@\spxentry{qnav.gravity.marine}!module@\spxentry{module}|hyperpage}{82}
+\indexentry{MarineGravity (class in qnav.gravity.marine)@\spxentry{MarineGravity}\spxextra{class in qnav.gravity.marine}|hyperpage}{82}
+\indexentry{calc\_gravity\_z() (qnav.gravity.marine.MarineGravity method)@\spxentry{calc\_gravity\_z()}\spxextra{qnav.gravity.marine.MarineGravity method}|hyperpage}{82}
+\indexentry{calc\_gravity\_z\_vec() (qnav.gravity.marine.MarineGravity method)@\spxentry{calc\_gravity\_z\_vec()}\spxextra{qnav.gravity.marine.MarineGravity method}|hyperpage}{83}
+\indexentry{get\_map\_value() (qnav.gravity.marine.MarineGravity method)@\spxentry{get\_map\_value()}\spxextra{qnav.gravity.marine.MarineGravity method}|hyperpage}{83}
+\indexentry{get\_anomaly() (qnav.gravity.marine.MarineGravity method)@\spxentry{get\_anomaly()}\spxextra{qnav.gravity.marine.MarineGravity method}|hyperpage}{83}
+\indexentry{get\_anomaly\_vec() (qnav.gravity.marine.MarineGravity method)@\spxentry{get\_anomaly\_vec()}\spxextra{qnav.gravity.marine.MarineGravity method}|hyperpage}{84}
+\indexentry{get\_disturbance() (qnav.gravity.marine.MarineGravity method)@\spxentry{get\_disturbance()}\spxextra{qnav.gravity.marine.MarineGravity method}|hyperpage}{84}
+\indexentry{get\_disturbance\_vec() (qnav.gravity.marine.MarineGravity method)@\spxentry{get\_disturbance\_vec()}\spxextra{qnav.gravity.marine.MarineGravity method}|hyperpage}{84}
+\indexentry{load\_data() (qnav.gravity.marine.MarineGravity method)@\spxentry{load\_data()}\spxextra{qnav.gravity.marine.MarineGravity method}|hyperpage}{85}
+\indexentry{download\_data() (qnav.gravity.marine.MarineGravity method)@\spxentry{download\_data()}\spxextra{qnav.gravity.marine.MarineGravity method}|hyperpage}{85}
+\indexentry{read\_marine\_file() (in module qnav.gravity.marine)@\spxentry{read\_marine\_file()}\spxextra{in module qnav.gravity.marine}|hyperpage}{85}
+\indexentry{module@\spxentry{module}!qnav.gravity.ggm\_plus@\spxentry{qnav.gravity.ggm\_plus}|hyperpage}{85}
+\indexentry{qnav.gravity.ggm\_plus@\spxentry{qnav.gravity.ggm\_plus}!module@\spxentry{module}|hyperpage}{85}
+\indexentry{GGMPlusAcc (class in qnav.gravity.ggm\_plus)@\spxentry{GGMPlusAcc}\spxextra{class in qnav.gravity.ggm\_plus}|hyperpage}{85}
+\indexentry{calc\_gravity\_z() (qnav.gravity.ggm\_plus.GGMPlusAcc method)@\spxentry{calc\_gravity\_z()}\spxextra{qnav.gravity.ggm\_plus.GGMPlusAcc method}|hyperpage}{85}
+\indexentry{calc\_gravity\_z\_vec() (qnav.gravity.ggm\_plus.GGMPlusAcc method)@\spxentry{calc\_gravity\_z\_vec()}\spxextra{qnav.gravity.ggm\_plus.GGMPlusAcc method}|hyperpage}{86}
+\indexentry{get\_anomaly() (qnav.gravity.ggm\_plus.GGMPlusAcc method)@\spxentry{get\_anomaly()}\spxextra{qnav.gravity.ggm\_plus.GGMPlusAcc method}|hyperpage}{86}
+\indexentry{get\_anomaly\_vec() (qnav.gravity.ggm\_plus.GGMPlusAcc method)@\spxentry{get\_anomaly\_vec()}\spxextra{qnav.gravity.ggm\_plus.GGMPlusAcc method}|hyperpage}{86}
+\indexentry{get\_disturbance() (qnav.gravity.ggm\_plus.GGMPlusAcc method)@\spxentry{get\_disturbance()}\spxextra{qnav.gravity.ggm\_plus.GGMPlusAcc method}|hyperpage}{87}
+\indexentry{get\_disturbance\_vec() (qnav.gravity.ggm\_plus.GGMPlusAcc method)@\spxentry{get\_disturbance\_vec()}\spxextra{qnav.gravity.ggm\_plus.GGMPlusAcc method}|hyperpage}{87}
+\indexentry{get\_map\_value() (qnav.gravity.ggm\_plus.GGMPlusAcc method)@\spxentry{get\_map\_value()}\spxextra{qnav.gravity.ggm\_plus.GGMPlusAcc method}|hyperpage}{87}
+\indexentry{get\_map\_values() (qnav.gravity.ggm\_plus.GGMPlusAcc method)@\spxentry{get\_map\_values()}\spxextra{qnav.gravity.ggm\_plus.GGMPlusAcc method}|hyperpage}{88}
+\indexentry{download\_data() (qnav.gravity.ggm\_plus.GGMPlusAcc method)@\spxentry{download\_data()}\spxextra{qnav.gravity.ggm\_plus.GGMPlusAcc method}|hyperpage}{88}
+\indexentry{GGMPlusDist (class in qnav.gravity.ggm\_plus)@\spxentry{GGMPlusDist}\spxextra{class in qnav.gravity.ggm\_plus}|hyperpage}{88}
+\indexentry{get\_map\_value() (qnav.gravity.ggm\_plus.GGMPlusDist method)@\spxentry{get\_map\_value()}\spxextra{qnav.gravity.ggm\_plus.GGMPlusDist method}|hyperpage}{88}
+\indexentry{get\_map\_values() (qnav.gravity.ggm\_plus.GGMPlusDist method)@\spxentry{get\_map\_values()}\spxextra{qnav.gravity.ggm\_plus.GGMPlusDist method}|hyperpage}{88}
+\indexentry{calc\_gravity\_z() (qnav.gravity.ggm\_plus.GGMPlusDist method)@\spxentry{calc\_gravity\_z()}\spxextra{qnav.gravity.ggm\_plus.GGMPlusDist method}|hyperpage}{89}
+\indexentry{calc\_gravity\_z\_vec() (qnav.gravity.ggm\_plus.GGMPlusDist method)@\spxentry{calc\_gravity\_z\_vec()}\spxextra{qnav.gravity.ggm\_plus.GGMPlusDist method}|hyperpage}{89}
+\indexentry{get\_disturbance() (qnav.gravity.ggm\_plus.GGMPlusDist method)@\spxentry{get\_disturbance()}\spxextra{qnav.gravity.ggm\_plus.GGMPlusDist method}|hyperpage}{89}
+\indexentry{get\_disturbance\_vec() (qnav.gravity.ggm\_plus.GGMPlusDist method)@\spxentry{get\_disturbance\_vec()}\spxextra{qnav.gravity.ggm\_plus.GGMPlusDist method}|hyperpage}{90}
+\indexentry{read\_ggm\_file() (in module qnav.gravity.ggm\_plus)@\spxentry{read\_ggm\_file()}\spxextra{in module qnav.gravity.ggm\_plus}|hyperpage}{90}
+\indexentry{get\_empty\_ggm\_tile() (in module qnav.gravity.ggm\_plus)@\spxentry{get\_empty\_ggm\_tile()}\spxextra{in module qnav.gravity.ggm\_plus}|hyperpage}{90}
+\indexentry{module@\spxentry{module}!qnav.gravity.srtm2gravity@\spxentry{qnav.gravity.srtm2gravity}|hyperpage}{90}
+\indexentry{qnav.gravity.srtm2gravity@\spxentry{qnav.gravity.srtm2gravity}!module@\spxentry{module}|hyperpage}{90}
+\indexentry{SRTM2GravityFull (class in qnav.gravity.srtm2gravity)@\spxentry{SRTM2GravityFull}\spxextra{class in qnav.gravity.srtm2gravity}|hyperpage}{90}
+\indexentry{SRTM2GravityRes (class in qnav.gravity.srtm2gravity)@\spxentry{SRTM2GravityRes}\spxextra{class in qnav.gravity.srtm2gravity}|hyperpage}{91}
+\indexentry{read\_srtm\_file() (in module qnav.gravity.srtm2gravity)@\spxentry{read\_srtm\_file()}\spxextra{in module qnav.gravity.srtm2gravity}|hyperpage}{91}
+\indexentry{get\_empty\_srtm\_tile() (in module qnav.gravity.srtm2gravity)@\spxentry{get\_empty\_srtm\_tile()}\spxextra{in module qnav.gravity.srtm2gravity}|hyperpage}{91}
+\indexentry{module@\spxentry{module}!qnav.gravity.irish@\spxentry{qnav.gravity.irish}|hyperpage}{91}
+\indexentry{qnav.gravity.irish@\spxentry{qnav.gravity.irish}!module@\spxentry{module}|hyperpage}{91}
+\indexentry{IrishSeaGravity (class in qnav.gravity.irish)@\spxentry{IrishSeaGravity}\spxextra{class in qnav.gravity.irish}|hyperpage}{91}
+\indexentry{load\_data() (qnav.gravity.irish.IrishSeaGravity method)@\spxentry{load\_data()}\spxextra{qnav.gravity.irish.IrishSeaGravity method}|hyperpage}{91}
+\indexentry{get\_map\_value() (qnav.gravity.irish.IrishSeaGravity method)@\spxentry{get\_map\_value()}\spxextra{qnav.gravity.irish.IrishSeaGravity method}|hyperpage}{91}
+\indexentry{calc\_gravity\_z() (qnav.gravity.irish.IrishSeaGravity method)@\spxentry{calc\_gravity\_z()}\spxextra{qnav.gravity.irish.IrishSeaGravity method}|hyperpage}{91}
+\indexentry{calc\_gravity\_z\_vec() (qnav.gravity.irish.IrishSeaGravity method)@\spxentry{calc\_gravity\_z\_vec()}\spxextra{qnav.gravity.irish.IrishSeaGravity method}|hyperpage}{92}
+\indexentry{get\_anomaly() (qnav.gravity.irish.IrishSeaGravity method)@\spxentry{get\_anomaly()}\spxextra{qnav.gravity.irish.IrishSeaGravity method}|hyperpage}{92}
+\indexentry{get\_anomaly\_vec() (qnav.gravity.irish.IrishSeaGravity method)@\spxentry{get\_anomaly\_vec()}\spxextra{qnav.gravity.irish.IrishSeaGravity method}|hyperpage}{92}
+\indexentry{get\_disturbance() (qnav.gravity.irish.IrishSeaGravity method)@\spxentry{get\_disturbance()}\spxextra{qnav.gravity.irish.IrishSeaGravity method}|hyperpage}{93}
+\indexentry{get\_disturbance\_vec() (qnav.gravity.irish.IrishSeaGravity method)@\spxentry{get\_disturbance\_vec()}\spxextra{qnav.gravity.irish.IrishSeaGravity method}|hyperpage}{93}
+\indexentry{read\_irish\_gravity\_file() (in module qnav.gravity.irish)@\spxentry{read\_irish\_gravity\_file()}\spxextra{in module qnav.gravity.irish}|hyperpage}{93}
+\indexentry{read\_irish\_ers\_file() (in module qnav.gravity.irish)@\spxentry{read\_irish\_ers\_file()}\spxextra{in module qnav.gravity.irish}|hyperpage}{94}
+\indexentry{module@\spxentry{module}!qnav.input.config@\spxentry{qnav.input.config}|hyperpage}{94}
+\indexentry{qnav.input.config@\spxentry{qnav.input.config}!module@\spxentry{module}|hyperpage}{94}
+\indexentry{get\_configuration() (in module qnav.input.config)@\spxentry{get\_configuration()}\spxextra{in module qnav.input.config}|hyperpage}{94}
+\indexentry{get\_trajectory() (in module qnav.input.config)@\spxentry{get\_trajectory()}\spxextra{in module qnav.input.config}|hyperpage}{94}
+\indexentry{get\_estimation() (in module qnav.input.config)@\spxentry{get\_estimation()}\spxextra{in module qnav.input.config}|hyperpage}{95}
+\indexentry{get\_platform\_hardware() (in module qnav.input.config)@\spxentry{get\_platform\_hardware()}\spxextra{in module qnav.input.config}|hyperpage}{95}
+\indexentry{get\_platform\_clock() (in module qnav.input.config)@\spxentry{get\_platform\_clock()}\spxextra{in module qnav.input.config}|hyperpage}{95}
+\indexentry{get\_collector() (in module qnav.input.config)@\spxentry{get\_collector()}\spxextra{in module qnav.input.config}|hyperpage}{95}
+\indexentry{get\_displayer() (in module qnav.input.config)@\spxentry{get\_displayer()}\spxextra{in module qnav.input.config}|hyperpage}{96}
+\indexentry{get\_results\_settings() (in module qnav.input.config)@\spxentry{get\_results\_settings()}\spxextra{in module qnav.input.config}|hyperpage}{96}
+\indexentry{get\_figure\_settings() (in module qnav.input.config)@\spxentry{get\_figure\_settings()}\spxextra{in module qnav.input.config}|hyperpage}{96}
+\indexentry{print\_banner() (in module qnav.input.config)@\spxentry{print\_banner()}\spxextra{in module qnav.input.config}|hyperpage}{96}
+\indexentry{print\_line() (in module qnav.input.config)@\spxentry{print\_line()}\spxextra{in module qnav.input.config}|hyperpage}{97}
+\indexentry{module@\spxentry{module}!qnav.input.config\_handler@\spxentry{qnav.input.config\_handler}|hyperpage}{97}
+\indexentry{qnav.input.config\_handler@\spxentry{qnav.input.config\_handler}!module@\spxentry{module}|hyperpage}{97}
+\indexentry{ConfigHandler (class in qnav.input.config\_handler)@\spxentry{ConfigHandler}\spxextra{class in qnav.input.config\_handler}|hyperpage}{97}
+\indexentry{get\_config\_name() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{get\_config\_name()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{97}
+\indexentry{load\_configuration() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{load\_configuration()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{97}
+\indexentry{append\_config() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{append\_config()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{97}
+\indexentry{expand\_section() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{expand\_section()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{98}
+\indexentry{quick\_append\_config() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{quick\_append\_config()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{98}
+\indexentry{get\_all\_values() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{get\_all\_values()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{98}
+\indexentry{get\_sections() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{get\_sections()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{98}
+\indexentry{get\_str() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{get\_str()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{99}
+\indexentry{get\_str\_alpha() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{get\_str\_alpha()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{99}
+\indexentry{get\_int() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{get\_int()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{99}
+\indexentry{get\_float() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{get\_float()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{100}
+\indexentry{get\_bool() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{get\_bool()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{100}
+\indexentry{get\_csv\_numeric() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{get\_csv\_numeric()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{100}
+\indexentry{get\_csv\_str() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{get\_csv\_str()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{101}
+\indexentry{get\_value\_filepath() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{get\_value\_filepath()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{101}
+\indexentry{get\_value\_filepath\_str() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{get\_value\_filepath\_str()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{101}
+\indexentry{is\_value\_set() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{is\_value\_set()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{102}
+\indexentry{overwrite\_value() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{overwrite\_value()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{102}
+\indexentry{copy\_file() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{copy\_file()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{102}
+\indexentry{write\_file() (qnav.input.config\_handler.ConfigHandler method)@\spxentry{write\_file()}\spxextra{qnav.input.config\_handler.ConfigHandler method}|hyperpage}{102}
+\indexentry{NavConfigWarning@\spxentry{NavConfigWarning}|hyperpage}{102}
+\indexentry{NavConfigError@\spxentry{NavConfigError}|hyperpage}{103}
+\indexentry{module@\spxentry{module}!qnav.measurement.sensor@\spxentry{qnav.measurement.sensor}|hyperpage}{103}
+\indexentry{qnav.measurement.sensor@\spxentry{qnav.measurement.sensor}!module@\spxentry{module}|hyperpage}{103}
+\indexentry{Sensor (class in qnav.measurement.sensor)@\spxentry{Sensor}\spxextra{class in qnav.measurement.sensor}|hyperpage}{103}
+\indexentry{take\_measurement() (qnav.measurement.sensor.Sensor method)@\spxentry{take\_measurement()}\spxextra{qnav.measurement.sensor.Sensor method}|hyperpage}{103}
+\indexentry{last\_measurement (qnav.measurement.sensor.Sensor property)@\spxentry{last\_measurement}\spxextra{qnav.measurement.sensor.Sensor property}|hyperpage}{103}
+\indexentry{update() (qnav.measurement.sensor.Sensor method)@\spxentry{update()}\spxextra{qnav.measurement.sensor.Sensor method}|hyperpage}{103}
+\indexentry{last\_update (qnav.measurement.sensor.Sensor property)@\spxentry{last\_update}\spxextra{qnav.measurement.sensor.Sensor property}|hyperpage}{104}
+\indexentry{next\_update (qnav.measurement.sensor.Sensor property)@\spxentry{next\_update}\spxextra{qnav.measurement.sensor.Sensor property}|hyperpage}{104}
+\indexentry{frequency (qnav.measurement.sensor.Sensor property)@\spxentry{frequency}\spxextra{qnav.measurement.sensor.Sensor property}|hyperpage}{104}
+\indexentry{time\_step (qnav.measurement.sensor.Sensor property)@\spxentry{time\_step}\spxextra{qnav.measurement.sensor.Sensor property}|hyperpage}{104}
+\indexentry{FusionTrigger (class in qnav.measurement.sensor)@\spxentry{FusionTrigger}\spxextra{class in qnav.measurement.sensor}|hyperpage}{104}
+\indexentry{SensorFusion (class in qnav.measurement.sensor)@\spxentry{SensorFusion}\spxextra{class in qnav.measurement.sensor}|hyperpage}{104}
+\indexentry{trigger (qnav.measurement.sensor.SensorFusion property)@\spxentry{trigger}\spxextra{qnav.measurement.sensor.SensorFusion property}|hyperpage}{104}
+\indexentry{sensors (qnav.measurement.sensor.SensorFusion property)@\spxentry{sensors}\spxextra{qnav.measurement.sensor.SensorFusion property}|hyperpage}{104}
+\indexentry{perform\_fusion() (qnav.measurement.sensor.SensorFusion method)@\spxentry{perform\_fusion()}\spxextra{qnav.measurement.sensor.SensorFusion method}|hyperpage}{105}
+\indexentry{module@\spxentry{module}!qnav.measurement.platform@\spxentry{qnav.measurement.platform}|hyperpage}{105}
+\indexentry{qnav.measurement.platform@\spxentry{qnav.measurement.platform}!module@\spxentry{module}|hyperpage}{105}
+\indexentry{SensorAxis (class in qnav.measurement.platform)@\spxentry{SensorAxis}\spxextra{class in qnav.measurement.platform}|hyperpage}{105}
+\indexentry{sensor\_angles\_deg (qnav.measurement.platform.SensorAxis property)@\spxentry{sensor\_angles\_deg}\spxextra{qnav.measurement.platform.SensorAxis property}|hyperpage}{105}
+\indexentry{sensor\_angles\_rad (qnav.measurement.platform.SensorAxis property)@\spxentry{sensor\_angles\_rad}\spxextra{qnav.measurement.platform.SensorAxis property}|hyperpage}{105}
+\indexentry{lever\_arm (qnav.measurement.platform.SensorAxis property)@\spxentry{lever\_arm}\spxextra{qnav.measurement.platform.SensorAxis property}|hyperpage}{106}
+\indexentry{body2sensor\_mat (qnav.measurement.platform.SensorAxis property)@\spxentry{body2sensor\_mat}\spxextra{qnav.measurement.platform.SensorAxis property}|hyperpage}{106}
+\indexentry{module@\spxentry{module}!qnav.measurement.error\_properties@\spxentry{qnav.measurement.error\_properties}|hyperpage}{106}
+\indexentry{qnav.measurement.error\_properties@\spxentry{qnav.measurement.error\_properties}!module@\spxentry{module}|hyperpage}{106}
+\indexentry{ErrorProperties (class in qnav.measurement.error\_properties)@\spxentry{ErrorProperties}\spxextra{class in qnav.measurement.error\_properties}|hyperpage}{106}
+\indexentry{bias\_error (qnav.measurement.error\_properties.ErrorProperties property)@\spxentry{bias\_error}\spxextra{qnav.measurement.error\_properties.ErrorProperties property}|hyperpage}{107}
+\indexentry{bias\_drift\_rate (qnav.measurement.error\_properties.ErrorProperties property)@\spxentry{bias\_drift\_rate}\spxextra{qnav.measurement.error\_properties.ErrorProperties property}|hyperpage}{107}
+\indexentry{scale\_error (qnav.measurement.error\_properties.ErrorProperties property)@\spxentry{scale\_error}\spxextra{qnav.measurement.error\_properties.ErrorProperties property}|hyperpage}{107}
+\indexentry{non\_orth\_error (qnav.measurement.error\_properties.ErrorProperties property)@\spxentry{non\_orth\_error}\spxextra{qnav.measurement.error\_properties.ErrorProperties property}|hyperpage}{108}
+\indexentry{avg\_meas\_noise (qnav.measurement.error\_properties.ErrorProperties property)@\spxentry{avg\_meas\_noise}\spxextra{qnav.measurement.error\_properties.ErrorProperties property}|hyperpage}{108}
+\indexentry{error\_matrix (qnav.measurement.error\_properties.ErrorProperties property)@\spxentry{error\_matrix}\spxextra{qnav.measurement.error\_properties.ErrorProperties property}|hyperpage}{108}
+\indexentry{module@\spxentry{module}!qnav.measurement.accelerometer@\spxentry{qnav.measurement.accelerometer}|hyperpage}{108}
+\indexentry{qnav.measurement.accelerometer@\spxentry{qnav.measurement.accelerometer}!module@\spxentry{module}|hyperpage}{108}
+\indexentry{Accelerometer (class in qnav.measurement.accelerometer)@\spxentry{Accelerometer}\spxextra{class in qnav.measurement.accelerometer}|hyperpage}{108}
+\indexentry{take\_measurement() (qnav.measurement.accelerometer.Accelerometer method)@\spxentry{take\_measurement()}\spxextra{qnav.measurement.accelerometer.Accelerometer method}|hyperpage}{109}
+\indexentry{last\_measurement (qnav.measurement.accelerometer.Accelerometer property)@\spxentry{last\_measurement}\spxextra{qnav.measurement.accelerometer.Accelerometer property}|hyperpage}{109}
+\indexentry{update() (qnav.measurement.accelerometer.Accelerometer method)@\spxentry{update()}\spxextra{qnav.measurement.accelerometer.Accelerometer method}|hyperpage}{109}
+\indexentry{sensor\_axis (qnav.measurement.accelerometer.Accelerometer property)@\spxentry{sensor\_axis}\spxextra{qnav.measurement.accelerometer.Accelerometer property}|hyperpage}{109}
+\indexentry{module@\spxentry{module}!qnav.measurement.gyroscope@\spxentry{qnav.measurement.gyroscope}|hyperpage}{109}
+\indexentry{qnav.measurement.gyroscope@\spxentry{qnav.measurement.gyroscope}!module@\spxentry{module}|hyperpage}{109}
+\indexentry{Gyroscope (class in qnav.measurement.gyroscope)@\spxentry{Gyroscope}\spxextra{class in qnav.measurement.gyroscope}|hyperpage}{109}
+\indexentry{take\_measurement() (qnav.measurement.gyroscope.Gyroscope method)@\spxentry{take\_measurement()}\spxextra{qnav.measurement.gyroscope.Gyroscope method}|hyperpage}{110}
+\indexentry{last\_measurement (qnav.measurement.gyroscope.Gyroscope property)@\spxentry{last\_measurement}\spxextra{qnav.measurement.gyroscope.Gyroscope property}|hyperpage}{110}
+\indexentry{update() (qnav.measurement.gyroscope.Gyroscope method)@\spxentry{update()}\spxextra{qnav.measurement.gyroscope.Gyroscope method}|hyperpage}{110}
+\indexentry{sensor\_axis (qnav.measurement.gyroscope.Gyroscope property)@\spxentry{sensor\_axis}\spxextra{qnav.measurement.gyroscope.Gyroscope property}|hyperpage}{110}
+\indexentry{module@\spxentry{module}!qnav.measurement.altimeter@\spxentry{qnav.measurement.altimeter}|hyperpage}{110}
+\indexentry{qnav.measurement.altimeter@\spxentry{qnav.measurement.altimeter}!module@\spxentry{module}|hyperpage}{110}
+\indexentry{Altimeter (class in qnav.measurement.altimeter)@\spxentry{Altimeter}\spxextra{class in qnav.measurement.altimeter}|hyperpage}{111}
+\indexentry{take\_measurement() (qnav.measurement.altimeter.Altimeter method)@\spxentry{take\_measurement()}\spxextra{qnav.measurement.altimeter.Altimeter method}|hyperpage}{111}
+\indexentry{last\_measurement (qnav.measurement.altimeter.Altimeter property)@\spxentry{last\_measurement}\spxextra{qnav.measurement.altimeter.Altimeter property}|hyperpage}{111}
+\indexentry{update() (qnav.measurement.altimeter.Altimeter method)@\spxentry{update()}\spxextra{qnav.measurement.altimeter.Altimeter method}|hyperpage}{111}
+\indexentry{module@\spxentry{module}!qnav.measurement.clock@\spxentry{qnav.measurement.clock}|hyperpage}{111}
+\indexentry{qnav.measurement.clock@\spxentry{qnav.measurement.clock}!module@\spxentry{module}|hyperpage}{111}
+\indexentry{Clock (class in qnav.measurement.clock)@\spxentry{Clock}\spxextra{class in qnav.measurement.clock}|hyperpage}{111}
+\indexentry{update() (qnav.measurement.clock.Clock method)@\spxentry{update()}\spxextra{qnav.measurement.clock.Clock method}|hyperpage}{111}
+\indexentry{get\_time() (qnav.measurement.clock.Clock method)@\spxentry{get\_time()}\spxextra{qnav.measurement.clock.Clock method}|hyperpage}{112}
+\indexentry{DummyClock (class in qnav.measurement.clock)@\spxentry{DummyClock}\spxextra{class in qnav.measurement.clock}|hyperpage}{112}
+\indexentry{update() (qnav.measurement.clock.DummyClock method)@\spxentry{update()}\spxextra{qnav.measurement.clock.DummyClock method}|hyperpage}{112}
+\indexentry{get\_time() (qnav.measurement.clock.DummyClock method)@\spxentry{get\_time()}\spxextra{qnav.measurement.clock.DummyClock method}|hyperpage}{112}
+\indexentry{module@\spxentry{module}!qnav.output.data@\spxentry{qnav.output.data}|hyperpage}{112}
+\indexentry{qnav.output.data@\spxentry{qnav.output.data}!module@\spxentry{module}|hyperpage}{112}
+\indexentry{ResultsTable (class in qnav.output.data)@\spxentry{ResultsTable}\spxextra{class in qnav.output.data}|hyperpage}{112}
+\indexentry{is\_data\_loaded (qnav.output.data.ResultsTable property)@\spxentry{is\_data\_loaded}\spxextra{qnav.output.data.ResultsTable property}|hyperpage}{112}
+\indexentry{module@\spxentry{module}!qnav.output.formats@\spxentry{qnav.output.formats}|hyperpage}{113}
+\indexentry{qnav.output.formats@\spxentry{qnav.output.formats}!module@\spxentry{module}|hyperpage}{113}
+\indexentry{FileFormat (class in qnav.output.formats)@\spxentry{FileFormat}\spxextra{class in qnav.output.formats}|hyperpage}{113}
+\indexentry{SaveFormat (class in qnav.output.formats)@\spxentry{SaveFormat}\spxextra{class in qnav.output.formats}|hyperpage}{113}
+\indexentry{save\_as\_csv() (in module qnav.output.formats)@\spxentry{save\_as\_csv()}\spxextra{in module qnav.output.formats}|hyperpage}{113}
+\indexentry{save\_as\_csv\_comp() (in module qnav.output.formats)@\spxentry{save\_as\_csv\_comp()}\spxextra{in module qnav.output.formats}|hyperpage}{113}
+\indexentry{save\_as\_numpy() (in module qnav.output.formats)@\spxentry{save\_as\_numpy()}\spxextra{in module qnav.output.formats}|hyperpage}{113}
+\indexentry{save\_as\_numpy\_comp() (in module qnav.output.formats)@\spxentry{save\_as\_numpy\_comp()}\spxextra{in module qnav.output.formats}|hyperpage}{113}
+\indexentry{save\_as\_binary() (in module qnav.output.formats)@\spxentry{save\_as\_binary()}\spxextra{in module qnav.output.formats}|hyperpage}{113}
+\indexentry{save\_as\_matlab() (in module qnav.output.formats)@\spxentry{save\_as\_matlab()}\spxextra{in module qnav.output.formats}|hyperpage}{114}
+\indexentry{save\_as\_matlab\_comp() (in module qnav.output.formats)@\spxentry{save\_as\_matlab\_comp()}\spxextra{in module qnav.output.formats}|hyperpage}{114}
+\indexentry{save\_as() (in module qnav.output.formats)@\spxentry{save\_as()}\spxextra{in module qnav.output.formats}|hyperpage}{114}
+\indexentry{module@\spxentry{module}!qnav.output.figures@\spxentry{qnav.output.figures}|hyperpage}{114}
+\indexentry{qnav.output.figures@\spxentry{qnav.output.figures}!module@\spxentry{module}|hyperpage}{114}
+\indexentry{module@\spxentry{module}!qnav.output.summary@\spxentry{qnav.output.summary}|hyperpage}{114}
+\indexentry{qnav.output.summary@\spxentry{qnav.output.summary}!module@\spxentry{module}|hyperpage}{114}
+\indexentry{module@\spxentry{module}!qnav.quantum.base@\spxentry{qnav.quantum.base}|hyperpage}{115}
+\indexentry{qnav.quantum.base@\spxentry{qnav.quantum.base}!module@\spxentry{module}|hyperpage}{115}
+\indexentry{ConceptQuantumImu (class in qnav.quantum.base)@\spxentry{ConceptQuantumImu}\spxextra{class in qnav.quantum.base}|hyperpage}{115}
+\indexentry{take\_measurement() (qnav.quantum.base.ConceptQuantumImu method)@\spxentry{take\_measurement()}\spxextra{qnav.quantum.base.ConceptQuantumImu method}|hyperpage}{115}
+\indexentry{update() (qnav.quantum.base.ConceptQuantumImu method)@\spxentry{update()}\spxextra{qnav.quantum.base.ConceptQuantumImu method}|hyperpage}{115}
+\indexentry{reset() (qnav.quantum.base.ConceptQuantumImu method)@\spxentry{reset()}\spxextra{qnav.quantum.base.ConceptQuantumImu method}|hyperpage}{115}
+\indexentry{last\_measurement (qnav.quantum.base.ConceptQuantumImu property)@\spxentry{last\_measurement}\spxextra{qnav.quantum.base.ConceptQuantumImu property}|hyperpage}{115}
+\indexentry{num\_active\_steps (qnav.quantum.base.ConceptQuantumImu property)@\spxentry{num\_active\_steps}\spxextra{qnav.quantum.base.ConceptQuantumImu property}|hyperpage}{115}
+\indexentry{num\_steps (qnav.quantum.base.ConceptQuantumImu property)@\spxentry{num\_steps}\spxextra{qnav.quantum.base.ConceptQuantumImu property}|hyperpage}{116}
+\indexentry{sensor\_axis (qnav.quantum.base.ConceptQuantumImu property)@\spxentry{sensor\_axis}\spxextra{qnav.quantum.base.ConceptQuantumImu property}|hyperpage}{116}
+\indexentry{ConceptQuantumFusion (class in qnav.quantum.base)@\spxentry{ConceptQuantumFusion}\spxextra{class in qnav.quantum.base}|hyperpage}{116}
+\indexentry{perform\_fusion() (qnav.quantum.base.ConceptQuantumFusion method)@\spxentry{perform\_fusion()}\spxextra{qnav.quantum.base.ConceptQuantumFusion method}|hyperpage}{116}
+\indexentry{reset() (qnav.quantum.base.ConceptQuantumFusion method)@\spxentry{reset()}\spxextra{qnav.quantum.base.ConceptQuantumFusion method}|hyperpage}{116}
+\indexentry{sensors (qnav.quantum.base.ConceptQuantumFusion property)@\spxentry{sensors}\spxextra{qnav.quantum.base.ConceptQuantumFusion property}|hyperpage}{116}
+\indexentry{module@\spxentry{module}!qnav.quantum.realistic@\spxentry{qnav.quantum.realistic}|hyperpage}{117}
+\indexentry{qnav.quantum.realistic@\spxentry{qnav.quantum.realistic}!module@\spxentry{module}|hyperpage}{117}
+\indexentry{ColdAtomInterferometer (class in qnav.quantum.realistic)@\spxentry{ColdAtomInterferometer}\spxextra{class in qnav.quantum.realistic}|hyperpage}{117}
+\indexentry{QuantumIMU (class in qnav.quantum.realistic)@\spxentry{QuantumIMU}\spxextra{class in qnav.quantum.realistic}|hyperpage}{117}
+\indexentry{take\_measurement() (qnav.quantum.realistic.QuantumIMU method)@\spxentry{take\_measurement()}\spxextra{qnav.quantum.realistic.QuantumIMU method}|hyperpage}{117}
+\indexentry{reset() (qnav.quantum.realistic.QuantumIMU method)@\spxentry{reset()}\spxextra{qnav.quantum.realistic.QuantumIMU method}|hyperpage}{117}
+\indexentry{ang\_diff() (in module qnav.quantum.realistic)@\spxentry{ang\_diff()}\spxextra{in module qnav.quantum.realistic}|hyperpage}{117}
+\indexentry{module@\spxentry{module}!qnav.quantum.particle\_filter@\spxentry{qnav.quantum.particle\_filter}|hyperpage}{118}
+\indexentry{qnav.quantum.particle\_filter@\spxentry{qnav.quantum.particle\_filter}!module@\spxentry{module}|hyperpage}{118}
+\indexentry{ParticleFilterParams (class in qnav.quantum.particle\_filter)@\spxentry{ParticleFilterParams}\spxextra{class in qnav.quantum.particle\_filter}|hyperpage}{118}
+\indexentry{QuantumPFFusion (class in qnav.quantum.particle\_filter)@\spxentry{QuantumPFFusion}\spxextra{class in qnav.quantum.particle\_filter}|hyperpage}{118}
+\indexentry{weighted\_cov() (in module qnav.quantum.particle\_filter)@\spxentry{weighted\_cov()}\spxextra{in module qnav.quantum.particle\_filter}|hyperpage}{118}
+\indexentry{module@\spxentry{module}!qnav.quantum.misalignment@\spxentry{qnav.quantum.misalignment}|hyperpage}{119}
+\indexentry{qnav.quantum.misalignment@\spxentry{qnav.quantum.misalignment}!module@\spxentry{module}|hyperpage}{119}
+\indexentry{QuantumPFMFusion (class in qnav.quantum.misalignment)@\spxentry{QuantumPFMFusion}\spxextra{class in qnav.quantum.misalignment}|hyperpage}{119}
+\indexentry{module@\spxentry{module}!qnav.quantum.gravity\_gradient@\spxentry{qnav.quantum.gravity\_gradient}|hyperpage}{119}
+\indexentry{qnav.quantum.gravity\_gradient@\spxentry{qnav.quantum.gravity\_gradient}!module@\spxentry{module}|hyperpage}{119}
+\indexentry{GravityGradInterferometer (class in qnav.quantum.gravity\_gradient)@\spxentry{GravityGradInterferometer}\spxextra{class in qnav.quantum.gravity\_gradient}|hyperpage}{119}
+\indexentry{k\_eff (qnav.quantum.gravity\_gradient.GravityGradInterferometer property)@\spxentry{k\_eff}\spxextra{qnav.quantum.gravity\_gradient.GravityGradInterferometer property}|hyperpage}{120}
+\indexentry{GravityGradiometer (class in qnav.quantum.gravity\_gradient)@\spxentry{GravityGradiometer}\spxextra{class in qnav.quantum.gravity\_gradient}|hyperpage}{120}
+\indexentry{take\_measurement() (qnav.quantum.gravity\_gradient.GravityGradiometer method)@\spxentry{take\_measurement()}\spxextra{qnav.quantum.gravity\_gradient.GravityGradiometer method}|hyperpage}{120}
+\indexentry{reset() (qnav.quantum.gravity\_gradient.GravityGradiometer method)@\spxentry{reset()}\spxextra{qnav.quantum.gravity\_gradient.GravityGradiometer method}|hyperpage}{120}
+\indexentry{update() (qnav.quantum.gravity\_gradient.GravityGradiometer method)@\spxentry{update()}\spxextra{qnav.quantum.gravity\_gradient.GravityGradiometer method}|hyperpage}{120}
+\indexentry{last\_measurement (qnav.quantum.gravity\_gradient.GravityGradiometer property)@\spxentry{last\_measurement}\spxextra{qnav.quantum.gravity\_gradient.GravityGradiometer property}|hyperpage}{121}
+\indexentry{num\_steps (qnav.quantum.gravity\_gradient.GravityGradiometer property)@\spxentry{num\_steps}\spxextra{qnav.quantum.gravity\_gradient.GravityGradiometer property}|hyperpage}{121}
+\indexentry{interferometer (qnav.quantum.gravity\_gradient.GravityGradiometer property)@\spxentry{interferometer}\spxextra{qnav.quantum.gravity\_gradient.GravityGradiometer property}|hyperpage}{121}
+\indexentry{gravity\_model (qnav.quantum.gravity\_gradient.GravityGradiometer property)@\spxentry{gravity\_model}\spxextra{qnav.quantum.gravity\_gradient.GravityGradiometer property}|hyperpage}{121}
+\indexentry{ParticleFilterParams (class in qnav.quantum.gravity\_gradient)@\spxentry{ParticleFilterParams}\spxextra{class in qnav.quantum.gravity\_gradient}|hyperpage}{121}
+\indexentry{GravityGradientPF (class in qnav.quantum.gravity\_gradient)@\spxentry{GravityGradientPF}\spxextra{class in qnav.quantum.gravity\_gradient}|hyperpage}{121}
+\indexentry{perform\_fusion() (qnav.quantum.gravity\_gradient.GravityGradientPF method)@\spxentry{perform\_fusion()}\spxextra{qnav.quantum.gravity\_gradient.GravityGradientPF method}|hyperpage}{122}
+\indexentry{init\_particle\_filter() (qnav.quantum.gravity\_gradient.GravityGradientPF method)@\spxentry{init\_particle\_filter()}\spxextra{qnav.quantum.gravity\_gradient.GravityGradientPF method}|hyperpage}{122}
+\indexentry{reset() (qnav.quantum.gravity\_gradient.GravityGradientPF method)@\spxentry{reset()}\spxextra{qnav.quantum.gravity\_gradient.GravityGradientPF method}|hyperpage}{122}
+\indexentry{module@\spxentry{module}!qnav.quantum.dummy@\spxentry{qnav.quantum.dummy}|hyperpage}{122}
+\indexentry{qnav.quantum.dummy@\spxentry{qnav.quantum.dummy}!module@\spxentry{module}|hyperpage}{122}
+\indexentry{DummySensor (class in qnav.quantum.dummy)@\spxentry{DummySensor}\spxextra{class in qnav.quantum.dummy}|hyperpage}{122}
+\indexentry{last\_measurement (qnav.quantum.dummy.DummySensor property)@\spxentry{last\_measurement}\spxextra{qnav.quantum.dummy.DummySensor property}|hyperpage}{123}
+\indexentry{last\_update (qnav.quantum.dummy.DummySensor property)@\spxentry{last\_update}\spxextra{qnav.quantum.dummy.DummySensor property}|hyperpage}{123}
+\indexentry{next\_update (qnav.quantum.dummy.DummySensor property)@\spxentry{next\_update}\spxextra{qnav.quantum.dummy.DummySensor property}|hyperpage}{123}
+\indexentry{DummyAccelerometer (class in qnav.quantum.dummy)@\spxentry{DummyAccelerometer}\spxextra{class in qnav.quantum.dummy}|hyperpage}{123}
+\indexentry{DummyGyroscope (class in qnav.quantum.dummy)@\spxentry{DummyGyroscope}\spxextra{class in qnav.quantum.dummy}|hyperpage}{123}
+\indexentry{module@\spxentry{module}!qnav.simulation.simulation@\spxentry{qnav.simulation.simulation}|hyperpage}{123}
+\indexentry{qnav.simulation.simulation@\spxentry{qnav.simulation.simulation}!module@\spxentry{module}|hyperpage}{123}
+\indexentry{run\_simulation\_loop() (in module qnav.simulation.simulation)@\spxentry{run\_simulation\_loop()}\spxextra{in module qnav.simulation.simulation}|hyperpage}{124}
+\indexentry{module@\spxentry{module}!qnav.simulation.scheduling@\spxentry{qnav.simulation.scheduling}|hyperpage}{124}
+\indexentry{qnav.simulation.scheduling@\spxentry{qnav.simulation.scheduling}!module@\spxentry{module}|hyperpage}{124}
+\indexentry{TimingHandler (class in qnav.simulation.scheduling)@\spxentry{TimingHandler}\spxextra{class in qnav.simulation.scheduling}|hyperpage}{124}
+\indexentry{update\_sensors\_past\_time() (qnav.simulation.scheduling.TimingHandler method)@\spxentry{update\_sensors\_past\_time()}\spxextra{qnav.simulation.scheduling.TimingHandler method}|hyperpage}{124}
+\indexentry{set\_sensor\_used() (qnav.simulation.scheduling.TimingHandler method)@\spxentry{set\_sensor\_used()}\spxextra{qnav.simulation.scheduling.TimingHandler method}|hyperpage}{125}
+\indexentry{get\_next\_sensor() (qnav.simulation.scheduling.TimingHandler method)@\spxentry{get\_next\_sensor()}\spxextra{qnav.simulation.scheduling.TimingHandler method}|hyperpage}{125}
+\indexentry{sensor\_iterator() (qnav.simulation.scheduling.TimingHandler method)@\spxentry{sensor\_iterator()}\spxextra{qnav.simulation.scheduling.TimingHandler method}|hyperpage}{125}
+\indexentry{get\_next\_fusion() (qnav.simulation.scheduling.TimingHandler method)@\spxentry{get\_next\_fusion()}\spxextra{qnav.simulation.scheduling.TimingHandler method}|hyperpage}{125}
+\indexentry{print\_mappings() (qnav.simulation.scheduling.TimingHandler method)@\spxentry{print\_mappings()}\spxextra{qnav.simulation.scheduling.TimingHandler method}|hyperpage}{125}
+\indexentry{module@\spxentry{module}!qnav.simulation.holonomic@\spxentry{qnav.simulation.holonomic}|hyperpage}{126}
+\indexentry{qnav.simulation.holonomic@\spxentry{qnav.simulation.holonomic}!module@\spxentry{module}|hyperpage}{126}
+\indexentry{HolonomicConstraint (class in qnav.simulation.holonomic)@\spxentry{HolonomicConstraint}\spxextra{class in qnav.simulation.holonomic}|hyperpage}{126}
+\indexentry{filter\_id (qnav.simulation.holonomic.HolonomicConstraint property)@\spxentry{filter\_id}\spxextra{qnav.simulation.holonomic.HolonomicConstraint property}|hyperpage}{126}
+\indexentry{filter\_gain (qnav.simulation.holonomic.HolonomicConstraint property)@\spxentry{filter\_gain}\spxextra{qnav.simulation.holonomic.HolonomicConstraint property}|hyperpage}{126}
+\indexentry{take\_measurement() (qnav.simulation.holonomic.HolonomicConstraint method)@\spxentry{take\_measurement()}\spxextra{qnav.simulation.holonomic.HolonomicConstraint method}|hyperpage}{126}
+\indexentry{clear\_measurement() (qnav.simulation.holonomic.HolonomicConstraint method)@\spxentry{clear\_measurement()}\spxextra{qnav.simulation.holonomic.HolonomicConstraint method}|hyperpage}{126}
+\indexentry{last\_measurement (qnav.simulation.holonomic.HolonomicConstraint property)@\spxentry{last\_measurement}\spxextra{qnav.simulation.holonomic.HolonomicConstraint property}|hyperpage}{127}
+\indexentry{HolonomicFusion (class in qnav.simulation.holonomic)@\spxentry{HolonomicFusion}\spxextra{class in qnav.simulation.holonomic}|hyperpage}{127}
+\indexentry{perform\_fusion() (qnav.simulation.holonomic.HolonomicFusion method)@\spxentry{perform\_fusion()}\spxextra{qnav.simulation.holonomic.HolonomicFusion method}|hyperpage}{127}
+\indexentry{module@\spxentry{module}!qnav.simulation.simulation@\spxentry{qnav.simulation.simulation}|hyperpage}{127}
+\indexentry{qnav.simulation.simulation@\spxentry{qnav.simulation.simulation}!module@\spxentry{module}|hyperpage}{127}
+\indexentry{run\_simulation\_loop() (in module qnav.simulation.simulation)@\spxentry{run\_simulation\_loop()}\spxextra{in module qnav.simulation.simulation}|hyperpage}{127}
+\indexentry{module@\spxentry{module}!qnav.simulation.display@\spxentry{qnav.simulation.display}|hyperpage}{128}
+\indexentry{qnav.simulation.display@\spxentry{qnav.simulation.display}!module@\spxentry{module}|hyperpage}{128}
+\indexentry{is\_using\_terminal() (in module qnav.simulation.display)@\spxentry{is\_using\_terminal()}\spxextra{in module qnav.simulation.display}|hyperpage}{128}
+\indexentry{clear\_terminal\_line() (in module qnav.simulation.display)@\spxentry{clear\_terminal\_line()}\spxextra{in module qnav.simulation.display}|hyperpage}{128}
+\indexentry{sec\_to\_str() (in module qnav.simulation.display)@\spxentry{sec\_to\_str()}\spxextra{in module qnav.simulation.display}|hyperpage}{128}
+\indexentry{Display (class in qnav.simulation.display)@\spxentry{Display}\spxextra{class in qnav.simulation.display}|hyperpage}{128}
+\indexentry{on\_start() (qnav.simulation.display.Display method)@\spxentry{on\_start()}\spxextra{qnav.simulation.display.Display method}|hyperpage}{128}
+\indexentry{on\_update() (qnav.simulation.display.Display method)@\spxentry{on\_update()}\spxextra{qnav.simulation.display.Display method}|hyperpage}{129}
+\indexentry{on\_finish() (qnav.simulation.display.Display method)@\spxentry{on\_finish()}\spxextra{qnav.simulation.display.Display method}|hyperpage}{129}
+\indexentry{ConsoleDisplay (class in qnav.simulation.display)@\spxentry{ConsoleDisplay}\spxextra{class in qnav.simulation.display}|hyperpage}{129}
+\indexentry{on\_start() (qnav.simulation.display.ConsoleDisplay method)@\spxentry{on\_start()}\spxextra{qnav.simulation.display.ConsoleDisplay method}|hyperpage}{129}
+\indexentry{on\_update() (qnav.simulation.display.ConsoleDisplay method)@\spxentry{on\_update()}\spxextra{qnav.simulation.display.ConsoleDisplay method}|hyperpage}{129}
+\indexentry{on\_finish() (qnav.simulation.display.ConsoleDisplay method)@\spxentry{on\_finish()}\spxextra{qnav.simulation.display.ConsoleDisplay method}|hyperpage}{129}
+\indexentry{ConsoleDisplayPlus (class in qnav.simulation.display)@\spxentry{ConsoleDisplayPlus}\spxextra{class in qnav.simulation.display}|hyperpage}{130}
+\indexentry{on\_update() (qnav.simulation.display.ConsoleDisplayPlus method)@\spxentry{on\_update()}\spxextra{qnav.simulation.display.ConsoleDisplayPlus method}|hyperpage}{130}
+\indexentry{on\_finish() (qnav.simulation.display.ConsoleDisplayPlus method)@\spxentry{on\_finish()}\spxextra{qnav.simulation.display.ConsoleDisplayPlus method}|hyperpage}{130}
+\indexentry{MultilineDisplay (class in qnav.simulation.display)@\spxentry{MultilineDisplay}\spxextra{class in qnav.simulation.display}|hyperpage}{130}
+\indexentry{on\_start() (qnav.simulation.display.MultilineDisplay method)@\spxentry{on\_start()}\spxextra{qnav.simulation.display.MultilineDisplay method}|hyperpage}{130}
+\indexentry{on\_update() (qnav.simulation.display.MultilineDisplay method)@\spxentry{on\_update()}\spxextra{qnav.simulation.display.MultilineDisplay method}|hyperpage}{130}
+\indexentry{on\_finish() (qnav.simulation.display.MultilineDisplay method)@\spxentry{on\_finish()}\spxextra{qnav.simulation.display.MultilineDisplay method}|hyperpage}{130}
+\indexentry{module@\spxentry{module}!qnav.util.constants@\spxentry{qnav.util.constants}|hyperpage}{131}
+\indexentry{qnav.util.constants@\spxentry{qnav.util.constants}!module@\spxentry{module}|hyperpage}{131}
+\indexentry{G (in module qnav.util.constants)@\spxentry{G}\spxextra{in module qnav.util.constants}|hyperpage}{131}
+\indexentry{F (in module qnav.util.constants)@\spxentry{F}\spxextra{in module qnav.util.constants}|hyperpage}{131}
+\indexentry{POLAR\_AXIS\_A (in module qnav.util.constants)@\spxentry{POLAR\_AXIS\_A}\spxextra{in module qnav.util.constants}|hyperpage}{131}
+\indexentry{R\_E (in module qnav.util.constants)@\spxentry{R\_E}\spxextra{in module qnav.util.constants}|hyperpage}{131}
+\indexentry{ECC\_SQ (in module qnav.util.constants)@\spxentry{ECC\_SQ}\spxextra{in module qnav.util.constants}|hyperpage}{131}
+\indexentry{ECC (in module qnav.util.constants)@\spxentry{ECC}\spxextra{in module qnav.util.constants}|hyperpage}{131}
+\indexentry{ECC\_PRIME (in module qnav.util.constants)@\spxentry{ECC\_PRIME}\spxextra{in module qnav.util.constants}|hyperpage}{131}
+\indexentry{G\_E (in module qnav.util.constants)@\spxentry{G\_E}\spxextra{in module qnav.util.constants}|hyperpage}{131}
+\indexentry{G\_P (in module qnav.util.constants)@\spxentry{G\_P}\spxextra{in module qnav.util.constants}|hyperpage}{131}
+\indexentry{OMEGA\_E (in module qnav.util.constants)@\spxentry{OMEGA\_E}\spxextra{in module qnav.util.constants}|hyperpage}{131}
+\indexentry{GM (in module qnav.util.constants)@\spxentry{GM}\spxextra{in module qnav.util.constants}|hyperpage}{131}
+\indexentry{M (in module qnav.util.constants)@\spxentry{M}\spxextra{in module qnav.util.constants}|hyperpage}{131}
+\indexentry{module@\spxentry{module}!qnav.util.connections@\spxentry{qnav.util.connections}|hyperpage}{132}
+\indexentry{qnav.util.connections@\spxentry{qnav.util.connections}!module@\spxentry{module}|hyperpage}{132}
+\indexentry{download\_file() (in module qnav.util.connections)@\spxentry{download\_file()}\spxextra{in module qnav.util.connections}|hyperpage}{132}
+\indexentry{module@\spxentry{module}!qnav.util.system@\spxentry{qnav.util.system}|hyperpage}{132}
+\indexentry{qnav.util.system@\spxentry{qnav.util.system}!module@\spxentry{module}|hyperpage}{132}
+\indexentry{get\_toolbox\_version() (in module qnav.util.system)@\spxentry{get\_toolbox\_version()}\spxextra{in module qnav.util.system}|hyperpage}{132}
+\indexentry{get\_system\_name() (in module qnav.util.system)@\spxentry{get\_system\_name()}\spxextra{in module qnav.util.system}|hyperpage}{132}
+\indexentry{get\_platform\_details() (in module qnav.util.system)@\spxentry{get\_platform\_details()}\spxextra{in module qnav.util.system}|hyperpage}{132}
+\indexentry{is\_window\_platform() (in module qnav.util.system)@\spxentry{is\_window\_platform()}\spxextra{in module qnav.util.system}|hyperpage}{133}
+\indexentry{is\_mac\_platform() (in module qnav.util.system)@\spxentry{is\_mac\_platform()}\spxextra{in module qnav.util.system}|hyperpage}{133}
+\indexentry{is\_linux\_platform() (in module qnav.util.system)@\spxentry{is\_linux\_platform()}\spxextra{in module qnav.util.system}|hyperpage}{133}
+\indexentry{module@\spxentry{module}!qnav.util.rng@\spxentry{qnav.util.rng}|hyperpage}{133}
+\indexentry{qnav.util.rng@\spxentry{qnav.util.rng}!module@\spxentry{module}|hyperpage}{133}
+\indexentry{GaussianMarkov (class in qnav.util.rng)@\spxentry{GaussianMarkov}\spxextra{class in qnav.util.rng}|hyperpage}{133}
+\indexentry{get\_random() (qnav.util.rng.GaussianMarkov method)@\spxentry{get\_random()}\spxextra{qnav.util.rng.GaussianMarkov method}|hyperpage}{133}
+\indexentry{reset() (qnav.util.rng.GaussianMarkov method)@\spxentry{reset()}\spxextra{qnav.util.rng.GaussianMarkov method}|hyperpage}{134}
+\indexentry{output\_shape (qnav.util.rng.GaussianMarkov property)@\spxentry{output\_shape}\spxextra{qnav.util.rng.GaussianMarkov property}|hyperpage}{134}
+\indexentry{last\_value (qnav.util.rng.GaussianMarkov property)@\spxentry{last\_value}\spxextra{qnav.util.rng.GaussianMarkov property}|hyperpage}{134}
+\indexentry{last\_time (qnav.util.rng.GaussianMarkov property)@\spxentry{last\_time}\spxextra{qnav.util.rng.GaussianMarkov property}|hyperpage}{134}
+\indexentry{module@\spxentry{module}!qnav.waypoints.generation@\spxentry{qnav.waypoints.generation}|hyperpage}{134}
+\indexentry{qnav.waypoints.generation@\spxentry{qnav.waypoints.generation}!module@\spxentry{module}|hyperpage}{134}
+\indexentry{get\_positions() (in module qnav.waypoints.generation)@\spxentry{get\_positions()}\spxextra{in module qnav.waypoints.generation}|hyperpage}{135}
+\indexentry{interpolate\_positions() (in module qnav.waypoints.generation)@\spxentry{interpolate\_positions()}\spxextra{in module qnav.waypoints.generation}|hyperpage}{135}
+\indexentry{produce\_noise() (in module qnav.waypoints.generation)@\spxentry{produce\_noise()}\spxextra{in module qnav.waypoints.generation}|hyperpage}{135}
+\indexentry{moving\_average() (in module qnav.waypoints.generation)@\spxentry{moving\_average()}\spxextra{in module qnav.waypoints.generation}|hyperpage}{136}
+\indexentry{rescale\_values() (in module qnav.waypoints.generation)@\spxentry{rescale\_values()}\spxextra{in module qnav.waypoints.generation}|hyperpage}{136}
+\indexentry{get\_simple\_trajectory\_values() (in module qnav.waypoints.generation)@\spxentry{get\_simple\_trajectory\_values()}\spxextra{in module qnav.waypoints.generation}|hyperpage}{136}
+\indexentry{get\_trajectory\_values() (in module qnav.waypoints.generation)@\spxentry{get\_trajectory\_values()}\spxextra{in module qnav.waypoints.generation}|hyperpage}{137}
+\indexentry{plot\_waypoints() (in module qnav.waypoints.generation)@\spxentry{plot\_waypoints()}\spxextra{in module qnav.waypoints.generation}|hyperpage}{138}
+\indexentry{plot\_figures() (in module qnav.waypoints.generation)@\spxentry{plot\_figures()}\spxextra{in module qnav.waypoints.generation}|hyperpage}{138}
+\indexentry{load\_waypoint\_csv() (in module qnav.waypoints.generation)@\spxentry{load\_waypoint\_csv()}\spxextra{in module qnav.waypoints.generation}|hyperpage}{138}
+\indexentry{crop\_waypoints() (in module qnav.waypoints.generation)@\spxentry{crop\_waypoints()}\spxextra{in module qnav.waypoints.generation}|hyperpage}{139}
+\indexentry{save\_waypoints() (in module qnav.waypoints.generation)@\spxentry{save\_waypoints()}\spxextra{in module qnav.waypoints.generation}|hyperpage}{139}
+\indexentry{load\_waypoints() (in module qnav.waypoints.generation)@\spxentry{load\_waypoints()}\spxextra{in module qnav.waypoints.generation}|hyperpage}{139}
+\indexentry{get\_trajectory() (in module qnav.waypoints.generation)@\spxentry{get\_trajectory()}\spxextra{in module qnav.waypoints.generation}|hyperpage}{139}
+\indexentry{read\_csv\_waypoints() (in module qnav.waypoints.generation)@\spxentry{read\_csv\_waypoints()}\spxextra{in module qnav.waypoints.generation}|hyperpage}{139}
+\indexentry{module@\spxentry{module}!qnav.waypoints.trajectory@\spxentry{qnav.waypoints.trajectory}|hyperpage}{140}
+\indexentry{qnav.waypoints.trajectory@\spxentry{qnav.waypoints.trajectory}!module@\spxentry{module}|hyperpage}{140}
+\indexentry{GroundTruth (class in qnav.waypoints.trajectory)@\spxentry{GroundTruth}\spxextra{class in qnav.waypoints.trajectory}|hyperpage}{140}
+\indexentry{timestamp (qnav.waypoints.trajectory.GroundTruth attribute)@\spxentry{timestamp}\spxextra{qnav.waypoints.trajectory.GroundTruth attribute}|hyperpage}{140}
+\indexentry{position (qnav.waypoints.trajectory.GroundTruth attribute)@\spxentry{position}\spxextra{qnav.waypoints.trajectory.GroundTruth attribute}|hyperpage}{140}
+\indexentry{velocity (qnav.waypoints.trajectory.GroundTruth attribute)@\spxentry{velocity}\spxextra{qnav.waypoints.trajectory.GroundTruth attribute}|hyperpage}{140}
+\indexentry{acceleration (qnav.waypoints.trajectory.GroundTruth attribute)@\spxentry{acceleration}\spxextra{qnav.waypoints.trajectory.GroundTruth attribute}|hyperpage}{140}
+\indexentry{attitude (qnav.waypoints.trajectory.GroundTruth attribute)@\spxentry{attitude}\spxextra{qnav.waypoints.trajectory.GroundTruth attribute}|hyperpage}{140}
+\indexentry{angle\_rates (qnav.waypoints.trajectory.GroundTruth attribute)@\spxentry{angle\_rates}\spxextra{qnav.waypoints.trajectory.GroundTruth attribute}|hyperpage}{140}
+\indexentry{as\_dict() (qnav.waypoints.trajectory.GroundTruth method)@\spxentry{as\_dict()}\spxextra{qnav.waypoints.trajectory.GroundTruth method}|hyperpage}{140}
+\indexentry{as\_numpy() (qnav.waypoints.trajectory.GroundTruth method)@\spxentry{as\_numpy()}\spxextra{qnav.waypoints.trajectory.GroundTruth method}|hyperpage}{140}
+\indexentry{Waypoints (class in qnav.waypoints.trajectory)@\spxentry{Waypoints}\spxextra{class in qnav.waypoints.trajectory}|hyperpage}{141}
+\indexentry{as\_array() (qnav.waypoints.trajectory.Waypoints method)@\spxentry{as\_array()}\spxextra{qnav.waypoints.trajectory.Waypoints method}|hyperpage}{141}
+\indexentry{Trajectory (class in qnav.waypoints.trajectory)@\spxentry{Trajectory}\spxextra{class in qnav.waypoints.trajectory}|hyperpage}{141}
+\indexentry{get\_record() (qnav.waypoints.trajectory.Trajectory method)@\spxentry{get\_record()}\spxextra{qnav.waypoints.trajectory.Trajectory method}|hyperpage}{141}
+\indexentry{get\_records() (qnav.waypoints.trajectory.Trajectory method)@\spxentry{get\_records()}\spxextra{qnav.waypoints.trajectory.Trajectory method}|hyperpage}{141}
+\indexentry{start\_time (qnav.waypoints.trajectory.Trajectory property)@\spxentry{start\_time}\spxextra{qnav.waypoints.trajectory.Trajectory property}|hyperpage}{141}
+\indexentry{end\_time (qnav.waypoints.trajectory.Trajectory property)@\spxentry{end\_time}\spxextra{qnav.waypoints.trajectory.Trajectory property}|hyperpage}{142}
+\indexentry{interp\_method (qnav.waypoints.trajectory.Trajectory property)@\spxentry{interp\_method}\spxextra{qnav.waypoints.trajectory.Trajectory property}|hyperpage}{142}
+\indexentry{cumulative\_distance() (in module qnav.waypoints.trajectory)@\spxentry{cumulative\_distance()}\spxextra{in module qnav.waypoints.trajectory}|hyperpage}{142}
+\indexentry{module@\spxentry{module}!qnav.waypoints.vehicle@\spxentry{qnav.waypoints.vehicle}|hyperpage}{142}
+\indexentry{qnav.waypoints.vehicle@\spxentry{qnav.waypoints.vehicle}!module@\spxentry{module}|hyperpage}{142}
+\indexentry{Vehicle (class in qnav.waypoints.vehicle)@\spxentry{Vehicle}\spxextra{class in qnav.waypoints.vehicle}|hyperpage}{142}
+\indexentry{description (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{description}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{143}
+\indexentry{turn\_rate\_max (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{turn\_rate\_max}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{143}
+\indexentry{acceleration\_max (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{acceleration\_max}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{143}
+\indexentry{deceleration\_max (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{deceleration\_max}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{143}
+\indexentry{time\_delay\_acc (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{time\_delay\_acc}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{143}
+\indexentry{time\_delay\_turn (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{time\_delay\_turn}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{143}
+\indexentry{pitch\_constant\_offset (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{pitch\_constant\_offset}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{143}
+\indexentry{pitch\_osc\_period (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{pitch\_osc\_period}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{143}
+\indexentry{pitch\_osc\_magnitude (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{pitch\_osc\_magnitude}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{143}
+\indexentry{pitch\_max (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{pitch\_max}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{143}
+\indexentry{roll\_constant\_offset (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{roll\_constant\_offset}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{143}
+\indexentry{roll\_osc\_period (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{roll\_osc\_period}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{143}
+\indexentry{roll\_osc\_magnitude (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{roll\_osc\_magnitude}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{143}
+\indexentry{roll\_max (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{roll\_max}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{143}
+\indexentry{d\_roll\_d\_turn\_rate (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{d\_roll\_d\_turn\_rate}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{143}
+\indexentry{vibration\_noise\_acceleration (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{vibration\_noise\_acceleration}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{144}
+\indexentry{vibration\_noise\_angle\_rates (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{vibration\_noise\_angle\_rates}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{144}
+\indexentry{vibration\_damping\_period (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{vibration\_damping\_period}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{144}
+\indexentry{variation\_per\_second1 (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{variation\_per\_second1}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{144}
+\indexentry{variation\_per\_second2 (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{variation\_per\_second2}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{144}
+\indexentry{rand\_seed (qnav.waypoints.vehicle.Vehicle attribute)@\spxentry{rand\_seed}\spxextra{qnav.waypoints.vehicle.Vehicle attribute}|hyperpage}{144}
+\indexentry{get\_default\_profile() (in module qnav.waypoints.vehicle)@\spxentry{get\_default\_profile()}\spxextra{in module qnav.waypoints.vehicle}|hyperpage}{144}
+\indexentry{get\_large\_aircraft\_profile() (in module qnav.waypoints.vehicle)@\spxentry{get\_large\_aircraft\_profile()}\spxextra{in module qnav.waypoints.vehicle}|hyperpage}{144}
+\indexentry{get\_large\_ship\_profile() (in module qnav.waypoints.vehicle)@\spxentry{get\_large\_ship\_profile()}\spxextra{in module qnav.waypoints.vehicle}|hyperpage}{144}
+\indexentry{get\_large\_van\_profile() (in module qnav.waypoints.vehicle)@\spxentry{get\_large\_van\_profile()}\spxextra{in module qnav.waypoints.vehicle}|hyperpage}{144}
+\indexentry{get\_submarine\_profile() (in module qnav.waypoints.vehicle)@\spxentry{get\_submarine\_profile()}\spxextra{in module qnav.waypoints.vehicle}|hyperpage}{145}
+\indexentry{get\_unrestricted\_profile() (in module qnav.waypoints.vehicle)@\spxentry{get\_unrestricted\_profile()}\spxextra{in module qnav.waypoints.vehicle}|hyperpage}{145}
+\indexentry{module@\spxentry{module}!qnav.waypoints.tracks@\spxentry{qnav.waypoints.tracks}|hyperpage}{145}
+\indexentry{qnav.waypoints.tracks@\spxentry{qnav.waypoints.tracks}!module@\spxentry{module}|hyperpage}{145}
+\indexentry{generate\_racetrack() (in module qnav.waypoints.tracks)@\spxentry{generate\_racetrack()}\spxextra{in module qnav.waypoints.tracks}|hyperpage}{145}

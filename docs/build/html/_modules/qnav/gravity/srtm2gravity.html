@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.gravity.srtm2gravity &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.gravity.srtm2gravity</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.gravity.srtm2gravity</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">===============</span>
+<span class="sd">srtm2gravity.py</span>
+<span class="sd">===============</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    SRTM2Gravity gravity map implementations.</span>
+<span class="sd">    This module provides support for the SRTM2Gravity gravity models.</span>
+<span class="sd">    Specifically, the full-scale and residual gravity maps.</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First implementation of this module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span> <span class="nn">qnav.gravity.ggm_plus</span> <span class="kn">import</span> <span class="n">GGMPlusDist</span>
+
+<span class="c1"># The size to expect for SRTM2Gravity tiles:</span>
+<span class="n">_TILE_SIZE</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1200</span><span class="p">,</span> <span class="mi">1200</span><span class="p">]</span>
+
+<div class="viewcode-block" id="SRTM2GravityFull">
+<a class="viewcode-back" href="../../../modules/gravity/srtm2gravity.html#qnav.gravity.srtm2gravity.SRTM2GravityFull">[docs]</a>
+<span class="k">class</span> <span class="nc">SRTM2GravityFull</span><span class="p">(</span><span class="n">GGMPlusDist</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implementation of SRTM2Gravity Full-Scale gravity.</span>
+<span class="sd">    Provides a gravity correction map that uses the SRTM2Gravity Full-Scale</span>
+<span class="sd">    dataset to provide gravity disturbance values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;SRTM2Gravity (Full-Scale)&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_get_tile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin_lat</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+
+        <span class="n">local_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_local_path</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">local_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auto_download</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">download_data</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">local_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">get_empty_srtm_tile</span><span class="p">()</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">read_srtm_file</span><span class="p">(</span><span class="n">local_path</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_get_sub_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+        <span class="c1"># Required</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+
+        <span class="c1"># Get the direction characters</span>
+        <span class="n">lat_char</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">)[</span><span class="n">lat</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">lon_char</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">)[</span><span class="n">lon</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">sub_size</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="n">lat_origin</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">sub_size</span> <span class="o">*</span> <span class="p">(</span><span class="n">lat</span> <span class="o">//</span> <span class="n">sub_size</span><span class="p">)))</span>
+        <span class="n">lon_origin</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">sub_size</span> <span class="o">*</span> <span class="p">(</span><span class="n">lon</span> <span class="o">//</span> <span class="n">sub_size</span><span class="p">)))</span>
+
+        <span class="c1"># Format the file name with origin coordinates</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">lat_char</span><span class="si">}{</span><span class="n">lat_origin</span><span class="si">:</span><span class="s1">02d</span><span class="si">}{</span><span class="n">lon_char</span><span class="si">}{</span><span class="n">lon_origin</span><span class="si">:</span><span class="s1">03d</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_get_local_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="n">tile_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tile_file</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">tile_sub_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_sub_dir</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_dir</span> <span class="o">/</span> <span class="s1">&#39;full_scale&#39;</span> <span class="o">/</span> <span class="n">tile_sub_dir</span> <span class="o">/</span> <span class="n">tile_name</span>
+
+    <span class="k">def</span> <span class="nf">_get_download_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">tile_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tile_file</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">tile_sub_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_sub_dir</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_download_url</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">tile_sub_dir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">tile_name</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="c1"># # TODO: REMOVE AFTER</span>
+    <span class="c1"># def _are_points_loaded(self, lat: np.ndarray, lon: np.ndarray) -&gt; np.ndarray:</span>
+    <span class="c1">#     lat_check = (lat &gt;= (self._min_lon + 1)) &amp; (lat &lt;= (self._max_lat - 1))</span>
+    <span class="c1">#     lon_check = (lon &gt;= (self._min_lon) &amp; (lon &lt;= self._max_lon)</span>
+    <span class="c1">#     return lat_check &amp; lon_check</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_file_suffix</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;_full&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_file_ext</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The file extension of the GGMPlus gravity acceleration data.</span>
+
+<span class="sd">        :return: The file extension of data files used.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;bin&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_download_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The base URL used for downloading GGMPlus acceleration data.</span>
+
+<span class="sd">        :return: The URL where GGMPlus gravity acceleration data can be</span>
+<span class="sd">            downloaded from.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;https://ddfe.blazejbucha.com/models/SRTM2gravity2018/data/FullScaleGravity/&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_tile_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the dimensions of tiles in decimal degrees.</span>
+<span class="sd">        This is the length of each square tile for latitude and longitude.</span>
+
+<span class="sd">        :return: The size of each time in decimal degrees.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_step_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the step size between cell in decimal degrees.</span>
+<span class="sd">        This is the distance between records in latitude and longitude</span>
+<span class="sd">        directions.</span>
+
+<span class="sd">        :return: The step size distance between gravity map grid cells.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">3600</span></div>
+
+
+
+<div class="viewcode-block" id="SRTM2GravityRes">
+<a class="viewcode-back" href="../../../modules/gravity/srtm2gravity.html#qnav.gravity.srtm2gravity.SRTM2GravityRes">[docs]</a>
+<span class="k">class</span> <span class="nc">SRTM2GravityRes</span><span class="p">(</span><span class="n">SRTM2GravityFull</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;SRTM2Gravity (Residual)&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_get_local_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="n">tile_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tile_file</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">tile_sub_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_sub_dir</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_dir</span> <span class="o">/</span> <span class="s1">&#39;residual&#39;</span> <span class="o">/</span> <span class="n">tile_sub_dir</span> <span class="o">/</span> <span class="n">tile_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_file_suffix</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;_res&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_download_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The base URL used for downloading GGMPlus acceleration data.</span>
+
+<span class="sd">        :return: The URL where GGMPlus gravity acceleration data can be</span>
+<span class="sd">            downloaded from.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;https://ddfe.blazejbucha.com/models/SRTM2gravity2018/data/ResidualGravity/&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="read_srtm_file">
+<a class="viewcode-back" href="../../../modules/gravity/srtm2gravity.html#qnav.gravity.srtm2gravity.read_srtm_file">[docs]</a>
+<span class="k">def</span> <span class="nf">read_srtm_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads the data from a given SRTM2Gravity file. Once read, the returned</span>
+<span class="sd">    1200-by-1200 matrix data will be in :math:`metres/second^2`. No latitude</span>
+<span class="sd">    or longitude coordinates are contained within any SRTM2Gravity file.</span>
+
+<span class="sd">    :param file_path: The location of the GGM_plus file to read.</span>
+<span class="sd">    :type file_path: Path or str</span>
+
+<span class="sd">    :return: The gravity disturbance matrix read from the file,</span>
+<span class="sd">        measured in :math:`metres/second^2`</span>
+<span class="sd">    :rtype: NumPy Matrix (1200-by-1200 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The data format of the file.</span>
+    <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;&gt;i4&#39;</span>  <span class="c1"># (32-bit signed-integers big-endian)</span>
+
+    <span class="c1"># Read the srtm2gravity data from the provided file.</span>
+    <span class="n">return_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+
+    <span class="c1"># Reformat the data to mGals and restructure the read vector into a</span>
+    <span class="c1"># 1200-by-1200 matrix (rows latitude, columns longitude).</span>
+    <span class="n">return_data</span> <span class="o">=</span> <span class="n">return_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-7</span>
+    <span class="n">return_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">return_data</span><span class="p">,</span> <span class="n">_TILE_SIZE</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># Finally, return the data.</span>
+    <span class="k">return</span> <span class="n">return_data</span></div>
+
+
+
+<div class="viewcode-block" id="get_empty_srtm_tile">
+<a class="viewcode-back" href="../../../modules/gravity/srtm2gravity.html#qnav.gravity.srtm2gravity.get_empty_srtm_tile">[docs]</a>
+<span class="k">def</span> <span class="nf">get_empty_srtm_tile</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Produces an empty tile of dimensions of GGM Plus data file.</span>
+<span class="sd">    Used when data is unavailable and cannot be downloaded.</span>
+
+<span class="sd">    :return: Empty GGM Plus tile data for missing files.</span>
+<span class="sd">    :rtype: NumPy Matrix (1200-by-1200 elements)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">_TILE_SIZE</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="kn">from</span> <span class="nn">qnav.gravity.somigliana</span> <span class="kn">import</span> <span class="n">Somigliana</span>
+    <span class="c1"># from qnav.earth.geoid import GeoidPGM</span>
+
+    <span class="n">project_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>
+    <span class="n">grav_dir</span> <span class="o">=</span> <span class="n">project_dir</span> <span class="o">/</span> <span class="s1">&#39;databases&#39;</span> <span class="o">/</span> <span class="s1">&#39;gravity&#39;</span> <span class="o">/</span> <span class="s1">&#39;srtm2gravity&#39;</span>
+    <span class="n">som</span> <span class="o">=</span> <span class="n">Somigliana</span><span class="p">()</span>
+
+    <span class="c1"># geoid_dir = project_dir / &#39;databases&#39; / &#39;geoid&#39; / &#39;egm2008-1.pgm&#39;</span>
+    <span class="c1"># test_geoid = GeoidPGM(geoid_dir)</span>
+    <span class="c1">#</span>
+    <span class="c1"># srtm_full = SRTM2GravityFull(som, test_geoid, grav_dir)</span>
+    <span class="c1">#</span>
+    <span class="c1"># # g0 = srtm_full.calc_gravity_z(52, -3, 1000)</span>
+    <span class="c1"># # g1 = srtm_full.calc_gravity_xyz(52, -3, 1000)</span>
+    <span class="c1"># g2 = srtm_full.calc_vertical_grad(52, -3, 1000)</span>
+
+    <span class="n">srtm_full</span> <span class="o">=</span> <span class="n">SRTM2GravityFull</span><span class="p">(</span><span class="n">som</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">grav_dir</span><span class="p">)</span>
+    <span class="c1"># test_g_acc = srtm_full.calc_gravity_z(52, -3, 1000)</span>
+
+    <span class="n">srtm_res</span> <span class="o">=</span> <span class="n">SRTM2GravityRes</span><span class="p">(</span><span class="n">som</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">grav_dir</span><span class="p">)</span>
+    <span class="c1"># test_g_dist = srtm_res.calc_gravity_z(52, -3, 1000)</span>
+
+    <span class="k">for</span> <span class="n">i_lat</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">59</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i_lon</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">12</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Downloading (</span><span class="si">{</span><span class="n">i_lat</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">i_lon</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+            <span class="n">srtm_full</span><span class="o">.</span><span class="n">download_data</span><span class="p">(</span><span class="n">i_lat</span><span class="p">,</span> <span class="n">i_lon</span><span class="p">)</span>
+            <span class="n">srtm_res</span><span class="o">.</span><span class="n">download_data</span><span class="p">(</span><span class="n">i_lat</span><span class="p">,</span> <span class="n">i_lon</span><span class="p">)</span>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.7.4. qnav.measurement.accelerometer &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="9.7.5. qnav.measurement.gyroscope" href="gyroscope.html" />
+    <link rel="prev" title="9.7.3. qnav.measurement.error_properties" href="error_properties.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../usage/packages.html">9. Software Components</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#earth">9.1. Earth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#estimation">9.2. Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#fusion">9.3. Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gps">9.4. GPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gravity">9.5. Gravity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#input">9.6. Input</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../usage/packages.html#measurement">9.7. Measurement</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="sensor.html">9.7.1. sensor.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="platform.html">9.7.2. platform.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="error_properties.html">9.7.3. error_properties.py</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">9.7.4. accelerometer.py</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accelerometer-py">9.7.4.1. accelerometer.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.measurement.accelerometer.Accelerometer"><code class="docutils literal notranslate"><span class="pre">Accelerometer</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="gyroscope.html">9.7.5. gyroscope.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="altimeter.html">9.7.6. altimeter.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="clock.html">9.7.7. clock.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#output">9.8. Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#quantum">9.9. Quantum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#simulation">9.10. Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#util">9.11. Util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#waypoints">9.12. Waypoints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../usage/packages.html"><span class="section-number">9. </span>Software Components</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">9.7.4. </span>qnav.measurement.accelerometer</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/modules/measurement/accelerometer.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qnav.measurement.accelerometer">
+<span id="qnav-measurement-accelerometer"></span><h1><span class="section-number">9.7.4. </span>qnav.measurement.accelerometer<a class="headerlink" href="#module-qnav.measurement.accelerometer" title="Link to this heading"></a></h1>
+<section id="accelerometer-py">
+<h2><span class="section-number">9.7.4.1. </span>accelerometer.py<a class="headerlink" href="#accelerometer-py" title="Link to this heading"></a></h2>
+<dl class="field-list">
+<dt class="field-odd">summary<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Contains the virtual accelerometer classes for producing measurements.
+This module contains virtual accelerometer classes that can be used for
+generating accelerometer measurements, from a simulated environment,
+with a configured level of noise/errors.</p>
+</dd>
+<dt class="field-even">authors<span class="colon">:</span></dt>
+<dd class="field-even"><div class="line-block">
+<div class="line">Prof. Jason Ralph - <a class="reference external" href="mailto:jfralph&#37;&#52;&#48;liverpool&#46;ac&#46;uk">jfralph<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></div>
+<div class="line">Michael Wright - <a class="reference external" href="mailto:mjwright&#37;&#52;&#48;liverpool&#46;ac&#46;uk">mjwright<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></div>
+</div>
+</dd>
+<dt class="field-odd">version<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1.0.0 - First full implementation of module.</p>
+</dd>
+</dl>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.measurement.accelerometer.Accelerometer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.measurement.accelerometer.</span></span><span class="sig-name descname"><span class="pre">Accelerometer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency:</span> <span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_profile:</span> <span class="pre">~qnav.measurement.error_properties.ErrorProperties</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor_axis:</span> <span class="pre">~qnav.measurement.platform.SensorAxis</span> <span class="pre">=</span> <span class="pre">&lt;qnav.measurement.platform.SensorAxis</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rand_seed:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/measurement/accelerometer.html#Accelerometer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.measurement.accelerometer.Accelerometer" title="Link to this definition"></a></dt>
+<dd><p>Provides the functionality of an accelerometer in a simulated environment.
+This class essentially represents a virtual accelerometer converting
+waypoint accelerations to body rate axis and applying noise/errors.
+The output of this can then be passed to a selected INS fusion class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.measurement.accelerometer.Accelerometer.take_measurement">
+<span class="sig-name descname"><span class="pre">take_measurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">est_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ground_truth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../waypoints/trajectory.html#qnav.waypoints.trajectory.GroundTruth" title="qnav.waypoints.trajectory.GroundTruth"><span class="pre">GroundTruth</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/measurement/accelerometer.html#Accelerometer.take_measurement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.measurement.accelerometer.Accelerometer.take_measurement" title="Link to this definition"></a></dt>
+<dd><p>Produces an accelerometer measurement from given truth data.
+This method converts the given waypoint data to body axes and
+applies the configured errors/noise. The output can then be
+fed to the selected INS solution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>est_time</strong> (<em>float</em>) – The estimated time the measurement of the sensor
+is expected to be captured at (in seconds).</p></li>
+<li><p><strong>ground_truth</strong> (<a class="reference internal" href="../waypoints/trajectory.html#qnav.waypoints.trajectory.GroundTruth" title="qnav.waypoints.trajectory.GroundTruth"><em>GroundTruth</em></a>) – The corresponding ground truth data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.measurement.accelerometer.Accelerometer.last_measurement">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">last_measurement</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#qnav.measurement.accelerometer.Accelerometer.last_measurement" title="Link to this definition"></a></dt>
+<dd><p>Returns the latest recorded acceleration produced by sensor.
+The measured acceleration of the accelerometer (North, East
+and Down components in metres/second).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Latest acceleration measurement produced by sensor.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray (3-elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.measurement.accelerometer.Accelerometer.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_sec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/measurement/accelerometer.html#Accelerometer.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.measurement.accelerometer.Accelerometer.update" title="Link to this definition"></a></dt>
+<dd><p>Called every iteration to update simulated sensor errors.
+As sensor errors propagate with time, it is important that this
+method is called prior to every measurement update.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time_sec</strong> (<em>float</em>) – The current simulation time in seconds.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.measurement.accelerometer.Accelerometer.sensor_axis">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sensor_axis</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="platform.html#qnav.measurement.platform.SensorAxis" title="qnav.measurement.platform.SensorAxis"><span class="pre">SensorAxis</span></a></em><a class="headerlink" href="#qnav.measurement.accelerometer.Accelerometer.sensor_axis" title="Link to this definition"></a></dt>
+<dd><p>Returns the true axis for the accelerometer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The sensor axis of the accelerometer.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="platform.html#qnav.measurement.platform.SensorAxis" title="qnav.measurement.platform.SensorAxis">SensorAxis</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="error_properties.html" class="btn btn-neutral float-left" title="9.7.3. qnav.measurement.error_properties" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gyroscope.html" class="btn btn-neutral float-right" title="9.7.5. qnav.measurement.gyroscope" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

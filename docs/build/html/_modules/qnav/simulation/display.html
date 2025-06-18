@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.simulation.display &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.simulation.display</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.simulation.display</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">==========</span>
+<span class="sd">display.py</span>
+<span class="sd">==========</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Allows means for displaying simulation progress in real-time.</span>
+<span class="sd">    This module is responsible for providing an interface for allowing the</span>
+<span class="sd">    displaying of simulation data so that progress can be presented to the</span>
+<span class="sd">    user in real-time.</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">stdin</span>
+
+<span class="kn">from</span> <span class="nn">qnav.estimation.state</span> <span class="kn">import</span> <span class="n">EstimatedState</span>
+<span class="kn">from</span> <span class="nn">qnav.waypoints.trajectory</span> <span class="kn">import</span> <span class="n">GroundTruth</span>
+<span class="kn">from</span> <span class="nn">qnav.waypoints.trajectory</span> <span class="kn">import</span> <span class="n">Trajectory</span>
+<span class="kn">from</span> <span class="nn">qnav.util.transformations</span> <span class="kn">import</span> <span class="n">lla2ned</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1">#: Ascii/Terminal character for line up.</span>
+<span class="n">_LINE_UP</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[1A&#39;</span>
+
+<span class="c1">#: Ascii/Terminal character to clear line.</span>
+<span class="n">_LINE_CLEAR</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\x1b</span><span class="s1">[2K&#39;</span>
+
+
+<div class="viewcode-block" id="is_using_terminal">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.is_using_terminal">[docs]</a>
+<span class="k">def</span> <span class="nf">is_using_terminal</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks if the application is being executed via terminal.</span>
+<span class="sd">    Used to determine if the toolbox is being run and displayed through a</span>
+<span class="sd">    command-line terminal, and not some interactive shell (or IDE). Used to</span>
+<span class="sd">    obtain an idea of how output data is to be displayed.</span>
+
+<span class="sd">    :return: True if standard output is being displayed inside terminal.</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">stdin</span><span class="o">.</span><span class="n">isatty</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="clear_terminal_line">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.clear_terminal_line">[docs]</a>
+<span class="k">def</span> <span class="nf">clear_terminal_line</span><span class="p">(</span><span class="n">num_lines</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Clears a previously printed line in the console.</span>
+<span class="sd">    Only works when executing application from command line.</span>
+
+<span class="sd">    :param num_lines: Number of lines to clear (default = 1).</span>
+<span class="sd">    :type num_lines: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_lines</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">_LINE_UP</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">_LINE_CLEAR</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="sec_to_str">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.sec_to_str">[docs]</a>
+<span class="k">def</span> <span class="nf">sec_to_str</span><span class="p">(</span><span class="n">time_sec</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts seconds to printed hours, minutes and seconds.</span>
+<span class="sd">    Used to make printed time more human readable.</span>
+
+<span class="sd">    :param time_sec: The time to display in seconds.</span>
+<span class="sd">    :type time_sec: int</span>
+
+<span class="sd">    :return: The given time in HH:MM:SS string format.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Convert to minutes and seconds</span>
+    <span class="n">seconds</span> <span class="o">=</span> <span class="n">time_sec</span> <span class="o">%</span> <span class="mi">60</span>
+    <span class="n">minutes</span> <span class="o">=</span> <span class="n">time_sec</span> <span class="o">//</span> <span class="mi">60</span>
+
+    <span class="c1"># Convert to hour, minutes, seconds</span>
+    <span class="n">hours</span> <span class="o">=</span> <span class="n">minutes</span> <span class="o">//</span> <span class="mi">60</span>
+    <span class="n">minutes</span> <span class="o">%=</span> <span class="mi">60</span>
+
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">hours</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">minutes</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">seconds</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="Display">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.Display">[docs]</a>
+<span class="k">class</span> <span class="nc">Display</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A template used to define classes for displaying simulation progress.</span>
+<span class="sd">    This provides the definition to be followed for classes that can be</span>
+<span class="sd">    used for displaying simulation data during runtime. This is useful</span>
+<span class="sd">    for users who wish to see verbose information or plot data during</span>
+<span class="sd">    simulations, without having to wait until the end.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_interval</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise displaying class by giving the update time interval.</span>
+<span class="sd">        This defines how often displaying updates will be given (in</span>
+<span class="sd">        simulation time).</span>
+
+<span class="sd">        :param update_interval: The time intervals between updates in seconds.</span>
+<span class="sd">        :type update_interval: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">update_interval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next_update</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="Display.on_start">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.Display.on_start">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">:</span> <span class="n">Trajectory</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called at the start of the simulation before first iteration.</span>
+<span class="sd">        Can be used to initialise any displaying components by extracting</span>
+<span class="sd">        necessary data from the trajectory.</span>
+
+<span class="sd">        :param trajectory: The ground truth trajectory instance.</span>
+<span class="sd">        :type trajectory: Trajectory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next_update</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">start_time</span></div>
+
+
+<div class="viewcode-block" id="Display.on_update">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.Display.on_update">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">on_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called during the simulation after each fusion update.</span>
+<span class="sd">        Presents the current (true) timestep, estimated states and ground</span>
+<span class="sd">        truth record.</span>
+
+<span class="sd">        :param timestamp: The current (true) simulation time in seconds.</span>
+<span class="sd">        :type timestamp: float</span>
+
+<span class="sd">        :param estimated_state: The current estimated state of the simulation.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+
+<span class="sd">        :param ground_truth: The current ground truth state of the simulation.</span>
+<span class="sd">        :type ground_truth: GroundTruth</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">timestamp</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_update</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next_update</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span></div>
+
+
+<div class="viewcode-block" id="Display.on_finish">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.Display.on_finish">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">on_finish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called at the end of the simulation after final iteration.</span>
+<span class="sd">        Can be used to finish up any displaying of information. Presents the</span>
+<span class="sd">        final (true) timestep, estimated states and ground truth record.</span>
+
+<span class="sd">        :param timestamp: The final (true) simulation time in seconds.</span>
+<span class="sd">        :type timestamp: float</span>
+
+<span class="sd">        :param estimated_state: The final estimated state of the simulation.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+
+<span class="sd">        :param ground_truth: The final ground truth state of the simulation.</span>
+<span class="sd">        :type ground_truth: GroundTruth</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ConsoleDisplay">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.ConsoleDisplay">[docs]</a>
+<span class="k">class</span> <span class="nc">ConsoleDisplay</span><span class="p">(</span><span class="n">Display</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A simple display for printing simulation progress in console.</span>
+<span class="sd">    Used to display that periodically prints the simulation&#39;s runtime progress</span>
+<span class="sd">    in the output console. Namely used as an example display class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;_start_time&#39;</span><span class="p">,</span> <span class="s1">&#39;end_time&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_interval</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise console printing by giving the update time interval.</span>
+<span class="sd">        This defines how often displaying updates will be given (in</span>
+<span class="sd">        simulation time).</span>
+
+<span class="sd">        :param update_interval: The time intervals between updates in seconds.</span>
+<span class="sd">        :type update_interval: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">update_interval</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_time</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ConsoleDisplay.on_start">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.ConsoleDisplay.on_start">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">:</span> <span class="n">Trajectory</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called at the start of the simulation before first iteration.</span>
+<span class="sd">        Used to obtain the start and end times of the trajectory.</span>
+
+<span class="sd">        :param trajectory: The ground truth trajectory instance.</span>
+<span class="sd">        :type trajectory: Trajectory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">start_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_time</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">end_time</span></div>
+
+
+<div class="viewcode-block" id="ConsoleDisplay.on_update">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.ConsoleDisplay.on_update">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called during the simulation after each fusion update.</span>
+<span class="sd">        Updates the runtime progress display of the simulation.</span>
+
+<span class="sd">        :param timestamp: The current (true) simulation time in seconds.</span>
+<span class="sd">        :type timestamp: float</span>
+
+<span class="sd">        :param estimated_state: The current estimated state of the simulation.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+
+<span class="sd">        :param ground_truth: The current ground truth state of the simulation.</span>
+<span class="sd">        :type ground_truth: GroundTruth</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">timestamp</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_update</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next_update</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span>
+            <span class="n">progress</span> <span class="o">=</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_time</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">[</span><span class="si">{</span><span class="n">progress</span><span class="si">:</span><span class="s2">8.4f</span><span class="si">}</span><span class="s2">%]</span><span class="se">\t</span><span class="s2"> Time: </span><span class="si">{</span><span class="n">timestamp</span><span class="si">:</span><span class="s2">12.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConsoleDisplay.on_finish">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.ConsoleDisplay.on_finish">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_finish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called at the end of the simulation after final iteration.</span>
+<span class="sd">        Finishes the runtime progress display of the simulation.</span>
+
+<span class="sd">        :param timestamp: The final (true) simulation time in seconds.</span>
+<span class="sd">        :type timestamp: float</span>
+
+<span class="sd">        :param estimated_state: The final estimated state of the simulation.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+
+<span class="sd">        :param ground_truth: The final ground truth state of the simulation.</span>
+<span class="sd">        :type ground_truth: GroundTruth</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\r</span><span class="si">{</span><span class="s1">&#39;Simulation Complete!&#39;</span><span class="si">:</span><span class="s2">50s</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ConsoleDisplayPlus">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.ConsoleDisplayPlus">[docs]</a>
+<span class="k">class</span> <span class="nc">ConsoleDisplayPlus</span><span class="p">(</span><span class="n">ConsoleDisplay</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extension to the basic displaying class that includes estimation errors.</span>
+<span class="sd">    This subclass also calculates the estimated position error at each</span>
+<span class="sd">    interval and displays it in the console. In addition to this, an</span>
+<span class="sd">    optional threshold can be set for the maximum error distance for</span>
+<span class="sd">    prematurely stopping the simulation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;_max_error&#39;</span><span class="p">,</span> <span class="s1">&#39;_max_length&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_interval</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">max_dist_error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise console printing by giving the update time interval.</span>
+<span class="sd">        This defines how often displaying updates will be given (in</span>
+<span class="sd">        simulation time).</span>
+
+<span class="sd">        :param update_interval: The time intervals between updates in seconds.</span>
+<span class="sd">        :type update_interval: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">update_interval</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">max_dist_error</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">max_dist_error</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_error</span> <span class="o">=</span> <span class="n">max_dist_error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_length</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">print_and_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">):</span>
+
+
+        <span class="n">progress</span> <span class="o">=</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_time</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+        <span class="n">position_error</span> <span class="o">=</span> <span class="n">lla2ned</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">ground_truth</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+        <span class="n">north_error</span><span class="p">,</span> <span class="n">east_error</span><span class="p">,</span> <span class="n">down_error</span> <span class="o">=</span> <span class="n">position_error</span>
+
+        <span class="n">fmt_string</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">progress</span><span class="si">:</span><span class="s2">8.4f</span><span class="si">}</span><span class="s2">%]</span><span class="se">\t</span><span class="s2"> NED Position Error: (&quot;</span>
+                      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">north_error</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">, &quot;</span>
+                      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">east_error</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">, &quot;</span>
+                      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">down_error</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">fmt_string</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\r</span><span class="si">{</span><span class="n">fmt_string</span><span class="si">:{</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_length</span><span class="si">}</span><span class="s2">s</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># TODO: Raise custom exception!</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">position_error</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_error</span><span class="p">,</span> \
+            <span class="sa">f</span><span class="s2">&quot;Estimated position error has exceeded threshold of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_error</span><span class="si">}</span><span class="s2"> metres&quot;</span>
+
+
+<div class="viewcode-block" id="ConsoleDisplayPlus.on_update">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.ConsoleDisplayPlus.on_update">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called during the simulation after each fusion update.</span>
+<span class="sd">        Updates the runtime progress display of the simulation.</span>
+
+<span class="sd">        :param timestamp: The current (true) simulation time in seconds.</span>
+<span class="sd">        :type timestamp: float</span>
+
+<span class="sd">        :param estimated_state: The current estimated state of the simulation.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+
+<span class="sd">        :param ground_truth: The current ground truth state of the simulation.</span>
+<span class="sd">        :type ground_truth: GroundTruth</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">timestamp</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_update</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next_update</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">print_and_process</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span></div>
+
+
+            <span class="c1"># self._next_update += self._time_step</span>
+            <span class="c1"># progress = (timestamp / self._end_time) * 100</span>
+            <span class="c1">#</span>
+            <span class="c1"># position_error = lla2ned(</span>
+            <span class="c1">#     estimated_state.position, ground_truth.position)</span>
+            <span class="c1"># north_error, east_error, down_error = position_error</span>
+            <span class="c1">#</span>
+            <span class="c1"># fmt_string = (f&quot;[{progress:8.4f}%]\t NED Position Error: (&quot;</span>
+            <span class="c1">#               f&quot;{north_error:.5f}, &quot;</span>
+            <span class="c1">#               f&quot;{east_error:.5f}, &quot;</span>
+            <span class="c1">#               f&quot;{down_error:.5f})&quot;)</span>
+            <span class="c1">#</span>
+            <span class="c1"># self._max_length = max(self._max_length, len(fmt_string) + 2)</span>
+            <span class="c1"># print(f&quot;\r{fmt_string:{self._max_length}s}&quot;, end=&quot;&quot;, flush=True)</span>
+            <span class="c1">#</span>
+            <span class="c1"># # TODO: Raise custom exception!</span>
+            <span class="c1"># assert np.linalg.norm(position_error) &lt;= self._max_error, \</span>
+            <span class="c1">#     f&quot;Estimated position error has exceeded threshold of {self._max_error} metres&quot;</span>
+
+<div class="viewcode-block" id="ConsoleDisplayPlus.on_finish">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.ConsoleDisplayPlus.on_finish">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_finish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called at the end of the simulation after final iteration.</span>
+<span class="sd">        Finishes the runtime progress display of the simulation.</span>
+
+<span class="sd">        :param timestamp: The final (true) simulation time in seconds.</span>
+<span class="sd">        :type timestamp: float</span>
+
+<span class="sd">        :param estimated_state: The final estimated state of the simulation.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+
+<span class="sd">        :param ground_truth: The final ground truth state of the simulation.</span>
+<span class="sd">        :type ground_truth: GroundTruth</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">print_and_process</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Simulation Complete!&#39;</span><span class="p">)</span></div>
+</div>
+
+        <span class="c1"># print(f&quot;{&#39;Simulation Complete!&#39;:{self._max_length}s}&quot;, flush=True)</span>
+
+
+
+
+
+<div class="viewcode-block" id="MultilineDisplay">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.MultilineDisplay">[docs]</a>
+<span class="k">class</span> <span class="nc">MultilineDisplay</span><span class="p">(</span><span class="n">ConsoleDisplayPlus</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_interval</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">max_dist_error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">update_interval</span><span class="p">,</span> <span class="n">max_dist_error</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_using_terminal</span> <span class="o">=</span> <span class="n">is_using_terminal</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sim_init_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_length</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_get_real_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim_init_time</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="MultilineDisplay.on_start">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.MultilineDisplay.on_start">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">:</span> <span class="n">Trajectory</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">on_start</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)</span>
+
+        <span class="n">num_lines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_length</span><span class="p">)</span> \
+            <span class="k">if</span> <span class="n">is_using_terminal</span><span class="p">()</span> <span class="k">else</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_lines</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Starting...&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MultilineDisplay.on_update">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.MultilineDisplay.on_update">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">timestamp</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_update</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next_update</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_step</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_print_update</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MultilineDisplay.on_finish">
+<a class="viewcode-back" href="../../../modules/simulation/display.html#qnav.simulation.display.MultilineDisplay.on_finish">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_finish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_print_update</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_print_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">):</span>
+
+        <span class="n">progress</span> <span class="o">=</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_time</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+        <span class="n">sim_time</span> <span class="o">=</span> <span class="n">sec_to_str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">))</span>
+        <span class="n">real_time</span> <span class="o">=</span> <span class="n">sec_to_str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_real_time</span><span class="p">()))</span>
+        <span class="n">position_error</span> <span class="o">=</span> <span class="n">lla2ned</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">ground_truth</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+        <span class="n">north_error</span><span class="p">,</span> <span class="n">east_error</span><span class="p">,</span> <span class="n">down_error</span> <span class="o">=</span> <span class="n">position_error</span>
+
+        <span class="n">fmt_strings</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Progress:</span><span class="se">\t</span><span class="s1"> </span><span class="si">{</span><span class="n">progress</span><span class="si">:</span><span class="s1">g</span><span class="si">}</span><span class="s1">%&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;Sim Time:</span><span class="se">\t</span><span class="s1"> </span><span class="si">{</span><span class="n">sim_time</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;Real Time:</span><span class="se">\t</span><span class="s1"> </span><span class="si">{</span><span class="n">real_time</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;NED Error:</span><span class="se">\t</span><span class="s1"> [</span><span class="si">{</span><span class="n">north_error</span><span class="si">:</span><span class="s1">g</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">east_error</span><span class="si">:</span><span class="s1">g</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">down_error</span><span class="si">:</span><span class="s1">g</span><span class="si">}</span><span class="s1">]&#39;</span>
+        <span class="p">)</span>
+
+        <span class="n">str_lengths</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">fmt_strings</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_length</span><span class="p">,</span> <span class="n">str_lengths</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_using_terminal</span><span class="p">:</span>
+            <span class="n">num_lines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fmt_strings</span><span class="p">)</span>
+            <span class="n">clear_terminal_line</span><span class="p">(</span><span class="n">num_lines</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">fmt_strings</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fmt_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\t\t</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fmt_strings</span><span class="p">)</span>
+            <span class="n">max_length</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_length</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\r</span><span class="si">{</span><span class="n">fmt_string</span><span class="si">:{</span><span class="n">max_length</span><span class="si">}</span><span class="s1">s</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">position_error</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_error</span><span class="p">,</span> \
+            <span class="sa">f</span><span class="s2">&quot;Estimated position error has exceeded threshold of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_error</span><span class="si">}</span><span class="s2"> metres&quot;</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

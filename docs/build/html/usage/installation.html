@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation Guide &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installation Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/installation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation-guide">
+<h1>Installation Guide<a class="headerlink" href="#installation-guide" title="Link to this heading"></a></h1>
+<p>The software is in the format of a conventional Python library and can be installed directly from the command-line.
+Doing this allows the PNT toolbox’s modules to be used in any Python project (sharing the same environment).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you intend to use the toolbox as a standalone application, interacting with it purely through
+user configuration files, then the installation steps can be skipped. However, the
+<a class="reference internal" href="requirements.html#software-requirements"><span class="std std-ref">required dependencies</span></a> must be installed.</p>
+</div>
+<p>Installing the library is optional and only recommended if you wish to employ its features within Python.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<section id="installing-via-pip">
+<h2>Installing via PIP<a class="headerlink" href="#installing-via-pip" title="Link to this heading"></a></h2>
+<p>To install the PNT library via <a class="reference external" href="https://docs.python.org/3/installing/">PIP</a> (Python’s Preferred Installer Program)
+firstly ensure that PIP is installed. If not, it can be invoked through python using <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pip</span></code>. Next navigate
+to the <strong>project’s root directory</strong> (the main project folder containing the files <code class="docutils literal notranslate"><span class="pre">README.md</span></code>,
+<code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> and <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>). Then execute the following command:</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">Install the Toolbox via PIP</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>.
+</pre></div>
+</div>
+</div>
+<p>Once executed the <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> script will be used and the toolbox will now be installed under the
+package name <code class="docutils literal notranslate"><span class="pre">nav_toolbox</span></code>.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>It is recommended that you use a <a class="reference external" href="https://docs.python.org/3/library/venv.html">virtual environment</a>
+for Python so that the interpreter, libraries and scripts installed are isolated. Doing this has many benefits
+including avoiding issues with conflicting packages and removing the need to use administrator privileges.</p>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="uninstalling-via-pip">
+<h2>Uninstalling via PIP<a class="headerlink" href="#uninstalling-via-pip" title="Link to this heading"></a></h2>
+<p>Conversely, the toolbox can be uninstalled using simular steps. To remove the PNT library via PIP the
+following command can be used:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">Uninstall the Toolbox via PIP</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>uninstall<span class="w"> </span>nav_toolbox
+</pre></div>
+</div>
+</div>
+<p>Once executed the toolbox will be uninstalled, however its dependencies will remain.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="handling-dependencies">
+<h2>Handling Dependencies<a class="headerlink" href="#handling-dependencies" title="Link to this heading"></a></h2>
+<p>The Python packages used by the toolbox will automatically be install during the installation process. These
+dependencies and their required versions are listed within <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code>. The listed packages can be
+installed manually via PIP using the following command:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">Install all Toolbox Dependencies via PIP</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>Similarly to uninstalling the toolbox, these packages can be uninstalled individually. To uninstall all
+dependencies use the following command:</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">Uninstall all Toolbox Dependencies via PIP</span><a class="headerlink" href="#id4" title="Link to this code"></a></div>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>uninstall<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

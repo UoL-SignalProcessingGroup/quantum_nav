@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>13. Potential Future Work &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="14. Software Licence" href="legal.html" />
+    <link rel="prev" title="12. Frequently Asked Questions" href="faq.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">13. Potential Future Work</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#possible-extensions">13.1. Possible Extensions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><span class="section-number">13. </span>Potential Future Work</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/future.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="potential-future-work">
+<h1><span class="section-number">13. </span>Potential Future Work<a class="headerlink" href="#potential-future-work" title="Link to this heading"></a></h1>
+<p>The produced PNT toolbox is very capable of providing facilities for conducting a wide range of navigation based
+experiments. However, it can always be improved and additional features can be added anytime. For this reason, this
+section lists some of the possible ways the toolbox can be extended given a potential project extension.</p>
+<section id="possible-extensions">
+<h2><span class="section-number">13.1. </span>Possible Extensions<a class="headerlink" href="#possible-extensions" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>More Sensors and Estimation Algorithms</dt><dd><p>If needed additional virtual hardware classes could be added, including non-classical sensors. On top of this,
+more advanced estimation algorithms can be implemented. For example, cold-atom quantum sensors could be introduced
+to the toolbox along with new algorithms to fuse their measurements with the current estimated states.</p>
+</dd>
+</dl>
+<hr class="docutils" />
+<dl>
+<dt>Concurrent Simulations</dt><dd><p>In some cases it is required than experiments are executed to cover a pre-set range of parameters. If needed, the
+toolbox could be adjusted so that multiple simulations are executed to cover a requested range of configuration
+values or cover all permutations automatically.</p>
+<p>Moreover, since the simulation execution cannot efficiently benefit from multithreading, the independent
+simulations could be conducted in parallel with each using a separate CPU core. In theory, this would allow the
+range of configuration settings to be covers in a fraction of the time.</p>
+</dd>
+</dl>
+<hr class="docutils" />
+<dl class="simple">
+<dt>Multi-Vehicle Cooperation</dt><dd><p>The toolbox is built for simulating a single platform following a set trajectory, taking measurements and using
+them to update its estimated states. For more advanced experiments, multiple platforms may need to cooperate with
+one another and collaborate to share estimates. While the toolbox is very capable of doing this (when used as a
+Python library) there is no set module, function or configuration to conduct it immediately. Nevertheless, the
+resources to conduct such experiments could be implemented if requested.</p>
+</dd>
+</dl>
+<hr class="docutils" />
+<dl>
+<dt>Graphical User Interface</dt><dd><p>If requested, a custom Graphical User Interface (GUI) could be implemented. This would aid the user with
+configuring experiments, showing produced trajectories and displaying simulation results in real-time. In
+principle, this would allow the software to be utilised much more easily as a standalone application.</p>
+<p>The user interface could be implemented as desktop application using a standard Python framework such as
+<a class="reference external" href="https://docs.python.org/3/library/tkinter.html">Tkinter</a>. Alternatively, a web-browser based interface could be
+made, allowing the software to be interfaced with across a local network. This would be more beneficial if the
+software is to be executed on system that does not feature a display or operating system with a desktop
+environment (i.e. command-line based interface). By using a web-browser, the interfacing system will not required
+any software or resources to be installed (including Python).</p>
+</dd>
+</dl>
+<hr class="docutils" />
+<dl class="simple">
+<dt>Numba Optimisation</dt><dd><p>If faster processing times are required, the toolbox can utilise <a class="reference external" href="https://numba.pydata.org/">Numba</a>. This would
+employ a JIT (Just-In-Time) compiler to convert the Python code to low-level code, obtaining performance comparable
+to that produced by C-code. In addition, this would utilise hardware such as multiple CPU cores and GPU devices
+to further accelerate calculations.</p>
+</dd>
+</dl>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="faq.html" class="btn btn-neutral float-left" title="12. Frequently Asked Questions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="legal.html" class="btn btn-neutral float-right" title="14. Software Licence" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

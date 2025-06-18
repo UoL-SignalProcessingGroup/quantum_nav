@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.input.config &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.input.config</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.input.config</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=========</span>
+<span class="sd">config.py</span>
+<span class="sd">=========</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Obtains primary simulation components from configuration file.</span>
+<span class="sd">    This module is used for initialising and obtaining the main</span>
+<span class="sd">    components used in simulations and for logging details to</span>
+<span class="sd">    the console.</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implemented version.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span> <span class="nn">qnav.estimation.state</span> <span class="kn">import</span> <span class="n">EstimatedState</span>
+<span class="kn">from</span> <span class="nn">qnav.gravity.map</span> <span class="kn">import</span> <span class="n">set_default_grid</span>
+<span class="kn">from</span> <span class="nn">qnav.input.config_handler</span> <span class="kn">import</span> <span class="n">ConfigHandler</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.clock</span> <span class="kn">import</span> <span class="n">Clock</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">SensorFusion</span>
+<span class="kn">from</span> <span class="nn">qnav.simulation.display</span> <span class="kn">import</span> <span class="n">Display</span>
+<span class="kn">from</span> <span class="nn">qnav.simulation.results</span> <span class="kn">import</span> <span class="n">ResultsCapture</span>
+<span class="kn">from</span> <span class="nn">qnav.waypoints.trajectory</span> <span class="kn">import</span> <span class="n">Trajectory</span>
+
+<span class="kn">import</span> <span class="nn">qnav.input.ini.altimeter_config</span> <span class="k">as</span> <span class="nn">alt_conf</span>
+<span class="kn">import</span> <span class="nn">qnav.input.ini.estimation_config</span> <span class="k">as</span> <span class="nn">est_conf</span>
+<span class="kn">import</span> <span class="nn">qnav.input.ini.gps_config</span> <span class="k">as</span> <span class="nn">gps_conf</span>
+<span class="kn">import</span> <span class="nn">qnav.input.ini.gravity_config</span> <span class="k">as</span> <span class="nn">grav_conf</span>
+<span class="kn">import</span> <span class="nn">qnav.input.ini.holonomic_config</span> <span class="k">as</span> <span class="nn">hol_conf</span>
+<span class="kn">import</span> <span class="nn">qnav.input.ini.measurement_config</span> <span class="k">as</span> <span class="nn">meas_conf</span>
+<span class="kn">import</span> <span class="nn">qnav.input.ini.quantum_config</span> <span class="k">as</span> <span class="nn">qs_conf</span>
+<span class="kn">import</span> <span class="nn">qnav.input.ini.quantum_grav_config</span> <span class="k">as</span> <span class="nn">qmm_conf</span>
+<span class="kn">import</span> <span class="nn">qnav.input.ini.vehicle_config</span> <span class="k">as</span> <span class="nn">vc_conf</span>
+<span class="kn">import</span> <span class="nn">qnav.input.ini.waypoint_config</span> <span class="k">as</span> <span class="nn">way_conf</span>
+<span class="kn">import</span> <span class="nn">qnav.input.ini.output_config</span> <span class="k">as</span> <span class="nn">out_conf</span>
+
+
+<span class="c1"># The default configuration file to assume.</span>
+<span class="n">__DEFAULT_CONFIG_FILE</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;default_settings.ini&quot;</span><span class="p">)</span>
+
+<span class="c1"># The column width to use</span>
+<span class="n">__BANNER_WIDTH</span> <span class="o">=</span> <span class="mi">64</span>
+
+
+<div class="viewcode-block" id="get_configuration">
+<a class="viewcode-back" href="../../../modules/input/config.html#qnav.input.config.get_configuration">[docs]</a>
+<span class="k">def</span> <span class="nf">get_configuration</span><span class="p">(</span><span class="n">config_file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConfigHandler</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialises and returns a :class:`qnav.input.config.ConfigHandler`</span>
+<span class="sd">    instance using the contents of the given file. On succession, the</span>
+<span class="sd">    file&#39;s variables, along with those in any sub-configurations,</span>
+<span class="sd">    will be parsed and loaded. If not file is given, a default</span>
+<span class="sd">    settings file will be used.</span>
+
+<span class="sd">    :param config_file: A path for a configuration (.ini) file to use.</span>
+<span class="sd">    :type config_file: Path</span>
+
+<span class="sd">    :return: An initialised ConfigHandler instance.</span>
+<span class="sd">    :rtype: ConfigHandler</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># If none provided, use default config file:</span>
+    <span class="k">if</span> <span class="n">config_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">config_file</span> <span class="o">=</span> <span class="n">__DEFAULT_CONFIG_FILE</span>
+
+    <span class="n">print_banner</span><span class="p">(</span><span class="s2">&quot;Initialisation&quot;</span><span class="p">)</span>
+    <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Configuration File&quot;</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
+
+    <span class="c1"># Initialise a configuration file handler.</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">ConfigHandler</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+
+    <span class="c1"># A collection of sections and properties containing the</span>
+    <span class="c1"># sub-configuration files to auto read and import.</span>
+    <span class="n">sub_configs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s2">&quot;Waypoints&quot;</span><span class="p">,</span> <span class="s2">&quot;waypointConfig&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Vehicle&quot;</span><span class="p">,</span>  <span class="s2">&quot;vehicleConfig&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Measurement&quot;</span><span class="p">,</span> <span class="s2">&quot;accelerometerConfig&quot;</span><span class="p">,</span> <span class="s2">&quot;Accelerometer&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Measurement&quot;</span><span class="p">,</span> <span class="s2">&quot;gyroscopeConfig&quot;</span><span class="p">,</span> <span class="s2">&quot;Gyroscope&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Measurement&quot;</span><span class="p">,</span> <span class="s2">&quot;clockConfig&quot;</span><span class="p">,</span> <span class="s2">&quot;Clock&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Estimation&quot;</span><span class="p">,</span> <span class="s2">&quot;accelerometerConfig&quot;</span><span class="p">,</span> <span class="s2">&quot;Accelerometer&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Estimation&quot;</span><span class="p">,</span> <span class="s2">&quot;gyroscopeConfig&quot;</span><span class="p">,</span> <span class="s2">&quot;Gyroscope&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Estimation&quot;</span><span class="p">,</span> <span class="s2">&quot;clockConfig&quot;</span><span class="p">,</span> <span class="s2">&quot;Clock&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Altimeter&quot;</span><span class="p">,</span> <span class="s2">&quot;altimeterConfig&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Quantum&quot;</span><span class="p">,</span> <span class="s2">&quot;quantumImuConfig&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Quantum&quot;</span><span class="p">,</span> <span class="s2">&quot;quantumGravityConfig&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;GPS&quot;</span><span class="p">,</span> <span class="s2">&quot;gpsZoneConfig&quot;</span><span class="p">,</span> <span class="s2">&quot;GpsZones&quot;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">section</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="n">sub_section</span> <span class="ow">in</span> <span class="n">sub_configs</span><span class="p">:</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">expand_section</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="n">sub_section</span><span class="p">)</span>
+
+    <span class="c1"># If requested by the user, display warnings about the configuration.</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">warn_on_fallback</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span>
+        <span class="s2">&quot;Misc&quot;</span><span class="p">,</span> <span class="s2">&quot;displayFallbackWarnings&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Number of Variables Read&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get_all_values</span><span class="p">()))</span>
+
+    <span class="c1"># Finally, return the configuration handler instance.</span>
+    <span class="k">return</span> <span class="n">config</span></div>
+
+
+
+<div class="viewcode-block" id="get_trajectory">
+<a class="viewcode-back" href="../../../modules/input/config.html#qnav.input.config.get_trajectory">[docs]</a>
+<span class="k">def</span> <span class="nf">get_trajectory</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigHandler</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Trajectory</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts values and produces ground truth trajectories.</span>
+<span class="sd">    When called, this function reads the required variables from the</span>
+<span class="sd">    given configuration and uses them to generate a trajectory. On</span>
+<span class="sd">    succession, this is return ready for use in a simulation.</span>
+
+<span class="sd">    :param config: The ConfigHandler instance to use for simulation settings.</span>
+<span class="sd">    :type config: ConfigHandler</span>
+
+<span class="sd">    :return: The trajectory ready for use in a simulation.</span>
+<span class="sd">    :rtype: Trajectory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: Add start and end times</span>
+    <span class="n">print_banner</span><span class="p">(</span><span class="s2">&quot;Trajectory&quot;</span><span class="p">)</span>
+    <span class="n">vehicle</span> <span class="o">=</span> <span class="n">vc_conf</span><span class="o">.</span><span class="n">get_vehicle_model</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Vehicle Model&quot;</span><span class="p">,</span> <span class="n">vehicle</span><span class="p">)</span>
+
+    <span class="n">gravity</span> <span class="o">=</span> <span class="n">grav_conf</span><span class="o">.</span><span class="n">get_true_gravity_model</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="c1"># TODO: NEW</span>
+    <span class="c1"># Set the default grid for calculating gravity gradient</span>
+    <span class="n">grid_params</span> <span class="o">=</span> <span class="n">grav_conf</span><span class="o">.</span><span class="n">get_gradient_grid</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">set_default_grid</span><span class="p">(</span><span class="o">**</span><span class="n">grid_params</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">gravity</span><span class="o">.</span><span class="n">base_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Gravity Function&quot;</span><span class="p">,</span> <span class="n">gravity</span><span class="p">)</span>
+        <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Gravity Correction&quot;</span><span class="p">,</span> <span class="s1">&#39;N/A&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Gravity Function&quot;</span><span class="p">,</span> <span class="n">gravity</span><span class="o">.</span><span class="n">base_model</span><span class="p">)</span>
+        <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Gravity Correction&quot;</span><span class="p">,</span> <span class="n">gravity</span><span class="p">)</span>
+
+    <span class="n">mode</span> <span class="o">=</span> <span class="n">way_conf</span><span class="o">.</span><span class="n">get_waypoint_mode</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">interp</span> <span class="o">=</span> <span class="n">way_conf</span><span class="o">.</span><span class="n">get_interp_method</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Generation Mode&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+    <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Interpolation&quot;</span><span class="p">,</span> <span class="n">interp</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">way_conf</span><span class="o">.</span><span class="n">generate_trajectory</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">vehicle</span><span class="p">,</span> <span class="n">gravity</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_estimation">
+<a class="viewcode-back" href="../../../modules/input/config.html#qnav.input.config.get_estimation">[docs]</a>
+<span class="k">def</span> <span class="nf">get_estimation</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigHandler</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">:</span> <span class="n">Trajectory</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EstimatedState</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts values and produces the initial estimation state.</span>
+<span class="sd">    When called, this function reads the required variables from the</span>
+<span class="sd">    given configuration and uses them to initialise the starting</span>
+<span class="sd">    estimation information. This uses the first record from the</span>
+<span class="sd">    previously generated trajectory and induces any requested errors.</span>
+<span class="sd">    On succession, an initial estimated state is return.</span>
+
+<span class="sd">    :param config: The ConfigHandler instance to use for simulation settings.</span>
+<span class="sd">    :type config: ConfigHandler</span>
+
+<span class="sd">    :param trajectory: The trajectory to be used during the simulation.</span>
+<span class="sd">        Required to obtain the true state at the first time step.</span>
+<span class="sd">    :type trajectory: Trajectory</span>
+
+<span class="sd">    :return: The initial estimated state to use in the simulation.</span>
+<span class="sd">    :rtype: EstimatedState</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">print_banner</span><span class="p">(</span><span class="s2">&quot;Estimation&quot;</span><span class="p">)</span>
+    <span class="n">ins_method</span> <span class="o">=</span> <span class="n">est_conf</span><span class="o">.</span><span class="n">get_ins_str</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;IMU Integration&quot;</span><span class="p">,</span> <span class="n">ins_method</span><span class="o">.</span><span class="n">title</span><span class="p">())</span>
+
+    <span class="c1"># Initialise at correct start time</span>
+    <span class="n">ground_truth</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">get_record</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">gravity</span> <span class="o">=</span> <span class="n">grav_conf</span><span class="o">.</span><span class="n">get_estimated_gravity_model</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">gravity</span><span class="o">.</span><span class="n">base_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Gravity Function&quot;</span><span class="p">,</span> <span class="n">gravity</span><span class="p">)</span>
+        <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Gravity Correction&quot;</span><span class="p">,</span> <span class="s1">&#39;N/A&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Gravity Function&quot;</span><span class="p">,</span> <span class="n">gravity</span><span class="o">.</span><span class="n">base_model</span><span class="p">)</span>
+        <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Gravity Correction&quot;</span><span class="p">,</span> <span class="n">gravity</span><span class="p">)</span>
+
+    <span class="n">estimated_state</span> <span class="o">=</span> <span class="n">est_conf</span><span class="o">.</span><span class="n">get_estimated_state</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">,</span> <span class="n">gravity</span><span class="p">)</span>
+    <span class="n">est_conf</span><span class="o">.</span><span class="n">add_estimation_errors</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">)</span>
+
+    <span class="n">has_errors</span> <span class="o">=</span> <span class="n">est_conf</span><span class="o">.</span><span class="n">has_estimation_errors</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Perfect Initialisation&quot;</span><span class="p">,</span> <span class="o">~</span><span class="n">has_errors</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">estimated_state</span></div>
+
+
+
+<div class="viewcode-block" id="get_platform_hardware">
+<a class="viewcode-back" href="../../../modules/input/config.html#qnav.input.config.get_platform_hardware">[docs]</a>
+<span class="k">def</span> <span class="nf">get_platform_hardware</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigHandler</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">SensorFusion</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts values and produces the virtual platform hardware instances.</span>
+<span class="sd">    When called, this function reads the required variables from the</span>
+<span class="sd">    given configuration and uses them initialize and return the requested</span>
+<span class="sd">    Sensor-Fusion instance to use during the simulation. On succession,</span>
+<span class="sd">    a list of SensorFusion classes to use in a simulation are returned.</span>
+
+<span class="sd">    :param config: The ConfigHandler instance to use for simulation settings.</span>
+<span class="sd">    :type config: ConfigHandler</span>
+
+<span class="sd">    :param estimated_state: The initial estimates before start of simulation.</span>
+<span class="sd">        Required as some fusion methods need an initial estimate to start with.</span>
+<span class="sd">    :type estimated_state: EstimatedState</span>
+
+<span class="sd">    :return: The list of SensorFusion instances to use in a simulation.</span>
+<span class="sd">    :rtype: list[SensorFusion]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">print_banner</span><span class="p">(</span><span class="s2">&quot;Hardware&quot;</span><span class="p">)</span>
+    <span class="n">accelerometer</span> <span class="o">=</span> <span class="n">meas_conf</span><span class="o">.</span><span class="n">get_accelerometer</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">gyroscope</span> <span class="o">=</span> <span class="n">meas_conf</span><span class="o">.</span><span class="n">get_gyroscope</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">ins_sf</span> <span class="o">=</span> <span class="n">est_conf</span><span class="o">.</span><span class="n">get_ins</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">accelerometer</span><span class="p">,</span> <span class="n">gyroscope</span><span class="p">)</span>
+    <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;INS Instance&quot;</span><span class="p">,</span> <span class="n">__class_name</span><span class="p">(</span><span class="n">ins_sf</span><span class="p">))</span>
+
+    <span class="n">altimeter_sf</span> <span class="o">=</span> <span class="n">alt_conf</span><span class="o">.</span><span class="n">get_altimeter_sf</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Altimeter Sensor&quot;</span><span class="p">,</span> <span class="n">__class_name</span><span class="p">(</span><span class="n">altimeter_sf</span><span class="p">))</span>
+
+    <span class="n">gps_sf</span> <span class="o">=</span> <span class="n">gps_conf</span><span class="o">.</span><span class="n">get_gps_sf</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">)</span>
+    <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;GPS Sensor&quot;</span><span class="p">,</span> <span class="n">__class_name</span><span class="p">(</span><span class="n">gps_sf</span><span class="p">))</span>
+
+    <span class="n">q_imu_sf</span> <span class="o">=</span> <span class="n">qs_conf</span><span class="o">.</span><span class="n">get_quantum_imu_sf</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">accelerometer</span><span class="p">,</span> <span class="n">gyroscope</span><span class="p">)</span>
+    <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Quantum IMU&quot;</span><span class="p">,</span> <span class="n">__class_name</span><span class="p">(</span><span class="n">q_imu_sf</span><span class="p">))</span>
+
+    <span class="n">q_grav_sf</span> <span class="o">=</span> <span class="n">qmm_conf</span><span class="o">.</span><span class="n">get_quantum_grav_sf</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Quantum GMM&quot;</span><span class="p">,</span> <span class="n">__class_name</span><span class="p">(</span><span class="n">q_grav_sf</span><span class="p">))</span>
+
+    <span class="n">holonomic_sf</span> <span class="o">=</span> <span class="n">hol_conf</span><span class="o">.</span><span class="n">get_holonomic_sf</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">print_line</span><span class="p">(</span><span class="s2">&quot;Holonomic Constrains&quot;</span><span class="p">,</span> <span class="n">__class_name</span><span class="p">(</span><span class="n">holonomic_sf</span><span class="p">))</span>
+
+    <span class="n">hardware</span> <span class="o">=</span> <span class="p">[</span><span class="n">ins_sf</span><span class="p">,</span> <span class="n">altimeter_sf</span><span class="p">,</span> <span class="n">gps_sf</span><span class="p">,</span>
+                <span class="n">q_imu_sf</span><span class="p">,</span> <span class="n">q_grav_sf</span><span class="p">,</span> <span class="n">holonomic_sf</span><span class="p">]</span>
+
+    <span class="c1"># Return all valid</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">h</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hardware</span> <span class="k">if</span> <span class="n">h</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="get_platform_clock">
+<a class="viewcode-back" href="../../../modules/input/config.html#qnav.input.config.get_platform_clock">[docs]</a>
+<span class="k">def</span> <span class="nf">get_platform_clock</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigHandler</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Clock</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts values and produces a virtual platform clock instances.</span>
+<span class="sd">    When called, this function reads the required variables from the</span>
+<span class="sd">    given configuration and uses them to initialise and return the</span>
+<span class="sd">    platform clock to use.</span>
+
+<span class="sd">    :param config: The ConfigHandler instance to use for simulation settings.</span>
+<span class="sd">    :type config: ConfigHandler</span>
+
+<span class="sd">    :return: The Clock instance to use in a simulation.</span>
+<span class="sd">    :rtype: Clock</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">meas_conf</span><span class="o">.</span><span class="n">get_clock</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_collector">
+<a class="viewcode-back" href="../../../modules/input/config.html#qnav.input.config.get_collector">[docs]</a>
+<span class="k">def</span> <span class="nf">get_collector</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigHandler</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ResultsCapture</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts values and produces the results collection instance to use.</span>
+<span class="sd">    When called, this function reads the required variables from the</span>
+<span class="sd">    given configuration and uses them initialise and return a results</span>
+<span class="sd">    collection instance, responsible for filtering and collecting</span>
+<span class="sd">    simulation results.</span>
+
+<span class="sd">    :param config: The ConfigHandler instance to use for simulation settings.</span>
+<span class="sd">    :type config: ConfigHandler</span>
+
+<span class="sd">    :return: The ResultsCapture instance to use in a simulation.</span>
+<span class="sd">    :rtype: ResultsCapture</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">out_conf</span><span class="o">.</span><span class="n">get_results_capture</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_displayer">
+<a class="viewcode-back" href="../../../modules/input/config.html#qnav.input.config.get_displayer">[docs]</a>
+<span class="k">def</span> <span class="nf">get_displayer</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigHandler</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Display</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts values and produces the displaying instance to use.</span>
+<span class="sd">    When called, this function reads the required variables from the</span>
+<span class="sd">    given configuration and uses them initialise and return a display</span>
+<span class="sd">    instance, responsible for feeding back real-time information about</span>
+<span class="sd">    the simulation. Can also be used for stopping the simulation</span>
+<span class="sd">    prematurely when criteria is met.</span>
+
+<span class="sd">    :param config: The ConfigHandler instance to use for simulation settings.</span>
+<span class="sd">    :type config: ConfigHandler</span>
+
+<span class="sd">    :return: The Display instance to use in a simulation.</span>
+<span class="sd">    :rtype: Display</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">out_conf</span><span class="o">.</span><span class="n">get_displayer</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_results_settings">
+<a class="viewcode-back" href="../../../modules/input/config.html#qnav.input.config.get_results_settings">[docs]</a>
+<span class="k">def</span> <span class="nf">get_results_settings</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigHandler</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts values and produces the results generation settings.</span>
+<span class="sd">    When called, this function reads the required variables from the</span>
+<span class="sd">    given configuration and uses them to define how results will be</span>
+<span class="sd">    gathered after the simulation and exported.</span>
+
+<span class="sd">    :param config: The ConfigHandler instance to use for simulation settings.</span>
+<span class="sd">    :type config: ConfigHandler</span>
+
+<span class="sd">    :return: A dictionary containing settings for exporting results.</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">print_banner</span><span class="p">(</span><span class="s2">&quot;Exporting Results&quot;</span><span class="p">)</span>
+
+    <span class="n">settings</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;output_dir&#39;</span><span class="p">:</span> <span class="n">out_conf</span><span class="o">.</span><span class="n">get_output_dir</span><span class="p">(</span><span class="n">config</span><span class="p">),</span>
+        <span class="s1">&#39;copy_config&#39;</span><span class="p">:</span> <span class="n">out_conf</span><span class="o">.</span><span class="n">get_copy_config</span><span class="p">(</span><span class="n">config</span><span class="p">),</span>
+        <span class="s1">&#39;down_sampling&#39;</span><span class="p">:</span> <span class="n">out_conf</span><span class="o">.</span><span class="n">get_output_downsample</span><span class="p">(</span><span class="n">config</span><span class="p">),</span>
+        <span class="s1">&#39;formats&#39;</span><span class="p">:</span> <span class="n">out_conf</span><span class="o">.</span><span class="n">get_output_formats</span><span class="p">(</span><span class="n">config</span><span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="n">print_line</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Include Full Configuration&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;copy_config&#39;</span><span class="p">])</span>
+    <span class="n">print_line</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Down Sample Ratio&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;down_sampling&#39;</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">fmt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;formats&#39;</span><span class="p">]):</span>
+        <span class="n">print_line</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Export Format </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">settings</span></div>
+
+
+
+<div class="viewcode-block" id="get_figure_settings">
+<a class="viewcode-back" href="../../../modules/input/config.html#qnav.input.config.get_figure_settings">[docs]</a>
+<span class="k">def</span> <span class="nf">get_figure_settings</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigHandler</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts values to use for results figure and report generation.</span>
+<span class="sd">    When called, this function reads the required variables from the</span>
+<span class="sd">    given configuration and returns them in a dictionary. These can</span>
+<span class="sd">    then be used later for generating the relevant after-simulation</span>
+<span class="sd">    graphics and report results.</span>
+
+<span class="sd">    :param config: The ConfigHandler instance to use for simulation settings.</span>
+<span class="sd">    :type config: ConfigHandler</span>
+
+<span class="sd">    :return: Dictionary containing figure generation settings.</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">print_banner</span><span class="p">(</span><span class="s2">&quot;Figure Generation&quot;</span><span class="p">)</span>
+
+    <span class="n">settings</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;do_save&#39;</span><span class="p">:</span> <span class="n">out_conf</span><span class="o">.</span><span class="n">get_save_figures</span><span class="p">(</span><span class="n">config</span><span class="p">),</span>
+        <span class="s1">&#39;do_show&#39;</span><span class="p">:</span> <span class="n">out_conf</span><span class="o">.</span><span class="n">get_show_figures</span><span class="p">(</span><span class="n">config</span><span class="p">),</span>
+        <span class="s1">&#39;renderer&#39;</span><span class="p">:</span> <span class="n">out_conf</span><span class="o">.</span><span class="n">get_figure_renderer</span><span class="p">(</span><span class="n">config</span><span class="p">),</span>
+        <span class="s1">&#39;formats&#39;</span><span class="p">:</span> <span class="n">out_conf</span><span class="o">.</span><span class="n">get_figure_formats</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="n">print_line</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saving Figures&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;do_save&#39;</span><span class="p">])</span>
+    <span class="n">print_line</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Render Figures&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;do_show&#39;</span><span class="p">])</span>
+    <span class="n">print_line</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Selected Render&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;renderer&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">settings</span></div>
+
+
+
+<div class="viewcode-block" id="print_banner">
+<a class="viewcode-back" href="../../../modules/input/config.html#qnav.input.config.print_banner">[docs]</a>
+<span class="k">def</span> <span class="nf">print_banner</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used to print formatted heading in the output console.</span>
+<span class="sd">    Simply used to group list points together cleanly.</span>
+
+<span class="sd">    :param text: (Optional) The text to include in the heading.</span>
+<span class="sd">        If not provided a dividing line will be used.</span>
+<span class="sd">    :type text: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">text</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s2">&quot;&quot;</span><span class="si">:</span><span class="s2">─&lt;</span><span class="si">{</span><span class="n">__BANNER_WIDTH</span><span class="si">}}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="sa">f</span><span class="s1">&#39;[ </span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s1"> ]&#39;</span><span class="si">:</span><span class="s2">─^</span><span class="si">{</span><span class="n">__BANNER_WIDTH</span><span class="si">}}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="print_line">
+<a class="viewcode-back" href="../../../modules/input/config.html#qnav.input.config.print_line">[docs]</a>
+<span class="k">def</span> <span class="nf">print_line</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">any</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used to print formated lines in the output console.</span>
+<span class="sd">    Simply used to produce clean uniformly spaced list points.</span>
+
+<span class="sd">    :param field: The text to place on the left-hand side.</span>
+<span class="sd">    :type field: str</span>
+
+<span class="sd">    :param value: The value to place on the right-hand side.</span>
+<span class="sd">    :type value: any</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">col_width</span> <span class="o">=</span> <span class="n">__BANNER_WIDTH</span> <span class="o">-</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="n">value_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; • </span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value_str</span><span class="si">:</span><span class="s2">.&gt;</span><span class="si">{</span><span class="n">col_width</span><span class="si">}}</span><span class="s2"> &quot;</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">__class_name</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts the printable name for a given class.</span>
+<span class="sd">    Simply used to produce clean text output to the console.</span>
+
+<span class="sd">    :param obj: The object to obtain the printable name for.</span>
+<span class="sd">    :type obj: object</span>
+
+<span class="sd">    :return: The printable name of the object.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;N/A&quot;</span> <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

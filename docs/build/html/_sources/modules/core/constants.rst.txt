@@ -1,0 +1,8 @@
+:orphan:
+
+nav_toolbox.core.constants
+==========================
+
+.. automodule:: nav_toolbox.core.constants
+    :members:
+    :member-order: bysource

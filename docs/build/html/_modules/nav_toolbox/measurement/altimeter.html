@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nav_toolbox.measurement.altimeter &mdash; Navigation Toolbox 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Navigation Toolbox
+          </a>
+              <div class="version">
+                Version 1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">1. Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">2. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">3. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">4. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/processing.html">5. Estimation Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">6. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">7. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">8. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">9. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">10. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">11. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">12. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Navigation Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nav_toolbox.measurement.altimeter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nav_toolbox.measurement.altimeter</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">============</span>
+<span class="sd">altimeter.py</span>
+<span class="sd">============</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Contains the virtual altimeter classes for producing measurements.</span>
+<span class="sd">    This module contains virtual altimeter classes that can be used for</span>
+<span class="sd">    generating altimeter measurements, from a simulated environment,</span>
+<span class="sd">    with a configured level of noise/errors.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Prof. Jason Ralph - jfralph@liverpool.ac.uk</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="StandardAltimeter">
+<a class="viewcode-back" href="../../../modules/measurement/altimeter.html#nav_toolbox.measurement.altimeter.StandardAltimeter">[docs]</a>
+<span class="k">class</span> <span class="nc">StandardAltimeter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Provides the functionality of an altimeter in a simulated environment.</span>
+<span class="sd">    This class essentially represents a virtual altimeter that takes the</span>
+<span class="sd">    altitude from the waypoint data and adds a configured noise/error.</span>
+<span class="sd">    The output of this can then be passed to a selected INS solution.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># All properties of the class.</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> \
+        <span class="s1">&#39;_alt_bias_error&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_alt_bias_drift_rate&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_frequency&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_is_enabled&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_rng&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">alt_bias_error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">alt_bias_drift_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">is_enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">rand_seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialises an altimeter instance with configured errors/rates.</span>
+
+<span class="sd">        :param freq: The frequency of altimeter measurements (in Hz).</span>
+<span class="sd">        :type freq: float</span>
+
+<span class="sd">        :param alt_bias_error: The initial altimeter bias error (in metres</span>
+<span class="sd">            above sea level).</span>
+<span class="sd">        :type alt_bias_error: float</span>
+
+<span class="sd">        :param alt_bias_drift_rate: The altimeter bias drift rate (in</span>
+<span class="sd">            metres/root sec).</span>
+<span class="sd">        :type alt_bias_drift_rate: float</span>
+
+<span class="sd">        :param rand_seed: The optional initialisation seed to use to</span>
+<span class="sd">            generate random numbers for noise and other errors.</span>
+<span class="sd">        :type rand_seed: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">assert</span> <span class="n">freq</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> \
+            <span class="s1">&#39;Altimeter measurement frequency must be a positive value!&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frequency</span> <span class="o">=</span> <span class="n">freq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_enabled</span> <span class="o">=</span> <span class="n">is_enabled</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_alt_bias_error</span> <span class="o">=</span> <span class="n">alt_bias_error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_alt_bias_drift_rate</span> <span class="o">=</span> <span class="n">alt_bias_drift_rate</span>
+
+        <span class="c1"># Initialise the random number generator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">rand_seed</span><span class="p">)</span>
+
+<div class="viewcode-block" id="StandardAltimeter.update">
+<a class="viewcode-back" href="../../../modules/measurement/altimeter.html#nav_toolbox.measurement.altimeter.StandardAltimeter.update">[docs]</a>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt_sqrt</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called every iteration to update simulated sensor errors.</span>
+<span class="sd">        As sensor errors propagate with time, it is important that this</span>
+<span class="sd">        method is called prior to every measurement update.</span>
+
+<span class="sd">        :param dt_sqrt: Square of the time difference since the last update.</span>
+<span class="sd">        :type dt_sqrt: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_alt_bias_error</span> <span class="o">+=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_alt_bias_drift_rate</span> <span class="o">*</span> <span class="n">dt_sqrt</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">()</span></div>
+
+        <span class="c1"># self._alt_bias_drift_rate * dt_sqrt * np.random.randn()</span>
+
+<div class="viewcode-block" id="StandardAltimeter.get_measurement">
+<a class="viewcode-back" href="../../../modules/measurement/altimeter.html#nav_toolbox.measurement.altimeter.StandardAltimeter.get_measurement">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">true_altitude</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Produces an altimeter measurement from given truth data.</span>
+<span class="sd">        This method takes the true altitude (above sea level) and</span>
+<span class="sd">        applies the configured errors/noise. The output can then be</span>
+<span class="sd">        fed to the selected INS solution.</span>
+
+<span class="sd">        :param true_altitude: The true altitude of the sensor (in metres</span>
+<span class="sd">            above sea level).</span>
+<span class="sd">        :type true_altitude: float</span>
+
+<span class="sd">        :return: The measured altitude of the altimeter (in metres above</span>
+<span class="sd">            sea level).</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">true_altitude</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_alt_bias_error</span></div>
+
+
+<div class="viewcode-block" id="StandardAltimeter.get_update_freq">
+<a class="viewcode-back" href="../../../modules/measurement/altimeter.html#nav_toolbox.measurement.altimeter.StandardAltimeter.get_update_freq">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_update_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the altimeter measurement frequency in Hz.</span>
+
+<span class="sd">        :return: The measurement frequency in Hz.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frequency</span></div>
+
+
+<div class="viewcode-block" id="StandardAltimeter.is_enabled">
+<a class="viewcode-back" href="../../../modules/measurement/altimeter.html#nav_toolbox.measurement.altimeter.StandardAltimeter.is_enabled">[docs]</a>
+    <span class="k">def</span> <span class="nf">is_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns if the altimeter is active for the simulation.</span>
+<span class="sd">        This method returns True if the altimeter instance is activated.</span>
+
+<span class="sd">        :return: True if the altimeter instance is active.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_enabled</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

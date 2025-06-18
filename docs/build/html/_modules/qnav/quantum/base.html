@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.quantum.base &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.quantum.base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.quantum.base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=======</span>
+<span class="sd">base.py</span>
+<span class="sd">=======</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Provides basic concept quantum sensors and fusion methods.</span>
+<span class="sd">    These serve as base models that more advanced and realistic</span>
+<span class="sd">    implementations can extend from.</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">qnav.measurement.accelerometer</span> <span class="kn">import</span> <span class="n">Accelerometer</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.error_properties</span> <span class="kn">import</span> <span class="n">ErrorProperties</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.gyroscope</span> <span class="kn">import</span> <span class="n">Gyroscope</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.platform</span> <span class="kn">import</span> <span class="n">SensorAxis</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">Sensor</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">SensorFusion</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">FusionTrigger</span>
+<span class="kn">from</span> <span class="nn">qnav.estimation.state</span> <span class="kn">import</span> <span class="n">EstimatedState</span>
+<span class="kn">from</span> <span class="nn">qnav.quantum.dummy</span> <span class="kn">import</span> <span class="n">DummyGyroscope</span>
+<span class="kn">from</span> <span class="nn">qnav.quantum.dummy</span> <span class="kn">import</span> <span class="n">DummyAccelerometer</span>
+<span class="kn">from</span> <span class="nn">qnav.waypoints.trajectory</span> <span class="kn">import</span> <span class="n">GroundTruth</span>
+<span class="kn">from</span> <span class="nn">qnav.fusion.ins</span> <span class="kn">import</span> <span class="n">NumericalINS</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="ConceptQuantumImu">
+<a class="viewcode-back" href="../../../modules/quantum/base.html#qnav.quantum.base.ConceptQuantumImu">[docs]</a>
+<span class="k">class</span> <span class="nc">ConceptQuantumImu</span><span class="p">(</span><span class="n">Sensor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Concept Quantum IMU featuring use of quantum accelerometer and gyroscope.</span>
+<span class="sd">    While not realistic in implementation, this base class produces</span>
+<span class="sd">    measurements mimicking a quantum accelerometer and gyroscope,</span>
+<span class="sd">    requiring multiple samples of the ground truth.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">full_frequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">imu_frequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">accelerometer_errors</span><span class="p">:</span> <span class="n">ErrorProperties</span><span class="p">,</span>
+                 <span class="n">gyroscope_errors</span><span class="p">:</span> <span class="n">ErrorProperties</span><span class="p">,</span>
+                 <span class="n">sensor_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="n">SensorAxis</span><span class="p">(),</span>
+                 <span class="n">duty_cycle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+                 <span class="n">start_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                 <span class="n">rand_seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a basic concept quantum IMU sensor from given configuration.</span>
+
+<span class="sd">        :param full_frequency: The frequency of quantum measurements. This is</span>
+<span class="sd">            the rate at which the sensor produces a quantum measurement.</span>
+<span class="sd">        :type full_frequency: float</span>
+
+<span class="sd">        :param imu_frequency: The frequency of shared IMU components. This is</span>
+<span class="sd">            the rate at which the sensor samples from the ground truth.</span>
+<span class="sd">            Must be higher than the full frequency.</span>
+<span class="sd">        :type imu_frequency: float</span>
+
+<span class="sd">        :param accelerometer_errors: The accelerometer errors to present in</span>
+<span class="sd">            the quantum accelerometer.</span>
+<span class="sd">        :type accelerometer_errors: ErrorProperties</span>
+
+<span class="sd">        :param gyroscope_errors: The gyroscope errors to present in</span>
+<span class="sd">            the quantum gyroscope.</span>
+<span class="sd">        :type gyroscope_errors: ErrorProperties</span>
+
+<span class="sd">        :param sensor_axis: The quantum IMU sensor axis.</span>
+<span class="sd">        :type sensor_axis: SensorAxis</span>
+
+<span class="sd">        :param duty_cycle: The percentage of time the measurement period</span>
+<span class="sd">            requires to gain a quantum measurement (between 0.0 and 1.0).</span>
+<span class="sd">        :type duty_cycle: float</span>
+
+<span class="sd">        :param start_time: The starting time of the sensor in seconds.</span>
+<span class="sd">        :type start_time: float</span>
+
+<span class="sd">        :param rand_seed: The random number generation seed.</span>
+<span class="sd">        :type rand_seed: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Call parent class&#39;s constructor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">imu_frequency</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">rand_seed</span><span class="p">)</span>
+
+        <span class="c1"># Ensure the duty cycle is suitable:</span>
+        <span class="k">if</span> <span class="n">duty_cycle</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">duty_cycle</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Duty cycle must be positive between 0 and 1&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Ensure the frequency is suitable:</span>
+        <span class="k">if</span> <span class="n">full_frequency</span> <span class="o">&gt;</span> <span class="n">imu_frequency</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;full_frequency cannot be higher than imu_frequency&quot;</span><span class="p">)</span>
+
+        <span class="c1"># TODO: Ensure sensor axis are the same?</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="n">sensor_axis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_duty_cycle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">duty_cycle</span>
+
+        <span class="c1"># Create highly-accurate &quot;quantum IMU sensors&quot; reusing IMU classes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_accelerometer</span> <span class="o">=</span> <span class="n">Accelerometer</span><span class="p">(</span><span class="n">imu_frequency</span><span class="p">,</span> <span class="n">accelerometer_errors</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_gyroscope</span> <span class="o">=</span> <span class="n">Gyroscope</span><span class="p">(</span><span class="n">imu_frequency</span><span class="p">,</span> <span class="n">gyroscope_errors</span><span class="p">)</span>
+
+        <span class="c1"># Obtain the measurement amounts required:</span>
+        <span class="n">freq_ratio</span> <span class="o">=</span> <span class="n">imu_frequency</span> <span class="o">/</span> <span class="n">full_frequency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_total_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">freq_ratio</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_active_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">duty_cycle</span> <span class="o">*</span> <span class="n">freq_ratio</span><span class="p">)</span>
+
+        <span class="c1"># TODO: NEW</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_total_steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_total_steps</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_active_steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_active_steps</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Pre-allocate array for holding measurement data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_acc_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_active_steps</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_gyro_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_active_steps</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+        <span class="c1"># Define the last measurement produced</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_measurement</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_active_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ConceptQuantumImu.take_measurement">
+<a class="viewcode-back" href="../../../modules/quantum/base.html#qnav.quantum.base.ConceptQuantumImu.take_measurement">[docs]</a>
+    <span class="k">def</span> <span class="nf">take_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">est_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Samples from the ground truth to collect data to produce measurements.</span>
+<span class="sd">        Using the ground truth, captures the current acceleration and angles</span>
+<span class="sd">        rates at the time. A series of these are required to produce a</span>
+<span class="sd">        measurement before fusion.</span>
+
+<span class="sd">        :param est_time: The estimated time the measurement of the sensor</span>
+<span class="sd">            is expected to be captured at (in seconds).</span>
+<span class="sd">        :type est_time: float</span>
+
+<span class="sd">        :param ground_truth: The corresponding ground truth data.</span>
+<span class="sd">        :type ground_truth: GroundTruth</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># While within the duty cycle for measurements:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_active_steps</span><span class="p">:</span>
+
+            <span class="c1"># Produce measurements from &quot;quantum IMU sensors&quot;:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qs_accelerometer</span><span class="o">.</span><span class="n">take_measurement</span><span class="p">(</span><span class="n">est_time</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qs_gyroscope</span><span class="o">.</span><span class="n">take_measurement</span><span class="p">(</span><span class="n">est_time</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span>
+
+            <span class="c1"># Record the produced measurements for current time step:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qs_acc_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qs_accelerometer</span><span class="o">.</span><span class="n">last_measurement</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qs_gyro_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qs_gyroscope</span><span class="o">.</span><span class="n">last_measurement</span>
+
+        <span class="c1"># If the final step:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_total_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+
+            <span class="c1"># Obtain the average sensor measurement</span>
+            <span class="n">acceleration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_qs_acc_data</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">angle_rates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_qs_gyro_data</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="c1"># If any nan values, abort measurement</span>
+            <span class="c1"># if (not np.any(np.isnan(acceleration)) and</span>
+            <span class="c1">#         not np.any(np.isnan(angle_rates))):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_measurement</span> <span class="o">=</span> <span class="p">(</span><span class="n">acceleration</span><span class="p">,</span> <span class="n">angle_rates</span><span class="p">)</span>
+
+        <span class="c1"># Increment the measurement step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="ConceptQuantumImu.update">
+<a class="viewcode-back" href="../../../modules/quantum/base.html#qnav.quantum.base.ConceptQuantumImu.update">[docs]</a>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_sec</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called on demand to update the sensor&#39;s state.</span>
+<span class="sd">        Typically called after measurements have been taken. When called</span>
+<span class="sd">        this increases the next measurement time and propagates internal</span>
+<span class="sd">        states, to the time difference.</span>
+
+<span class="sd">        :param time_sec: The current simulation time in seconds.</span>
+<span class="sd">        :type time_sec: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Update using parent class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">time_sec</span><span class="p">)</span>
+
+        <span class="c1"># Then update the internal sensors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_accelerometer</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">time_sec</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_gyroscope</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">time_sec</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConceptQuantumImu.reset">
+<a class="viewcode-back" href="../../../modules/quantum/base.html#qnav.quantum.base.ConceptQuantumImu.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resets the sensor, clearing all previous measurements.</span>
+<span class="sd">        Normally used directly after fusion.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_measurement</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_acc_data</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_gyro_data</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">last_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the last acceleration and angle rate measurements captured</span>
+<span class="sd">        by the quantum sensor, respectively.</span>
+
+<span class="sd">        :return: The last measurements of the sensor.</span>
+<span class="sd">        :rtype: tuple[np.ndarray, np.ndarray]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_measurement</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_active_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the number of measurement steps required,</span>
+
+<span class="sd">        :return: Number of measurements required.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_active_steps</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the number of total steps required,</span>
+
+<span class="sd">        :return: Number of steps required for fusion.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_total_steps</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sensor_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SensorAxis</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the true sensor axis for the sensor.</span>
+
+<span class="sd">        :return: The sensor axis used by the sensor.</span>
+<span class="sd">        :rtype: SensorAxis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_axis</span></div>
+
+
+
+<div class="viewcode-block" id="ConceptQuantumFusion">
+<a class="viewcode-back" href="../../../modules/quantum/base.html#qnav.quantum.base.ConceptQuantumFusion">[docs]</a>
+<span class="k">class</span> <span class="nc">ConceptQuantumFusion</span><span class="p">(</span><span class="n">SensorFusion</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A basic version of quantum fusion, namely used as a base class.</span>
+<span class="sd">    This is the simplest implementation of position correction fusion for</span>
+<span class="sd">    quantum IMU. Many of its methods can be extended and swapped out for</span>
+<span class="sd">    more advanced implementations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qs_imu</span><span class="p">:</span> <span class="n">ConceptQuantumImu</span><span class="p">,</span>
+                 <span class="n">shared_accelerometer</span><span class="p">:</span> <span class="n">Accelerometer</span><span class="p">,</span>
+                 <span class="n">shared_gyroscope</span><span class="p">:</span> <span class="n">Gyroscope</span><span class="p">,</span>
+                 <span class="n">est_qs_imu_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">est_acc_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">est_gyro_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a quantum sensor fusion instance for position correction.</span>
+
+<span class="sd">        :param qs_imu: The quantum sensor to use for quantum IMU measurements.</span>
+<span class="sd">        :type qs_imu: ConceptQuantumImu</span>
+
+<span class="sd">        :param shared_accelerometer: The IMU&#39;s accelerometer instance.</span>
+<span class="sd">        :type shared_accelerometer: Accelerometer</span>
+
+<span class="sd">        :param shared_gyroscope: The IMU&#39;s gyroscope instance.</span>
+<span class="sd">        :type shared_gyroscope: Gyroscope</span>
+
+<span class="sd">        :param est_qs_imu_axis: (Optional) Estimated sensor axis for</span>
+<span class="sd">            quantum IMU. If not provided, true axis will be used.</span>
+<span class="sd">        :type est_qs_imu_axis: SensorAxis</span>
+
+<span class="sd">        :param est_acc_axis: (Optional) Estimated sensor axis for</span>
+<span class="sd">            accelerometer. If not provided, true axis will be used.</span>
+<span class="sd">        :type est_acc_axis: SensorAxis</span>
+
+<span class="sd">        :param est_gyro_axis: (Optional) Estimated sensor axis for</span>
+<span class="sd">            gyroscope. If not provided, true axis will be used.</span>
+<span class="sd">        :type est_gyro_axis: SensorAxis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Call parent class&#39;s constructor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">FusionTrigger</span><span class="o">.</span><span class="n">ALL</span><span class="p">,</span> <span class="n">qs_imu</span><span class="p">,</span>
+            <span class="n">shared_accelerometer</span><span class="p">,</span> <span class="n">shared_gyroscope</span><span class="p">)</span>
+
+        <span class="c1"># set_or_default = lambda a, b: a if a is not None else b</span>
+        <span class="c1">#</span>
+        <span class="c1"># self._qs_est_axis: SensorAxis = set_or_default(</span>
+        <span class="c1">#     est_qs_imu_axis, qs_imu.sensor_axis)</span>
+        <span class="c1">#</span>
+        <span class="c1"># self._acc_est_axis: SensorAxis = set_or_default(</span>
+        <span class="c1">#     est_acc_axis, shared_accelerometer.sensor_axis)</span>
+        <span class="c1">#</span>
+        <span class="c1"># self._gyro_est_axis: SensorAxis = set_or_default(</span>
+        <span class="c1">#     est_gyro_axis, shared_gyroscope.sensor_axis)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_est_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="n">est_qs_imu_axis</span> \
+            <span class="k">if</span> <span class="n">est_qs_imu_axis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">qs_imu</span><span class="o">.</span><span class="n">sensor_axis</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_acc_est_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="n">est_acc_axis</span> \
+            <span class="k">if</span> <span class="n">est_acc_axis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">shared_accelerometer</span><span class="o">.</span><span class="n">sensor_axis</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gyro_est_axis</span><span class="p">:</span> <span class="n">SensorAxis</span> <span class="o">=</span> <span class="n">est_gyro_axis</span> \
+            <span class="k">if</span> <span class="n">est_gyro_axis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">shared_gyroscope</span><span class="o">.</span><span class="n">sensor_axis</span>
+
+        <span class="c1"># Ensure frequencies are valid:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">qs_imu</span><span class="o">.</span><span class="n">frequency</span>
+                <span class="o">!=</span> <span class="n">shared_accelerometer</span><span class="o">.</span><span class="n">frequency</span>
+                <span class="o">!=</span> <span class="n">shared_gyroscope</span><span class="o">.</span><span class="n">frequency</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Sensor frequencies must be identical&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Unpack given parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_imu</span> <span class="o">=</span> <span class="n">qs_imu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_accelerometer</span> <span class="o">=</span> <span class="n">shared_accelerometer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gyroscope</span> <span class="o">=</span> <span class="n">shared_gyroscope</span>
+
+        <span class="c1"># Initialise steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qs_imu</span><span class="o">.</span><span class="n">num_steps</span>
+
+        <span class="c1"># Set-up measurement table</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_imu_acc_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_steps</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_imu_gyro_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_steps</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+        <span class="c1"># Pre-allocate last estimated state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_estimated_state</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ConceptQuantumFusion.perform_fusion">
+<a class="viewcode-back" href="../../../modules/quantum/base.html#qnav.quantum.base.ConceptQuantumFusion.perform_fusion">[docs]</a>
+    <span class="k">def</span> <span class="nf">perform_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Collects measurements and applies position fixing.</span>
+<span class="sd">        Each cycle collects measurements from the typical IMU sensors and</span>
+<span class="sd">        quantum sensor. After a set number of calls, this uses the single</span>
+<span class="sd">        quantum measurement to calculate an approximate bias correction for</span>
+<span class="sd">        the IMU. If successful, the position fixing is applied.</span>
+
+<span class="sd">        :param estimated_state: The current estimated state to update.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get latest measurements from sensors</span>
+        <span class="n">qs_measurement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qs_imu</span><span class="o">.</span><span class="n">last_measurement</span>
+        <span class="n">acc_measurement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accelerometer</span><span class="o">.</span><span class="n">last_measurement</span>
+        <span class="n">ang_measurement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gyroscope</span><span class="o">.</span><span class="n">last_measurement</span>
+
+        <span class="c1"># On the first step:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+
+            <span class="c1"># Preserve the current estimated state.</span>
+            <span class="c1"># self._estimated_state = copy(estimated_state)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_estimated_state</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+
+        <span class="c1"># Record latest IMU measurements:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_imu_acc_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">acc_measurement</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_imu_gyro_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">ang_measurement</span>
+
+        <span class="c1"># On the final step:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+
+            <span class="c1"># If successful qs_measurement:</span>
+            <span class="k">if</span> <span class="n">qs_measurement</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="c1"># Estimate sensor biases using sensor measurement differences</span>
+                <span class="n">qs_measurement_imu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_measurement_to_imu_axis</span><span class="p">(</span><span class="o">*</span><span class="n">qs_measurement</span><span class="p">)</span>
+                <span class="n">acc_bias</span><span class="p">,</span> <span class="n">gyro_bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_bias_errors</span><span class="p">(</span><span class="o">*</span><span class="n">qs_measurement_imu</span><span class="p">)</span>
+
+                <span class="c1"># Apply correction using corrected IMU measurements</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_perform_correction</span><span class="p">(</span><span class="n">acc_bias</span><span class="p">,</span> <span class="n">gyro_bias</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">)</span>
+
+            <span class="c1"># Reset sensor and measurement table</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+
+
+<div class="viewcode-block" id="ConceptQuantumFusion.reset">
+<a class="viewcode-back" href="../../../modules/quantum/base.html#qnav.quantum.base.ConceptQuantumFusion.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resets the state of the fusion, clearing internal temporary states.</span>
+<span class="sd">        When call the fusion will return to expecting the first measurement,</span>
+<span class="sd">        then continuing from there.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qs_imu</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+
+    <span class="k">def</span> <span class="nf">_measurement_to_imu_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceleration_qs</span><span class="p">,</span>
+                                 <span class="n">angle_rate_qs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts quantum measurements to assumed IMU axes.</span>
+<span class="sd">        A requirement for comparing quantum IMU values against standard IMU</span>
+<span class="sd">        values, by converting them to a common axes.</span>
+
+<span class="sd">        :param acceleration_qs: The measured acceleration from the quantum sensor.</span>
+<span class="sd">        :type acceleration_qs: np.ndarray (3-elements)</span>
+
+<span class="sd">        :param angle_rate_qs:</span>
+<span class="sd">        :type angle_rate_qs: np.ndarray (3-elements)</span>
+
+<span class="sd">        :return: The given quantum measurements converted to IMU axes.</span>
+<span class="sd">        :rtype: tuple[np.ndarray, np.ndarray]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Unpack the lever arm values</span>
+        <span class="n">qs_lever_arm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qs_est_axis</span><span class="o">.</span><span class="n">lever_arm</span>
+        <span class="n">acc_lever_arm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acc_est_axis</span><span class="o">.</span><span class="n">lever_arm</span>
+
+        <span class="c1"># Unpack the sensor rotation matrix values</span>
+        <span class="n">qs_rot_body2sensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qs_est_axis</span><span class="o">.</span><span class="n">body2sensor_mat</span>
+        <span class="n">acc_rot_body2sensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acc_est_axis</span><span class="o">.</span><span class="n">body2sensor_mat</span>
+        <span class="n">gyro_rot_body2sensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gyro_est_axis</span><span class="o">.</span><span class="n">body2sensor_mat</span>
+
+        <span class="c1"># Obtain the measured acceleration and angle rate.</span>
+        <span class="c1"># acceleration_qs, angle_rate_qs = qs_measurement</span>
+        <span class="n">angle_rate_qs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">angle_rate_qs</span><span class="p">)</span>
+
+        <span class="c1"># Convert acceleration from quantum sensors to body axes</span>
+        <span class="c1"># (includes the lever arm correction).</span>
+        <span class="n">acceleration_qs_body</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span>
+            <span class="n">qs_rot_body2sensor</span><span class="p">,</span> <span class="n">acceleration_qs</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span>
+            <span class="n">angle_rate_qs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">angle_rate_qs</span><span class="p">,</span> <span class="n">qs_lever_arm</span><span class="p">))</span>
+
+        <span class="c1"># Convert acceleration from body axes to IMU sensor axes</span>
+        <span class="c1"># (includes the lever arm correction).</span>
+        <span class="n">acceleration_qs_imu</span> <span class="o">=</span> <span class="n">acc_rot_body2sensor</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span>
+            <span class="n">acceleration_qs_body</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">angle_rate_qs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span>
+                <span class="n">angle_rate_qs</span><span class="p">,</span> <span class="n">acc_lever_arm</span><span class="p">)))</span>
+
+        <span class="c1"># Rotate angle rates from body axes to IMU axes.</span>
+        <span class="n">angle_rate_qs_imu</span> <span class="o">=</span> <span class="n">gyro_rot_body2sensor</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">angle_rate_qs</span><span class="p">)</span>
+        <span class="n">angle_rate_qs_imu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">angle_rate_qs_imu</span><span class="p">)</span>  <span class="c1"># TODO: NEW</span>
+
+        <span class="k">return</span> <span class="n">acceleration_qs_imu</span><span class="p">,</span> <span class="n">angle_rate_qs_imu</span>
+
+    <span class="k">def</span> <span class="nf">_calculate_bias_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceleration_qs_imu</span><span class="p">,</span>
+                               <span class="n">angle_rate_qs_imu</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Estimates and returns the accelerometer and gyroscope bias.</span>
+<span class="sd">        Using the collected IMU measurements and calculated quantum IMU</span>
+<span class="sd">        measurements, this method examines the difference and returns the</span>
+<span class="sd">        estimated bias for each.</span>
+
+<span class="sd">        :param acceleration_qs_imu: The quantum acceleration measurement</span>
+<span class="sd">            (given in converted IMU axis).</span>
+
+<span class="sd">        :param angle_rate_qs_imu: The quantum gyroscope measurement</span>
+<span class="sd">            (given in converted IMU axis).</span>
+
+<span class="sd">        :return: The estimated accelerometer and gyroscope biases, respectively.</span>
+<span class="sd">        :rtype: tuple[np.ndarray, np.ndarray]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Obtain the average acceleration value from the measurement record.</span>
+        <span class="n">mean_imu_acceleration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_imu_acc_data</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Obtain the average angle rate value from the measurement record.</span>
+        <span class="n">mean_imu_angle_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_imu_gyro_data</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Convert angle rates to radians.</span>
+        <span class="c1"># mean_imu_angle_rate = np.radians(mean_imu_angle_rate)</span>
+        <span class="c1"># angle_rate_qs_imu = np.radians(angle_rate_qs_imu)</span>
+
+        <span class="c1"># Calculate estimated bias values for IMU.</span>
+        <span class="n">accelerometer_biases</span> <span class="o">=</span> <span class="n">mean_imu_acceleration</span> <span class="o">-</span> <span class="n">acceleration_qs_imu</span>
+        <span class="n">gyroscope_biases</span> <span class="o">=</span> <span class="p">(</span><span class="n">mean_imu_angle_rate</span> <span class="o">-</span> <span class="n">angle_rate_qs_imu</span><span class="p">)</span>
+        <span class="c1"># gyroscope_biases = np.degrees(gyroscope_biases)</span>
+
+        <span class="c1"># Replace nan values with zero (prevent numerical errors).</span>
+        <span class="n">accelerometer_biases</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">accelerometer_biases</span><span class="p">)</span>
+        <span class="n">gyroscope_biases</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">gyroscope_biases</span><span class="p">)</span>
+
+        <span class="c1"># Return the calculated bias errors</span>
+        <span class="k">return</span> <span class="n">accelerometer_biases</span><span class="p">,</span> <span class="n">gyroscope_biases</span>
+
+    <span class="k">def</span> <span class="nf">_perform_correction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acc_bias</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                            <span class="n">gyro_bias</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                            <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reprocesses IMU solution using estimated biases and correct for</span>
+<span class="sd">        biases in measurement record.</span>
+
+<span class="sd">        :param acc_bias: The calculated acceleration biases for correction.</span>
+<span class="sd">        :type acc_bias: np.ndarray</span>
+
+<span class="sd">        :param gyro_bias: The calculated angle rate biases for correction.</span>
+<span class="sd">        :type gyro_bias: np.ndarray</span>
+
+<span class="sd">        :param estimated_state: The current estimated state to be updated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO: Remove or improve</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">acc_bias</span><span class="p">))</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">gyro_bias</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Rejecting correction and resetting...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Correct for biases in measurement record</span>
+        <span class="n">acc_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_imu_acc_data</span> <span class="o">-</span> <span class="n">acc_bias</span>
+        <span class="n">gyro_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_imu_gyro_data</span> <span class="o">-</span> <span class="n">gyro_bias</span>
+
+        <span class="c1"># acc_data = self._imu_acc_data</span>
+        <span class="c1"># gyro_data = self._imu_gyro_data</span>
+
+        <span class="n">tmp_state</span><span class="p">:</span> <span class="n">EstimatedState</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimated_state</span>
+
+        <span class="n">dummy_accelerometer</span> <span class="o">=</span> <span class="n">DummyAccelerometer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_accelerometer</span><span class="p">)</span>
+        <span class="n">dummy_gyroscope</span> <span class="o">=</span> <span class="n">DummyGyroscope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gyroscope</span><span class="p">)</span>
+        <span class="c1"># dummy_accelerometer.next_update = timestep</span>
+        <span class="c1"># dummy_gyroscope.next_update = timestep</span>
+
+        <span class="n">tmp_ins</span> <span class="o">=</span> <span class="n">NumericalINS</span><span class="p">(</span><span class="n">dummy_accelerometer</span><span class="p">,</span> <span class="n">dummy_gyroscope</span><span class="p">)</span>
+
+        <span class="c1"># TODO: Fix depending on fusion ordering!</span>
+        <span class="c1"># for i in range(self._num_steps):</span>
+        <span class="c1"># for i in range(self._num_steps - 1):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_steps</span><span class="p">):</span>
+            <span class="n">dummy_accelerometer</span><span class="o">.</span><span class="n">last_measurement</span> <span class="o">=</span> <span class="n">acc_data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">dummy_gyroscope</span><span class="o">.</span><span class="n">last_measurement</span> <span class="o">=</span> <span class="n">gyro_data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">tmp_ins</span><span class="o">.</span><span class="n">perform_fusion</span><span class="p">(</span><span class="n">tmp_state</span><span class="p">)</span>
+
+        <span class="c1"># Finally, overwrite the current estimates</span>
+        <span class="n">estimated_state</span><span class="o">.</span><span class="n">update_estimates</span><span class="p">(</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">tmp_state</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
+            <span class="n">velocity</span><span class="o">=</span><span class="n">tmp_state</span><span class="o">.</span><span class="n">velocity</span><span class="p">,</span>
+            <span class="n">acceleration</span><span class="o">=</span><span class="n">tmp_state</span><span class="o">.</span><span class="n">acceleration</span><span class="p">,</span>
+            <span class="n">attitude</span><span class="o">=</span><span class="n">tmp_state</span><span class="o">.</span><span class="n">attitude</span><span class="p">,</span>
+            <span class="n">angle_rates</span><span class="o">=</span><span class="n">tmp_state</span><span class="o">.</span><span class="n">angle_rates</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

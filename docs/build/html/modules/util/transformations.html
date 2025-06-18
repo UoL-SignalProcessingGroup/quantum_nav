@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.1.1. qnav.util.transformations &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="9.1.2. qnav.earth.dted" href="../earth/dted.html" />
+    <link rel="prev" title="9. Software Components" href="../../usage/packages.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../usage/packages.html">9. Software Components</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../usage/packages.html#earth">9.1. Earth</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">9.1.1. transformations.py</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#transformations-py">9.1.1.1. transformations.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.deg2rad"><code class="docutils literal notranslate"><span class="pre">deg2rad()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.rad2deg"><code class="docutils literal notranslate"><span class="pre">rad2deg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.deg2dec"><code class="docutils literal notranslate"><span class="pre">deg2dec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.dec2deg"><code class="docutils literal notranslate"><span class="pre">dec2deg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.radius"><code class="docutils literal notranslate"><span class="pre">radius()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.radius_vec"><code class="docutils literal notranslate"><span class="pre">radius_vec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.rotation_rate"><code class="docutils literal notranslate"><span class="pre">rotation_rate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.rotation_rate_vec"><code class="docutils literal notranslate"><span class="pre">rotation_rate_vec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.radius84"><code class="docutils literal notranslate"><span class="pre">radius84()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.radius84_vec"><code class="docutils literal notranslate"><span class="pre">radius84_vec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.rotate_3d"><code class="docutils literal notranslate"><span class="pre">rotate_3d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.rotate_3d_vec"><code class="docutils literal notranslate"><span class="pre">rotate_3d_vec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.lla2ned"><code class="docutils literal notranslate"><span class="pre">lla2ned()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.lla2ned_vec"><code class="docutils literal notranslate"><span class="pre">lla2ned_vec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.ned2lla"><code class="docutils literal notranslate"><span class="pre">ned2lla()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.ned2lla_vec"><code class="docutils literal notranslate"><span class="pre">ned2lla_vec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.lla2ecef"><code class="docutils literal notranslate"><span class="pre">lla2ecef()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.lla2ecef_vec"><code class="docutils literal notranslate"><span class="pre">lla2ecef_vec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.euler_to_quaternion"><code class="docutils literal notranslate"><span class="pre">euler_to_quaternion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.quaternion_to_euler"><code class="docutils literal notranslate"><span class="pre">quaternion_to_euler()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.euler_to_quaternion_vec"><code class="docutils literal notranslate"><span class="pre">euler_to_quaternion_vec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.quaternion_to_euler_vec"><code class="docutils literal notranslate"><span class="pre">quaternion_to_euler_vec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.haversine"><code class="docutils literal notranslate"><span class="pre">haversine()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.haversine_vec"><code class="docutils literal notranslate"><span class="pre">haversine_vec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.get_time_pos_vel"><code class="docutils literal notranslate"><span class="pre">get_time_pos_vel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.ecef2eci"><code class="docutils literal notranslate"><span class="pre">ecef2eci()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.eci2ecef"><code class="docutils literal notranslate"><span class="pre">eci2ecef()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.ecef2lla"><code class="docutils literal notranslate"><span class="pre">ecef2lla()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.ecef2lla_vec"><code class="docutils literal notranslate"><span class="pre">ecef2lla_vec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.ecef2ned_transform"><code class="docutils literal notranslate"><span class="pre">ecef2ned_transform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.ecef2ned_transform_vec"><code class="docutils literal notranslate"><span class="pre">ecef2ned_transform_vec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.ecef2ned"><code class="docutils literal notranslate"><span class="pre">ecef2ned()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.ned2ecef"><code class="docutils literal notranslate"><span class="pre">ned2ecef()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.ned2ecef_vec"><code class="docutils literal notranslate"><span class="pre">ned2ecef_vec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.vned2vecef"><code class="docutils literal notranslate"><span class="pre">vned2vecef()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.utc2gps"><code class="docutils literal notranslate"><span class="pre">utc2gps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.ned2azel"><code class="docutils literal notranslate"><span class="pre">ned2azel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.get_transport_rate"><code class="docutils literal notranslate"><span class="pre">get_transport_rate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.get_transport_rate_vec"><code class="docutils literal notranslate"><span class="pre">get_transport_rate_vec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.vel_ecef2vel_ned"><code class="docutils literal notranslate"><span class="pre">vel_ecef2vel_ned()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.transformations.cross_prod_xy"><code class="docutils literal notranslate"><span class="pre">cross_prod_xy()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../earth/dted.html">9.1.2. dted.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../earth/geoid.html">9.1.3. geoid.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../earth/utm.html">9.1.4. utm.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#estimation">9.2. Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#fusion">9.3. Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gps">9.4. GPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gravity">9.5. Gravity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#input">9.6. Input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#measurement">9.7. Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#output">9.8. Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#quantum">9.9. Quantum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#simulation">9.10. Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#util">9.11. Util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#waypoints">9.12. Waypoints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../usage/packages.html"><span class="section-number">9. </span>Software Components</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">9.1.1. </span>qnav.util.transformations</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/modules/util/transformations.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qnav.util.transformations">
+<span id="qnav-util-transformations"></span><h1><span class="section-number">9.1.1. </span>qnav.util.transformations<a class="headerlink" href="#module-qnav.util.transformations" title="Link to this heading"></a></h1>
+<section id="transformations-py">
+<h2><span class="section-number">9.1.1.1. </span>transformations.py<a class="headerlink" href="#transformations-py" title="Link to this heading"></a></h2>
+<dl class="field-list">
+<dt class="field-odd">summary<span class="colon">:</span></dt>
+<dd class="field-odd"><p>This module includes all general transformation calculations that
+are required for the Navigation Simulation Study. The output from the
+presented functions has been compared with other implementations such as
+Python’s NavPy and MATLAB’s mapping toolbox.</p>
+</dd>
+<dt class="field-even">authors<span class="colon">:</span></dt>
+<dd class="field-even"><div class="line-block">
+<div class="line">Prof. Jason Ralph - <a class="reference external" href="mailto:jfralph&#37;&#52;&#48;liverpool&#46;ac&#46;uk">jfralph<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></div>
+<div class="line">Michael Wright - <a class="reference external" href="mailto:mjwright&#37;&#52;&#48;liverpool&#46;ac&#46;uk">mjwright<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></div>
+</div>
+</dd>
+<dt class="field-odd">version<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1.0.0 - First full implementation of this module.</p>
+</dd>
+</dl>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.deg2rad">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">deg2rad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta_deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#deg2rad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.deg2rad" title="Link to this definition"></a></dt>
+<dd><p>A wrapper function for converting from degrees to radians.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>theta_deg</strong> (<em>float</em>) – An input value in degrees.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The converted input value in radians.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.rad2deg">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">rad2deg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta_rad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#rad2deg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.rad2deg" title="Link to this definition"></a></dt>
+<dd><p>A wrapper function for converting from radians to degrees.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>theta_rad</strong> (<em>float</em>) – An input value in radians.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The converted input value in degrees.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.deg2dec">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">deg2dec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degrees</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minutes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#deg2dec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.deg2dec" title="Link to this definition"></a></dt>
+<dd><p>Converts a degrees, minutes, seconds coordinate to decimal format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>degrees</strong> (<em>float</em>) – The degrees of the given coordinate.</p></li>
+<li><p><strong>minutes</strong> (<em>float</em>) – The minutes of the given coordinate.</p></li>
+<li><p><strong>seconds</strong> (<em>float</em>) – The seconds of the given coordinate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The decimal equivalent of the given coordinate.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.dec2deg">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">dec2deg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta_deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#dec2deg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.dec2deg" title="Link to this definition"></a></dt>
+<dd><p>Converts a decimal coordinate to degrees, minutes, seconds format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>theta_deg</strong> (<em>float</em><em> or </em><em>NumPy Array</em>) – The decimal format of the given coordinate.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The degrees, minutes and seconds of the given coordinate.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float or NumPy Array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.radius">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">radius</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#radius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.radius" title="Link to this definition"></a></dt>
+<dd><p>This function calculates the radius (in metres) from the centre of the
+Earth for a given latitude position, using WGS84 parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lat</strong> (<em>float</em>) – The latitude of the points of interest.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The calculated radius in metres for the given position.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.radius_vec">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">radius_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#radius_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.radius_vec" title="Link to this definition"></a></dt>
+<dd><p>The vectorised version of the
+<a class="reference internal" href="#qnav.util.transformations.radius" title="qnav.util.transformations.radius"><code class="xref py py-func docutils literal notranslate"><span class="pre">radius()</span></code></a> function. This
+calculates the radius (in metres) from the centre of the Earth for a large
+series of given latitude positions, using WGS84 parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lat</strong> (<em>numpy.ndarray</em>) – The latitude of the points of interest.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The calculated radius in metres for the given position.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.rotation_rate">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">rotation_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#rotation_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.rotation_rate" title="Link to this definition"></a></dt>
+<dd><p>Returns the rotation rate of earth at given latitude position.
+Calculates the rotation rate vector of the earth the given latitude.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lat</strong> (<em>float</em>) – The latitude position (in decimal degrees).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The rotation vector in degrees/second.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.rotation_rate_vec">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">rotation_rate_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#rotation_rate_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.rotation_rate_vec" title="Link to this definition"></a></dt>
+<dd><p>Returns the rotation rate of earth at given latitude position.
+Calculates the rotation rate vector of the earth the given latitude.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lat</strong> (<em>np.ndarray</em>) – The latitude position (in decimal degrees).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The rotation vector in degrees/second.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.radius84">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">radius84</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#radius84"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.radius84" title="Link to this definition"></a></dt>
+<dd><p>This function calculates the radius (in metres) from the centre of the
+Earth for a given latitude position, using WGS84 parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lat</strong> (<em>float</em>) – The latitude of the points of interest.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The calculated radius in metres for the given position.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.radius84_vec">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">radius84_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#radius84_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.radius84_vec" title="Link to this definition"></a></dt>
+<dd><p>The vectorised version of the
+<a class="reference internal" href="#qnav.util.transformations.radius84" title="qnav.util.transformations.radius84"><code class="xref py py-func docutils literal notranslate"><span class="pre">radius84()</span></code></a> function. This
+calculates the radius (in metres) from the centre of the Earth for a large
+series of given latitude positions, using WGS84 parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lat</strong> (<em>numpy.ndarray</em>) – The latitude of the points of interest.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The calculated radius in metres for the given position.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.rotate_3d">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">rotate_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#rotate_3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.rotate_3d" title="Link to this definition"></a></dt>
+<dd><p>This function produces a three-dimensional rotation matrix corresponding
+to the Euler angles psi (Heading), theta (Pitch), phi (Roll/Bank).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>psi</strong> (<em>float</em>) – The heading angle in radians.</p></li>
+<li><p><strong>theta</strong> (<em>float</em>) – The pitch angle in radians.</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – The roll/bank angle in radians.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A matrix corresponding to three rotations in the above order.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (3-by-3 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.rotate_3d_vec">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">rotate_3d_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">psi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#rotate_3d_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.rotate_3d_vec" title="Link to this definition"></a></dt>
+<dd><p>This function is the vectorised version of the
+<a class="reference internal" href="#qnav.util.transformations.rotate_3d" title="qnav.util.transformations.rotate_3d"><code class="xref py py-func docutils literal notranslate"><span class="pre">rotate_3d()</span></code></a> function. This
+produces multiple three-dimensional rotation matrices corresponding
+to the Euler angles psi (Heading), theta (Pitch), phi (Roll/Bank).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>psi</strong> (<em>numpy.ndarray</em>) – The heading angles in radians.</p></li>
+<li><p><strong>theta</strong> (<em>numpy.ndarray</em>) – The pitch angles in radians.</p></li>
+<li><p><strong>phi</strong> (<em>numpy.ndarray</em>) – The roll/bank angles in radians.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The matrices corresponding to three rotations in the above order.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (n-3-by-3 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.lla2ned">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">lla2ned</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#lla2ned"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.lla2ned" title="Link to this definition"></a></dt>
+<dd><p>This function converts a reference Latitude-Longitude-Altitude (LLA)
+position from a given centre LLA point and translates its location to
+North-East-Down (NED) coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lla</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The centre location (array containing [lat, lon, alt]) with
+lat-lon given in degrees and alt given in metres.</p></li>
+<li><p><strong>ref_lla</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The reference location (array containing [lat, lon, alt])
+with lat-lon given in degrees and alt given in metres.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array containing the calculated North, East and Down
+coordinates from the centre position, were all values are given in
+metres.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (3-elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.lla2ned_vec">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">lla2ned_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#lla2ned_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.lla2ned_vec" title="Link to this definition"></a></dt>
+<dd><p>This function is the vectorised version of the
+<a class="reference internal" href="#qnav.util.transformations.lla2ned" title="qnav.util.transformations.lla2ned"><code class="xref py py-func docutils literal notranslate"><span class="pre">lla2ned()</span></code></a> function. This
+allows means for converting reference Latitude-Longitude-Altitude (LLA)
+positions from given centre LLA points and translates their location to
+North-East-Down (NED) coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lla</strong> (<em>numpy.ndarray</em><em> (</em><em>n-by-3 elements</em><em>)</em>) – The centre locations (array rows containing [lat, lon, alt])
+with lat-lon given in degrees and alt given in metres.</p></li>
+<li><p><strong>ref_lla</strong> (<em>numpy.ndarray</em><em> (</em><em>n-by-3 elements</em><em>)</em>) – The reference location (array rows containing
+[lat, lon, alt]) with lat-lon given in degrees and alt given in
+metres.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array containing the calculated North, East and Down
+coordinates from the centre position, were all values are given in
+metres.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (n-by-3 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.ned2lla">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">ned2lla</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ned</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#ned2lla"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.ned2lla" title="Link to this definition"></a></dt>
+<dd><p>This function converts a reference North-East-Down (NED) position from a
+given centre position and translates its location to Latitude-Longitude-
+Altitude (LLA) coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ned</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The centre location (array containing [north, east, down])
+with all values being given in metres.</p></li>
+<li><p><strong>ref_lla</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The reference location (array containing [lat, lon, alt])
+with lat-lon given in degrees and alt given in metres.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array containing the calculated Latitude, Longitude and
+Altitude coordinates from the centre position, with lat-lon is given
+in degrees and alt given in metres.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (3-elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.ned2lla_vec">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">ned2lla_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ned</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#ned2lla_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.ned2lla_vec" title="Link to this definition"></a></dt>
+<dd><p>This function is the vectorised version of the
+<a class="reference internal" href="#qnav.util.transformations.ned2lla" title="qnav.util.transformations.ned2lla"><code class="xref py py-func docutils literal notranslate"><span class="pre">ned2lla()</span></code></a> function. This
+converts reference North-East-Down (NED) positions from a given centre
+positions and translates their location to Latitude-Longitude-Altitude
+(LLA) coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ned</strong> (<em>numpy.ndarray</em><em> (</em><em>n-by-3 elements</em><em>)</em>) – The centre locations (array rows containing
+[north, east, down]) with all values being given in metres.</p></li>
+<li><p><strong>ref_lla</strong> (<em>numpy.ndarray</em><em> (</em><em>n-by-3 elements</em><em>)</em>) – The reference location (array rows containing
+[lat, lon, alt]) with lat-lon given in degrees and alt given in
+metres.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array rows containing the calculated Latitude, Longitude and
+Altitude coordinates from the centre positions, with lat-lon is given
+in degrees and alt given in metres.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (n-by-3 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.lla2ecef">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">lla2ecef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#lla2ecef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.lla2ecef" title="Link to this definition"></a></dt>
+<dd><p>This function converts a reference Latitude-Longitude-Altitude (LLA)
+position to Earth-Centred Earth-Fixed coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lla</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The reference location (array containing [lat, lon, alt]) with
+lat-lon given in degrees and alt given in metres.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array containing the calculated X, Y and Z coordinates from
+the centre of the Earth, with all values being given in metres.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (3-elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.lla2ecef_vec">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">lla2ecef_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#lla2ecef_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.lla2ecef_vec" title="Link to this definition"></a></dt>
+<dd><p>This function is the vectorised version of the
+<a class="reference internal" href="#qnav.util.transformations.lla2ecef" title="qnav.util.transformations.lla2ecef"><code class="xref py py-func docutils literal notranslate"><span class="pre">lla2ecef()</span></code></a> function. This
+converts a series of reference Latitude-Longitude-Altitude (LLA) positions
+to Earth-Centred Earth-Fixed coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lla</strong> (<em>numpy.ndarray</em><em> (</em><em>n-by-3 elements</em><em>)</em>) – The reference locations (array rows containing
+[lat, lon, alt]) with lat-lon given in degrees and alt given in
+metres.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array containing the calculated X, Y and Z coordinates from
+the centre of the Earth, with all values being given in metres.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (n-by-3 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.euler_to_quaternion">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">euler_to_quaternion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#euler_to_quaternion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.euler_to_quaternion" title="Link to this definition"></a></dt>
+<dd><p>Converts given attitude angles to quaternion format.
+Given an array representing euler angles, this function converts them to
+quaternion format. On succession, an array containing the a, b, c and d
+quaternion coefficients (i.e. where a + bi + cj + dk) will be returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>angles</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – Euler angles given in degrees</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The a, b, c, and d quaternion coefficients in columns.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (4-elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.quaternion_to_euler">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">quaternion_to_euler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#quaternion_to_euler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.quaternion_to_euler" title="Link to this definition"></a></dt>
+<dd><p>Converts given quaternions to Euler angle format.
+Given an array representing coefficients for quaternions (i.e.
+values a, b, c and d where a + bi + cj + dk), this function converts them
+to euler angle format. On succession, an array containing the Euler angles
+will be returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>quat</strong> (<em>numpy.ndarray</em><em> (</em><em>4-elements</em><em>)</em>) – The a, b, c, and d quaternion coefficients in columns.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The converted Euler angles given in degrees.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (3-elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.euler_to_quaternion_vec">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">euler_to_quaternion_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#euler_to_quaternion_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.euler_to_quaternion_vec" title="Link to this definition"></a></dt>
+<dd><p>Converts given attitude angles to quaternion format.
+Given an array representing euler angles, this function converts them to
+quaternion format. On succession, an array containing the a, b, c and d
+quaternion coefficients (i.e. where a + bi + cj + dk) will be returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>angles</strong> (<em>numpy.ndarray</em><em> (</em><em>n-by-3 elements</em><em>)</em>) – Euler angles given in degrees</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The a, b, c, and d quaternion coefficients in columns.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (n-by-4 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.quaternion_to_euler_vec">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">quaternion_to_euler_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#quaternion_to_euler_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.quaternion_to_euler_vec" title="Link to this definition"></a></dt>
+<dd><p>Converts given quaternions to Euler angle format.
+Given an array representing coefficients for quaternions (i.e.
+values a, b, c and d where a + bi + cj + dk), this function converts them
+to euler angle format. On succession, an array containing the Euler angles
+will be returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>quat</strong> (<em>numpy.ndarray</em><em> (</em><em>n-by-4 elements</em><em>)</em>) – The a, b, c, and d quaternion coefficients in columns.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The converted Euler angles given in degrees.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (n-by-3 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.haversine">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">haversine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alt1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alt2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#haversine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.haversine" title="Link to this definition"></a></dt>
+<dd><p>Returns the estimated distance in metres between two sets of
+latitude-longitude-altitude positions. This function uses the Haversine
+formula to calculate the distance between latitude-longitude points, then
+employs pythagoras to estimate the actual distance by considering change
+in altitude between positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat1</strong> (<em>numpy.ndarray</em><em> (</em><em>n-elements</em><em>)</em>) – The latitude position(s) belonging to the first set.</p></li>
+<li><p><strong>lon1</strong> (<em>numpy.ndarray</em><em> (</em><em>n-elements</em><em>)</em>) – The longitude position(s) belonging to the first set.</p></li>
+<li><p><strong>alt1</strong> (<em>numpy.ndarray</em><em> (</em><em>n-elements</em><em>)</em>) – The altitude position(s) belonging to the first set.</p></li>
+<li><p><strong>lat2</strong> (<em>numpy.ndarray</em><em> (</em><em>n-elements</em><em>)</em>) – The latitude position(s) belonging to the second set.</p></li>
+<li><p><strong>lon2</strong> (<em>numpy.ndarray</em><em> (</em><em>n-elements</em><em>)</em>) – The longitude position(s) belonging to the second set.</p></li>
+<li><p><strong>alt2</strong> (<em>numpy.ndarray</em><em> (</em><em>n-elements</em><em>)</em>) – The latitude position(s) belonging to the second set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The distance between the given positions in metres.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.array (n-elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.haversine_vec">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">haversine_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alt1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alt2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#haversine_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.haversine_vec" title="Link to this definition"></a></dt>
+<dd><p>Returns the estimated distance in metres between two sets of
+latitude-longitude-altitude positions. This function uses the Haversine
+formula to calculate the distance between latitude-longitude points, then
+employs pythagoras to estimate the actual distance by considering change
+in altitude between positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat1</strong> (<em>numpy.ndarray</em><em> (</em><em>n-elements</em><em>)</em>) – The latitude position(s) belonging to the first set.</p></li>
+<li><p><strong>lon1</strong> (<em>numpy.ndarray</em><em> (</em><em>n-elements</em><em>)</em>) – The longitude position(s) belonging to the first set.</p></li>
+<li><p><strong>alt1</strong> (<em>numpy.ndarray</em><em> (</em><em>n-elements</em><em>)</em>) – The altitude position(s) belonging to the first set.</p></li>
+<li><p><strong>lat2</strong> (<em>numpy.ndarray</em><em> (</em><em>n-elements</em><em>)</em>) – The latitude position(s) belonging to the second set.</p></li>
+<li><p><strong>lon2</strong> (<em>numpy.ndarray</em><em> (</em><em>n-elements</em><em>)</em>) – The longitude position(s) belonging to the second set.</p></li>
+<li><p><strong>alt2</strong> (<em>numpy.ndarray</em><em> (</em><em>n-elements</em><em>)</em>) – The latitude position(s) belonging to the second set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The distance between the given positions in metres.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.array (n-elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.get_time_pos_vel">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">get_time_pos_vel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#get_time_pos_vel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.get_time_pos_vel" title="Link to this definition"></a></dt>
+<dd><p>This function calculates the position and velocity matrices for a given
+timestamp.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time</strong> (<em>Python datetime instance</em>) – A datetime for the requested time.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The position and velocity matrices.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple (mat_pos, mat_vel)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.ecef2eci">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">ecef2eci</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_ecef</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_ecef</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#ecef2eci"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.ecef2eci" title="Link to this definition"></a></dt>
+<dd><p>This function converts a position and velocity from the ECI frame to the
+ECEF frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time</strong> (<em>Python datetime instance</em>) – A datetime for the requested time.</p></li>
+<li><p><strong>r_ecef</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – Position in ECI (given in metres).</p></li>
+<li><p><strong>v_ecef</strong> – Velocity in ECI (given in metres/second).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The position and velocity vectors in ECEF. Position is given in
+metres and velocity is given in metres/second.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple (r_eci, v_eci)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.eci2ecef">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">eci2ecef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_eci</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_eci</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#eci2ecef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.eci2ecef" title="Link to this definition"></a></dt>
+<dd><p>This function converts a position and velocity from the ECEF frame to the
+ECI frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time</strong> (<em>Python datetime instance</em>) – A datetime for the requested time.</p></li>
+<li><p><strong>r_eci</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – Position in ECEF (given in metres).</p></li>
+<li><p><strong>v_eci</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – Velocity in ECEF (given in metres/second).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The position and velocity vectors in ECI. Position is given in
+metres and velocity is given in metres/second.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple (r_ecef, v_ecef)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.ecef2lla">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">ecef2lla</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#ecef2lla"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.ecef2lla" title="Link to this definition"></a></dt>
+<dd><p>Converts the given XYZ Earth Centred Earth Fixed coordinates to
+longitude latitude altitude coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>xyz</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – A position in ECEF (m-m-m)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The given position converted to LLA (deg-deg-m).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (3-elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.ecef2lla_vec">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">ecef2lla_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#ecef2lla_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.ecef2lla_vec" title="Link to this definition"></a></dt>
+<dd><p>This function is the vectorised version of the
+<a class="reference internal" href="#qnav.util.transformations.ecef2lla" title="qnav.util.transformations.ecef2lla"><code class="xref py py-func docutils literal notranslate"><span class="pre">ecef2lla()</span></code></a> function.
+This converts the given XYZ Earth Centred Earth Fixed coordinates to
+longitude latitude altitude coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>xyz</strong> (<em>numpy.ndarray</em><em> (</em><em>n-by-3 elements</em><em>)</em>) – A series of positions in ECEF (m-m-m)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The given positions converted to LLA (deg-deg-m).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (n-by-3 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.ecef2ned_transform">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">ecef2ned_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#ecef2ned_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.ecef2ned_transform" title="Link to this definition"></a></dt>
+<dd><p>This function generates a transformation matrix for ECEF to
+North-East-Down (NED) for an input Latitude-Longitude-Altitude (LLA)
+reference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ref_lla</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The reference position in LLA, with lat-lon given in
+degrees and alt given in metres.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The calculated 3-by-3 transformation matrix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NumPy Matrix (3-by-3 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.ecef2ned_transform_vec">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">ecef2ned_transform_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#ecef2ned_transform_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.ecef2ned_transform_vec" title="Link to this definition"></a></dt>
+<dd><p>This function is the vectorised version of the
+<a class="reference internal" href="#qnav.util.transformations.ecef2ned_transform" title="qnav.util.transformations.ecef2ned_transform"><code class="xref py py-func docutils literal notranslate"><span class="pre">ecef2ned_transform()</span></code></a>
+function. This generates transformation matrices for ECEF to
+North-East-Down (NED) for input Latitude-Longitude-Altitude (LLA)
+references.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ref_lla</strong> (<em>numpy.ndarray</em><em> (</em><em>n-by-3 elements</em><em>)</em>) – The reference position in LLAs, with lat-lon given in
+degrees and alt given in metres.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The calculated n-by-3-by-3 transformation matrix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (n-3-3 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.ecef2ned">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">ecef2ned</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#ecef2ned"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.ecef2ned" title="Link to this definition"></a></dt>
+<dd><p>This function takes an ECEF position and a reference
+Latitude-Longitude-Altitude (LLA) position and returns the relative
+position of the former from the latter in North-East-Down (NED) reference
+frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xyz</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – Position in ECEF, given in metres.</p></li>
+<li><p><strong>ref_lla</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The reference LLA position, with lat-lon given in degrees
+and alt given in metres.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The given position converted to NED, given in metres.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (3-elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.ned2ecef">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">ned2ecef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ned</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#ned2ecef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.ned2ecef" title="Link to this definition"></a></dt>
+<dd><p>This function takes an origin Latitude-Longitude-Altitude (LLA) position
+and a relative position in North-East-Down (NED) from this origin and
+returns the latter position in ECEF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ned</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – Position in NED, given in metres.</p></li>
+<li><p><strong>ref_lla</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The reference LLA position, with lat-lon given in degrees
+and alt given in metres.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The given position converted to ECEF, given in metres.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (3-elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.ned2ecef_vec">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">ned2ecef_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ned</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#ned2ecef_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.ned2ecef_vec" title="Link to this definition"></a></dt>
+<dd><p>This function takes a North-East-Down (NED) position along with its
+relative Latitude-Longitude-Altitude (LLA) reference position and
+returns the latter position in ECEF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ned</strong> (<em>numpy.ndarray</em><em>  (</em><em>n-by-3 elements</em><em>)</em>) – Positions in NED, given in metres.</p></li>
+<li><p><strong>ref_lla</strong> (<em>numpy.ndarray</em><em> (</em><em>n-by-3 elements</em><em>)</em>) – The reference LLA positions, with lat-lon given in
+degrees and alt given in metres.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The given position converted to ECEF, given in metres.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (n-by-3 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.vned2vecef">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">vned2vecef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vel_ned</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#vned2vecef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.vned2vecef" title="Link to this definition"></a></dt>
+<dd><p>This function takes an origin Latitude-Longitude-Altitude (LLA) position
+and a relative velocity in North-East-Down (NED) components from this
+origin and returns the velocity in ECEF format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vel_ned</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – Velocity in NED, given in metres/second.</p></li>
+<li><p><strong>pos_lla</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The reference LLA position, with lat-lon given in degrees
+and alt given in metres.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The given velocity vector converted to ECEF, given in metres/sec.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NumPy Matrix (3-by-3 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.utc2gps">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">utc2gps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#utc2gps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.utc2gps" title="Link to this definition"></a></dt>
+<dd><p>This function converts a provided time given in Coordinated Universal Time
+(UTC) to a Python dictionary containing the corresponding week number, day
+number and second.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time</strong> (<em>Python Datetime instance</em>) – A requested time in Coordinated Universal Time (UTC) format.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The provided time as a Python dictionary that can be used for
+GPS functions.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.ned2azel">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">ned2azel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ned</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#ned2azel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.ned2azel" title="Link to this definition"></a></dt>
+<dd><p>This function takes an origin North-East-Down (NED) position and converts
+it into an azimuth and elevation value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ned</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The centre location (array containing [north, east, down])
+with all values being given in metres.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing two elements, the corresponding azimuth and
+elevation in radians.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[float, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.get_transport_rate">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">get_transport_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position_lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity_ned</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#get_transport_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.get_transport_rate" title="Link to this definition"></a></dt>
+<dd><p>This function computes the transport rate (in Local NED axes) for given
+position and velocity vectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position_lla</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The current position vector stating the latitude,
+longitude and altitude (degrees-degrees-metres).</p></li>
+<li><p><strong>velocity_ned</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The current velocity vector stating the velocity
+North, East and Down (given in metres/second).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transport rate for the given position and velocity.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NumPy Matrix (3-by-3 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.get_transport_rate_vec">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">get_transport_rate_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position_lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity_ned</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#get_transport_rate_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.get_transport_rate_vec" title="Link to this definition"></a></dt>
+<dd><p>This function is the vectorised version of the
+<a class="reference internal" href="#qnav.util.transformations.get_transport_rate" title="qnav.util.transformations.get_transport_rate"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_transport_rate()</span></code></a>
+function. This computes the transport rate (in Local NED axes)
+for a series of given positions and velocity vectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position_lla</strong> (<em>numpy.ndarray</em><em> (</em><em>n-by-3 elements</em><em>)</em>) – The current position vectors stating the latitude,
+longitude and altitude (degrees-degrees-metres).</p></li>
+<li><p><strong>velocity_ned</strong> (<em>numpy.ndarray</em><em> (</em><em>n-by-3 elements</em><em>)</em>) – The current velocity vectors stating the velocity
+North, East and Down (given in metres/second).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transport rate for the given positions and velocities.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NumPy Matrix (n-3-3 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.vel_ecef2vel_ned">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">vel_ecef2vel_ned</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vel_ecef</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#vel_ecef2vel_ned"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.vel_ecef2vel_ned" title="Link to this definition"></a></dt>
+<dd><p>A function to take ECEF velocity and an LLA location and convert it into
+the NED velocity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vel_ecef</strong> (<em>numpy.ndarray</em><em> (</em><em>3-elements</em><em>)</em>) – The velocity given in Earth-Centred Earth-Fixed format.</p></li>
+<li><p><strong>lla</strong> – The current latitude, longitude and altitude (in deg-deg-m).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The given Earth-Centred Earth-Fixed (ECEF) velocity converted
+into local North-East-Down (NED), subject to the given reference
+position.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (3-elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.transformations.cross_prod_xy">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.transformations.</span></span><span class="sig-name descname"><span class="pre">cross_prod_xy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vec1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vec2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/util/transformations.html#cross_prod_xy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.transformations.cross_prod_xy" title="Link to this definition"></a></dt>
+<dd><p>An optimised method for computing the cross-product of two 1-by-3 arrays.
+In most cases this method is far quicker that the Numpy cross function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vec1</strong> (<em>numpy.ndarray</em><em> (</em><em>3 elements</em><em>)</em>) – The first 1-by-3 tuple/array.</p></li>
+<li><p><strong>vec2</strong> (<em>numpy.ndarray</em><em> (</em><em>3 elements</em><em>)</em>) – The first 1-by-3 tuple/array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The cross product of the two tuples.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (3 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../../usage/packages.html" class="btn btn-neutral float-left" title="9. Software Components" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../earth/dted.html" class="btn btn-neutral float-right" title="9.1.2. qnav.earth.dted" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

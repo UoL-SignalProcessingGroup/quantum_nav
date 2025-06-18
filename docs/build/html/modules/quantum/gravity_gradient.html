@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.9.5. qnav.quantum.gravity_gradient &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="9.9.6. qnav.quantum.dummy" href="dummy.html" />
+    <link rel="prev" title="9.9.4. qnav.quantum.misalignment" href="misalignment.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../usage/packages.html">9. Software Components</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#earth">9.1. Earth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#estimation">9.2. Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#fusion">9.3. Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gps">9.4. GPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gravity">9.5. Gravity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#input">9.6. Input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#measurement">9.7. Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#output">9.8. Output</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../usage/packages.html#quantum">9.9. Quantum</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="base.html">9.9.1. base.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="realistic.html">9.9.2. realistic.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="particle_filter.html">9.9.3. particle_filter.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="misalignment.html">9.9.4. misalignment.py</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">9.9.5. gravity_gradient.py</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gravity-gradient-py">9.9.5.1. gravity_gradient.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.quantum.gravity_gradient.GravityGradInterferometer"><code class="docutils literal notranslate"><span class="pre">GravityGradInterferometer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.quantum.gravity_gradient.GravityGradiometer"><code class="docutils literal notranslate"><span class="pre">GravityGradiometer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.quantum.gravity_gradient.ParticleFilterParams"><code class="docutils literal notranslate"><span class="pre">ParticleFilterParams</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.quantum.gravity_gradient.GravityGradientPF"><code class="docutils literal notranslate"><span class="pre">GravityGradientPF</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="dummy.html">9.9.6. dummy.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#simulation">9.10. Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#util">9.11. Util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#waypoints">9.12. Waypoints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../usage/packages.html"><span class="section-number">9. </span>Software Components</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">9.9.5. </span>qnav.quantum.gravity_gradient</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/modules/quantum/gravity_gradient.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qnav.quantum.gravity_gradient">
+<span id="qnav-quantum-gravity-gradient"></span><h1><span class="section-number">9.9.5. </span>qnav.quantum.gravity_gradient<a class="headerlink" href="#module-qnav.quantum.gravity_gradient" title="Link to this heading"></a></h1>
+<section id="gravity-gradient-py">
+<h2><span class="section-number">9.9.5.1. </span>gravity_gradient.py<a class="headerlink" href="#gravity-gradient-py" title="Link to this heading"></a></h2>
+<dl class="field-list">
+<dt class="field-odd">summary<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Provides implementation for Quantum gravity gradient sensing and fusion.
+Implementation is mainly based on Peters et al, ‘High precision gravity
+measurements using atom interferometry’, Metrologia, Vol.38,
+pp.25-61 (2001).</p>
+</dd>
+<dt class="field-even">authors<span class="colon">:</span></dt>
+<dd class="field-even"><div class="line-block">
+<div class="line">Prof. Jason Ralph - <a class="reference external" href="mailto:jfralph&#37;&#52;&#48;liverpool&#46;ac&#46;uk">jfralph<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></div>
+<div class="line">Michael Wright - <a class="reference external" href="mailto:mjwright&#37;&#52;&#48;liverpool&#46;ac&#46;uk">mjwright<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></div>
+</div>
+</dd>
+<dt class="field-odd">version<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1.0.0 - First full implementation of class.</p>
+</dd>
+</dl>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.quantum.gravity_gradient.GravityGradInterferometer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.quantum.gravity_gradient.</span></span><span class="sig-name descname"><span class="pre">GravityGradInterferometer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_of_atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_mass</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.4431608262e-25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recoil_velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0058845</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stationary_velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.57</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor_z_top</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor_z_bottom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_pulse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.025</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beam_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rand_failure_prob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/quantum/gravity_gradient.html#GravityGradInterferometer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.quantum.gravity_gradient.GravityGradInterferometer" title="Link to this definition"></a></dt>
+<dd><p>Parameters used by the Cold Atom Gravity Gradient Interferometer.
+These properties describe the qualities of an ultra-cold atom
+interferometer, which is used for capturing gravity gradient
+estimations from the local environment.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.quantum.gravity_gradient.GravityGradInterferometer.k_eff">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k_eff</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.quantum.gravity_gradient.GravityGradInterferometer.k_eff" title="Link to this definition"></a></dt>
+<dd><p>Effective wave number, the number of wave cycles per unit distance.
+A property provided for a value commonly calculated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A measure of the spatial frequency of a wave.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.quantum.gravity_gradient.GravityGradiometer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.quantum.gravity_gradient.</span></span><span class="sig-name descname"><span class="pre">GravityGradiometer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_frequency:</span> <span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imu_frequency:</span> <span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accelerometer_errors:</span> <span class="pre">~qnav.measurement.error_properties.ErrorProperties</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interferometer:</span> <span class="pre">~qnav.quantum.gravity_gradient.GravityGradInterferometer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity_model:</span> <span class="pre">~qnav.gravity.base.GravityModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor_axis:</span> <span class="pre">~qnav.measurement.platform.SensorAxis</span> <span class="pre">=</span> <span class="pre">&lt;qnav.measurement.platform.SensorAxis</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duty_cycle:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rand_seed:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/quantum/gravity_gradient.html#GravityGradiometer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.quantum.gravity_gradient.GravityGradiometer" title="Link to this definition"></a></dt>
+<dd><p>Quantum Gravity Gradiometer Sensor for estimating vertical gravity gradient.
+A Quantum sensor that features two ultra-cold atom accelerometers, measuring
+the change in the vertical gravity gradient.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.quantum.gravity_gradient.GravityGradiometer.take_measurement">
+<span class="sig-name descname"><span class="pre">take_measurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">est_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ground_truth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../waypoints/trajectory.html#qnav.waypoints.trajectory.GroundTruth" title="qnav.waypoints.trajectory.GroundTruth"><span class="pre">GroundTruth</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/quantum/gravity_gradient.html#GravityGradiometer.take_measurement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.quantum.gravity_gradient.GravityGradiometer.take_measurement" title="Link to this definition"></a></dt>
+<dd><p>Samples from the ground truth to collect data to produce measurements.
+Using the current ground truth, captures the</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>est_time</strong> (<em>float</em>) – The estimated time the measurement of the sensor
+is expected to be captured at (in seconds).</p></li>
+<li><p><strong>ground_truth</strong> (<a class="reference internal" href="../waypoints/trajectory.html#qnav.waypoints.trajectory.GroundTruth" title="qnav.waypoints.trajectory.GroundTruth"><em>GroundTruth</em></a>) – The corresponding ground truth data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.quantum.gravity_gradient.GravityGradiometer.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/quantum/gravity_gradient.html#GravityGradiometer.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.quantum.gravity_gradient.GravityGradiometer.reset" title="Link to this definition"></a></dt>
+<dd><p>Resets the sensor, clearing all previous measurements.
+Normally used directly after fusion.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.quantum.gravity_gradient.GravityGradiometer.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_sec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/quantum/gravity_gradient.html#GravityGradiometer.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.quantum.gravity_gradient.GravityGradiometer.update" title="Link to this definition"></a></dt>
+<dd><p>Called on demand to update the sensor’s state.
+Typically called after measurements have been taken. When called
+this increases the next measurement time and propagates internal
+states, to the time difference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time_sec</strong> (<em>float</em>) – The current simulation time in seconds.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.quantum.gravity_gradient.GravityGradiometer.last_measurement">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">last_measurement</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qnav.quantum.gravity_gradient.GravityGradiometer.last_measurement" title="Link to this definition"></a></dt>
+<dd><p>Returns the latest measurement produced from the sensor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The last produced gravity gradient signal.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[float, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.quantum.gravity_gradient.GravityGradiometer.num_steps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_steps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#qnav.quantum.gravity_gradient.GravityGradiometer.num_steps" title="Link to this definition"></a></dt>
+<dd><p>Returns the total number of internal measurement steps required.
+Used namely for sharing array sizes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The number of internal measurement steps used.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.quantum.gravity_gradient.GravityGradiometer.interferometer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">interferometer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qnav.quantum.gravity_gradient.GravityGradInterferometer" title="qnav.quantum.gravity_gradient.GravityGradInterferometer"><span class="pre">GravityGradInterferometer</span></a></em><a class="headerlink" href="#qnav.quantum.gravity_gradient.GravityGradiometer.interferometer" title="Link to this definition"></a></dt>
+<dd><p>Returns the interferometer properties used by the sensor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Interferometer properties.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#qnav.quantum.gravity_gradient.GravityGradInterferometer" title="qnav.quantum.gravity_gradient.GravityGradInterferometer">GravityGradInterferometer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.quantum.gravity_gradient.GravityGradiometer.gravity_model">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gravity_model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../gravity/base.html#qnav.gravity.base.GravityModel" title="qnav.gravity.base.GravityModel"><span class="pre">GravityModel</span></a></em><a class="headerlink" href="#qnav.quantum.gravity_gradient.GravityGradiometer.gravity_model" title="Link to this definition"></a></dt>
+<dd><p>Returns the internal gravity model used by the sensor.
+Can be accessed for testing or producing similar measurements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Gravity Model instance used by the sensor.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../gravity/base.html#qnav.gravity.base.GravityModel" title="qnav.gravity.base.GravityModel">GravityModel</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.quantum.gravity_gradient.ParticleFilterParams">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.quantum.gravity_gradient.</span></span><span class="sig-name descname"><span class="pre">ParticleFilterParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_particles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_position_sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_velocity_sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_attitude_sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.00126</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity_sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attitude_sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ellipse_intervals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">361</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ellipse_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/quantum/gravity_gradient.html#ParticleFilterParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.quantum.gravity_gradient.ParticleFilterParams" title="Link to this definition"></a></dt>
+<dd><p>Particle Filter Properties for the gravity gradient fusion methods.
+A list of properties relating to the particle filter processing.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.quantum.gravity_gradient.GravityGradientPF">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.quantum.gravity_gradient.</span></span><span class="sig-name descname"><span class="pre">GravityGradientPF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qs_gravity_grad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qnav.quantum.gravity_gradient.GravityGradiometer" title="qnav.quantum.gravity_gradient.GravityGradiometer"><span class="pre">GravityGradiometer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qnav.quantum.gravity_gradient.ParticleFilterParams" title="qnav.quantum.gravity_gradient.ParticleFilterParams"><span class="pre">ParticleFilterParams</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">ParticleFilterParams(num_particles=1000,</span> <span class="pre">init_position_sigma=20.0,</span> <span class="pre">init_velocity_sigma=1e-05,</span> <span class="pre">init_attitude_sigma=1e-05,</span> <span class="pre">weight_sigma=0.00126,</span> <span class="pre">alpha=0.05,</span> <span class="pre">beta=0.05,</span> <span class="pre">gamma=0.05,</span> <span class="pre">position_sigma=2.0,</span> <span class="pre">velocity_sigma=0.005,</span> <span class="pre">attitude_sigma=0.001,</span> <span class="pre">ellipse_intervals=361,</span> <span class="pre">ellipse_iterations=5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_interferometer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qnav.quantum.gravity_gradient.GravityGradInterferometer" title="qnav.quantum.gravity_gradient.GravityGradInterferometer"><span class="pre">GravityGradInterferometer</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng_seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/quantum/gravity_gradient.html#GravityGradientPF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.quantum.gravity_gradient.GravityGradientPF" title="Link to this definition"></a></dt>
+<dd><p>Gravity Gradient Particle Filter Fusion.
+Applies position correction using gravity gradient signals,
+via a particle filter approach.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.quantum.gravity_gradient.GravityGradientPF.perform_fusion">
+<span class="sig-name descname"><span class="pre">perform_fusion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimated_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../estimation/state.html#qnav.estimation.state.EstimatedState" title="qnav.estimation.state.EstimatedState"><span class="pre">EstimatedState</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qnav/quantum/gravity_gradient.html#GravityGradientPF.perform_fusion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.quantum.gravity_gradient.GravityGradientPF.perform_fusion" title="Link to this definition"></a></dt>
+<dd><p>Performs the fusion with sensors and updates the estimated state.
+When called performs fusion when gravity gradient sensor
+measurements are ready. When so, the particle filter algorithms is
+employed and the estimated state is updated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>estimated_state</strong> (<a class="reference internal" href="../estimation/state.html#qnav.estimation.state.EstimatedState" title="qnav.estimation.state.EstimatedState"><em>EstimatedState</em></a>) – The current estimated states of the platform.
+This is what the fusion method will update.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.quantum.gravity_gradient.GravityGradientPF.init_particle_filter">
+<span class="sig-name descname"><span class="pre">init_particle_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimated_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../estimation/state.html#qnav.estimation.state.EstimatedState" title="qnav.estimation.state.EstimatedState"><span class="pre">EstimatedState</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qnav/quantum/gravity_gradient.html#GravityGradientPF.init_particle_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.quantum.gravity_gradient.GravityGradientPF.init_particle_filter" title="Link to this definition"></a></dt>
+<dd><p>Initialises the particle filter using current estimate.
+This is called during the first iteration, setting the particles’
+estimated position, velocity and attitude values based around the
+current estimated state. The range of estimation is based on the
+initial sigma values set in the filter properties for each.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>estimated_state</strong> (<a class="reference internal" href="../estimation/state.html#qnav.estimation.state.EstimatedState" title="qnav.estimation.state.EstimatedState"><em>EstimatedState</em></a>) – The current estimated states of the platform.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.quantum.gravity_gradient.GravityGradientPF.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/quantum/gravity_gradient.html#GravityGradientPF.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.quantum.gravity_gradient.GravityGradientPF.reset" title="Link to this definition"></a></dt>
+<dd><p>Resets the state of the fusion, clearing internal temporary states.
+When call the fusion will return to expecting the first measurement,
+then continuing from there.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="misalignment.html" class="btn btn-neutral float-left" title="9.9.4. qnav.quantum.misalignment" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dummy.html" class="btn btn-neutral float-right" title="9.9.6. qnav.quantum.dummy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

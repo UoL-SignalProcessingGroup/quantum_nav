@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10. System Requirements &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="11. Example Usage" href="tutorials.html" />
+    <link rel="prev" title="9.12.4. qnav.waypoints.tracks" href="../modules/waypoints/tracks.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packages.html">9. Software Components</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">10. System Requirements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#hardware-requirements">10.1. Hardware Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#minimum-specifications">10.1.1. Minimum Specifications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#recommended-specifications">10.1.2. Recommended Specifications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#note-about-memory-and-storage">10.1.3. Note About Memory and Storage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#software-requirements">10.2. Software Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#operating-system">10.2.1. Operating System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#python">10.2.2. Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#required-packages">10.2.3. Required Packages</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><span class="section-number">10. </span>System Requirements</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/requirements.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="system-requirements">
+<h1><span class="section-number">10. </span>System Requirements<a class="headerlink" href="#system-requirements" title="Link to this heading"></a></h1>
+<p>The finalised toolbox requires various hardware and software requirements to be efficiently used.
+The minimum and suggested requirements have been acquired based on experimentation and auditing of the toolbox.</p>
+<section id="hardware-requirements">
+<h2><span class="section-number">10.1. </span>Hardware Requirements<a class="headerlink" href="#hardware-requirements" title="Link to this heading"></a></h2>
+<p>The hardware requirements are subject to the requested input. The resources needed can be reduced by decreasing the
+requested frequency/resolution and increasing the output down-sampling via the configuration file.</p>
+<section id="minimum-specifications">
+<h3><span class="section-number">10.1.1. </span>Minimum Specifications<a class="headerlink" href="#minimum-specifications" title="Link to this heading"></a></h3>
+<p>The minimum requirements to use the toolbox are outlined in the table below. The host system must at a minimum have
+these hardware specifications to use the toolbox at a basic (limited) level. Updates and potential additions to the
+toolbox may increase these minimum requirements.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Hardware</p></th>
+<th class="head"><p>Minimum Resources Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Processor (CPU)</p></td>
+<td><p>x86 32-bit processor 1.00 GHz (or better)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Physical Memory (RAM)</p></td>
+<td><p>2.00 GB of memory (or larger)</p></td>
+</tr>
+<tr class="row-even"><td><p>Disk Storage Space (HDD)</p></td>
+<td><p>20.00 GB available (or more)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="recommended-specifications">
+<h3><span class="section-number">10.1.2. </span>Recommended Specifications<a class="headerlink" href="#recommended-specifications" title="Link to this heading"></a></h3>
+<p>The recommended requirements to fully use the toolbox are outlined in the table below. If the host system has these
+hardware specifications or higher it is guaranteed to use the software to its full extent.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Hardware</p></th>
+<th class="head"><p>Recommended Resources Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Processor (CPU)</p></td>
+<td><p>x86 64-bit processor 2.00 GHz (or better)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Physical Memory (RAM)</p></td>
+<td><p>8.00 GB of memory (or larger)</p></td>
+</tr>
+<tr class="row-even"><td><p>Disk Storage Space (HDD)</p></td>
+<td><p>100.00 GB available (or more)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="note-about-memory-and-storage">
+<h3><span class="section-number">10.1.3. </span>Note About Memory and Storage<a class="headerlink" href="#note-about-memory-and-storage" title="Link to this heading"></a></h3>
+<p>Executing simulations can demand a large amount of RAM. This is especially true if high frequencies and/or a large
+amount of waypoint data is used. For example, a single simulation at 1,000 Hz is expected to require around 1 GB of RAM
+for each simulated hour due to the amount of data that needs to be produced and recorded. To significantly reduce this
+resource requirement various settings can be changed.</p>
+<p>Firstly, virtual memory can be used for offloading waypoint and estimation results to disk. This is enabled under
+the <strong>Waypoint</strong> and <strong>Estimation</strong> sections in the configuration file via the <code class="docutils literal notranslate"><span class="pre">useVirtualMemory</span></code> options. In
+addition, an <code class="docutils literal notranslate"><span class="pre">outputDownSampleRate</span></code> can be specified under the <strong>Output</strong> section, meaning that only a sub-sampled
+amount of the estimation results will be collected and saved. Lastly, at a worst case scenario the waypoint and
+measurement frequencies can be reduced.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The use of virtual memory on 32-bit systems is limited to at most 2 GB. This means that waypoints and
+simulation results cannot use more than 2 GB if the use of virtual memory is enabled on 32-bit systems. If this
+limitation causes significant problems requested updates to the toolbox can be made to overcome it.</p>
+</div>
+<p>In the event that the output data needs to be saved in multiple formats, but there is insufficient storage space,
+a single format (such as simple binary) can used which can later be converted. Using the read and write modules inside
+the output sub-package, the single generated file can be read and its content can then be written into the other
+needed formats.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+<section id="software-requirements">
+<h2><span class="section-number">10.2. </span>Software Requirements<a class="headerlink" href="#software-requirements" title="Link to this heading"></a></h2>
+<section id="operating-system">
+<h3><span class="section-number">10.2.1. </span>Operating System<a class="headerlink" href="#operating-system" title="Link to this heading"></a></h3>
+<p>The toolbox has been developed with platform independence constantly in mind, taking fully advantage of Python’s
+flexibility.</p>
+<p>The handling of file paths and managing local resources has been done without replaying on any operating system
+specific features/formats. Likewise, the implementation of multi-processing functions has been done in a way that
+acknowledges adapts to the different ways operating system handle communication between multiple threads/processes.
+As a result, the same project build can be used on any major platform without any alteration to its source code.</p>
+<p>The toolbox has been tested and proved to function flawlessly on Windows, Mac and Linux systems. Specifically:</p>
+<ul class="simple">
+<li><p>Windows 10 - Enterprise</p></li>
+<li><p>Linux - Ubuntu LTS 22.04</p></li>
+<li><p>MacOS - Sonoma 14.6.1</p></li>
+<li><p>Raspberry Pi OS - 2022-09-22 (32-bit)</p></li>
+</ul>
+</section>
+<section id="python">
+<h3><span class="section-number">10.2.2. </span>Python<a class="headerlink" href="#python" title="Link to this heading"></a></h3>
+<p>The toolbox was developed using the <a class="reference external" href="https://www.python.org/downloads//">latest stable release of Python</a>.
+To benefit from this, the latest Python features have been employed. Therefore, the toolbox requires the installation
+of <strong>Python version 3.11 or higher</strong>. During development, the use of using future safe functions/packages was strongly
+considered. While older versions of Python <em>may</em> be able to run the toolbox, the correct behaviour/output cannot
+be guaranteed.</p>
+</section>
+<section id="required-packages">
+<h3><span class="section-number">10.2.3. </span>Required Packages<a class="headerlink" href="#required-packages" title="Link to this heading"></a></h3>
+<p>Where possible, the use of dependencies has been eliminated by implementing the majority of the software manually.
+However, this could not be achieved for instances where the required functionality is not available in base Python.
+As a result, the toolbox requires the use of the following packages.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://pypi.org/project/mypu/">Mypy</a> (version 3.12.1+)</p></li>
+<li><p><a class="reference external" href="https://pypi.org/project/numpy/">NumPy</a> (version 2.1.1+)</p></li>
+<li><p><a class="reference external" href="https://pypi.org/project/scipy/">SciPy</a> (version1.14.1+)</p></li>
+<li><p><a class="reference external" href="https://pypi.org/project/pandas/">Pandas</a> (version 2.2.3+)</p></li>
+<li><p><a class="reference external" href="https://pypi.org/project/matplotlib/">MatplotLib</a> (version 3.9.2+)</p></li>
+<li><p><a class="reference external" href="https://pypi.org/project/plotly/">Plotly</a> (version 5.24.1+)</p></li>
+<li><p><a class="reference external" href="https://pypi.org/project/h5py/">H5py</a> (version 1.11.2+)</p></li>
+</ul>
+<p>If <a class="reference external" href="https://docs.python.org/3/installing/">PIP</a> is installed on the host machine, all the above required packages for
+their target version can be installed automatically by utilising the included <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file by using the
+following command:</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">Automatically install required packages (via PIP)</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+</div>
+<p>Sometimes PIP may not be installed as a standalone application, or it may be associated with another version of
+Python that is installed (i.e. an older version). In this case PIP can be use through Python.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">Automatically install required packages</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the toolbox is installed as a package via PIP, all packages and dependencies will also be installed
+automatically along side the software. You can check which Python packages are installed using the
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">list</span></code> command.</p>
+</div>
+<p>For installing and handling Python packages in general, please see
+<a class="reference external" href="https://packaging.python.org/tutorials/installing-packages/">this guide</a>.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../modules/waypoints/tracks.html" class="btn btn-neutral float-left" title="9.12.4. qnav.waypoints.tracks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorials.html" class="btn btn-neutral float-right" title="11. Example Usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

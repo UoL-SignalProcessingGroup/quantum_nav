@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.5.5. qnav.gravity.map &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="9.5.6. qnav.gravity.egm" href="egm.html" />
+    <link rel="prev" title="9.5.4. qnav.gravity.nima" href="nima.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../usage/packages.html">9. Software Components</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#earth">9.1. Earth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#estimation">9.2. Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#fusion">9.3. Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gps">9.4. GPS</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../usage/packages.html#gravity">9.5. Gravity</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="base.html">9.5.1. base.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="simple.html">9.5.2. simple.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="somigliana.html">9.5.3. somigliana.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nima.html">9.5.4. nima.py</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">9.5.5. map.py</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#map-py">9.5.5.1. map.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.gravity.map.CircularGrid"><code class="docutils literal notranslate"><span class="pre">CircularGrid</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.gravity.map.set_default_grid"><code class="docutils literal notranslate"><span class="pre">set_default_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.gravity.map.GravityMap"><code class="docutils literal notranslate"><span class="pre">GravityMap</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="egm.html">9.5.6. egm.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geosat.html">9.5.7. geosat.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="marine.html">9.5.8. marine.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ggm_plus.html">9.5.9. ggm_plus.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="srtm2gravity.html">9.5.10. srtm2gravity.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="irish.html">9.5.11. irish.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#input">9.6. Input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#measurement">9.7. Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#output">9.8. Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#quantum">9.9. Quantum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#simulation">9.10. Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#util">9.11. Util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#waypoints">9.12. Waypoints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../usage/packages.html"><span class="section-number">9. </span>Software Components</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">9.5.5. </span>qnav.gravity.map</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/modules/gravity/map.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qnav.gravity.map">
+<span id="qnav-gravity-map"></span><h1><span class="section-number">9.5.5. </span>qnav.gravity.map<a class="headerlink" href="#module-qnav.gravity.map" title="Link to this heading"></a></h1>
+<section id="map-py">
+<h2><span class="section-number">9.5.5.1. </span>map.py<a class="headerlink" href="#map-py" title="Link to this heading"></a></h2>
+<dl class="field-list">
+<dt class="field-odd">summary<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Module provides template implementation for gravity correction maps.
+Due to their high resolution and spatial complexity, methods from
+the original gravity model base class have had to be adjusted.
+The largest feature provided by this module is the method for
+correctly approximating the vertical gravity gradient.</p>
+</dd>
+<dt class="field-even">authors<span class="colon">:</span></dt>
+<dd class="field-even"><div class="line-block">
+<div class="line">Prof. Jason Ralph - <a class="reference external" href="mailto:jfralph&#37;&#52;&#48;liverpool&#46;ac&#46;uk">jfralph<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></div>
+<div class="line">Michael Wright - <a class="reference external" href="mailto:mjwright&#37;&#52;&#48;liverpool&#46;ac&#46;uk">mjwright<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></div>
+</div>
+</dd>
+<dt class="field-odd">version<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1.0.0 - First implementation of this module.</p>
+</dd>
+</dl>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.gravity.map.CircularGrid">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.gravity.map.</span></span><span class="sig-name descname"><span class="pre">CircularGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_rings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_angles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/gravity/map.html#CircularGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.gravity.map.CircularGrid" title="Link to this definition"></a></dt>
+<dd><p>Definition for a circular reference grid from a centre position.
+Circular grid points used for involving the surrounding data for
+accurately computing the vertical gravity gradient.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.gravity.map.CircularGrid.generate_grid">
+<span class="sig-name descname"><span class="pre">generate_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qnav/gravity/map.html#CircularGrid.generate_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.gravity.map.CircularGrid.generate_grid" title="Link to this definition"></a></dt>
+<dd><p>Generates a circular grid of query positions surrounding a point.
+On succession, a dictionary containing the positional and
+angular information of points surrounding a position of interest are
+returned. This also includes commonly calculated values step size
+values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>float</em>) – The latitude position of the point (in decimal degrees).</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) – The longitude position of the point (in decimal degrees).</p></li>
+<li><p><strong>alt</strong> (<em>float</em>) – The altitude position of the point (in metres).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A dictionary holding the calculated positions (lla),
+NED offsets (ned), azimuth angles (alpha), distances from centre</p>
+<blockquote>
+<div><p>(psi) and step sizes (delta_psi and delta_alpha).</p>
+</div></blockquote>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict[str, np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.gravity.map.set_default_grid">
+<span class="sig-prename descclassname"><span class="pre">qnav.gravity.map.</span></span><span class="sig-name descname"><span class="pre">set_default_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_rings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_angles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/gravity/map.html#set_default_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.gravity.map.set_default_grid" title="Link to this definition"></a></dt>
+<dd><p>Overwrites the settings to use for the default circular reference grid.
+This is the grid that will be used by default for calculating the
+vertical gravity gradient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_rings</strong> (<em>int</em>) – Number of radial distance steps.</p></li>
+<li><p><strong>num_angles</strong> (<em>int</em>) – Number of azimuth angle steps.</p></li>
+<li><p><strong>max_radius</strong> (<em>float</em>) – Maximum radial distance (in degrees).</p></li>
+<li><p><strong>l_threshold</strong> (<em>float</em>) – Threshold for internal points (in metres).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.gravity.map.GravityMap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.gravity.map.</span></span><span class="sig-name descname"><span class="pre">GravityMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#qnav.gravity.base.GravityModel" title="qnav.gravity.base.GravityModel"><span class="pre">GravityModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">geoid_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../earth/geoid.html#qnav.earth.geoid.GeoidModel" title="qnav.earth.geoid.GeoidModel"><span class="pre">GeoidModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_download</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/gravity/map.html#GravityMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.gravity.map.GravityMap" title="Link to this definition"></a></dt>
+<dd><p>An extension to the abstract base class GravityModel that provides
+re-worked methods for handling high-resolution lookup maps.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.gravity.map.GravityMap.get_anomaly">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_anomaly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/qnav/gravity/map.html#GravityMap.get_anomaly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.gravity.map.GravityMap.get_anomaly" title="Link to this definition"></a></dt>
+<dd><p>Calculates the gravity anomaly for given position.
+Retrieves the gravity anomaly value for the requested position
+(in m/s^2) at the base surface. For gravity maps this value is
+interpolated from its dataset, following possible conversion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>float</em>) – The latitude coordinate for the position of interest.
+The latitude position value given in decimal degrees.</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) – The longitude coordinate for the position of interest.
+The longitude position value given in decimal degrees.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The gravity anomaly value (in m/s^2).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.gravity.map.GravityMap.get_disturbance">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_disturbance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/qnav/gravity/map.html#GravityMap.get_disturbance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.gravity.map.GravityMap.get_disturbance" title="Link to this definition"></a></dt>
+<dd><p>Calculates the gravity disturbance for given position.
+Retrieves the gravity disturbance value for the requested position
+(in m/s^2) at the base surface. For gravity maps this value is
+interpolated from its dataset, following possible conversion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>float</em>) – The latitude coordinate for the position of interest.
+The latitude position value given in decimal degrees.</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) – The longitude coordinate for the position of interest.
+The longitude position value given in decimal degrees.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The gravity disturbance value (in m/s^2).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.gravity.map.GravityMap.get_anomaly_vec">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_anomaly_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/gravity/map.html#GravityMap.get_anomaly_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.gravity.map.GravityMap.get_anomaly_vec" title="Link to this definition"></a></dt>
+<dd><p>Calculates the gravity anomaly for multiple given positions.
+Retrieves the gravity anomaly value for the requested position
+(in m/s^2) at the base surface. For gravity maps this value is
+interpolated from its dataset, following possible conversion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>float</em>) – The latitude coordinate for the position of interest.
+The latitude position value given in decimal degrees.</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) – The longitude coordinate for the position of interest.
+The longitude position value given in decimal degrees.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The gravity anomaly value (in m/s^2).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.gravity.map.GravityMap.get_disturbance_vec">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_disturbance_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/gravity/map.html#GravityMap.get_disturbance_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.gravity.map.GravityMap.get_disturbance_vec" title="Link to this definition"></a></dt>
+<dd><p>Calculates the gravity disturbance for multiple given positions.
+Retrieves the gravity disturbance value for the requested position
+(in m/s^2) at the base surface. For gravity maps this value is
+interpolated from its dataset, following possible conversion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>float</em>) – The latitude coordinate for the position of interest.
+The latitude position value given in decimal degrees.</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) – The longitude coordinate for the position of interest.
+The longitude position value given in decimal degrees.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The gravity disturbance value (in m/s^2).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.gravity.map.GravityMap.calc_gravity_xyz">
+<span class="sig-name descname"><span class="pre">calc_gravity_xyz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/gravity/map.html#GravityMap.calc_gravity_xyz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.gravity.map.GravityMap.calc_gravity_xyz" title="Link to this definition"></a></dt>
+<dd><p>Calculates and returns the gravitational acceleration vector.
+Computes the gravity acceleration X/North, Y/East and Z/Down
+components (in m/s^2) for the given location and altitude offset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>float</em>) – The latitude coordinate for the position of interest.
+The latitude position value given in decimal degrees.</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) – The longitude coordinate for the position of interest.
+The longitude position value given in decimal degrees.</p></li>
+<li><p><strong>alt</strong> (<em>float</em>) – The altitude offset for the position of interest.
+The elevation from the WGS-84 reference ellipsoid in metres.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The local gravity vector for the XYZ components (in m/s^2).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (3-elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.gravity.map.GravityMap.calc_gravity_xyz_vec">
+<span class="sig-name descname"><span class="pre">calc_gravity_xyz_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/gravity/map.html#GravityMap.calc_gravity_xyz_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.gravity.map.GravityMap.calc_gravity_xyz_vec" title="Link to this definition"></a></dt>
+<dd><p>In a vectorised batch, calculates and returns the gravitational
+acceleration for the X/North, Y/East and Z/Down axes (in m/s^2)
+for the given location and altitude offset. Ideal when calculating
+gravity for a large number of positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>np.array</em>) – The latitude coordinate for the position of interest.
+The latitude position value given in decimal degrees.</p></li>
+<li><p><strong>lon</strong> (<em>np.array</em>) – The longitude coordinate for the position of interest.
+The longitude position value given in decimal degrees.</p></li>
+<li><p><strong>alt</strong> (<em>np.array</em>) – The altitude offset for the position of interest.
+The elevation from the WGS-84 reference ellipsoid in metres.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The local gravity vector for the XYZ components (in m/s^2).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray (N-by-3 elements)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.gravity.map.GravityMap.calc_vertical_grad">
+<span class="sig-name descname"><span class="pre">calc_vertical_grad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">circular_grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qnav.gravity.map.CircularGrid" title="qnav.gravity.map.CircularGrid"><span class="pre">CircularGrid</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/qnav/gravity/map.html#GravityMap.calc_vertical_grad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.gravity.map.GravityMap.calc_vertical_grad" title="Link to this definition"></a></dt>
+<dd><p>Calculates the vertical gradient of gravity.
+Computes the vertical change in gravity (∂g/∂r) of the Z/Down
+component (in m/s^2). This is primary used for gravity map-matching
+related calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>float</em>) – The latitude coordinate for the position of interest.
+The latitude position value given in decimal degrees.</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) – The longitude coordinate for the position of interest.
+The longitude position value given in decimal degrees.</p></li>
+<li><p><strong>alt</strong> (<em>float</em>) – The altitude offset for the position of interest.
+The elevation from the WGS-84 reference ellipsoid in metres.</p></li>
+<li><p><strong>step</strong> (<em>float</em>) – The step size (in metres) for calculating the gradient.
+To be used when the gradient cannot be computed directly.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The vertical gravity gradient (in m/s^2).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.gravity.map.GravityMap.calc_vertical_grad_vec">
+<span class="sig-name descname"><span class="pre">calc_vertical_grad_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">circular_grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qnav.gravity.map.CircularGrid" title="qnav.gravity.map.CircularGrid"><span class="pre">CircularGrid</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/gravity/map.html#GravityMap.calc_vertical_grad_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.gravity.map.GravityMap.calc_vertical_grad_vec" title="Link to this definition"></a></dt>
+<dd><p>In a vectorised batch, calculates the vertical gradient of gravity.
+Computes the vertical change in gravity (∂g/∂r) of the Z/Down
+component (in m/s^2). This is primary used for gravity map-matching
+related calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>np.ndarray</em>) – The latitude coordinate for the position of interest.
+The latitude position value given in decimal degrees.</p></li>
+<li><p><strong>lon</strong> (<em>np.ndarray</em>) – The longitude coordinate for the position of interest.
+The longitude position value given in decimal degrees.</p></li>
+<li><p><strong>alt</strong> (<em>np.ndarray</em>) – The altitude offset for the position of interest.
+The elevation from the WGS-84 reference ellipsoid in metres.</p></li>
+<li><p><strong>step</strong> (<em>float</em>) – The step size (in metres) for calculating the gradient.
+To be used when the gradient cannot be computed directly.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The vertical gravity gradient (in m/s^2).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.gravity.map.GravityMap.base_model">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">base_model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Self</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qnav.gravity.map.GravityMap.base_model" title="Link to this definition"></a></dt>
+<dd><p>Returns the base gravity model the model extends from.
+Allows access to the base function/model the instance is using.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The base gravity model.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="base.html#qnav.gravity.base.GravityModel" title="qnav.gravity.base.GravityModel">GravityModel</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="nima.html" class="btn btn-neutral float-left" title="9.5.4. qnav.gravity.nima" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="egm.html" class="btn btn-neutral float-right" title="9.5.6. qnav.gravity.egm" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.output.data &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.output.data</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.output.data</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+
+<div class="viewcode-block" id="ResultsTable">
+<a class="viewcode-back" href="../../../modules/output/data.html#qnav.output.data.ResultsTable">[docs]</a>
+<span class="k">class</span> <span class="nc">ResultsTable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dynamic on-disk data container for results records.</span>
+<span class="sd">    Provides a container that uses virtual-memory, storing the results on</span>
+<span class="sd">    disk but still allowing fast querying and retrieval. This can be useful</span>
+<span class="sd">    for a number of tasks, including conversion and report generation,</span>
+<span class="sd">    without loading all data into memory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The on-disk location for the result data table.</span>
+    <span class="n">_file_path</span><span class="p">:</span> <span class="n">Path</span>
+
+    <span class="c1"># The mode to use for opening and accessing the file.</span>
+    <span class="n">_read_only</span><span class="p">:</span> <span class="nb">bool</span>
+
+    <span class="c1"># The results description string contained in the metadata.</span>
+    <span class="n">_description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># The time steps series, corresponding to each result</span>
+    <span class="n">_time_steps</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># The data table containing all the results in virtual array format.</span>
+    <span class="n">_data_table</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># A dictionary used for indexing columns to data</span>
+    <span class="n">_index_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">read_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">auto_load</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_path</span> <span class="o">=</span> <span class="n">file_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_read_only</span> <span class="o">=</span> <span class="n">read_only</span>
+
+        <span class="k">if</span> <span class="n">auto_load</span> <span class="ow">and</span> <span class="n">file_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">virtual_memory</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+
+        <span class="c1"># Open the file and attempt to read header:</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">offset_bytes</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;I&#39;</span><span class="p">,</span> <span class="n">offset_bytes</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">header_bytes</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">offset</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span>
+
+        <span class="c1"># Attempt to unpack the header:</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">header_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_description</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index_dict</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s2">&quot;fields&quot;</span><span class="p">]</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s2">&quot;size&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">virtual_memory</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_table</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_file_path</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span>
+                <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_table</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_file_path</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_table</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__generate_header</span><span class="p">(</span><span class="n">desc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">time_steps</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">time_steps</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;time_steps must be 1 dimensional&quot;</span><span class="p">)</span>
+
+        <span class="n">total_num_rows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">time_steps</span><span class="p">)</span>
+        <span class="n">total_num_cols</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="n">num_cols</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">v</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">num_rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">v</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">fields</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">total_num_cols</span><span class="p">,</span> <span class="n">num_cols</span><span class="p">)</span>
+            <span class="n">total_num_cols</span> <span class="o">+=</span> <span class="n">num_cols</span>
+
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;data field &quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&quot; has more than 2 dimensions&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">num_rows</span> <span class="o">!=</span> <span class="n">total_num_rows</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;data field &quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&quot; has </span><span class="si">{</span><span class="n">num_rows</span><span class="si">}</span><span class="s1"> rows, not </span><span class="si">{</span><span class="n">total_num_rows</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">data_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">total_num_rows</span><span class="p">,</span> <span class="n">total_num_cols</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">desc</span><span class="p">,</span>
+            <span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="n">fields</span><span class="p">,</span>
+            <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="n">data_size</span><span class="p">,</span>
+            <span class="s2">&quot;format_version&quot;</span><span class="p">:</span> <span class="mi">1</span>
+        <span class="p">}</span>
+
+
+    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">time_steps</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_only</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot write data in read-only mode&quot;</span><span class="p">)</span>
+
+        <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__generate_header</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="n">time_steps</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">data_size</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s2">&quot;size&quot;</span><span class="p">]</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s2">&quot;fields&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Encode the header contents in binary</span>
+        <span class="n">header_bytes</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">header</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">header_bytes</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span>
+        <span class="n">offset_bytes</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&gt;I&#39;</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>  <span class="c1"># Big-endian uint-1</span>
+
+        <span class="c1"># Write the header data</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">offset_bytes</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header_bytes</span><span class="p">)</span>
+
+        <span class="n">to_write</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_path</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="s1">&#39;r+&#39;</span><span class="p">,</span>
+                             <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">data_size</span><span class="p">)</span>
+
+        <span class="n">to_write</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_steps</span>
+        <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span> <span class="ow">in</span> <span class="n">fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">to_write</span><span class="p">[:,</span> <span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">to_write</span><span class="p">[:,</span> <span class="n">index</span><span class="p">:</span><span class="n">index</span> <span class="o">+</span> <span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_description</span> <span class="o">=</span> <span class="n">desc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_steps</span> <span class="o">=</span> <span class="n">to_write</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_table</span> <span class="o">=</span> <span class="n">to_write</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index_dict</span> <span class="o">=</span> <span class="n">fields</span>
+        <span class="n">to_write</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_table</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">LookupError</span><span class="p">(</span><span class="s2">&quot;no data within table&quot;</span><span class="p">)</span>
+
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_table</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">fields</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_table</span><span class="p">[:,</span> <span class="n">index</span><span class="p">]</span>
+                <span class="n">columns</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fields</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_table</span><span class="p">[:,</span> <span class="n">index</span><span class="p">:</span><span class="n">index</span> <span class="o">+</span> <span class="n">size</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="n">size</span><span class="p">):</span>
+                    <span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">index</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+        <span class="n">table</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;columns&#39;</span><span class="p">:</span> <span class="n">columns</span><span class="p">,</span>
+            <span class="s1">&#39;values&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_table</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_description</span><span class="p">,</span>
+            <span class="s1">&#39;time_steps&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_steps</span><span class="p">,</span>
+            <span class="s1">&#39;table&#39;</span><span class="p">:</span> <span class="n">table</span><span class="p">,</span>
+            <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">fields</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_data_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        States data has already been loaded.</span>
+
+<span class="sd">        :return: Returns True if data is loaded.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_table</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
+
+
+
+
+
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="c1">#</span>
+<span class="c1">#     sf = SaveFormat.CSV</span>
+<span class="c1">#</span>
+<span class="c1">#     l = list()</span>
+<span class="c1">#     for a in SaveFormat:</span>
+<span class="c1">#         print(a)</span>
+<span class="c1">#         l.append(a)</span>
+
+    <span class="c1"># np.random.seed(0)</span>
+    <span class="c1"># test_data = np.random.random((10, 6))</span>
+    <span class="c1">#</span>
+    <span class="c1"># test_times = np.arange(10)</span>
+    <span class="c1"># test_field_1 = test_data[:, 0]</span>
+    <span class="c1"># test_field_2 = test_data[:, 1:3]</span>
+    <span class="c1"># test_field_3 = test_data[:, 3:6]</span>
+
+    <span class="n">test_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;testing.qnr&quot;</span><span class="p">)</span>
+    <span class="n">rt</span> <span class="o">=</span> <span class="n">ResultsTable</span><span class="p">(</span><span class="n">test_file</span><span class="p">,</span> <span class="n">auto_load</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># rt.write(&quot;Testing123&quot;, test_times,</span>
+    <span class="c1">#          field1=test_field_1,</span>
+    <span class="c1">#          field2=test_field_2,</span>
+    <span class="c1">#          field3=test_field_3)</span>
+
+    <span class="n">rt</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">virtual_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">rt</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

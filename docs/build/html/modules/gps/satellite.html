@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.4.3. qnav.gps.satellite &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="9.4.4. qnav.gps.sensor" href="sensor.html" />
+    <link rel="prev" title="9.4.2. qnav.gps.fusion" href="fusion.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../usage/packages.html">9. Software Components</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#earth">9.1. Earth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#estimation">9.2. Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#fusion">9.3. Fusion</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../usage/packages.html#gps">9.4. GPS</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ephemeris.html">9.4.1. ephemeris.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fusion.html">9.4.2. fusion.py</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">9.4.3. satellite.py</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#satellite-py">9.4.3.1. satellite.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.gps.satellite.satellite_param_fields"><code class="docutils literal notranslate"><span class="pre">satellite_param_fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.gps.satellite.SatelliteParams"><code class="docutils literal notranslate"><span class="pre">SatelliteParams</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.gps.satellite.Satellite"><code class="docutils literal notranslate"><span class="pre">Satellite</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sensor.html">9.4.4. sensor.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zones.html">9.4.5. zones.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gravity">9.5. Gravity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#input">9.6. Input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#measurement">9.7. Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#output">9.8. Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#quantum">9.9. Quantum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#simulation">9.10. Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#util">9.11. Util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#waypoints">9.12. Waypoints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../usage/packages.html"><span class="section-number">9. </span>Software Components</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">9.4.3. </span>qnav.gps.satellite</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/modules/gps/satellite.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qnav.gps.satellite">
+<span id="qnav-gps-satellite"></span><h1><span class="section-number">9.4.3. </span>qnav.gps.satellite<a class="headerlink" href="#module-qnav.gps.satellite" title="Link to this heading"></a></h1>
+<section id="satellite-py">
+<h2><span class="section-number">9.4.3.1. </span>satellite.py<a class="headerlink" href="#satellite-py" title="Link to this heading"></a></h2>
+<dl class="field-list">
+<dt class="field-odd">summary<span class="colon">:</span></dt>
+<dd class="field-odd"><p>All GPS satellite and solver functionalities.
+This module is responsible for simulating up-to-date satellites and
+supplying a solver to produce measurements (with configured errors
+and noise). During a simulation these classes will be used for
+acquiring GPS information.</p>
+</dd>
+<dt class="field-even">authors<span class="colon">:</span></dt>
+<dd class="field-even"><div class="line-block">
+<div class="line">Dr. Niall Moroney - <a class="reference external" href="mailto:niall&#46;moroney17&#37;&#52;&#48;imperial&#46;ac&#46;uk">niall<span>&#46;</span>moroney17<span>&#64;</span>imperial<span>&#46;</span>ac<span>&#46;</span>uk</a></div>
+<div class="line">Michael Wright - <a class="reference external" href="mailto:mjwright&#37;&#52;&#48;liverpool&#46;ac&#46;uk">mjwright<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></div>
+</div>
+</dd>
+<dt class="field-odd">version<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0.9.0 - Awaiting further implementations.</p>
+</dd>
+</dl>
+</section>
+<dl class="py data">
+<dt class="sig sig-object py" id="qnav.gps.satellite.satellite_param_fields">
+<span class="sig-prename descclassname"><span class="pre">qnav.gps.satellite.</span></span><span class="sig-name descname"><span class="pre">satellite_param_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('type',</span> <span class="pre">'id',</span> <span class="pre">'year',</span> <span class="pre">'month',</span> <span class="pre">'day',</span> <span class="pre">'hour',</span> <span class="pre">'minute',</span> <span class="pre">'second',</span> <span class="pre">'clock_bias',</span> <span class="pre">'drift_freq_bias',</span> <span class="pre">'drift_rate_message_time',</span> <span class="pre">'t_0e',</span> <span class="pre">'prn',</span> <span class="pre">'delta_n',</span> <span class="pre">'i_dot',</span> <span class="pre">'omega_dot',</span> <span class="pre">'omega_0',</span> <span class="pre">'c_us',</span> <span class="pre">'c_uc',</span> <span class="pre">'c_is',</span> <span class="pre">'c_ic',</span> <span class="pre">'c_rs',</span> <span class="pre">'c_rc',</span> <span class="pre">'sqrt_a',</span> <span class="pre">'e',</span> <span class="pre">'i_0',</span> <span class="pre">'w',</span> <span class="pre">'m_bar_0')</span></em><a class="headerlink" href="#qnav.gps.satellite.satellite_param_fields" title="Link to this definition"></a></dt>
+<dd><p>The field names for satellite parameters.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.gps.satellite.</span></span><span class="sig-name descname"><span class="pre">SatelliteParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hour</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clock_bias</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drift_freq_bias</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drift_rate_message_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_0e</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_dot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega_dot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_us</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_uc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_is</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_ic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_rs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_rc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sqrt_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_bar_0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams" title="Link to this definition"></a></dt>
+<dd><p>A collection of satellite parameters needed to initialise a Satellite instance.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.c_ic">
+<span class="sig-name descname"><span class="pre">c_ic</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.c_ic" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 20</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.c_is">
+<span class="sig-name descname"><span class="pre">c_is</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.c_is" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 19</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.c_rc">
+<span class="sig-name descname"><span class="pre">c_rc</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.c_rc" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 22</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.c_rs">
+<span class="sig-name descname"><span class="pre">c_rs</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.c_rs" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 21</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.c_uc">
+<span class="sig-name descname"><span class="pre">c_uc</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.c_uc" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 18</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.c_us">
+<span class="sig-name descname"><span class="pre">c_us</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.c_us" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 17</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.clock_bias">
+<span class="sig-name descname"><span class="pre">clock_bias</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.clock_bias" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 8</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.day">
+<span class="sig-name descname"><span class="pre">day</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.day" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.delta_n">
+<span class="sig-name descname"><span class="pre">delta_n</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.delta_n" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 13</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.drift_freq_bias">
+<span class="sig-name descname"><span class="pre">drift_freq_bias</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.drift_freq_bias" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 9</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.drift_rate_message_time">
+<span class="sig-name descname"><span class="pre">drift_rate_message_time</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.drift_rate_message_time" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 10</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.e">
+<span class="sig-name descname"><span class="pre">e</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.e" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 24</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.hour">
+<span class="sig-name descname"><span class="pre">hour</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.hour" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 5</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.i_0">
+<span class="sig-name descname"><span class="pre">i_0</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.i_0" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 25</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.i_dot">
+<span class="sig-name descname"><span class="pre">i_dot</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.i_dot" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 14</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.id" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.m_bar_0">
+<span class="sig-name descname"><span class="pre">m_bar_0</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.m_bar_0" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 27</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.minute">
+<span class="sig-name descname"><span class="pre">minute</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.minute" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 6</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.month">
+<span class="sig-name descname"><span class="pre">month</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.month" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.omega_0">
+<span class="sig-name descname"><span class="pre">omega_0</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.omega_0" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 16</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.omega_dot">
+<span class="sig-name descname"><span class="pre">omega_dot</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.omega_dot" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 15</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.prn">
+<span class="sig-name descname"><span class="pre">prn</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.prn" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 12</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.second">
+<span class="sig-name descname"><span class="pre">second</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.second" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 7</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.sqrt_a">
+<span class="sig-name descname"><span class="pre">sqrt_a</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.sqrt_a" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 23</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.t_0e">
+<span class="sig-name descname"><span class="pre">t_0e</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.t_0e" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 11</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.type">
+<span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.type" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.w">
+<span class="sig-name descname"><span class="pre">w</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.w" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 26</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qnav.gps.satellite.SatelliteParams.year">
+<span class="sig-name descname"><span class="pre">year</span></span><a class="headerlink" href="#qnav.gps.satellite.SatelliteParams.year" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.gps.satellite.Satellite">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.gps.satellite.</span></span><span class="sig-name descname"><span class="pre">Satellite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qnav.gps.satellite.SatelliteParams" title="qnav.gps.satellite.SatelliteParams"><span class="pre">SatelliteParams</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">gps_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pseudo_range_noise</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pseudo_range_rate_noise</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rand_seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/gps/satellite.html#Satellite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.gps.satellite.Satellite" title="Link to this definition"></a></dt>
+<dd><p>Represents a GPS satellite and its current states/properties.
+This class is responsible for representing information about a GPS
+satellite. Methods are supplied for updating these states and allowing
+for measurement information to be acquired. During simulations a
+collection of satellite instances will be used for generating a GPS signal
+that will be used to improve navigation accuracy.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.gps.satellite.Satellite.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/gps/satellite.html#Satellite.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.gps.satellite.Satellite.update" title="Link to this definition"></a></dt>
+<dd><p>Updates the position, velocity and errors given the time difference.
+This method updates the state of the satellite by a given amount of
+time (in seconds). The updated position and velocity of the satellite
+are calculated along with the new error states for generating noisy
+measurements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dt</strong> (<em>float</em>) – The time difference since the last update was requested.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.gps.satellite.Satellite.get_location_azimuth_elevation">
+<span class="sig-name descname"><span class="pre">get_location_azimuth_elevation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ant_pos_lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qnav/gps/satellite.html#Satellite.get_location_azimuth_elevation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.gps.satellite.Satellite.get_location_azimuth_elevation" title="Link to this definition"></a></dt>
+<dd><p>Get the relative location of the satellite from the current position,
+in azimuth and elevation (deg-deg).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ant_pos_lla</strong> (<em>numpy.array</em><em> (</em><em>3-elements</em><em>)</em>) – The true antenna position (latitude, longitude
+and altitude given in deg-deg-metres).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns the corresponding azimuth and elevation (both in
+degrees).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[float, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.gps.satellite.Satellite.get_measurements">
+<span class="sig-name descname"><span class="pre">get_measurements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ant_pos_lla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ant_att_deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ant_vel_body_axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../_modules/qnav/gps/satellite.html#Satellite.get_measurements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.gps.satellite.Satellite.get_measurements" title="Link to this definition"></a></dt>
+<dd><p>Calculates and returns the noisy pseudo ranges, position, velocity
+and time information for the satellite.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ant_pos_lla</strong> (<em>numpy.array</em><em> (</em><em>3-elements</em><em>)</em>) – The true antenna position (latitude, longitude
+and altitude given in deg-deg-metres).</p></li>
+<li><p><strong>ant_att_deg</strong> (<em>numpy.array</em><em> (</em><em>3-elements</em><em>)</em>) – The true antenna attitude (heading, pitch and roll
+in degrees).</p></li>
+<li><p><strong>ant_vel_body_axes</strong> (<em>numpy.array</em><em> (</em><em>3-elements</em><em>)</em>) – The true antenna velocity (in body axes in
+metres/second).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The relevant measurement information in a dict.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.gps.satellite.Satellite.sat_id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sat_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qnav.gps.satellite.Satellite.sat_id" title="Link to this definition"></a></dt>
+<dd><p>Returns the full satellites ID from given parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.gps.satellite.Satellite.sat_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sat_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">datetime</span></em><a class="headerlink" href="#qnav.gps.satellite.Satellite.sat_time" title="Link to this definition"></a></dt>
+<dd><p>The satellite’s current clock time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Current satellite time.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>datetime.datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.gps.satellite.Satellite.position">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#qnav.gps.satellite.Satellite.position" title="Link to this definition"></a></dt>
+<dd><p>The satellite’s ECEF position since last update.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Current ECEF position.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.gps.satellite.Satellite.velocity">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">velocity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#qnav.gps.satellite.Satellite.velocity" title="Link to this definition"></a></dt>
+<dd><p>The satellite’s ECEF velocity since last update.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Current ECEF velocity.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.gps.satellite.Satellite.pseudo_range_noise">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pseudo_range_noise</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.gps.satellite.Satellite.pseudo_range_noise" title="Link to this definition"></a></dt>
+<dd><p>Returns the satellite’s initial pseudo range noise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Pseudo range noise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qnav.gps.satellite.Satellite.pseudo_range_rate_noise">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pseudo_range_rate_noise</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#qnav.gps.satellite.Satellite.pseudo_range_rate_noise" title="Link to this definition"></a></dt>
+<dd><p>Returns the satellite’s initial pseudo range rate noise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Pseudo range rate noise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="fusion.html" class="btn btn-neutral float-left" title="9.4.2. qnav.gps.fusion" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sensor.html" class="btn btn-neutral float-right" title="9.4.4. qnav.gps.sensor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

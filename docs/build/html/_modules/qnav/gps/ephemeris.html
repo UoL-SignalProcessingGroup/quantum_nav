@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.gps.ephemeris &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.gps.ephemeris</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.gps.ephemeris</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">============</span>
+<span class="sd">ephemeris.py</span>
+<span class="sd">============</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Collection of functions for extracting GPS/GNSS information.</span>
+<span class="sd">    This module is responsible for the util satellite functionality within</span>
+<span class="sd">    the toolbox. This includes functions for downloading GPS information,</span>
+<span class="sd">    parsing RINEX files, extracting satellite information and estimating</span>
+<span class="sd">    missing values.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+<span class="sd">    | Dr. Niall Moroney - niall.moroney17@imperial.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First implementation of this module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="c1"># .. TODO:</span>
+<span class="c1">#       - Add better method for holding Rinex records</span>
+<span class="c1">#       - Support more RINEX file versions that just 3.03</span>
+<span class="c1">#       - Read version from header and raise error if unsupported</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">ftplib</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">gzip</span>
+
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
+<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">norm</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">ftplib</span> <span class="kn">import</span> <span class="n">FTP_TLS</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">StrEnum</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+
+<span class="kn">from</span> <span class="nn">qnav.gps.satellite</span> <span class="kn">import</span> <span class="n">SatelliteParams</span>
+<span class="kn">from</span> <span class="nn">qnav.gps.satellite</span> <span class="kn">import</span> <span class="n">satellite_param_fields</span>
+<span class="kn">from</span> <span class="nn">qnav.util.constants</span> <span class="kn">import</span> <span class="n">OMEGA_E</span>
+<span class="kn">from</span> <span class="nn">qnav.util.constants</span> <span class="kn">import</span> <span class="n">GM</span>
+
+
+<span class="c1">#: The FTP server address for downloading RINEX files.</span>
+<span class="n">__FTP_ADDR</span> <span class="o">=</span> <span class="s1">&#39;gdc.cddis.eosdis.nasa.gov&#39;</span>
+
+<span class="c1">#: The FTP date formatting string for hourly data directories.</span>
+<span class="n">__FTP_DIR_DATE_STR</span> <span class="o">=</span> <span class="s1">&#39;/gnss/data/hourly/%Y/%j/%H&#39;</span>
+
+<span class="c1">#: The suffix/extension to match with files to download from.</span>
+<span class="n">__FPT_FILE_SUFFIX</span> <span class="o">=</span> <span class="s1">&#39;MN.rnx.gz&#39;</span>
+
+
+<div class="viewcode-block" id="SatelliteType">
+<a class="viewcode-back" href="../../../modules/gps/ephemeris.html#qnav.gps.ephemeris.SatelliteType">[docs]</a>
+<span class="k">class</span> <span class="nc">SatelliteType</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Character identifiers for the different satellite types.</span>
+<span class="sd">    These characters identify the record types corresponding to the satellite</span>
+<span class="sd">    systems supported inside a Rinex File (as of version 4).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">GPS</span> <span class="o">=</span> <span class="s1">&#39;G&#39;</span><span class="p">,</span>
+    <span class="n">GLONASS</span> <span class="o">=</span> <span class="s1">&#39;R&#39;</span><span class="p">,</span>
+    <span class="n">GALILEO</span> <span class="o">=</span> <span class="s1">&#39;E&#39;</span><span class="p">,</span>
+    <span class="n">QZSS</span> <span class="o">=</span> <span class="s1">&#39;J&#39;</span><span class="p">,</span>
+    <span class="n">BDS</span> <span class="o">=</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span>
+    <span class="n">IRNSS</span> <span class="o">=</span> <span class="s1">&#39;I&#39;</span><span class="p">,</span>
+    <span class="n">SBAS</span> <span class="o">=</span> <span class="s1">&#39;S&#39;</span>
+    <span class="n">MIXED</span> <span class="o">=</span> <span class="s1">&#39;M&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="get_rinex_path">
+<a class="viewcode-back" href="../../../modules/gps/ephemeris.html#qnav.gps.ephemeris.get_rinex_path">[docs]</a>
+<span class="k">def</span> <span class="nf">get_rinex_path</span><span class="p">(</span><span class="n">gps_time</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Obtain the location of a local RINEX file identified by GPS date and time.</span>
+<span class="sd">    This function will return the local filepath of a RINEX file corresponding</span>
+<span class="sd">    to a given (python) datetime. The file of the returned path may or may not</span>
+<span class="sd">    exist (requiring downloading if missing).</span>
+
+<span class="sd">    :param gps_time: Python datetime object for the time required for the ephemeris.</span>
+<span class="sd">    :type gps_time: datetime.datetime</span>
+
+<span class="sd">    :param directory: Location for the files to be downloaded to.</span>
+<span class="sd">    :type directory: Path</span>
+
+<span class="sd">    :return: The path of the corresponding RINEX file.</span>
+<span class="sd">    :rtype: Path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">eph_year</span> <span class="o">=</span> <span class="n">gps_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y&#39;</span><span class="p">)</span>
+    <span class="n">eph_file</span> <span class="o">=</span> <span class="n">gps_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y_%j.rnx&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">directory</span> <span class="o">/</span> <span class="n">eph_year</span> <span class="o">/</span> <span class="n">eph_file</span></div>
+
+
+
+<div class="viewcode-block" id="download_rinex_file">
+<a class="viewcode-back" href="../../../modules/gps/ephemeris.html#qnav.gps.ephemeris.download_rinex_file">[docs]</a>
+<span class="k">def</span> <span class="nf">download_rinex_file</span><span class="p">(</span><span class="n">gps_time</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">database_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function downloads and extracts an ephemeris file for a specified</span>
+<span class="sd">    day from &quot;cddis.gsfc.nasa.gov&quot; and saves it under the provided directory.</span>
+
+<span class="sd">    :param gps_time: The Python datetime object for the time required for the</span>
+<span class="sd">        ephemeris data.</span>
+<span class="sd">    :type: datetime.datetime</span>
+
+<span class="sd">    :param database_dir: The location for the files to be downloaded to.</span>
+<span class="sd">    :type database_dir: Path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Get the expected parent directory of the on the NASA server</span>
+    <span class="n">fpt_dir</span> <span class="o">=</span> <span class="n">gps_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">__FTP_DIR_DATE_STR</span><span class="p">)</span>
+
+    <span class="c1"># Get the local file paths for the download destinations</span>
+    <span class="n">eph_file_path</span> <span class="o">=</span> <span class="n">get_rinex_path</span><span class="p">(</span><span class="n">gps_time</span><span class="p">,</span> <span class="n">database_dir</span><span class="p">)</span>
+
+    <span class="c1"># If unzipped ephemeris file does not exist, download and unpack it:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">eph_file_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+
+        <span class="c1"># Create any missing directories:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">eph_file_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="n">eph_file_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">FTP_TLS</span><span class="p">(</span><span class="n">__FTP_ADDR</span><span class="p">)</span> <span class="k">as</span> <span class="n">ftp</span><span class="p">:</span>
+
+                <span class="n">ftp</span><span class="o">.</span><span class="n">login</span><span class="p">()</span>
+                <span class="n">ftp</span><span class="o">.</span><span class="n">prot_p</span><span class="p">()</span>
+
+                <span class="n">ftp</span><span class="o">.</span><span class="n">cwd</span><span class="p">(</span><span class="n">fpt_dir</span><span class="p">)</span>
+                <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">ftp</span><span class="o">.</span><span class="n">dir</span><span class="p">(</span><span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">)</span>
+
+                <span class="n">files</span> <span class="o">=</span> <span class="p">([</span><span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)))</span> <span class="k">for</span>
+                          <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">__FPT_FILE_SUFFIX</span><span class="p">)])</span>
+
+                <span class="n">sizes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">file</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+                <span class="n">file</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="n">sizes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">sizes</span><span class="p">))][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="c1"># Create any missing directories:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">database_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                    <span class="n">database_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                <span class="c1"># Generate a temporary file to hold downloaded data:</span>
+                <span class="k">with</span> <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">database_dir</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.Z&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+
+                    <span class="c1"># Write the data to the temporary file:</span>
+                    <span class="n">ftp</span><span class="o">.</span><span class="n">retrbinary</span><span class="p">(</span><span class="s1">&#39;RETR &#39;</span> <span class="o">+</span> <span class="n">file</span><span class="p">,</span> <span class="n">tmp</span><span class="o">.</span><span class="n">write</span><span class="p">)</span>
+                    <span class="n">tmp</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                    <span class="n">tmp</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+                    <span class="c1"># Extract and write the decompressed content:</span>
+                    <span class="k">with</span> <span class="p">(</span><span class="n">gzip</span><span class="o">.</span><span class="n">GzipFile</span><span class="p">(</span><span class="s1">&#39;rb&#39;</span><span class="p">,</span> <span class="n">fileobj</span><span class="o">=</span><span class="n">tmp</span><span class="p">)</span> <span class="k">as</span> <span class="n">input_file</span><span class="p">,</span>
+                            <span class="nb">open</span><span class="p">(</span><span class="n">eph_file_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output_file</span><span class="p">):</span>
+                        <span class="n">output_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">input_file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+        <span class="k">except</span> <span class="n">ftplib</span><span class="o">.</span><span class="n">error_perm</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Unable to acquire GPS ephemeris file for </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">gps_time</span><span class="o">.</span><span class="n">date</span><span class="p">())</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">ConnectionError</span> <span class="k">as</span> <span class="n">con_e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Unable to download GPS ephemeris file</span><span class="se">\n</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">con_e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">e</span></div>
+
+
+
+<div class="viewcode-block" id="download_rinex_files">
+<a class="viewcode-back" href="../../../modules/gps/ephemeris.html#qnav.gps.ephemeris.download_rinex_files">[docs]</a>
+<span class="k">def</span> <span class="nf">download_rinex_files</span><span class="p">(</span><span class="n">from_time</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+                         <span class="n">to_time</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+                         <span class="n">database_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+                         <span class="n">inc_last</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function downloads and extracts multiple ephemeris files.</span>
+<span class="sd">    Given a date range, this function will download all the ephemeris</span>
+<span class="sd">    files covered by the range.</span>
+
+<span class="sd">    :param from_time: The first date for the download range.</span>
+<span class="sd">        This is the date for the first GPS file to be downloaded.</span>
+<span class="sd">    :type from_time: datetime.datetime</span>
+
+<span class="sd">    :param to_time: The last date for the download range.</span>
+<span class="sd">        This is the end date for the GPS files to download.</span>
+<span class="sd">    :type to_time: datetime.datetime</span>
+
+<span class="sd">    :param database_dir: The location for the files to be downloaded to.</span>
+<span class="sd">    :type database_dir: Path</span>
+
+<span class="sd">    :param inc_last: Should the last date of the range be included?</span>
+<span class="sd">    :type inc_last: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Create any missing directories:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">database_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">database_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">FTP_TLS</span><span class="p">(</span><span class="n">__FTP_ADDR</span><span class="p">)</span> <span class="k">as</span> <span class="n">ftp</span><span class="p">:</span>
+
+        <span class="n">ftp</span><span class="o">.</span><span class="n">login</span><span class="p">()</span>
+        <span class="n">ftp</span><span class="o">.</span><span class="n">prot_p</span><span class="p">()</span>
+
+        <span class="c1"># Extract the date range requested</span>
+        <span class="n">gps_time</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">from_time</span><span class="p">)</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="n">to_time</span>
+        <span class="n">num_days</span> <span class="o">=</span> <span class="p">(</span><span class="n">end_date</span> <span class="o">-</span> <span class="n">gps_time</span><span class="p">)</span><span class="o">.</span><span class="n">days</span>
+
+        <span class="c1"># Download the GPS data for all the dates given:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_days</span> <span class="o">+</span> <span class="n">inc_last</span><span class="p">):</span>
+
+            <span class="c1"># Print batch downloading status in console:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloading GPS Data </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">num_days</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">:</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span>
+                  <span class="n">gps_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%a</span><span class="s2"> </span><span class="si">%d</span><span class="s2"> %b %Y&quot;</span><span class="p">))</span>
+
+            <span class="c1"># Get the expected parent directory of the on the NASA server</span>
+            <span class="n">fpt_dir</span> <span class="o">=</span> <span class="n">gps_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">__FTP_DIR_DATE_STR</span><span class="p">)</span>
+
+            <span class="c1"># Get the local file paths for the download destinations</span>
+            <span class="n">eph_file_path</span> <span class="o">=</span> <span class="n">get_rinex_path</span><span class="p">(</span><span class="n">gps_time</span><span class="p">,</span> <span class="n">database_dir</span><span class="p">)</span>
+
+            <span class="c1"># Create any missing directories:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">eph_file_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                <span class="n">eph_file_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># If unzipped ephemeris file does not exist, download and unpack it:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">eph_file_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+
+                <span class="n">ftp</span><span class="o">.</span><span class="n">cwd</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+                <span class="n">ftp</span><span class="o">.</span><span class="n">cwd</span><span class="p">(</span><span class="n">fpt_dir</span><span class="p">)</span>
+
+                <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">ftp</span><span class="o">.</span><span class="n">dir</span><span class="p">(</span><span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">)</span>
+                <span class="n">files</span> <span class="o">=</span> <span class="p">([</span><span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)))</span> <span class="k">for</span>
+                          <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">__FPT_FILE_SUFFIX</span><span class="p">)])</span>
+
+                <span class="n">sizes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">file</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+                <span class="n">file</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="n">sizes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">sizes</span><span class="p">))][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="c1"># Generate a temporary file to hold downloaded data:</span>
+                <span class="k">with</span> <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">database_dir</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.Z&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+
+                    <span class="c1"># Write the data to the temporary file:</span>
+                    <span class="n">ftp</span><span class="o">.</span><span class="n">retrbinary</span><span class="p">(</span><span class="s1">&#39;RETR &#39;</span> <span class="o">+</span> <span class="n">file</span><span class="p">,</span> <span class="n">tmp</span><span class="o">.</span><span class="n">write</span><span class="p">)</span>
+                    <span class="n">tmp</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                    <span class="n">tmp</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+                    <span class="c1"># Extract and write the decompressed content:</span>
+                    <span class="k">with</span> <span class="p">(</span><span class="n">gzip</span><span class="o">.</span><span class="n">GzipFile</span><span class="p">(</span><span class="s1">&#39;rb&#39;</span><span class="p">,</span> <span class="n">fileobj</span><span class="o">=</span><span class="n">tmp</span><span class="p">)</span> <span class="k">as</span> <span class="n">input_file</span><span class="p">,</span>
+                          <span class="nb">open</span><span class="p">(</span><span class="n">eph_file_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output_file</span><span class="p">):</span>
+                        <span class="n">output_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">input_file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+            <span class="c1"># Increment the time to the next day:</span>
+            <span class="n">gps_time</span> <span class="o">+=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># def read_ephemeris_file(ephemeris_file: Path) -&gt; list[SatelliteParams]:</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Parses a downloaded ephemeris file and returns its data.</span>
+<span class="c1">#     Reads a given ephemeris file, skipping the header contents and returning</span>
+<span class="c1">#     the contained satellite parameter records</span>
+<span class="c1">#</span>
+<span class="c1">#     :param ephemeris_file: The local ephemeris file to read.</span>
+<span class="c1">#     :type ephemeris_file: Path</span>
+<span class="c1">#</span>
+<span class="c1">#     :returns: A list of extracted satellite parameters for GPS satellites.</span>
+<span class="c1">#     :rtype: list[SatelliteParams]</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#     # https://files.igs.org/pub/data/format/rinex303.pdf</span>
+<span class="c1">#</span>
+<span class="c1">#     satellite_ephemeris = dict()</span>
+<span class="c1">#     satellite_list = []</span>
+<span class="c1">#</span>
+<span class="c1">#     # Read File and ignore header</span>
+<span class="c1">#     with open(ephemeris_file, &#39;r&#39;) as file:</span>
+<span class="c1">#</span>
+<span class="c1">#         line = file.readline()</span>
+<span class="c1">#</span>
+<span class="c1">#         while line.find(&quot;END OF HEADER&quot;) == -1:</span>
+<span class="c1">#             line = file.readline()</span>
+<span class="c1">#</span>
+<span class="c1">#         # Read blocks of four lines, each specifying one satellite</span>
+<span class="c1">#         prefix_length: dict[str, int] = {</span>
+<span class="c1">#             &#39;G&#39;: 8, &#39;R&#39;: 5, &#39;S&#39;: 4, &#39;E&#39;: 8, &#39;C&#39;: 8, &#39;J&#39;: 8</span>
+<span class="c1">#         }</span>
+<span class="c1">#</span>
+<span class="c1">#         # Conversion for code to satellite description</span>
+<span class="c1">#         prefix_type: dict[str, str] = {</span>
+<span class="c1">#             &#39;G&#39;: &#39;GPS&#39;, &#39;R&#39;: &#39;GLONASS&#39;, &#39;S&#39;: &#39;SBAS&#39;,</span>
+<span class="c1">#             &#39;E&#39;: &#39;Galileo&#39;, &#39;C&#39;: &#39;BeiDou&#39;, &#39;J&#39;: &#39;QZSS&#39;</span>
+<span class="c1">#         }</span>
+<span class="c1">#</span>
+<span class="c1">#         line = file.readline().replace(&#39;D&#39;, &#39;E&#39;)</span>
+<span class="c1">#         while line:</span>
+<span class="c1">#</span>
+<span class="c1">#             line_count = 1</span>
+<span class="c1">#             block: dict[str, any] = dict()</span>
+<span class="c1">#</span>
+<span class="c1">#             length = prefix_length[line[0]]</span>
+<span class="c1">#             block[&#39;type&#39;] = prefix_type[line[0]]</span>
+<span class="c1">#             block[&#39;id&#39;] = int(line[1:3])</span>
+<span class="c1">#             block[&#39;year&#39;] = int(line[4:8])</span>
+<span class="c1">#             block[&#39;month&#39;] = int(line[9:11])</span>
+<span class="c1">#             block[&#39;day&#39;] = int(line[12:14])</span>
+<span class="c1">#             block[&#39;time&#39;] = line[15:23]</span>
+<span class="c1">#             block[&#39;clock_bias&#39;] = float(line[23:42])</span>
+<span class="c1">#             block[&#39;drift_freq_bias&#39;] = float(line[42:61])</span>
+<span class="c1">#             block[&#39;drift_rate_message_time&#39;] = float(line[61:80])</span>
+<span class="c1">#             ephemeris_data = []</span>
+<span class="c1">#</span>
+<span class="c1">#             while line_count &lt; length:</span>
+<span class="c1">#                 line_count += 1</span>
+<span class="c1">#                 line = file.readline().replace(&#39;D&#39;, &#39;E&#39;)</span>
+<span class="c1">#                 items = [line[4:23], line[23:42], line[42:61], line[61:80]]</span>
+<span class="c1">#                 ephemeris_data += items</span>
+<span class="c1">#</span>
+<span class="c1">#             if length == 4:</span>
+<span class="c1">#                 block[&#39;t_0e&#39;] = block[&#39;drift_rate_message_time&#39;]</span>
+<span class="c1">#                 block[&#39;prn&#39;] = block[&#39;id&#39;]</span>
+<span class="c1">#                 block[&#39;delta_n&#39;] = 0</span>
+<span class="c1">#                 block[&#39;i_dot&#39;] = 0</span>
+<span class="c1">#                 block[&#39;c_us&#39;] = 0</span>
+<span class="c1">#                 block[&#39;c_uc&#39;] = 0</span>
+<span class="c1">#                 block[&#39;c_is&#39;] = 0</span>
+<span class="c1">#                 block[&#39;c_ic&#39;] = 0</span>
+<span class="c1">#                 block[&#39;c_rs&#39;] = 0</span>
+<span class="c1">#                 block[&#39;c_rc&#39;] = 0</span>
+<span class="c1">#                 block[&#39;omega_dot&#39;] = 0</span>
+<span class="c1">#</span>
+<span class="c1">#                 r_pz90f = np.array([</span>
+<span class="c1">#                     float(ephemeris_data[0]),</span>
+<span class="c1">#                     float(ephemeris_data[4]),</span>
+<span class="c1">#                     float(ephemeris_data[8])</span>
+<span class="c1">#                 ])</span>
+<span class="c1">#</span>
+<span class="c1">#                 v_pz90f = np.array([</span>
+<span class="c1">#                     float(ephemeris_data[1]),</span>
+<span class="c1">#                     float(ephemeris_data[5]),</span>
+<span class="c1">#                     float(ephemeris_data[9])</span>
+<span class="c1">#                 ])</span>
+<span class="c1">#</span>
+<span class="c1">#                 time_pz90f = datetime(</span>
+<span class="c1">#                     block[&#39;year&#39;], block[&#39;month&#39;], block[&#39;day&#39;],</span>
+<span class="c1">#                     int(block[&#39;time&#39;][0:2]), int(block[&#39;time&#39;][3:5]), int(block[&#39;time&#39;][6:9]))</span>
+<span class="c1">#</span>
+<span class="c1">#                 # Convert given satellite position and velocity into ECI frame</span>
+<span class="c1">#                 r_eci, v_eci = _pz90f2eci(time_pz90f, r_pz90f, v_pz90f)</span>
+<span class="c1">#</span>
+<span class="c1">#                 # Convert this position and velocity into Kepler orbital</span>
+<span class="c1">#                 # parameters</span>
+<span class="c1">#                 kep_params = _get_kepler_parameters(r_eci, v_eci)</span>
+<span class="c1">#</span>
+<span class="c1">#                 # Assign Kepler parameters</span>
+<span class="c1">#                 block[&#39;sqrt_a&#39;] = (kep_params[&#39;a&#39;] * 1000) ** 0.5</span>
+<span class="c1">#                 block[&#39;e&#39;] = kep_params[&#39;e&#39;]</span>
+<span class="c1">#                 block[&#39;i_0&#39;] = kep_params[&#39;i&#39;]</span>
+<span class="c1">#                 block[&#39;omega_0&#39;] = kep_params[&#39;Omega&#39;]</span>
+<span class="c1">#                 block[&#39;w&#39;] = kep_params[&#39;omega_small&#39;]</span>
+<span class="c1">#                 block[&#39;m_bar_0&#39;] = kep_params[&#39;theta&#39;]</span>
+<span class="c1">#</span>
+<span class="c1">#             else:</span>
+<span class="c1">#                 # block[&#39;messageTime&#39;] = block[&#39;drift_rate_message_time&#39;]</span>
+<span class="c1">#                 block[&#39;sqrt_a&#39;] = _float(ephemeris_data[7])</span>
+<span class="c1">#                 block[&#39;e&#39;] = _float(ephemeris_data[5])</span>
+<span class="c1">#                 block[&#39;i_0&#39;] = _float(ephemeris_data[12])</span>
+<span class="c1">#                 block[&#39;omega_0&#39;] = _float(ephemeris_data[10])</span>
+<span class="c1">#                 block[&#39;w&#39;] = _float(ephemeris_data[14])</span>
+<span class="c1">#                 block[&#39;m_bar_0&#39;] = _float(ephemeris_data[3])</span>
+<span class="c1">#                 block[&#39;delta_n&#39;] = _float(ephemeris_data[2])</span>
+<span class="c1">#                 block[&#39;omega_dot&#39;] = _float(ephemeris_data[15])</span>
+<span class="c1">#                 block[&#39;i_dot&#39;] = _float(ephemeris_data[16])</span>
+<span class="c1">#                 block[&#39;c_us&#39;] = _float(ephemeris_data[6])</span>
+<span class="c1">#                 block[&#39;c_uc&#39;] = _float(ephemeris_data[4])</span>
+<span class="c1">#                 block[&#39;c_is&#39;] = _float(ephemeris_data[11])</span>
+<span class="c1">#                 block[&#39;c_ic&#39;] = _float(ephemeris_data[9])</span>
+<span class="c1">#                 block[&#39;c_rs&#39;] = _float(ephemeris_data[1])</span>
+<span class="c1">#                 block[&#39;c_rc&#39;] = _float(ephemeris_data[13])</span>
+<span class="c1">#                 # block[&#39;t_tx&#39;] = _float(ephemeris_data[25])</span>
+<span class="c1">#                 # block[&#39;GPS_Week&#39;] = _float(ephemeris_data[18])</span>
+<span class="c1">#                 block[&#39;t_0e&#39;] = _float(ephemeris_data[8])</span>
+<span class="c1">#                 block[&#39;prn&#39;] = block[&#39;id&#39;]</span>
+<span class="c1">#</span>
+<span class="c1">#             sat_id = block[&#39;type&#39;] + str(block[&#39;prn&#39;])</span>
+<span class="c1">#</span>
+<span class="c1">#             if sat_id not in satellite_list and sat_id[0] not in [&#39;S&#39;]:</span>
+<span class="c1">#                 satellite_ephemeris[sat_id] = block</span>
+<span class="c1">#                 # satellite_list.append(sat_id)</span>
+<span class="c1">#</span>
+<span class="c1">#             # satellite_ephemeris[sat_id] = block</span>
+<span class="c1">#             line = file.readline().replace(&#39;D&#39;, &#39;E&#39;)</span>
+<span class="c1">#</span>
+<span class="c1">#     to_return = []</span>
+<span class="c1">#     for k, v in satellite_ephemeris.items():</span>
+<span class="c1">#         if len(k) &gt; 2 and k[0:3] == &#39;GPS&#39;:</span>
+<span class="c1">#             to_return.append(SatelliteParams(**v))</span>
+<span class="c1">#</span>
+<span class="c1">#     return to_return</span>
+
+
+<div class="viewcode-block" id="read_rinex_file">
+<a class="viewcode-back" href="../../../modules/gps/ephemeris.html#qnav.gps.ephemeris.read_rinex_file">[docs]</a>
+<span class="k">def</span> <span class="nf">read_rinex_file</span><span class="p">(</span><span class="n">ephemeris_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses a downloaded ephemeris file and returns its data.</span>
+<span class="sd">    Reads a given ephemeris file, skipping the header contents and returning</span>
+<span class="sd">    the contained entry records in dictionaries. Each is keyed by the ID of</span>
+<span class="sd">    the satellite.</span>
+
+<span class="sd">    :param ephemeris_file: The local ephemeris file to read.</span>
+<span class="sd">    :type ephemeris_file: Path</span>
+
+<span class="sd">    :returns: A dictionary of extracted satellite parameters.</span>
+<span class="sd">    :rtype: dict[str, dict]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">file_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Read file and ignore header</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ephemeris_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+
+        <span class="n">header_suffix</span> <span class="o">=</span> <span class="s1">&#39;END OF HEADER&#39;</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        
+        <span class="k">while</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">header_suffix</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="k">while</span> <span class="n">line</span> <span class="o">:=</span> <span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">():</span>
+
+            <span class="n">sat_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="p">,]</span>
+
+            <span class="k">match</span> <span class="n">sat_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+
+                <span class="k">case</span> <span class="n">SatelliteType</span><span class="o">.</span><span class="n">GPS</span><span class="p">:</span>
+                    <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">)])</span>
+                    <span class="n">file_data</span><span class="p">[</span><span class="n">sat_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">_parse_gps_entry</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+                <span class="k">case</span> <span class="n">SatelliteType</span><span class="o">.</span><span class="n">GLONASS</span><span class="p">:</span>
+                    <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)])</span>  <span class="c1"># Sometimes 4 lines!</span>
+                    <span class="n">file_data</span><span class="p">[</span><span class="n">sat_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">_parse_gnss_entry</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+                <span class="k">case</span> <span class="n">SatelliteType</span><span class="o">.</span><span class="n">GALILEO</span><span class="p">:</span>
+                    <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">)])</span>
+                    <span class="n">file_data</span><span class="p">[</span><span class="n">sat_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">_parse_galileo_entry</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+                <span class="k">case</span> <span class="n">SatelliteType</span><span class="o">.</span><span class="n">QZSS</span><span class="p">:</span>
+                    <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">)])</span>
+                    <span class="n">file_data</span><span class="p">[</span><span class="n">sat_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">_parse_qzss_entry</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+                <span class="k">case</span> <span class="n">SatelliteType</span><span class="o">.</span><span class="n">BDS</span><span class="p">:</span>
+                    <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">)])</span>
+                    <span class="n">file_data</span><span class="p">[</span><span class="n">sat_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">_parse_bds_entry</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+                <span class="k">case</span> <span class="n">SatelliteType</span><span class="o">.</span><span class="n">IRNSS</span><span class="p">:</span>
+                    <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">)])</span>
+                    <span class="n">file_data</span><span class="p">[</span><span class="n">sat_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">_parse_irnss_entry</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+                <span class="k">case</span> <span class="n">SatelliteType</span><span class="o">.</span><span class="n">SBAS</span><span class="p">:</span>
+                    <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)])</span>
+                    <span class="n">file_data</span><span class="p">[</span><span class="n">sat_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">_parse_sbas_entry</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+                <span class="k">case</span> <span class="s1">&#39; &#39;</span><span class="p">:</span>
+                    <span class="k">pass</span>  <span class="c1"># Skip until matching ID is found.</span>
+
+                <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unsupported satellite ID </span><span class="se">\&#39;</span><span class="si">{</span><span class="n">sat_id</span><span class="si">}</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">file_data</span></div>
+
+
+
+<span class="c1"># def rinex_to_satellite_params(rinex_data: dict, id_filter: str = r&#39;.*&#39;) -&gt; list[SatelliteParams]:</span>
+<span class="c1">#</span>
+<span class="c1">#     to_return: list[SatelliteParams] = []</span>
+<span class="c1">#</span>
+<span class="c1">#     for sat_id, records in rinex_data.items():</span>
+<span class="c1">#         if re.match(id_filter, sat_id):</span>
+<span class="c1">#             temp_dict = {k: v for k, v in records.items()</span>
+<span class="c1">#                          if k in satellite_param_fields}</span>
+<span class="c1">#             to_return.append(SatelliteParams(**temp_dict))</span>
+<span class="c1">#</span>
+<span class="c1">#     return to_return</span>
+
+
+<div class="viewcode-block" id="rinex_to_satellite_params">
+<a class="viewcode-back" href="../../../modules/gps/ephemeris.html#qnav.gps.ephemeris.rinex_to_satellite_params">[docs]</a>
+<span class="k">def</span> <span class="nf">rinex_to_satellite_params</span><span class="p">(</span><span class="n">rinex_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="o">*</span><span class="n">satellite_types</span><span class="p">:</span> <span class="n">SatelliteType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">SatelliteParams</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts given rinex data and converts into satellite parameters class.</span>
+<span class="sd">    A helper function for extracting the usable satellite parameter data</span>
+<span class="sd">    from given Rinex data, allowing for satellite instances to be created.</span>
+<span class="sd">    Optional filtering can also be supplied to limit returns to specific</span>
+<span class="sd">    satellite types.</span>
+
+<span class="sd">    :param rinex_data: The data records read from a Rinex file.</span>
+<span class="sd">    :type rinex_data: dict[str, dict]</span>
+
+<span class="sd">    :param satellite_types: (Optional) The satellite types to filter by.</span>
+<span class="sd">        By default, all types are selected and no filtering is performed.</span>
+<span class="sd">    :type satellite_types: SatelliteType</span>
+
+<span class="sd">    :return: The satellite parameters for each rinex record.</span>
+<span class="sd">    :rtype: list[SatelliteParams]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The satellite parameter list to return.</span>
+    <span class="n">to_return</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SatelliteParams</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># If no filtering is given, assume all</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">satellite_types</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">satellite_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">SatelliteType</span><span class="p">]</span>
+
+    <span class="c1"># For each satellite record :</span>
+    <span class="k">for</span> <span class="n">sat_id</span><span class="p">,</span> <span class="n">records</span> <span class="ow">in</span> <span class="n">rinex_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">sat_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">satellite_types</span><span class="p">:</span>
+
+            <span class="c1"># Extract keys that match the required.</span>
+            <span class="n">temp_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">records</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                         <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">satellite_param_fields</span><span class="p">}</span>
+
+            <span class="c1"># Create satellite parameters and append to list</span>
+            <span class="n">to_return</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SatelliteParams</span><span class="p">(</span><span class="o">**</span><span class="n">temp_dict</span><span class="p">))</span>
+
+    <span class="c1"># Finally, return the satellite list.</span>
+    <span class="k">return</span> <span class="n">to_return</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_parse_epoch_fields</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]),</span>
+        <span class="s1">&#39;year&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">]),</span>
+        <span class="s1">&#39;month&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">9</span><span class="p">:</span><span class="mi">11</span><span class="p">]),</span>
+        <span class="s1">&#39;day&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">12</span><span class="p">:</span><span class="mi">14</span><span class="p">]),</span>
+        <span class="s1">&#39;hour&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">15</span><span class="p">:</span><span class="mi">17</span><span class="p">]),</span>
+        <span class="s1">&#39;minute&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">18</span><span class="p">:</span><span class="mi">20</span><span class="p">]),</span>
+        <span class="s1">&#39;second&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">21</span><span class="p">:</span><span class="mi">23</span><span class="p">]),</span>
+        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">15</span><span class="p">:</span><span class="mi">23</span><span class="p">]),</span>  <span class="c1"># TODO: Fix ?</span>
+        <span class="s1">&#39;prn&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]),</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">_parse_gps_entry</span><span class="p">(</span><span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">any</span><span class="p">]:</span>
+
+    <span class="n">epoch</span> <span class="o">=</span> <span class="n">_parse_epoch_fields</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">record_fields</span> <span class="o">=</span> <span class="n">_parse_record_fields</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+    <span class="c1"># Satellite System Records (see page 68)</span>
+    <span class="n">record_keys</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;clock_bias&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_freq_bias&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_rate_message_time&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;iod_eph&#39;</span><span class="p">,</span> <span class="s1">&#39;c_rs&#39;</span><span class="p">,</span> <span class="s1">&#39;delta_n&#39;</span><span class="p">,</span> <span class="s1">&#39;m_bar_0&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;c_uc&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;c_us&#39;</span><span class="p">,</span> <span class="s1">&#39;sqrt_a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;t_0e&#39;</span><span class="p">,</span> <span class="s1">&#39;c_ic&#39;</span><span class="p">,</span> <span class="s1">&#39;omega_0&#39;</span><span class="p">,</span> <span class="s1">&#39;c_is&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;i_0&#39;</span><span class="p">,</span> <span class="s1">&#39;c_rc&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;omega_dot&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;i_dot&#39;</span><span class="p">,</span> <span class="s1">&#39;code_l2&#39;</span><span class="p">,</span> <span class="s1">&#39;gps_week&#39;</span><span class="p">,</span> <span class="s1">&#39;l2_p&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sv_acc&#39;</span><span class="p">,</span> <span class="s1">&#39;sv_health&#39;</span><span class="p">,</span> <span class="s1">&#39;tgd&#39;</span><span class="p">,</span> <span class="s1">&#39;iod_clock&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;trans_time&#39;</span><span class="p">,</span> <span class="s1">&#39;fit_int&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_1&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_2&#39;</span>
+    <span class="p">]</span>
+
+    <span class="n">records</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">record_keys</span><span class="p">,</span> <span class="n">record_fields</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">epoch</span> <span class="o">|</span> <span class="n">records</span>
+
+
+<span class="k">def</span> <span class="nf">_parse_galileo_entry</span><span class="p">(</span><span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">any</span><span class="p">]:</span>
+
+    <span class="n">epoch</span> <span class="o">=</span> <span class="n">_parse_epoch_fields</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">record_fields</span> <span class="o">=</span> <span class="n">_parse_record_fields</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+    <span class="c1"># Satellite System Records (see page 68)</span>
+    <span class="n">record_keys</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;clock_bias&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_freq_bias&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_rate_message_time&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;iod_nav&#39;</span><span class="p">,</span> <span class="s1">&#39;c_rs&#39;</span><span class="p">,</span> <span class="s1">&#39;delta_n&#39;</span><span class="p">,</span> <span class="s1">&#39;m_bar_0&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;c_uc&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;c_us&#39;</span><span class="p">,</span> <span class="s1">&#39;sqrt_a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;t_0e&#39;</span><span class="p">,</span> <span class="s1">&#39;c_ic&#39;</span><span class="p">,</span> <span class="s1">&#39;omega_0&#39;</span><span class="p">,</span> <span class="s1">&#39;c_is&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;i_0&#39;</span><span class="p">,</span> <span class="s1">&#39;c_rc&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;omega_dot&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;i_dot&#39;</span><span class="p">,</span> <span class="s1">&#39;data_source&#39;</span><span class="p">,</span> <span class="s1">&#39;gal_week&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sisa&#39;</span><span class="p">,</span> <span class="s1">&#39;sv_health&#39;</span><span class="p">,</span> <span class="s1">&#39;bgd_e5a_e1&#39;</span><span class="p">,</span> <span class="s1">&#39;bgd_e5b_e1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;trans_time&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_2&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_3&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_4&#39;</span>
+    <span class="p">]</span>
+
+    <span class="n">records</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">record_keys</span><span class="p">,</span> <span class="n">record_fields</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">epoch</span> <span class="o">|</span> <span class="n">records</span>
+
+
+<span class="k">def</span> <span class="nf">_parse_gnss_entry</span><span class="p">(</span><span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">any</span><span class="p">]:</span>
+
+    <span class="n">epoch</span> <span class="o">=</span> <span class="n">_parse_epoch_fields</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">record_fields</span> <span class="o">=</span> <span class="n">_parse_record_fields</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+    <span class="c1"># Satellite System Records (see page 68)</span>
+    <span class="n">record_keys</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;clock_bias&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_freq_bias&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_rate_message_time&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sat_pos_x&#39;</span><span class="p">,</span> <span class="s1">&#39;sat_vel_x&#39;</span><span class="p">,</span> <span class="s1">&#39;sat_acc_x&#39;</span><span class="p">,</span> <span class="s1">&#39;health&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sat_pos_y&#39;</span><span class="p">,</span> <span class="s1">&#39;sat_vel_y&#39;</span><span class="p">,</span> <span class="s1">&#39;sat_acc_y&#39;</span><span class="p">,</span> <span class="s1">&#39;freq_num&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sat_pos_z&#39;</span><span class="p">,</span> <span class="s1">&#39;sat_vel_z&#39;</span><span class="p">,</span> <span class="s1">&#39;sat_acc_z&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;status&#39;</span><span class="p">,</span> <span class="s1">&#39;l1_l2_delay&#39;</span><span class="p">,</span> <span class="s1">&#39;urai&#39;</span><span class="p">,</span> <span class="s1">&#39;health_flags&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="n">records</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">record_keys</span><span class="p">,</span> <span class="n">record_fields</span><span class="p">))</span>
+
+    <span class="n">to_return</span> <span class="o">=</span> <span class="n">epoch</span> <span class="o">|</span> <span class="n">records</span>
+    <span class="n">_add_missing_fields</span><span class="p">(</span><span class="n">to_return</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">to_return</span>
+
+
+<span class="k">def</span> <span class="nf">_parse_qzss_entry</span><span class="p">(</span><span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">any</span><span class="p">]:</span>
+
+    <span class="n">epoch</span> <span class="o">=</span> <span class="n">_parse_epoch_fields</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">record_fields</span> <span class="o">=</span> <span class="n">_parse_record_fields</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+    <span class="c1"># Satellite System Records (see page 68)</span>
+    <span class="n">record_keys</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;clock_bias&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_freq_bias&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_rate_message_time&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;iod_eph&#39;</span><span class="p">,</span> <span class="s1">&#39;c_rs&#39;</span><span class="p">,</span> <span class="s1">&#39;delta_n&#39;</span><span class="p">,</span> <span class="s1">&#39;m_bar_0&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;c_uc&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;c_us&#39;</span><span class="p">,</span> <span class="s1">&#39;sqrt_a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;t_0e&#39;</span><span class="p">,</span> <span class="s1">&#39;c_ic&#39;</span><span class="p">,</span> <span class="s1">&#39;omega_0&#39;</span><span class="p">,</span> <span class="s1">&#39;c_is&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;i_0&#39;</span><span class="p">,</span> <span class="s1">&#39;c_rc&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;omega_dot&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;i_dot&#39;</span><span class="p">,</span> <span class="s1">&#39;code_l2&#39;</span><span class="p">,</span> <span class="s1">&#39;gps_week&#39;</span><span class="p">,</span> <span class="s1">&#39;l2p_flags&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sv_acc&#39;</span><span class="p">,</span> <span class="s1">&#39;sv_health&#39;</span><span class="p">,</span> <span class="s1">&#39;tgd&#39;</span><span class="p">,</span> <span class="s1">&#39;iod_clock&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;trans_time&#39;</span><span class="p">,</span> <span class="s1">&#39;fit_int&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_1&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_2&#39;</span>
+    <span class="p">]</span>
+
+    <span class="n">records</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">record_keys</span><span class="p">,</span> <span class="n">record_fields</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">epoch</span> <span class="o">|</span> <span class="n">records</span>
+
+
+<span class="k">def</span> <span class="nf">_parse_bds_entry</span><span class="p">(</span><span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">any</span><span class="p">]:</span>
+
+    <span class="n">epoch</span> <span class="o">=</span> <span class="n">_parse_epoch_fields</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">record_fields</span> <span class="o">=</span> <span class="n">_parse_record_fields</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+    <span class="c1"># Satellite System Records (see page 68)</span>
+    <span class="n">record_keys</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;clock_bias&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_freq_bias&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_rate_message_time&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;aod_eph&#39;</span><span class="p">,</span> <span class="s1">&#39;c_rs&#39;</span><span class="p">,</span> <span class="s1">&#39;delta_n&#39;</span><span class="p">,</span> <span class="s1">&#39;m_bar_0&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;c_uc&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;c_us&#39;</span><span class="p">,</span> <span class="s1">&#39;sqrt_a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;t_0e&#39;</span><span class="p">,</span> <span class="s1">&#39;c_ic&#39;</span><span class="p">,</span> <span class="s1">&#39;omega_0&#39;</span><span class="p">,</span> <span class="s1">&#39;c_is&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;i_0&#39;</span><span class="p">,</span> <span class="s1">&#39;c_rc&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;omega_dot&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;i_dot&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_1&#39;</span><span class="p">,</span> <span class="s1">&#39;bdt_week&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sv_acc&#39;</span><span class="p">,</span> <span class="s1">&#39;sat_h1&#39;</span><span class="p">,</span> <span class="s1">&#39;tgd1_b1_b3&#39;</span><span class="p">,</span> <span class="s1">&#39;tgd2_b2_b3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;trans_time&#39;</span><span class="p">,</span> <span class="s1">&#39;aod_clock&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_3&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_4&#39;</span>
+    <span class="p">]</span>
+
+    <span class="n">records</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">record_keys</span><span class="p">,</span> <span class="n">record_fields</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">epoch</span> <span class="o">|</span> <span class="n">records</span>
+
+
+<span class="k">def</span> <span class="nf">_parse_sbas_entry</span><span class="p">(</span><span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">any</span><span class="p">]:</span>
+
+    <span class="n">epoch</span> <span class="o">=</span> <span class="n">_parse_epoch_fields</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">record_fields</span> <span class="o">=</span> <span class="n">_parse_record_fields</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+    <span class="c1"># Satellite System Records (see page 68)</span>
+    <span class="n">record_keys</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;clock_bias&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_freq_bias&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_rate_message_time&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sat_pos_x&#39;</span><span class="p">,</span> <span class="s1">&#39;sat_vel_x&#39;</span><span class="p">,</span> <span class="s1">&#39;sat_acc_x&#39;</span><span class="p">,</span> <span class="s1">&#39;health&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sat_pos_y&#39;</span><span class="p">,</span> <span class="s1">&#39;sat_vel_y&#39;</span><span class="p">,</span> <span class="s1">&#39;sat_acc_y&#39;</span><span class="p">,</span> <span class="s1">&#39;acc_code&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sat_pos_z&#39;</span><span class="p">,</span> <span class="s1">&#39;sat_vel_z&#39;</span><span class="p">,</span> <span class="s1">&#39;sat_acc_z&#39;</span><span class="p">,</span> <span class="s1">&#39;iod_nav&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="n">records</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">record_keys</span><span class="p">,</span> <span class="n">record_fields</span><span class="p">))</span>
+
+    <span class="n">to_return</span> <span class="o">=</span> <span class="n">epoch</span> <span class="o">|</span> <span class="n">records</span>
+    <span class="n">_add_missing_fields</span><span class="p">(</span><span class="n">to_return</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">to_return</span>
+
+
+<span class="k">def</span> <span class="nf">_parse_irnss_entry</span><span class="p">(</span><span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">any</span><span class="p">]:</span>
+
+    <span class="n">epoch</span> <span class="o">=</span> <span class="n">_parse_epoch_fields</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">record_fields</span> <span class="o">=</span> <span class="n">_parse_record_fields</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+    <span class="c1"># Satellite System Records (see page 68)</span>
+    <span class="n">record_keys</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;clock_bias&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_freq_bias&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_rate_message_time&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;iod_eph_clock&#39;</span><span class="p">,</span> <span class="s1">&#39;c_rs&#39;</span><span class="p">,</span> <span class="s1">&#39;delta_n&#39;</span><span class="p">,</span> <span class="s1">&#39;m_bar_0&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;c_uc&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;c_us&#39;</span><span class="p">,</span> <span class="s1">&#39;sqrt_a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;t_0e&#39;</span><span class="p">,</span> <span class="s1">&#39;c_ic&#39;</span><span class="p">,</span> <span class="s1">&#39;omega_0&#39;</span><span class="p">,</span> <span class="s1">&#39;c_is&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;i_0&#39;</span><span class="p">,</span> <span class="s1">&#39;c_rc&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;omega_dot&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;i_dot&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_1&#39;</span><span class="p">,</span> <span class="s1">&#39;irn_week&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;usr_rng_acc&#39;</span><span class="p">,</span> <span class="s1">&#39;health&#39;</span><span class="p">,</span> <span class="s1">&#39;tgd&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;trans_time&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_4&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_5&#39;</span><span class="p">,</span> <span class="s1">&#39;spare_6&#39;</span>
+    <span class="p">]</span>
+
+    <span class="n">records</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">record_keys</span><span class="p">,</span> <span class="n">record_fields</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">epoch</span> <span class="o">|</span> <span class="n">records</span>
+
+
+<span class="k">def</span> <span class="nf">_parse_record_fields</span><span class="p">(</span><span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+
+    <span class="n">fields</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">23</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">23</span><span class="p">:</span><span class="mi">42</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">42</span><span class="p">:</span><span class="mi">61</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">61</span><span class="p">:</span><span class="mi">80</span><span class="p">]]</span>
+        <span class="n">fields</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+
+    <span class="n">fields</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">_str2float</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_str2float</span><span class="p">(</span><span class="n">str_data</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modified conversion for string to float values.</span>
+<span class="sd">    Converts string in a Rinex file to float, adjusting for other</span>
+<span class="sd">    exponent representations and replacing empty values with NaN.</span>
+
+<span class="sd">    :param str_data: The exact string to be converts to float.</span>
+<span class="sd">    :type str_data: str</span>
+
+<span class="sd">    :return: The given string in the Rinex file converted to float.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">str_value</span> <span class="o">=</span> <span class="n">str_data</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">str_value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">str_value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_add_missing_fields</span><span class="p">(</span><span class="n">records</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">any</span><span class="p">]):</span>
+
+    <span class="c1"># Satellite ECEF position in metres</span>
+    <span class="n">r_pz90f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+         <span class="n">records</span><span class="p">[</span><span class="s1">&#39;sat_pos_x&#39;</span><span class="p">],</span>
+         <span class="n">records</span><span class="p">[</span><span class="s1">&#39;sat_pos_y&#39;</span><span class="p">],</span>
+         <span class="n">records</span><span class="p">[</span><span class="s1">&#39;sat_pos_z&#39;</span><span class="p">]</span>
+    <span class="p">])</span> <span class="o">*</span> <span class="mf">1e3</span>
+
+    <span class="c1"># Satellite ECEF velocity in metres</span>
+    <span class="n">v_pz90f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="n">records</span><span class="p">[</span><span class="s1">&#39;sat_vel_x&#39;</span><span class="p">],</span>
+        <span class="n">records</span><span class="p">[</span><span class="s1">&#39;sat_vel_y&#39;</span><span class="p">],</span>
+        <span class="n">records</span><span class="p">[</span><span class="s1">&#39;sat_vel_z&#39;</span><span class="p">]</span>
+    <span class="p">])</span> <span class="o">*</span> <span class="mf">1e3</span>
+
+    <span class="c1"># Convert extracted time fields to date time object</span>
+    <span class="n">time_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">,</span> <span class="s1">&#39;month&#39;</span><span class="p">,</span> <span class="s1">&#39;day&#39;</span><span class="p">,</span> <span class="s1">&#39;hour&#39;</span><span class="p">,</span> <span class="s1">&#39;minute&#39;</span><span class="p">,</span> <span class="s1">&#39;second&#39;</span><span class="p">]</span>
+    <span class="n">time_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">records</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">time_fields</span><span class="p">}</span>
+    <span class="n">time_pz90f</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="o">**</span><span class="n">time_dict</span><span class="p">)</span>
+
+    <span class="c1"># Convert given satellite position and velocity into ECI frame</span>
+    <span class="n">r_eci</span><span class="p">,</span> <span class="n">v_eci</span> <span class="o">=</span> <span class="n">_pz90f2eci</span><span class="p">(</span><span class="n">time_pz90f</span><span class="p">,</span> <span class="n">r_pz90f</span><span class="p">,</span> <span class="n">v_pz90f</span><span class="p">)</span>
+    <span class="n">kep_params</span> <span class="o">=</span> <span class="n">_get_kepler_parameters</span><span class="p">(</span><span class="n">r_eci</span><span class="p">,</span> <span class="n">v_eci</span><span class="p">)</span>
+
+    <span class="c1"># Assign Kepler parameters</span>
+    <span class="n">records</span><span class="p">[</span><span class="s1">&#39;sqrt_a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">kep_params</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">])</span>
+    <span class="n">records</span><span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kep_params</span><span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">]</span>
+    <span class="n">records</span><span class="p">[</span><span class="s1">&#39;i_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kep_params</span><span class="p">[</span><span class="s1">&#39;i&#39;</span><span class="p">]</span>
+    <span class="n">records</span><span class="p">[</span><span class="s1">&#39;omega_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kep_params</span><span class="p">[</span><span class="s1">&#39;Omega&#39;</span><span class="p">]</span>
+    <span class="n">records</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kep_params</span><span class="p">[</span><span class="s1">&#39;omega_small&#39;</span><span class="p">]</span>
+    <span class="n">records</span><span class="p">[</span><span class="s1">&#39;m_bar_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kep_params</span><span class="p">[</span><span class="s1">&#39;theta&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Insert filler values for remaining fields</span>
+    <span class="n">records</span><span class="p">[</span><span class="s1">&#39;t_0e&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">records</span><span class="p">[</span><span class="s1">&#39;drift_rate_message_time&#39;</span><span class="p">]</span>
+    <span class="n">records</span><span class="p">[</span><span class="s1">&#39;delta_n&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">records</span><span class="p">[</span><span class="s1">&#39;i_dot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">records</span><span class="p">[</span><span class="s1">&#39;omega_dot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">records</span><span class="p">[</span><span class="s1">&#39;c_us&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">records</span><span class="p">[</span><span class="s1">&#39;c_uc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">records</span><span class="p">[</span><span class="s1">&#39;c_is&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">records</span><span class="p">[</span><span class="s1">&#39;c_ic&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">records</span><span class="p">[</span><span class="s1">&#39;c_rs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">records</span><span class="p">[</span><span class="s1">&#39;c_rc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+
+<span class="k">def</span> <span class="nf">_pz90f2eci</span><span class="p">(</span><span class="n">time</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">r_pz90f</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">v_pz90f</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts a position and velocity given in the PZ-90F</span>
+<span class="sd">    coordinate reference frame used by the GLONASS system into the ECI</span>
+<span class="sd">    reference frame.</span>
+
+<span class="sd">    :param time: The datetime object for the time at which the PZ-90F</span>
+<span class="sd">        parameters are correct</span>
+<span class="sd">    :type time: datetime.datetime</span>
+
+<span class="sd">    :param r_pz90f: A numpy array for the position in PZ-90F reference frame</span>
+<span class="sd">    :type r_pz90f: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :param v_pz90f: A numpy array for the velocity in PZ-90F reference frame</span>
+<span class="sd">    :type v_pz90f: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :returns:</span>
+<span class="sd">        * rECI - numpy array for the position in the ECI reference frame</span>
+<span class="sd">        * vECI - numpy array for the velocity in the ECI reference frame</span>
+<span class="sd">    :rtype: tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">theta_g0</span> <span class="o">=</span> <span class="n">_greenwich_side_real_time_midnight</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>  <span class="c1"># Greenwich Sidereal Time</span>
+    <span class="n">time_sec</span> <span class="o">=</span> <span class="p">((</span><span class="n">time</span> <span class="o">-</span> <span class="n">datetime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">day</span><span class="p">))</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>  <span class="c1"># Seconds since midnight</span>
+    <span class="n">theta_ge</span> <span class="o">=</span> <span class="n">theta_g0</span> <span class="o">+</span> <span class="n">OMEGA_E</span> <span class="o">*</span> <span class="n">time_sec</span>  <span class="c1"># Sidereal time at epoch</span>
+
+    <span class="c1"># Convert position and velocity into ECI</span>
+    <span class="n">s_t</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_ge</span><span class="p">)</span>
+    <span class="n">c_t</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta_ge</span><span class="p">)</span>
+
+    <span class="n">r_eci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="n">r_pz90f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">c_t</span> <span class="o">-</span> <span class="n">r_pz90f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">s_t</span><span class="p">,</span>
+        <span class="n">r_pz90f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">s_t</span> <span class="o">+</span> <span class="n">r_pz90f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">c_t</span><span class="p">,</span>
+        <span class="n">r_pz90f</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="p">])</span>
+
+    <span class="n">v_eci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="n">v_pz90f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">c_t</span> <span class="o">-</span> <span class="n">v_pz90f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">s_t</span> <span class="o">-</span> <span class="n">OMEGA_E</span> <span class="o">*</span> <span class="n">r_eci</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">v_pz90f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">s_t</span> <span class="o">+</span> <span class="n">v_pz90f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">c_t</span> <span class="o">+</span> <span class="n">OMEGA_E</span> <span class="o">*</span> <span class="n">r_eci</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">v_pz90f</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">r_eci</span><span class="p">,</span> <span class="n">v_eci</span>
+
+
+<span class="k">def</span> <span class="nf">_greenwich_side_real_time_midnight</span><span class="p">(</span><span class="n">time</span><span class="p">:</span> <span class="n">datetime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function calculates the Sidereal Time at Greenwich at 00:00:00 on</span>
+<span class="sd">    the inputted day.</span>
+
+<span class="sd">    :param time: A Python datetime object for the time in question</span>
+<span class="sd">    :type time: datetime.datetime</span>
+
+<span class="sd">    :return: The Greenwich Sidereal Time @ 00:00:00 of input day</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">time00</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>  <span class="c1"># 00:00:00 of day</span>
+    <span class="n">jd</span> <span class="o">=</span> <span class="n">_julian_date</span><span class="p">(</span><span class="n">time00</span><span class="p">)</span>  <span class="c1"># Julian date of midnight time</span>
+    <span class="n">ut</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">jd</span> <span class="o">-</span> <span class="mf">2451545.0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">36525.0</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="mf">6.697374558</span> <span class="o">+</span> <span class="p">(</span><span class="mf">2400.051336</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.000025862</span> <span class="o">*</span> <span class="n">t</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">ut</span> <span class="o">*</span> <span class="mf">1.0027379093</span><span class="p">)</span>
+    <span class="n">gs_t0</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">%</span> <span class="mi">24</span>
+    <span class="k">return</span> <span class="n">gs_t0</span>
+
+
+<span class="k">def</span> <span class="nf">_julian_date</span><span class="p">(</span><span class="n">time</span><span class="p">:</span> <span class="n">datetime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function gives the Julian Date of an input time, i.e. the time in days</span>
+<span class="sd">    since 12:00 Jan 1 4713 B.C in Universal Time.</span>
+
+<span class="sd">    :param time: A Python datetime object for the time in question</span>
+<span class="sd">    :type time: datetime</span>
+
+<span class="sd">    :returns: The JD - Julian date</span>
+<span class="sd">    :rtype: float</span>
+
+<span class="sd">    .. TODO:</span>
+<span class="sd">        Currently only works for input times that are 00:00:00,</span>
+<span class="sd">        this has a quick but currently unnecessary fix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">year</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">month</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>
+
+    <span class="n">dum1</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">modf</span><span class="p">((</span><span class="n">month</span> <span class="o">-</span> <span class="mf">14.0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">jd</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">modf</span><span class="p">(</span><span class="mi">1461</span> <span class="o">*</span> <span class="p">(</span><span class="n">year</span> <span class="o">+</span> <span class="mi">4800</span> <span class="o">+</span> <span class="n">dum1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">4.0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">jd</span> <span class="o">+=</span> <span class="n">math</span><span class="o">.</span><span class="n">modf</span><span class="p">((</span><span class="mi">367</span> <span class="o">*</span> <span class="p">(</span><span class="n">month</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">dum1</span><span class="p">))</span> <span class="o">/</span> <span class="mf">12.0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">dum2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">modf</span><span class="p">((</span><span class="n">year</span> <span class="o">+</span> <span class="mi">4900</span> <span class="o">+</span> <span class="n">dum1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">jd</span> <span class="o">-=</span> <span class="n">math</span><span class="o">.</span><span class="n">modf</span><span class="p">((</span><span class="mi">3</span> <span class="o">*</span> <span class="n">dum2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">4.0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">jd</span> <span class="o">+=</span> <span class="n">day</span> <span class="o">-</span> <span class="mf">2432075.5</span> <span class="o">+</span> <span class="mi">2400000</span>
+    <span class="k">return</span> <span class="n">jd</span>
+
+
+<span class="k">def</span> <span class="nf">_get_kepler_parameters</span><span class="p">(</span><span class="n">r_vec</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">v_vec</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts a satellites position and velocity in the ECI</span>
+<span class="sd">    frame into the keplerian parameters of the associated orbit as per the</span>
+<span class="sd">    method shown in &quot;Fundamentals of Astrodynamics and Applications&quot;,</span>
+<span class="sd">    Vallado, 2007 (Algorithm 9, Page 113).</span>
+
+<span class="sd">    :param r_vec: Satellite position in ECI frame (represented by r)</span>
+<span class="sd">    :type r_vec: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :param v_vec: Satellite velocity in ECI frame (represented by v)</span>
+<span class="sd">    :type v_vec: numpy.ndarray (3-elements)</span>
+
+<span class="sd">    :return: A dict containing all relevant Kepler orbital parameters</span>
+<span class="sd">    :rtype: dict[str, float]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Kepler value (μ)</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">GM</span>
+
+    <span class="c1"># Calculate the angular momentum</span>
+    <span class="n">h_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">r_vec</span><span class="p">,</span> <span class="n">v_vec</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">h_vec</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the node vector</span>
+    <span class="n">n_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">h_vec</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">n_vec</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the l2 norms</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r_vec</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v_vec</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the Eccentricity vector</span>
+    <span class="n">e_vec</span> <span class="o">=</span> <span class="p">(</span><span class="n">v</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="p">(</span><span class="n">mu</span> <span class="o">/</span> <span class="n">r</span><span class="p">))</span> <span class="o">*</span> <span class="n">r_vec</span> <span class="o">-</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r_vec</span><span class="p">,</span> <span class="n">v_vec</span><span class="p">))</span> <span class="o">*</span> <span class="n">v_vec</span>
+    <span class="n">e_vec</span> <span class="o">/=</span> <span class="n">mu</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">e_vec</span><span class="p">)</span>
+
+    <span class="c1"># Specific mechanical energy (ξ)</span>
+    <span class="n">ke</span> <span class="o">=</span> <span class="p">((</span><span class="n">v</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">mu</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span>
+
+    <span class="c1"># Calculate semi major axis</span>
+    <span class="k">if</span> <span class="n">e</span> <span class="o">!=</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="o">-</span><span class="n">mu</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ke</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">e</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">h</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">mu</span>
+
+    <span class="c1"># TODO: Temp fix</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">mu</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="s1">&#39;Omega&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+                <span class="s1">&#39;omega_small&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="s1">&#39;theta&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="s1">&#39;tau&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">}</span>
+
+    <span class="c1"># A correction previous put here?</span>
+    <span class="c1"># cos_e = (1 - norm(r_vec) / a) / e</span>
+    <span class="c1"># sin_e = r_vec.dot(v_vec) / (e * (mu * a) ** 0.5)</span>
+    <span class="c1"># e = np.arctan2(sin_e, cos_e)</span>
+
+    <span class="c1"># Calculate the inclination (i)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">h_vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">h</span><span class="p">)</span>
+
+    <span class="c1"># Calculate longitude of ascending node (Ω)</span>
+    <span class="c1"># omega = np.arccos(n_vec[0] / n)</span>
+    <span class="n">omega</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="n">_acos</span><span class="p">(</span><span class="n">n_vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n_vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">omega</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">omega</span>
+
+    <span class="c1"># Argument of peri-centre (ω)</span>
+    <span class="c1"># omega_small = np.arccos(n_vec.dot(e_vec) / (n * e))</span>
+    <span class="n">omega_small</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">omega_small</span> <span class="o">=</span> <span class="n">_acos</span><span class="p">(</span><span class="n">n_vec</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">e_vec</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">e</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">e_vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">omega_small</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">omega_small</span>
+
+    <span class="c1"># True anomaly at epoch time (v)</span>
+    <span class="c1"># theta = np.arccos(e_vec.dot(r_vec) / (r * e))</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">e</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">_acos</span><span class="p">(</span><span class="n">e_vec</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r_vec</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">r</span> <span class="o">*</span> <span class="n">e</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r_vec</span><span class="p">,</span> <span class="n">v_vec</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">theta</span>
+
+    <span class="c1"># tau = -(e - e * math.sin(e)) / (mu * a ** -3) ** 0.5§</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;p&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="p">),</span>
+        <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">a</span><span class="p">),</span>
+        <span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+        <span class="s1">&#39;i&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+        <span class="s1">&#39;Omega&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">omega</span><span class="p">),</span>
+        <span class="s1">&#39;omega_small&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">omega_small</span><span class="p">),</span>
+        <span class="s1">&#39;theta&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">_acos</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_float</span><span class="p">(</span><span class="n">string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is a minor amendment to the python &quot;float&quot; function,</span>
+<span class="sd">    returning None for an input string of ``\\n`` rather than an error.</span>
+
+<span class="sd">    :param string: The input string to be converted to a float</span>
+<span class="sd">    :type string: str</span>
+
+<span class="sd">    :return: A corresponding float value or None</span>
+<span class="sd">    :rtype: float or None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">string</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="n">gps_save_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;databases&#39;</span> <span class="o">/</span> <span class="s1">&#39;gps&#39;</span> <span class="o">/</span> <span class="s1">&#39;rinex&#39;</span>
+    <span class="c1"># assert gps_save_dir.is_dir()</span>
+
+    <span class="c1"># gps_from_data = datetime(2019, 3, 1)</span>
+    <span class="c1"># gps_to_data = datetime(2024, 11, 11)</span>
+
+    <span class="n">gps_from_data</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2018</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">gps_to_data</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2019</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">download_rinex_files</span><span class="p">(</span><span class="n">gps_from_data</span><span class="p">,</span> <span class="n">gps_to_data</span><span class="p">,</span> <span class="n">gps_save_dir</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+
+    <span class="c1"># gps_test_date = datetime(2024, 11, 1)</span>
+    <span class="c1"># download_rinex_file(gps_test_date, gps_save_dir)</span>
+
+    <span class="c1"># gps_save_dir.is_dir()</span>
+
+
+    <span class="c1"># var = [s for s in SatelliteType]</span>
+    <span class="c1"># print(var)</span>
+
+<span class="c1"># if __name__ == &#39;__main__&#39;:</span>
+
+    <span class="c1"># import tempfile</span>
+    <span class="c1"># with tempfile.TemporaryDirectory() as tmp_dir:</span>
+    <span class="c1">#</span>
+    <span class="c1">#     test_dir = Path(tmp_dir)</span>
+    <span class="c1">#     # test_date = datetime(2020, 11, 10)</span>
+    <span class="c1">#     # test_date = datetime(2020, 9, 14)</span>
+    <span class="c1">#     test_date = datetime(2024, 10, 7)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     download_ephemeris_file(test_date, test_dir)</span>
+    <span class="c1">#     test_file = get_rinex_path(test_date, test_dir)</span>
+    <span class="c1">#     test_data = read_rinex_file(test_file)</span>
+    <span class="c1">#</span>
+    <span class="c1"># # test_file = Path(&quot;.&quot;) / &#39;2024_278.rnx&#39;</span>
+    <span class="c1"># # test_data = read_ephemeris_file_new(test_file)</span>
+    <span class="c1"># # test_result = ephemeris_to_satellite_params(test_data)</span>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

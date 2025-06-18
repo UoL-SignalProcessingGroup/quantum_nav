@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.8.2. qnav.output.formats &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="9.8.3. qnav.output.figures" href="figures.html" />
+    <link rel="prev" title="9.8.1. qnav.output.data" href="data.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../usage/packages.html">9. Software Components</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#earth">9.1. Earth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#estimation">9.2. Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#fusion">9.3. Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gps">9.4. GPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gravity">9.5. Gravity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#input">9.6. Input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#measurement">9.7. Measurement</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../usage/packages.html#output">9.8. Output</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="data.html">9.8.1. data.py</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">9.8.2. formats.py</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.output.formats.FileFormat"><code class="docutils literal notranslate"><span class="pre">FileFormat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.output.formats.SaveFormat"><code class="docutils literal notranslate"><span class="pre">SaveFormat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.output.formats.save_as_csv"><code class="docutils literal notranslate"><span class="pre">save_as_csv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.output.formats.save_as_csv_comp"><code class="docutils literal notranslate"><span class="pre">save_as_csv_comp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.output.formats.save_as_numpy"><code class="docutils literal notranslate"><span class="pre">save_as_numpy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.output.formats.save_as_numpy_comp"><code class="docutils literal notranslate"><span class="pre">save_as_numpy_comp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.output.formats.save_as_binary"><code class="docutils literal notranslate"><span class="pre">save_as_binary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.output.formats.save_as_matlab"><code class="docutils literal notranslate"><span class="pre">save_as_matlab()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.output.formats.save_as_matlab_comp"><code class="docutils literal notranslate"><span class="pre">save_as_matlab_comp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.output.formats.save_as"><code class="docutils literal notranslate"><span class="pre">save_as()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="figures.html">9.8.3. figures.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="summary.html">9.8.4. summary.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#quantum">9.9. Quantum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#simulation">9.10. Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#util">9.11. Util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#waypoints">9.12. Waypoints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../usage/packages.html"><span class="section-number">9. </span>Software Components</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">9.8.2. </span>qnav.output.formats</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/modules/output/formats.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qnav.output.formats">
+<span id="qnav-output-formats"></span><h1><span class="section-number">9.8.2. </span>qnav.output.formats<a class="headerlink" href="#module-qnav.output.formats" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.output.formats.FileFormat">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.output.formats.</span></span><span class="sig-name descname"><span class="pre">FileFormat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">match_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_ext</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/output/formats.html#FileFormat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.output.formats.FileFormat" title="Link to this definition"></a></dt>
+<dd><p>Defines the fields for each supported file format.
+Included as a simpler way to represent the SaveFormat enum class.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.output.formats.SaveFormat">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.output.formats.</span></span><span class="sig-name descname"><span class="pre">SaveFormat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/output/formats.html#SaveFormat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.output.formats.SaveFormat" title="Link to this definition"></a></dt>
+<dd><p>A collection of the supported file formats for results table.
+Controllable flags for selecting the use of the supported file formats
+when exporting data. A useful way to efficiently export data in
+multiple formats, without employing multiple functions.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.output.formats.save_as_csv">
+<span class="sig-prename descclassname"><span class="pre">qnav.output.formats.</span></span><span class="sig-name descname"><span class="pre">save_as_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="data.html#qnav.output.data.ResultsTable" title="qnav.output.data.ResultsTable"><span class="pre">ResultsTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">down_sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/output/formats.html#save_as_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.output.formats.save_as_csv" title="Link to this definition"></a></dt>
+<dd><p>Exports the given results table as a CSV file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>pathlib.Path</em>) – The file path to save the CSV data to.</p></li>
+<li><p><strong>results</strong> (<a class="reference internal" href="data.html#qnav.output.data.ResultsTable" title="qnav.output.data.ResultsTable"><em>ResultsTable</em></a>) – The results to convert to CSV.</p></li>
+<li><p><strong>down_sample</strong> (<em>int</em>) – Optional down-sampling factor to apply.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.output.formats.save_as_csv_comp">
+<span class="sig-prename descclassname"><span class="pre">qnav.output.formats.</span></span><span class="sig-name descname"><span class="pre">save_as_csv_comp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="data.html#qnav.output.data.ResultsTable" title="qnav.output.data.ResultsTable"><span class="pre">ResultsTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">down_sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/output/formats.html#save_as_csv_comp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.output.formats.save_as_csv_comp" title="Link to this definition"></a></dt>
+<dd><p>Exports the given results table as a compressed CSV file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>pathlib.Path</em>) – The file path to save the compressed CSV data to.</p></li>
+<li><p><strong>results</strong> (<a class="reference internal" href="data.html#qnav.output.data.ResultsTable" title="qnav.output.data.ResultsTable"><em>ResultsTable</em></a>) – The results to convert to compressed CSV.</p></li>
+<li><p><strong>down_sample</strong> (<em>int</em>) – Optional down-sampling factor to apply.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.output.formats.save_as_numpy">
+<span class="sig-prename descclassname"><span class="pre">qnav.output.formats.</span></span><span class="sig-name descname"><span class="pre">save_as_numpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="data.html#qnav.output.data.ResultsTable" title="qnav.output.data.ResultsTable"><span class="pre">ResultsTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">down_sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/output/formats.html#save_as_numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.output.formats.save_as_numpy" title="Link to this definition"></a></dt>
+<dd><p>Exports the given results table as a numpy data file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>pathlib.Path</em>) – The file path to save the numpy data to.</p></li>
+<li><p><strong>results</strong> (<a class="reference internal" href="data.html#qnav.output.data.ResultsTable" title="qnav.output.data.ResultsTable"><em>ResultsTable</em></a>) – The results to convert to numpy save file.</p></li>
+<li><p><strong>down_sample</strong> (<em>int</em>) – Optional down-sampling factor to apply.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.output.formats.save_as_numpy_comp">
+<span class="sig-prename descclassname"><span class="pre">qnav.output.formats.</span></span><span class="sig-name descname"><span class="pre">save_as_numpy_comp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="data.html#qnav.output.data.ResultsTable" title="qnav.output.data.ResultsTable"><span class="pre">ResultsTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">down_sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/output/formats.html#save_as_numpy_comp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.output.formats.save_as_numpy_comp" title="Link to this definition"></a></dt>
+<dd><p>Exports the given results table as a compressed numpy data file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>pathlib.Path</em>) – The file path to save the compressed numpy data to.</p></li>
+<li><p><strong>results</strong> (<a class="reference internal" href="data.html#qnav.output.data.ResultsTable" title="qnav.output.data.ResultsTable"><em>ResultsTable</em></a>) – The results to convert to compressed numpy save file.</p></li>
+<li><p><strong>down_sample</strong> (<em>int</em>) – Optional down-sampling factor to apply.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.output.formats.save_as_binary">
+<span class="sig-prename descclassname"><span class="pre">qnav.output.formats.</span></span><span class="sig-name descname"><span class="pre">save_as_binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="data.html#qnav.output.data.ResultsTable" title="qnav.output.data.ResultsTable"><span class="pre">ResultsTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">down_sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/output/formats.html#save_as_binary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.output.formats.save_as_binary" title="Link to this definition"></a></dt>
+<dd><p>Exports the given results table as a compressed numpy data file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>pathlib.Path</em>) – The file path to save the compressed numpy data to.</p></li>
+<li><p><strong>results</strong> (<a class="reference internal" href="data.html#qnav.output.data.ResultsTable" title="qnav.output.data.ResultsTable"><em>ResultsTable</em></a>) – The results to convert to compressed numpy save file.</p></li>
+<li><p><strong>down_sample</strong> (<em>int</em>) – Optional down-sampling factor to apply.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.output.formats.save_as_matlab">
+<span class="sig-prename descclassname"><span class="pre">qnav.output.formats.</span></span><span class="sig-name descname"><span class="pre">save_as_matlab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="data.html#qnav.output.data.ResultsTable" title="qnav.output.data.ResultsTable"><span class="pre">ResultsTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">down_sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/output/formats.html#save_as_matlab"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.output.formats.save_as_matlab" title="Link to this definition"></a></dt>
+<dd><p>Exports the given results table as a (non-compressed) MATLAB data file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>pathlib.Path</em>) – The file path to save the MATLAB data to.</p></li>
+<li><p><strong>results</strong> (<a class="reference internal" href="data.html#qnav.output.data.ResultsTable" title="qnav.output.data.ResultsTable"><em>ResultsTable</em></a>) – The results to convert to MATLAB file.</p></li>
+<li><p><strong>down_sample</strong> (<em>int</em>) – Optional down-sampling factor to apply.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.output.formats.save_as_matlab_comp">
+<span class="sig-prename descclassname"><span class="pre">qnav.output.formats.</span></span><span class="sig-name descname"><span class="pre">save_as_matlab_comp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="data.html#qnav.output.data.ResultsTable" title="qnav.output.data.ResultsTable"><span class="pre">ResultsTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">down_sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/output/formats.html#save_as_matlab_comp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.output.formats.save_as_matlab_comp" title="Link to this definition"></a></dt>
+<dd><p>Exports the given results table as a MATLAB data file (with compression).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>pathlib.Path</em>) – The file path to save the MATLAB data to.</p></li>
+<li><p><strong>results</strong> (<a class="reference internal" href="data.html#qnav.output.data.ResultsTable" title="qnav.output.data.ResultsTable"><em>ResultsTable</em></a>) – The results to convert to MATLAB file.</p></li>
+<li><p><strong>down_sample</strong> (<em>int</em>) – Optional down-sampling factor to apply.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.output.formats.save_as">
+<span class="sig-prename descclassname"><span class="pre">qnav.output.formats.</span></span><span class="sig-name descname"><span class="pre">save_as</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="data.html#qnav.output.data.ResultsTable" title="qnav.output.data.ResultsTable"><span class="pre">ResultsTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">down_sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">formats</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qnav.output.formats.SaveFormat" title="qnav.output.formats.SaveFormat"><span class="pre">SaveFormat</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/output/formats.html#save_as"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.output.formats.save_as" title="Link to this definition"></a></dt>
+<dd><p>Saves the given results as one or format types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_dir</strong> (<em>pathlib.Path</em>) – The location to write results to.</p></li>
+<li><p><strong>file_name</strong> (<em>str</em>) – The filename prefix to use.</p></li>
+<li><p><strong>results</strong> (<a class="reference internal" href="data.html#qnav.output.data.ResultsTable" title="qnav.output.data.ResultsTable"><em>ResultsTable</em></a>) – The results to convert and write.</p></li>
+<li><p><strong>down_sample</strong> (<em>int</em>) – Optional down-sampling factor to apply.</p></li>
+<li><p><strong>formats</strong> (<a class="reference internal" href="#qnav.output.formats.SaveFormat" title="qnav.output.formats.SaveFormat"><em>SaveFormat</em></a>) – The output formats to use.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="data.html" class="btn btn-neutral float-left" title="9.8.1. qnav.output.data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="figures.html" class="btn btn-neutral float-right" title="9.8.3. qnav.output.figures" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

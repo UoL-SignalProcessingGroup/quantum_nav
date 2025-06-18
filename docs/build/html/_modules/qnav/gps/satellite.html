@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.gps.satellite &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.gps.satellite</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.gps.satellite</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">============</span>
+<span class="sd">satellite.py</span>
+<span class="sd">============</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    All GPS satellite and solver functionalities.</span>
+<span class="sd">    This module is responsible for simulating up-to-date satellites and</span>
+<span class="sd">    supplying a solver to produce measurements (with configured errors</span>
+<span class="sd">    and noise). During a simulation these classes will be used for</span>
+<span class="sd">    acquiring GPS information.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Dr. Niall Moroney - niall.moroney17@imperial.ac.uk</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    0.9.0 - Awaiting further implementations.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">qnav.util.transformations</span> <span class="k">as</span> <span class="nn">trans</span>
+<span class="kn">import</span> <span class="nn">qnav.util.constants</span> <span class="k">as</span> <span class="nn">const</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+
+
+<span class="c1">#: The field names for satellite parameters.</span>
+<span class="n">satellite_param_fields</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;year&#39;</span><span class="p">,</span> <span class="s1">&#39;month&#39;</span><span class="p">,</span> <span class="s1">&#39;day&#39;</span><span class="p">,</span> <span class="s1">&#39;hour&#39;</span><span class="p">,</span> <span class="s1">&#39;minute&#39;</span><span class="p">,</span> <span class="s1">&#39;second&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;clock_bias&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_freq_bias&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_rate_message_time&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;t_0e&#39;</span><span class="p">,</span> <span class="s1">&#39;prn&#39;</span><span class="p">,</span> <span class="s1">&#39;delta_n&#39;</span><span class="p">,</span> <span class="s1">&#39;i_dot&#39;</span><span class="p">,</span> <span class="s1">&#39;omega_dot&#39;</span><span class="p">,</span> <span class="s1">&#39;omega_0&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;c_us&#39;</span><span class="p">,</span> <span class="s1">&#39;c_uc&#39;</span><span class="p">,</span> <span class="s1">&#39;c_is&#39;</span><span class="p">,</span> <span class="s1">&#39;c_ic&#39;</span><span class="p">,</span> <span class="s1">&#39;c_rs&#39;</span><span class="p">,</span> <span class="s1">&#39;c_rc&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;sqrt_a&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;i_0&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;m_bar_0&#39;</span><span class="p">)</span>
+
+<span class="c1">#: A collection of satellite parameters needed to initialise a Satellite instance.</span>
+<span class="n">SatelliteParams</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;SatelliteParams&#39;</span><span class="p">,</span> <span class="n">satellite_param_fields</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Satellite">
+<a class="viewcode-back" href="../../../modules/gps/satellite.html#qnav.gps.satellite.Satellite">[docs]</a>
+<span class="k">class</span> <span class="nc">Satellite</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a GPS satellite and its current states/properties.</span>
+<span class="sd">    This class is responsible for representing information about a GPS</span>
+<span class="sd">    satellite. Methods are supplied for updating these states and allowing</span>
+<span class="sd">    for measurement information to be acquired. During simulations a</span>
+<span class="sd">    collection of satellite instances will be used for generating a GPS signal</span>
+<span class="sd">    that will be used to improve navigation accuracy.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># All properties of the class</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;_params&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_gps_time&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_pseudo_range_noise&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_pseudo_range_rate_noise&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_position_ecef&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_velocity_ecef&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_rho_range_noise&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_rho_range_rate_noise&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_rng&#39;</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">params</span><span class="p">:</span> <span class="n">SatelliteParams</span><span class="p">,</span>
+                 <span class="n">gps_time</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">pseudo_range_noise</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">pseudo_range_rate_noise</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">rand_seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a Satellite instance from given information.</span>
+
+<span class="sd">        :param params: The satellite parameters extracted from a</span>
+<span class="sd">            RINEX/Ephemeris file.</span>
+<span class="sd">        :type params: SatelliteParams</span>
+
+<span class="sd">        :param gps_time: The current time of the GPS satellite.</span>
+<span class="sd">        :type gps_time: datetime.datetime</span>
+
+<span class="sd">        :param pseudo_range_noise: The amount of pseudo range noise to be</span>
+<span class="sd">            applied to measurements.</span>
+<span class="sd">        :type pseudo_range_noise: float</span>
+
+<span class="sd">        :param pseudo_range_rate_noise: The amount of drift to use when</span>
+<span class="sd">            updating pseudo range noise.</span>
+<span class="sd">        :type pseudo_range_rate_noise: float</span>
+
+<span class="sd">        :param rand_seed: The optional initialisation seed to use to</span>
+<span class="sd">            generate random numbers for noise and other errors.</span>
+<span class="sd">        :type rand_seed: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gps_time</span> <span class="o">=</span> <span class="n">gps_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_range_noise</span> <span class="o">=</span> <span class="n">pseudo_range_noise</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_range_rate_noise</span> <span class="o">=</span> <span class="n">pseudo_range_rate_noise</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_position_ecef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_velocity_ecef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">rand_seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rho_range_noise</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rho_range_rate_noise</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Use recorded satellite time if not give:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gps_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gps_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_param_datetime</span><span class="p">()</span>
+
+        <span class="c1"># Bootstrap satellite state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Satellite.update">
+<a class="viewcode-back" href="../../../modules/gps/satellite.html#qnav.gps.satellite.Satellite.update">[docs]</a>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the position, velocity and errors given the time difference.</span>
+<span class="sd">        This method updates the state of the satellite by a given amount of</span>
+<span class="sd">        time (in seconds). The updated position and velocity of the satellite</span>
+<span class="sd">        are calculated along with the new error states for generating noisy</span>
+<span class="sd">        measurements.</span>
+
+<span class="sd">        :param dt: The time difference since the last update was requested.</span>
+<span class="sd">        :type dt: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Increase the GPS clock time</span>
+        <span class="c1"># if dt &lt; 0: raise ValueError(&#39;dt must be greater than zero&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gps_time</span> <span class="o">+=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">dt</span><span class="p">)</span>
+
+        <span class="c1"># Update the measurement noise</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_noise</span><span class="p">()</span>
+
+        <span class="n">gm</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">GM</span>
+        <span class="n">omega_e</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">OMEGA_E</span>
+
+        <span class="c1"># TODO: Check as only seconds are used</span>
+        <span class="n">gps_time</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">utc2gps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gps_time</span><span class="p">)</span>
+
+        <span class="c1"># Time (seconds)</span>
+        <span class="n">t_k</span> <span class="o">=</span> <span class="n">gps_time</span><span class="p">[</span><span class="s1">&#39;seconds&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">t_0e</span>
+
+        <span class="c1"># Earth semi-major axis (meters)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">sqrt_a</span> <span class="o">**</span> <span class="mi">2</span>
+
+        <span class="c1"># Computed mean motion</span>
+        <span class="n">n_0</span> <span class="o">=</span> <span class="p">(</span><span class="n">gm</span> <span class="o">/</span> <span class="n">a</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
+
+        <span class="c1"># Corrected mean motion</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">n_0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">delta_n</span>
+
+        <span class="c1"># Mean anomaly</span>
+        <span class="n">m_bar_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">m_bar_0</span> <span class="o">+</span> <span class="n">n</span> <span class="o">*</span> <span class="n">t_k</span>
+
+        <span class="c1"># Solve Kepler&#39;s equation of eccentric anomaly by iteration</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">e</span>
+        <span class="n">e_k</span> <span class="o">=</span> <span class="n">m_bar_k</span>
+        <span class="n">e_old</span> <span class="o">=</span> <span class="n">m_bar_k</span>
+        <span class="n">d_e</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">while</span> <span class="n">d_e</span> <span class="o">&gt;</span> <span class="mf">1e-9</span><span class="p">:</span>
+            <span class="n">e_k</span> <span class="o">=</span> <span class="n">m_bar_k</span> <span class="o">+</span> <span class="n">e</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">e_old</span><span class="p">)</span>
+            <span class="n">d_e</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">e_k</span> <span class="o">-</span> <span class="n">e_old</span><span class="p">)</span>
+            <span class="n">e_old</span> <span class="o">=</span> <span class="n">e_k</span>
+
+        <span class="c1"># ---------------------------------------------------------------------- #</span>
+
+        <span class="c1"># Following method described in:</span>
+        <span class="c1"># https://www.navipedia.net/index.php/GPS_and_Galileo_Satellite_Coordinates_Computation</span>
+        <span class="n">nu_k</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">((</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">e_k</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">e</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)),</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">e_k</span><span class="p">)</span> <span class="o">-</span> <span class="n">e</span><span class="p">))</span>
+
+        <span class="c1"># Argument of Latitude</span>
+        <span class="n">phi_k</span> <span class="o">=</span> <span class="n">nu_k</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">w</span>
+        <span class="n">cos_2_phi_k</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">phi_k</span><span class="p">)</span>
+
+        <span class="c1"># Argument of Latitude correction</span>
+        <span class="n">delta_u_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">c_uc</span> <span class="o">*</span> <span class="n">cos_2_phi_k</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">c_us</span> <span class="o">*</span> <span class="n">cos_2_phi_k</span>
+
+        <span class="c1"># Radius correction</span>
+        <span class="n">delta_r_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">c_rc</span> <span class="o">*</span> <span class="n">cos_2_phi_k</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">c_rs</span> <span class="o">*</span> <span class="n">cos_2_phi_k</span>
+
+        <span class="c1"># Inclination correction</span>
+        <span class="n">delta_i_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">c_ic</span> <span class="o">*</span> <span class="n">cos_2_phi_k</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">c_is</span> <span class="o">*</span> <span class="n">cos_2_phi_k</span>
+
+        <span class="c1"># Corrected argument of latitude</span>
+        <span class="c1"># u_k = (phi_k + delta_u_k) % (2 * np.pi)</span>
+        <span class="n">u_k</span> <span class="o">=</span> <span class="p">(</span><span class="n">phi_k</span> <span class="o">+</span> <span class="n">delta_u_k</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+        <span class="c1"># Corrected radius</span>
+        <span class="n">r_k</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">e</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">e_k</span><span class="p">))</span> <span class="o">+</span> <span class="n">delta_r_k</span>
+
+        <span class="c1"># Corrected inclination</span>
+        <span class="n">i_k</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">i_0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">i_dot</span> <span class="o">*</span> <span class="n">t_k</span> <span class="o">+</span> <span class="n">delta_i_k</span><span class="p">)</span>
+
+        <span class="c1"># Position in orbital plane</span>
+        <span class="n">x_prime_k</span> <span class="o">=</span> <span class="n">r_k</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">u_k</span><span class="p">)</span>
+        <span class="n">y_prime_k</span> <span class="o">=</span> <span class="n">r_k</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">u_k</span><span class="p">)</span>
+
+        <span class="c1"># Corrected longitude of ascending node</span>
+        <span class="n">omega_k</span> <span class="o">=</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">omega_0</span> <span class="o">+</span> <span class="n">t_k</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">omega_dot</span> <span class="o">-</span> <span class="n">omega_e</span><span class="p">)</span>
+                    <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">t_0e</span> <span class="o">*</span> <span class="n">omega_e</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
+
+        <span class="c1"># Earth fixed geocentric satellite coordinates</span>
+        <span class="n">x_k</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_prime_k</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">omega_k</span><span class="p">)</span> <span class="o">-</span> <span class="n">y_prime_k</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega_k</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">i_k</span><span class="p">))</span>
+        <span class="n">y_k</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_prime_k</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega_k</span><span class="p">)</span> <span class="o">-</span> <span class="n">y_prime_k</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">omega_k</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">i_k</span><span class="p">))</span>
+        <span class="n">z_k</span> <span class="o">=</span> <span class="n">y_prime_k</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">i_k</span><span class="p">)</span>
+
+        <span class="c1"># Update the position of the satellite</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_position_ecef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x_k</span><span class="p">,</span> <span class="n">y_k</span><span class="p">,</span> <span class="n">z_k</span><span class="p">])</span>
+
+        <span class="c1"># ---------------------------------------------------------------------- #</span>
+
+        <span class="c1"># Satellite velocity calculation as per method in &quot;Principals of</span>
+        <span class="c1"># GNSS, Inertial, and Multi-sensor Integrated Navigation Systems&quot; - Mason</span>
+        <span class="n">e_dot</span> <span class="o">=</span> <span class="p">((</span><span class="n">n_0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">delta_n</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">e_k</span><span class="p">)))</span>
+
+        <span class="n">phi_dot</span> <span class="o">=</span> <span class="n">e_dot</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">nu_k</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">e_k</span><span class="p">)</span>
+
+        <span class="n">r_dot</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">e_k</span><span class="p">)</span> <span class="o">*</span> <span class="n">e_dot</span>
+                 <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">phi_dot</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">c_rs</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">phi_k</span><span class="p">)</span>
+                 <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">c_rc</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">phi_k</span><span class="p">))</span>
+
+        <span class="n">u_dot</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">c_us</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">phi_k</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span>
+                  <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">c_uc</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">phi_k</span><span class="p">))</span> <span class="o">*</span> <span class="n">phi_dot</span><span class="p">)</span>
+
+        <span class="n">x_prime_dot</span> <span class="o">=</span> <span class="n">r_dot</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">u_k</span><span class="p">)</span> <span class="o">-</span> <span class="n">r_k</span> <span class="o">*</span> <span class="n">u_dot</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">u_k</span><span class="p">)</span>
+        <span class="n">y_prime_dot</span> <span class="o">=</span> <span class="n">r_dot</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">u_k</span><span class="p">)</span> <span class="o">+</span> <span class="n">r_k</span> <span class="o">*</span> <span class="n">u_dot</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">u_k</span><span class="p">)</span>
+
+        <span class="n">i_k_dot</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">i_dot</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">phi_dot</span> <span class="o">*</span>
+                   <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">c_is</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">phi_k</span><span class="p">)</span>
+                    <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">c_ic</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">phi_k</span><span class="p">)))</span>
+
+        <span class="n">x_dot</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_prime_dot</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">omega_k</span><span class="p">)</span>
+                 <span class="o">-</span> <span class="n">y_prime_dot</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">i_k</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega_k</span><span class="p">)</span>
+                 <span class="o">+</span> <span class="n">i_k_dot</span> <span class="o">*</span> <span class="n">y_prime_k</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">i_k</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega_k</span><span class="p">)</span> <span class="o">+</span>
+                 <span class="p">(</span><span class="n">omega_e</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">omega_dot</span><span class="p">)</span> <span class="o">*</span>
+                 <span class="p">(</span><span class="n">x_prime_k</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega_k</span><span class="p">)</span> <span class="o">+</span> <span class="n">y_prime_k</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">i_k</span><span class="p">)</span> <span class="o">*</span>
+                  <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">omega_k</span><span class="p">)))</span>
+
+        <span class="n">y_dot</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_prime_dot</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega_k</span><span class="p">)</span>
+                 <span class="o">+</span> <span class="n">y_prime_dot</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">i_k</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">omega_k</span><span class="p">)</span>
+                 <span class="o">-</span> <span class="n">i_k_dot</span> <span class="o">*</span> <span class="n">y_prime_k</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">i_k</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">omega_k</span><span class="p">)</span> <span class="o">+</span>
+                 <span class="p">(</span><span class="n">omega_e</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">omega_dot</span><span class="p">)</span> <span class="o">*</span>
+                 <span class="p">(</span><span class="o">-</span><span class="n">x_prime_k</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">omega_k</span><span class="p">)</span> <span class="o">+</span> <span class="n">y_prime_k</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">i_k</span><span class="p">)</span> <span class="o">*</span>
+                  <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega_k</span><span class="p">)))</span>
+
+        <span class="n">z_dot</span> <span class="o">=</span> <span class="n">y_prime_dot</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">i_k</span><span class="p">)</span> <span class="o">+</span> <span class="n">i_k_dot</span> <span class="o">*</span> <span class="n">y_prime_k</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">i_k</span><span class="p">)</span>
+
+        <span class="c1"># Update the velocity of the satellite</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_velocity_ecef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x_dot</span><span class="p">,</span> <span class="n">y_dot</span><span class="p">,</span> <span class="n">z_dot</span><span class="p">])</span></div>
+
+
+        <span class="c1"># ---------------------------------------------------------------------- #</span>
+
+
+    <span class="k">def</span> <span class="nf">_get_pseudo_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                           <span class="n">ant_pos_lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                           <span class="n">ant_att_deg</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                           <span class="n">ant_vel_body_axes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the true pseudo ranges between the satellite and the given</span>
+<span class="sd">        antenna location.</span>
+
+<span class="sd">        .. TODO:</span>
+<span class="sd">            Include correct noise of velocities?</span>
+
+<span class="sd">        :param ant_pos_lla: The true antenna position (latitude, longitude</span>
+<span class="sd">            and altitude given in deg-deg-metres).</span>
+<span class="sd">        :type ant_pos_lla: numpy.array (3-elements)</span>
+
+<span class="sd">        :param ant_att_deg: The true antenna attitude (heading, pitch and roll</span>
+<span class="sd">            in degrees).</span>
+<span class="sd">        :type ant_att_deg: numpy.array (3-elements)</span>
+
+<span class="sd">        :param ant_vel_body_axes: The true antenna velocity (in body axes in</span>
+<span class="sd">            metres/second).</span>
+<span class="sd">        :type ant_vel_body_axes: numpy.array (3-elements)</span>
+
+<span class="sd">        :return: The true rho and rho rate values.</span>
+<span class="sd">        :rtype: tuple (2-elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sat_pos_ecef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_position_ecef</span>
+        <span class="n">sat_vel_ecef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_velocity_ecef</span>
+        <span class="n">ant_pos_ecef</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">lla2ecef</span><span class="p">(</span><span class="n">ant_pos_lla</span><span class="p">)</span>
+
+        <span class="n">rot_mat</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">ant_att_deg</span><span class="p">))</span>
+        <span class="n">ant_vel_ned</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">rot_mat</span><span class="p">)</span> <span class="o">@</span> <span class="n">ant_vel_body_axes</span>
+        <span class="n">ant_vel_ecef</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">vned2vecef</span><span class="p">(</span><span class="n">ant_vel_ned</span><span class="p">,</span> <span class="n">ant_pos_lla</span><span class="p">)</span>
+
+        <span class="c1"># Relative position of satellite from antenna</span>
+        <span class="n">d_p</span> <span class="o">=</span> <span class="n">sat_pos_ecef</span> <span class="o">-</span> <span class="n">ant_pos_ecef</span>
+        <span class="n">rho_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d_p</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">d_p</span><span class="p">))</span>
+        <span class="n">vel_rel_true</span> <span class="o">=</span> <span class="p">(</span><span class="n">sat_vel_ecef</span> <span class="o">-</span> <span class="n">ant_vel_ecef</span><span class="p">)</span>
+        <span class="n">los_vector_true</span> <span class="o">=</span> <span class="n">d_p</span> <span class="o">/</span> <span class="n">rho_true</span>
+        <span class="c1"># vel_rel_true = np.array(vel_rel_true)</span>
+
+        <span class="c1"># TODO: Check changes (removed loop)</span>
+        <span class="n">rho_rate_true</span> <span class="o">=</span> <span class="n">los_vector_true</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vel_rel_true</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">rho_true</span><span class="p">,</span> <span class="n">rho_rate_true</span>
+
+    <span class="k">def</span> <span class="nf">_update_noise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rho_range_noise</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_range_noise</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rho_range_rate_noise</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_range_rate_noise</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Satellite.get_location_azimuth_elevation">
+<a class="viewcode-back" href="../../../modules/gps/satellite.html#qnav.gps.satellite.Satellite.get_location_azimuth_elevation">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_location_azimuth_elevation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ant_pos_lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the relative location of the satellite from the current position,</span>
+<span class="sd">        in azimuth and elevation (deg-deg).</span>
+
+<span class="sd">        :param ant_pos_lla: The true antenna position (latitude, longitude</span>
+<span class="sd">            and altitude given in deg-deg-metres).</span>
+<span class="sd">        :type ant_pos_lla: numpy.array (3-elements)</span>
+
+<span class="sd">        :return: Returns the corresponding azimuth and elevation (both in</span>
+<span class="sd">            degrees).</span>
+<span class="sd">        :rtype: tuple[float, float]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Satellite position in NED from antenna</span>
+        <span class="n">sat_pos_ecef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_position_ecef</span>
+        <span class="n">sat_ned</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">ecef2ned</span><span class="p">(</span><span class="n">sat_pos_ecef</span><span class="p">,</span> <span class="n">ant_pos_lla</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">trans</span><span class="o">.</span><span class="n">ned2azel</span><span class="p">(</span><span class="n">sat_ned</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Satellite.get_measurements">
+<a class="viewcode-back" href="../../../modules/gps/satellite.html#qnav.gps.satellite.Satellite.get_measurements">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ant_pos_lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                         <span class="n">ant_att_deg</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                         <span class="n">ant_vel_body_axes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates and returns the noisy pseudo ranges, position, velocity</span>
+<span class="sd">        and time information for the satellite.</span>
+
+<span class="sd">        :param ant_pos_lla: The true antenna position (latitude, longitude</span>
+<span class="sd">            and altitude given in deg-deg-metres).</span>
+<span class="sd">        :type ant_pos_lla: numpy.array (3-elements)</span>
+
+<span class="sd">        :param ant_att_deg: The true antenna attitude (heading, pitch and roll</span>
+<span class="sd">            in degrees).</span>
+<span class="sd">        :type ant_att_deg: numpy.array (3-elements)</span>
+
+<span class="sd">        :param ant_vel_body_axes: The true antenna velocity (in body axes in</span>
+<span class="sd">            metres/second).</span>
+<span class="sd">        :type ant_vel_body_axes: numpy.array (3-elements)</span>
+
+<span class="sd">        :return: The relevant measurement information in a dict.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO: Add noise to these?</span>
+        <span class="n">gps_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gps_time</span>
+        <span class="n">sat_pos_ecef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_position_ecef</span>
+        <span class="n">sat_vel_ecef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_velocity_ecef</span>
+
+        <span class="n">rho_true</span><span class="p">,</span> <span class="n">rho_rate_true</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pseudo_ranges</span><span class="p">(</span>
+            <span class="n">ant_pos_lla</span><span class="p">,</span> <span class="n">ant_att_deg</span><span class="p">,</span> <span class="n">ant_vel_body_axes</span><span class="p">)</span>
+
+        <span class="c1"># GPS Antenna only has access to noisy pseudo range (rate) measurements.</span>
+        <span class="n">rho_meas</span> <span class="o">=</span> <span class="n">rho_true</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rho_range_noise</span>
+        <span class="n">rho_rate_meas</span> <span class="o">=</span> <span class="n">rho_rate_true</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rho_range_rate_noise</span>
+        <span class="c1"># rho_meas = (rho_true + self._pseudo_range_noise * self._rng.normal())</span>
+        <span class="c1"># rho_rate_meas = (rho_rate_true + self._pseudo_range_rate_noise * self._rng.normal())</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">gps_time</span><span class="p">,</span>
+            <span class="s1">&#39;pseudoRangeNoisy&#39;</span><span class="p">:</span> <span class="n">rho_meas</span><span class="p">,</span>
+            <span class="s1">&#39;pseudoRangeRatesNoisy&#39;</span><span class="p">:</span> <span class="n">rho_rate_meas</span><span class="p">,</span>
+            <span class="s1">&#39;satellitePosition&#39;</span><span class="p">:</span> <span class="n">sat_pos_ecef</span><span class="p">,</span>
+            <span class="s1">&#39;satelliteVelocity&#39;</span><span class="p">:</span> <span class="n">sat_vel_ecef</span>
+        <span class="p">}</span></div>
+
+
+    <span class="c1"># def get_position_and_velocity(self) -&gt; tuple:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Returns a tuple containing the current position and velocity of the</span>
+    <span class="c1">#     satellite in ECEF format. This is namely for debugging and testing.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :return: The current position and velocity of the satellite.</span>
+    <span class="c1">#     :rtype: tuple</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     return self._position_ecef, self._velocity_ecef</span>
+
+    <span class="k">def</span> <span class="nf">_get_param_datetime</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the recorded timestamp of the satellite.</span>
+<span class="sd">        Obtains the time recorded in the satellite parameters in the format</span>
+<span class="sd">        of Python datetime.</span>
+
+<span class="sd">        :return: The recorded satellite date and time.</span>
+<span class="sd">        :rtype: datetime.datetime</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">time_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">_asdict</span><span class="p">()</span>
+        <span class="n">time_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">,</span> <span class="s1">&#39;month&#39;</span><span class="p">,</span> <span class="s1">&#39;day&#39;</span><span class="p">,</span> <span class="s1">&#39;hour&#39;</span><span class="p">,</span> <span class="s1">&#39;minute&#39;</span><span class="p">,</span> <span class="s1">&#39;second&#39;</span><span class="p">]</span>
+        <span class="n">time_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">time_params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">time_fields</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="p">(</span><span class="o">**</span><span class="n">time_dict</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sat_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the full satellites ID from given parameters.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">type</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sat_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The satellite&#39;s current clock time.</span>
+
+<span class="sd">        :return: Current satellite time.</span>
+<span class="sd">        :rtype: datetime.datetime</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gps_time</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The satellite&#39;s ECEF position since last update.</span>
+
+<span class="sd">        :return: Current ECEF position.</span>
+<span class="sd">        :rtype: numpy.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_position_ecef</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The satellite&#39;s ECEF velocity since last update.</span>
+
+<span class="sd">        :return: Current ECEF velocity.</span>
+<span class="sd">        :rtype: numpy.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_velocity_ecef</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pseudo_range_noise</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the satellite&#39;s initial pseudo range noise.</span>
+
+<span class="sd">        :return: Pseudo range noise.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_range_noise</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pseudo_range_rate_noise</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the satellite&#39;s initial pseudo range rate noise.</span>
+
+<span class="sd">        :return: Pseudo range rate noise.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_range_rate_noise</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">SatelliteParams</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="mi">2000</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span>
+                          <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+                          <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+                          <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+
+    <span class="c1"># satellite_param_fields = (</span>
+    <span class="c1">#     &#39;type&#39;, &#39;id&#39;, &#39;year&#39;, &#39;month&#39;, &#39;day&#39;, &#39;hour&#39;, &#39;minute&#39;, &#39;second&#39;,</span>
+    <span class="c1">#     &#39;clock_bias&#39;, &#39;drift_freq_bias&#39;, &#39;drift_rate_message_time&#39;,</span>
+    <span class="c1">#     &#39;t_0e&#39;, &#39;prn&#39;, &#39;delta_n&#39;, &#39;i_dot&#39;, &#39;omega_dot&#39;, &#39;omega_0&#39;,</span>
+    <span class="c1">#     &#39;c_us&#39;, &#39;c_uc&#39;, &#39;c_is&#39;, &#39;c_ic&#39;, &#39;c_rs&#39;, &#39;c_rc&#39;,</span>
+    <span class="c1">#     &#39;sqrt_a&#39;, &#39;e&#39;, &#39;i_0&#39;, &#39;w&#39;, &#39;m_bar_0&#39;)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

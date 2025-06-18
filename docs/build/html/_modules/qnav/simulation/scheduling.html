@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.simulation.scheduling &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.simulation.scheduling</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.simulation.scheduling</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=============</span>
+<span class="sd">scheduling.py</span>
+<span class="sd">=============</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Coordinates the scheduling of sensors and fusion methods.</span>
+<span class="sd">    This module provides classes that are used for organising the timing of</span>
+<span class="sd">    sensor measurements and fusion methods during simulations. Essentially</span>
+<span class="sd">    this is used to efficiently get the next non-inform time increment</span>
+<span class="sd">    along with what is to occur at that time.</span>
+
+<span class="sd">:author:</span>
+<span class="sd">    Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">Sensor</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">SensorFusion</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">FusionTrigger</span>
+
+
+<span class="k">class</span> <span class="nc">_SensorStatusMap</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A mapping between a fusion method and its sensors&#39; status.</span>
+<span class="sd">    This mapping is used to record which sensors have been used/updated</span>
+<span class="sd">    recently. When a sensor has been used a flag for its status is set.</span>
+<span class="sd">    When  a sufficient amount of sensor flags are set, the fusion can then</span>
+<span class="sd">    be performed. After this, all flags can be reset.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Slots used to reduce memory and improve look-up time.</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;_fusion&#39;</span><span class="p">,</span> <span class="s1">&#39;_group_trigger&#39;</span><span class="p">,</span> <span class="s1">&#39;_sensors_ready&#39;</span><span class="p">)</span>
+
+    <span class="c1"># The reference fusion method for the sensors.</span>
+    <span class="n">_fusion</span><span class="p">:</span> <span class="n">SensorFusion</span>
+
+    <span class="c1"># The triggering mode for the fusion method.</span>
+    <span class="n">_group_trigger</span><span class="p">:</span> <span class="n">FusionTrigger</span>
+
+    <span class="c1"># A ready status look-up for all sensors.</span>
+    <span class="n">_sensors_ready</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Sensor</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sensor_fusion</span><span class="p">:</span> <span class="n">SensorFusion</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a status mapping between the fusion method and whether the</span>
+<span class="sd">        sensors required by it have updated. This, in turn, is then used to</span>
+<span class="sd">        flag that the fusion method is ready.</span>
+
+<span class="sd">        :param sensor_fusion: The SensorFusion groups used in the simulation.</span>
+<span class="sd">        :type sensor_fusion: SensorFusion</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Reference the fusion method:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fusion</span> <span class="o">=</span> <span class="n">sensor_fusion</span>
+
+        <span class="c1"># Copy the trigger used for the fusion method:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_group_trigger</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fusion</span><span class="o">.</span><span class="n">trigger</span><span class="p">)</span>
+
+        <span class="c1"># Create a mapping for all sensors statuses:</span>
+        <span class="n">sensors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fusion</span><span class="o">.</span><span class="n">sensors</span><span class="p">)</span>
+        <span class="n">is_ready</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sensors</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sensors_ready</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span><span class="n">sensors</span><span class="p">,</span> <span class="n">is_ready</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">get_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SensorFusion</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the fusion method associated with the mapping.</span>
+
+<span class="sd">        :return: The SensorFusion instance used in the mapping.</span>
+<span class="sd">        :rtype: SensorFusion</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fusion</span>
+
+    <span class="k">def</span> <span class="nf">set_sensor_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sensor</span><span class="p">:</span> <span class="n">Sensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the flag for a given sensor as ready.</span>
+<span class="sd">        This is typically called directly prior or after a measurement from</span>
+<span class="sd">        the sensor has been produced to notify its fusion method(s).</span>
+
+<span class="sd">        :param sensor: The sensor instance which is ready to be used.</span>
+<span class="sd">        :type sensor: Sensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">sensor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensors_ready</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sensors_ready</span><span class="p">[</span><span class="n">sensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">is_fusion_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        States if the fusion method is ready to be performed.</span>
+<span class="sd">        This is subject to ready flags of sensors and the trigger mode</span>
+<span class="sd">        selected by the fusion method.</span>
+
+<span class="sd">        :return: True if fusion is ready to be performed.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensors_ready</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group_trigger</span> <span class="ow">is</span> <span class="n">FusionTrigger</span><span class="o">.</span><span class="n">ANY</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resets all sensor flags, setting them to false.</span>
+<span class="sd">        Simply resets the mapping for the fusion instance so that all ready</span>
+<span class="sd">        flags are set to false. Commonly used once fusion has been performed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sensors_ready</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensors_ready</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group_trigger</span> <span class="ow">is</span> <span class="n">FusionTrigger</span><span class="o">.</span><span class="n">ALL_THEN_ANY</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_group_trigger</span> <span class="o">=</span> <span class="n">FusionTrigger</span><span class="o">.</span><span class="n">ANY</span>
+
+    <span class="k">def</span> <span class="nf">print_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Displays the internal mapped sensor status in the output console.</span>
+<span class="sd">        When called, prints the attached sensors and their ready statuses</span>
+<span class="sd">        for the sensor fusion instance. Useful for debugging states.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fusion</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fusion</span><span class="p">))</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_group_trigger</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sensor</span><span class="p">,</span> <span class="n">status</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensors_ready</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">status_char</span> <span class="o">=</span> <span class="s2">&quot;✓&quot;</span> <span class="k">if</span> <span class="n">status</span> <span class="k">else</span> <span class="s2">&quot;✗&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">sensor</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">sensor</span><span class="p">))</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">status_char</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TimingHandler">
+<a class="viewcode-back" href="../../../modules/simulation/scheduling.html#qnav.simulation.scheduling.TimingHandler">[docs]</a>
+<span class="k">class</span> <span class="nc">TimingHandler</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A handler for managing the timings for sensors and fusion methods.</span>
+<span class="sd">    On creation this creates a mapping between shared sensors and fusion</span>
+<span class="sd">    methods. Through this the sensor with the earliest due time can be</span>
+<span class="sd">    obtained. Once this sensor is used (i.e a measurement has been produced)</span>
+<span class="sd">    a flag can be set for the fusion methods associate with it. When</span>
+<span class="sd">    sufficient sensor flags for a fusion method are set, the fusion method</span>
+<span class="sd">    can then be also obtained and returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Slots used to reduce memory and improve look-up time.</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;_all_sensors&#39;</span><span class="p">,</span> <span class="s1">&#39;_sensor_map&#39;</span><span class="p">)</span>
+
+    <span class="c1"># A list of all unique sensor instances.</span>
+    <span class="n">_all_sensors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Sensor</span><span class="p">]</span>
+
+    <span class="c1"># A mapping between sensors and their fusion methods&#39; ready status.</span>
+    <span class="n">_sensor_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Sensor</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">_SensorStatusMap</span><span class="p">]]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hardware</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">SensorFusion</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a timing scheduler for sensors and fusion methods.</span>
+<span class="sd">        On creation returns a timing handler for the given</span>
+<span class="sd">        class:`SensorFusion` instances.</span>
+
+<span class="sd">        :param hardware: Collection of SensorFusion instances.</span>
+<span class="sd">        :type hardware: Iterable[SensorFusion]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_all_sensors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_map</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Get list of all unique sensor instances:</span>
+        <span class="k">for</span> <span class="n">sensor_fusion</span> <span class="ow">in</span> <span class="n">hardware</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">sensor</span> <span class="ow">in</span> <span class="n">sensor_fusion</span><span class="o">.</span><span class="n">sensors</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">sensor</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_sensors</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_all_sensors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sensor</span><span class="p">)</span>
+
+        <span class="c1"># Check unique sensors are usable:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_sensors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No usable sensors provided&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Add look-up dictionary for sensors-fusions:</span>
+        <span class="k">for</span> <span class="n">sensor_fusion</span> <span class="ow">in</span> <span class="n">hardware</span><span class="p">:</span>
+            <span class="n">mapping</span> <span class="o">=</span> <span class="n">_SensorStatusMap</span><span class="p">(</span><span class="n">sensor_fusion</span><span class="p">)</span>
+
+            <span class="c1"># Ensure all associated sensors point to instance:</span>
+            <span class="k">for</span> <span class="n">sensor</span> <span class="ow">in</span> <span class="n">sensor_fusion</span><span class="o">.</span><span class="n">sensors</span><span class="p">:</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sensor</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="n">tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mapping</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_map</span><span class="p">[</span><span class="n">sensor</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span>
+
+<div class="viewcode-block" id="TimingHandler.update_sensors_past_time">
+<a class="viewcode-back" href="../../../modules/simulation/scheduling.html#qnav.simulation.scheduling.TimingHandler.update_sensors_past_time">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_sensors_past_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delay_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Repeatedly updates sensors until all due time are past the given time.</span>
+<span class="sd">        Applies updates and skips measurements of all sensors until their due</span>
+<span class="sd">        times for next measurements are past the given time. This is used to</span>
+<span class="sd">        correctly induce a delay for measurements from the start of the</span>
+<span class="sd">        simulation. Note this does not collect measurements or change any</span>
+<span class="sd">        of the connected statuses used for fusion.</span>
+
+<span class="sd">        :param delay_time: The time to update all sensors past (in seconds).</span>
+<span class="sd">            Essentially the delay before measurements are to be processed.</span>
+<span class="sd">        :type delay_time: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">sensor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_iterator</span><span class="p">(</span><span class="n">delay_time</span><span class="p">):</span>
+            <span class="n">sensor</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="TimingHandler.set_sensor_used">
+<a class="viewcode-back" href="../../../modules/simulation/scheduling.html#qnav.simulation.scheduling.TimingHandler.set_sensor_used">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_sensor_used</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sensor</span><span class="p">:</span> <span class="n">Sensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Flags that the given sensor has been used.</span>
+<span class="sd">        Marks the given sensor instance as used for all fusion methods that</span>
+<span class="sd">        requires this. If conditions are met, this trigger fusion methods</span>
+<span class="sd">        that use this sensor to be ready.</span>
+
+<span class="sd">        :param sensor: The sensor instance that has been used recently.</span>
+<span class="sd">        :type sensor: Sensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">set_sensor_ready</span><span class="p">(</span><span class="n">sensor</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span>
+         <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_map</span><span class="p">[</span><span class="n">sensor</span><span class="p">]]</span></div>
+
+
+<div class="viewcode-block" id="TimingHandler.get_next_sensor">
+<a class="viewcode-back" href="../../../modules/simulation/scheduling.html#qnav.simulation.scheduling.TimingHandler.get_next_sensor">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_next_sensor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the sensor with the earliest due time for measurement.</span>
+<span class="sd">        Searches through shared sensors and returns the one with the</span>
+<span class="sd">        earlier due time.</span>
+
+<span class="sd">        :return: Sensor with the earliest due time.</span>
+<span class="sd">        :rtype: Sensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">next_update</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_sensors</span><span class="p">]</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">times</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">times</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_sensors</span><span class="p">[</span><span class="n">index</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="TimingHandler.sensor_iterator">
+<a class="viewcode-back" href="../../../modules/simulation/scheduling.html#qnav.simulation.scheduling.TimingHandler.sensor_iterator">[docs]</a>
+    <span class="k">def</span> <span class="nf">sensor_iterator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Sensor</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates an iterator for continually getting the next sensor.</span>
+<span class="sd">        The produced iterator will be return the sensor with the earliest</span>
+<span class="sd">        measurement due time. The iteration stops when the next earliest</span>
+<span class="sd">        due time exceeds the given max time.</span>
+
+<span class="sd">        :param max_time: The maximum time due for measurements (in seconds).</span>
+<span class="sd">        :type max_time: float</span>
+
+<span class="sd">        :return: An iterator returning the sensor with the earliest due time.</span>
+<span class="sd">        :rtype: Iterator[Sensor]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">while</span> <span class="p">((</span><span class="n">sensor</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_next_sensor</span><span class="p">())</span> <span class="ow">and</span>
+               <span class="p">(</span><span class="n">sensor</span><span class="o">.</span><span class="n">next_update</span> <span class="o">&lt;=</span> <span class="n">max_time</span><span class="p">)):</span>
+            <span class="k">yield</span> <span class="n">sensor</span></div>
+
+            <span class="c1"># sensor.update()</span>
+
+<div class="viewcode-block" id="TimingHandler.get_next_fusion">
+<a class="viewcode-back" href="../../../modules/simulation/scheduling.html#qnav.simulation.scheduling.TimingHandler.get_next_fusion">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_next_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sensor</span><span class="p">:</span> <span class="n">Sensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">SensorFusion</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns any fusion methods that are to be used.</span>
+<span class="sd">        Searches through fusion methods and returns a list collection of those</span>
+<span class="sd">        that are ready to be used. These are automatically marked as used on</span>
+<span class="sd">        return. If no fusion methods are ready, then the list will be empty.</span>
+<span class="sd">        For faster retrieval, the search of fusion methods can be filtered</span>
+<span class="sd">        to only those assigned with a given sensor instance.</span>
+
+<span class="sd">        :param sensor: Sensor instance to filter fusion methods by (Optional).</span>
+<span class="sd">        :type sensor: Sensor</span>
+
+<span class="sd">        :return: A list of fusion methods ready to be applied.</span>
+<span class="sd">        :rtype: list[SensorFusion]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># If no sensor provided:</span>
+        <span class="k">if</span> <span class="n">sensor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="c1"># Iterate across all unique sensors and return flattened list</span>
+            <span class="n">to_flatten</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_next_fusion</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_sensors</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">to_flatten</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>
+
+        <span class="n">to_return</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_map</span><span class="p">[</span><span class="n">sensor</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">is_fusion_ready</span><span class="p">():</span>
+                <span class="n">to_return</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">get_fusion</span><span class="p">())</span>
+                <span class="n">m</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">to_return</span></div>
+
+
+<div class="viewcode-block" id="TimingHandler.print_mappings">
+<a class="viewcode-back" href="../../../modules/simulation/scheduling.html#qnav.simulation.scheduling.TimingHandler.print_mappings">[docs]</a>
+    <span class="k">def</span> <span class="nf">print_mappings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Displays the internal scheduling mappings in the output console.</span>
+<span class="sd">        When called, prints the fusion methods attached to each sensor,</span>
+<span class="sd">        along with their ready status. Useful for debugging states.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s2">&quot;[ Sensor Mappings ]&quot;</span><span class="si">:</span><span class="s2">-^60</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">mapping_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">mappings</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_map</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">mapping</span> <span class="ow">in</span> <span class="n">mappings</span><span class="p">:</span>
+                <span class="n">mapping_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">mapping</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">mapping</span> <span class="ow">in</span> <span class="n">mapping_set</span><span class="p">:</span>
+            <span class="n">mapping</span><span class="o">.</span><span class="n">print_mapping</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s2">&quot;&quot;</span><span class="si">:</span><span class="s2">-^60</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</div>
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

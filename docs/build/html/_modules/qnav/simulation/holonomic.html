@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.simulation.holonomic &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.simulation.holonomic</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.simulation.holonomic</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">============</span>
+<span class="sd">holonomic.py</span>
+<span class="sd">============</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Supplies means of applying configured holonomic constraints.</span>
+<span class="sd">    Virtual simulations are vulnerable to numerical instabilities, causing</span>
+<span class="sd">    unintended drift between the ground truth and estimated state over time.</span>
+<span class="sd">    Unlike with artificial noise that is purposely added through configured</span>
+<span class="sd">    sensor error properties, this is undesirable and can cause unintended</span>
+<span class="sd">    behavior. To combat this, this holonomic module can be used to apply</span>
+<span class="sd">    a variety of constraints to restrict the estimated state of the system</span>
+<span class="sd">    to values within the expected behaviour. In other words, this is used</span>
+<span class="sd">    to slightly nudge the estimated state toward that of the ground truth</span>
+<span class="sd">    at a scale to overcome numerical instabilities (such as rounding errors)</span>
+<span class="sd">    but not to affect simulated errors.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Prof. Jason Ralph - jfralph@liverpool.ac.uk</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">Sensor</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">SensorFusion</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">FusionTrigger</span>
+<span class="kn">from</span> <span class="nn">qnav.waypoints.trajectory</span> <span class="kn">import</span> <span class="n">GroundTruth</span>
+<span class="kn">from</span> <span class="nn">qnav.estimation.state</span> <span class="kn">import</span> <span class="n">EstimatedState</span>
+
+
+<div class="viewcode-block" id="HolonomicConstraint">
+<a class="viewcode-back" href="../../../modules/simulation/holonomic.html#qnav.simulation.holonomic.HolonomicConstraint">[docs]</a>
+<span class="k">class</span> <span class="nc">HolonomicConstraint</span><span class="p">(</span><span class="n">Sensor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Obtains holonomic correction values during simulation.</span>
+<span class="sd">    For a given ground truth record, gently shifts the estimated state towards</span>
+<span class="sd">    the ground truth state at a rate to overcome unintended drift, but not</span>
+<span class="sd">    affect simulation accuracy (i.e. intended behaviour from</span>
+<span class="sd">    artificial/configured errors).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: Why are fixed gain and axis filter separate variables?</span>
+    <span class="c1"># TODO: Does not support non-inertia measurements</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">gt_filter</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fixed_gain</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">axis_filter</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialises a holonomic constraint to apply for given ground truth.</span>
+<span class="sd">        Requires an update frequency, ground truth record filter and fixed</span>
+<span class="sd">        gain amount (along with optional record axis to apply). On succession</span>
+<span class="sd">        creates a sensor wrapper that applies the holonomic constraint at</span>
+<span class="sd">        fixed frequency for the specified ground truth record during</span>
+<span class="sd">        simulation.</span>
+
+<span class="sd">        :param frequency: The frequency to apply the correction (in Hz).</span>
+<span class="sd">        :type frequency: float</span>
+
+<span class="sd">        :param fixed_gain: The percentage gain (between 0.0 and 1.0)</span>
+<span class="sd">            of correction to apply.</span>
+<span class="sd">        :type fixed_gain: float</span>
+
+<span class="sd">        :param gt_filter: The ground truth record name to apply the correction</span>
+<span class="sd">            for. This is case-sensitive and must match the property name of</span>
+<span class="sd">            the record in the ground truth and estimated state.</span>
+<span class="sd">        :type gt_filter: str</span>
+
+<span class="sd">        :param axis_filter: (Optional) The filter percentages (or toggle</span>
+<span class="sd">            flags) for each axis of the ground truth record. Can also be</span>
+<span class="sd">            used to disable corrections for certain axis.</span>
+<span class="sd">        :type axis_filter: np.ndarray[float]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gt_filter</span> <span class="o">=</span> <span class="n">gt_filter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_gain</span> <span class="o">=</span> <span class="n">fixed_gain</span>
+
+        <span class="k">if</span> <span class="n">axis_filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_gain</span> <span class="o">*=</span> <span class="n">axis_filter</span>
+            <span class="k">if</span> <span class="n">axis_filter</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;axis_filter must be of shape (3,)&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_measurement</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">filter_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Displays the tag used for filtering the ground truth.</span>
+<span class="sd">        Simply used for checking filter doesn&#39;t already exist.</span>
+
+<span class="sd">        :return: The tag ID for the ground truth record to filter by.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gt_filter</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">filter_gain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Displays the gain amount (percentage) being applied.</span>
+<span class="sd">        Simply used for checking the filter&#39;s value.</span>
+
+<span class="sd">        :return: The gain amount to apply to each axis</span>
+<span class="sd">        :rtype: float | np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_gain</span>
+
+<div class="viewcode-block" id="HolonomicConstraint.take_measurement">
+<a class="viewcode-back" href="../../../modules/simulation/holonomic.html#qnav.simulation.holonomic.HolonomicConstraint.take_measurement">[docs]</a>
+    <span class="k">def</span> <span class="nf">take_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">est_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">:</span> <span class="n">GroundTruth</span><span class="p">)</span> <span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts data from ground truth to obtain correction amount.</span>
+<span class="sd">        When called during simulation loop, this checks the relevant data can</span>
+<span class="sd">        be extracted from the ground truth and uses it to update the</span>
+<span class="sd">        correction value to apply at that time.</span>
+
+<span class="sd">        :param est_time: The estimate time of the measurement (not used).</span>
+<span class="sd">        :type est_time: float</span>
+
+<span class="sd">        :param ground_truth: The ground truth record at the given time.</span>
+<span class="sd">        :type ground_truth: GroundTruth</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ground_truth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gt_filter</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ground_truth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gt_filter</span><span class="p">)</span>
+            <span class="c1"># self._last_measurement = value * self._fixed_gain</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_measurement</span> <span class="o">=</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="HolonomicConstraint.clear_measurement">
+<a class="viewcode-back" href="../../../modules/simulation/holonomic.html#qnav.simulation.holonomic.HolonomicConstraint.clear_measurement">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clears the last measurement value obtained.</span>
+<span class="sd">        Useful in preventing the accidental reuse of measurements when using</span>
+<span class="sd">        multiple holonomic constraints asynchronously.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_measurement</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">last_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the last measurement captured (i.e. correction to apply).</span>
+<span class="sd">        Upon error this will return None.</span>
+
+<span class="sd">        :return: The holonomic correction to apply.</span>
+<span class="sd">        :rtype: float | np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_measurement</span></div>
+
+
+
+<div class="viewcode-block" id="HolonomicFusion">
+<a class="viewcode-back" href="../../../modules/simulation/holonomic.html#qnav.simulation.holonomic.HolonomicFusion">[docs]</a>
+<span class="k">class</span> <span class="nc">HolonomicFusion</span><span class="p">(</span><span class="n">SensorFusion</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies the holonomic constraint corrections during simulation.</span>
+<span class="sd">    Manages a correction of holonomic constraints and applying them</span>
+<span class="sd">    to correct the current estimated state.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trigger</span><span class="p">:</span> <span class="n">FusionTrigger</span><span class="p">,</span> <span class="o">*</span><span class="n">holonomics</span><span class="p">:</span> <span class="n">HolonomicConstraint</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Defines holonomic fusion to apply with list of holonomic constraints.</span>
+
+<span class="sd">        :param trigger: The trigger mode for deciding when to apply fusion.</span>
+<span class="sd">        :type trigger: FusionTrigger</span>
+
+<span class="sd">        :param sensors: A series of configured holonomic constraints to use.</span>
+<span class="sd">        :type sensors: Iterable[HolonomicConstraint]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span> <span class="o">*</span><span class="n">holonomics</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_holonomics</span> <span class="o">=</span> <span class="n">holonomics</span>
+
+        <span class="n">all_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">holonomic</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_holonomics</span><span class="p">:</span>
+
+            <span class="c1"># Check that the holonomic instances are valid:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">holonomic</span><span class="p">,</span> <span class="n">HolonomicConstraint</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sensor type must be HolonomicConstraint&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Check that the constraint isn&#39;t already covered:</span>
+            <span class="n">filter_id</span> <span class="o">=</span> <span class="n">holonomic</span><span class="o">.</span><span class="n">filter_id</span>
+            <span class="k">if</span> <span class="n">filter_id</span> <span class="ow">in</span> <span class="n">all_ids</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Duplicate filter ID: </span><span class="si">{</span><span class="n">filter_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">all_ids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">filter_id</span><span class="p">)</span>
+
+<div class="viewcode-block" id="HolonomicFusion.perform_fusion">
+<a class="viewcode-back" href="../../../modules/simulation/holonomic.html#qnav.simulation.holonomic.HolonomicFusion.perform_fusion">[docs]</a>
+    <span class="k">def</span> <span class="nf">perform_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply the holonomic constraints and corrections during simulation.</span>
+<span class="sd">        When called, performs fusion by overwriting current estimates.</span>
+
+<span class="sd">        :param estimated_state: The current estimated states to update.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">updated_states</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Obtain a dictionary of all updates</span>
+        <span class="k">for</span> <span class="n">holonomic</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_holonomics</span><span class="p">:</span>
+
+            <span class="c1"># Get the current property ID</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">holonomic</span><span class="o">.</span><span class="n">filter_id</span>
+
+            <span class="c1"># Get the estimated and true values</span>
+            <span class="n">est_value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">estimated_state</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">true_value</span> <span class="o">=</span> <span class="n">holonomic</span><span class="o">.</span><span class="n">last_measurement</span>
+            <span class="n">gain</span> <span class="o">=</span> <span class="n">holonomic</span><span class="o">.</span><span class="n">filter_gain</span>
+
+            <span class="c1"># Stop if either of them are none</span>
+            <span class="k">if</span> <span class="n">est_value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">true_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">updated_states</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">est_value</span> <span class="o">+</span> <span class="n">gain</span> <span class="o">*</span> <span class="p">(</span>
+                    <span class="n">true_value</span> <span class="o">-</span> <span class="n">est_value</span><span class="p">)</span>
+
+        <span class="c1"># Apply updates by overwriting current estimates</span>
+        <span class="n">estimated_state</span><span class="o">.</span><span class="n">update_estimates</span><span class="p">(</span><span class="o">**</span><span class="n">updated_states</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="c1"># if __name__ == &#39;__main__&#39;:</span>
+<span class="c1">#     tmp = np.array([1,2,3])</span>
+<span class="c1">#     gt = GroundTruth(1, tmp, tmp, tmp, tmp, tmp)</span>
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

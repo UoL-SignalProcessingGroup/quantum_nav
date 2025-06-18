@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.6.1. qnav.input.config &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="9.6.2. qnav.input.config_handler" href="config_handler.html" />
+    <link rel="prev" title="9.5.11. qnav.gravity.irish" href="../gravity/irish.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../usage/packages.html">9. Software Components</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#earth">9.1. Earth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#estimation">9.2. Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#fusion">9.3. Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gps">9.4. GPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gravity">9.5. Gravity</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../usage/packages.html#input">9.6. Input</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">9.6.1. config.py</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#config-py">9.6.1.1. config.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.input.config.get_configuration"><code class="docutils literal notranslate"><span class="pre">get_configuration()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.input.config.get_trajectory"><code class="docutils literal notranslate"><span class="pre">get_trajectory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.input.config.get_estimation"><code class="docutils literal notranslate"><span class="pre">get_estimation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.input.config.get_platform_hardware"><code class="docutils literal notranslate"><span class="pre">get_platform_hardware()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.input.config.get_platform_clock"><code class="docutils literal notranslate"><span class="pre">get_platform_clock()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.input.config.get_collector"><code class="docutils literal notranslate"><span class="pre">get_collector()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.input.config.get_displayer"><code class="docutils literal notranslate"><span class="pre">get_displayer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.input.config.get_results_settings"><code class="docutils literal notranslate"><span class="pre">get_results_settings()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.input.config.get_figure_settings"><code class="docutils literal notranslate"><span class="pre">get_figure_settings()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.input.config.print_banner"><code class="docutils literal notranslate"><span class="pre">print_banner()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.input.config.print_line"><code class="docutils literal notranslate"><span class="pre">print_line()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="config_handler.html">9.6.2. config_handler.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#measurement">9.7. Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#output">9.8. Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#quantum">9.9. Quantum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#simulation">9.10. Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#util">9.11. Util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#waypoints">9.12. Waypoints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../usage/packages.html"><span class="section-number">9. </span>Software Components</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">9.6.1. </span>qnav.input.config</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/modules/input/config.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qnav.input.config">
+<span id="qnav-input-config"></span><h1><span class="section-number">9.6.1. </span>qnav.input.config<a class="headerlink" href="#module-qnav.input.config" title="Link to this heading"></a></h1>
+<section id="config-py">
+<h2><span class="section-number">9.6.1.1. </span>config.py<a class="headerlink" href="#config-py" title="Link to this heading"></a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">summary<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Obtains primary simulation components from configuration file.
+This module is used for initialising and obtaining the main
+components used in simulations and for logging details to
+the console.</p>
+</dd>
+<dt class="field-even">author<span class="colon">:</span></dt>
+<dd class="field-even"><p>Michael Wright - <a class="reference external" href="mailto:mjwright&#37;&#52;&#48;liverpool&#46;ac&#46;uk">mjwright<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></p>
+</dd>
+<dt class="field-odd">version<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1.0.0 - First full implemented version.</p>
+</dd>
+</dl>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.input.config.get_configuration">
+<span class="sig-prename descclassname"><span class="pre">qnav.input.config.</span></span><span class="sig-name descname"><span class="pre">get_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><span class="pre">ConfigHandler</span></a></span></span><a class="reference internal" href="../../_modules/qnav/input/config.html#get_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config.get_configuration" title="Link to this definition"></a></dt>
+<dd><p>Initialises and returns a <code class="xref py py-class docutils literal notranslate"><span class="pre">qnav.input.config.ConfigHandler</span></code>
+instance using the contents of the given file. On succession, the
+file’s variables, along with those in any sub-configurations,
+will be parsed and loaded. If not file is given, a default
+settings file will be used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config_file</strong> (<em>Path</em>) – A path for a configuration (.ini) file to use.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An initialised ConfigHandler instance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler">ConfigHandler</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.input.config.get_trajectory">
+<span class="sig-prename descclassname"><span class="pre">qnav.input.config.</span></span><span class="sig-name descname"><span class="pre">get_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><span class="pre">ConfigHandler</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../waypoints/trajectory.html#qnav.waypoints.trajectory.Trajectory" title="qnav.waypoints.trajectory.Trajectory"><span class="pre">Trajectory</span></a></span></span><a class="reference internal" href="../../_modules/qnav/input/config.html#get_trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config.get_trajectory" title="Link to this definition"></a></dt>
+<dd><p>Extracts values and produces ground truth trajectories.
+When called, this function reads the required variables from the
+given configuration and uses them to generate a trajectory. On
+succession, this is return ready for use in a simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><em>ConfigHandler</em></a>) – The ConfigHandler instance to use for simulation settings.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The trajectory ready for use in a simulation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../waypoints/trajectory.html#qnav.waypoints.trajectory.Trajectory" title="qnav.waypoints.trajectory.Trajectory">Trajectory</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.input.config.get_estimation">
+<span class="sig-prename descclassname"><span class="pre">qnav.input.config.</span></span><span class="sig-name descname"><span class="pre">get_estimation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><span class="pre">ConfigHandler</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../waypoints/trajectory.html#qnav.waypoints.trajectory.Trajectory" title="qnav.waypoints.trajectory.Trajectory"><span class="pre">Trajectory</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../estimation/state.html#qnav.estimation.state.EstimatedState" title="qnav.estimation.state.EstimatedState"><span class="pre">EstimatedState</span></a></span></span><a class="reference internal" href="../../_modules/qnav/input/config.html#get_estimation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config.get_estimation" title="Link to this definition"></a></dt>
+<dd><p>Extracts values and produces the initial estimation state.
+When called, this function reads the required variables from the
+given configuration and uses them to initialise the starting
+estimation information. This uses the first record from the
+previously generated trajectory and induces any requested errors.
+On succession, an initial estimated state is return.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><em>ConfigHandler</em></a>) – The ConfigHandler instance to use for simulation settings.</p></li>
+<li><p><strong>trajectory</strong> (<a class="reference internal" href="../waypoints/trajectory.html#qnav.waypoints.trajectory.Trajectory" title="qnav.waypoints.trajectory.Trajectory"><em>Trajectory</em></a>) – The trajectory to be used during the simulation.
+Required to obtain the true state at the first time step.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The initial estimated state to use in the simulation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../estimation/state.html#qnav.estimation.state.EstimatedState" title="qnav.estimation.state.EstimatedState">EstimatedState</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.input.config.get_platform_hardware">
+<span class="sig-prename descclassname"><span class="pre">qnav.input.config.</span></span><span class="sig-name descname"><span class="pre">get_platform_hardware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><span class="pre">ConfigHandler</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimated_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../estimation/state.html#qnav.estimation.state.EstimatedState" title="qnav.estimation.state.EstimatedState"><span class="pre">EstimatedState</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../measurement/sensor.html#qnav.measurement.sensor.SensorFusion" title="qnav.measurement.sensor.SensorFusion"><span class="pre">SensorFusion</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qnav/input/config.html#get_platform_hardware"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config.get_platform_hardware" title="Link to this definition"></a></dt>
+<dd><p>Extracts values and produces the virtual platform hardware instances.
+When called, this function reads the required variables from the
+given configuration and uses them initialize and return the requested
+Sensor-Fusion instance to use during the simulation. On succession,
+a list of SensorFusion classes to use in a simulation are returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><em>ConfigHandler</em></a>) – The ConfigHandler instance to use for simulation settings.</p></li>
+<li><p><strong>estimated_state</strong> (<a class="reference internal" href="../estimation/state.html#qnav.estimation.state.EstimatedState" title="qnav.estimation.state.EstimatedState"><em>EstimatedState</em></a>) – The initial estimates before start of simulation.
+Required as some fusion methods need an initial estimate to start with.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The list of SensorFusion instances to use in a simulation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[<a class="reference internal" href="../measurement/sensor.html#qnav.measurement.sensor.SensorFusion" title="qnav.measurement.sensor.SensorFusion">SensorFusion</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.input.config.get_platform_clock">
+<span class="sig-prename descclassname"><span class="pre">qnav.input.config.</span></span><span class="sig-name descname"><span class="pre">get_platform_clock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><span class="pre">ConfigHandler</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../measurement/clock.html#qnav.measurement.clock.Clock" title="qnav.measurement.clock.Clock"><span class="pre">Clock</span></a></span></span><a class="reference internal" href="../../_modules/qnav/input/config.html#get_platform_clock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config.get_platform_clock" title="Link to this definition"></a></dt>
+<dd><p>Extracts values and produces a virtual platform clock instances.
+When called, this function reads the required variables from the
+given configuration and uses them to initialise and return the
+platform clock to use.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><em>ConfigHandler</em></a>) – The ConfigHandler instance to use for simulation settings.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Clock instance to use in a simulation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../measurement/clock.html#qnav.measurement.clock.Clock" title="qnav.measurement.clock.Clock">Clock</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.input.config.get_collector">
+<span class="sig-prename descclassname"><span class="pre">qnav.input.config.</span></span><span class="sig-name descname"><span class="pre">get_collector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><span class="pre">ConfigHandler</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ResultsCapture</span></span></span><a class="reference internal" href="../../_modules/qnav/input/config.html#get_collector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config.get_collector" title="Link to this definition"></a></dt>
+<dd><p>Extracts values and produces the results collection instance to use.
+When called, this function reads the required variables from the
+given configuration and uses them initialise and return a results
+collection instance, responsible for filtering and collecting
+simulation results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><em>ConfigHandler</em></a>) – The ConfigHandler instance to use for simulation settings.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The ResultsCapture instance to use in a simulation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ResultsCapture</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.input.config.get_displayer">
+<span class="sig-prename descclassname"><span class="pre">qnav.input.config.</span></span><span class="sig-name descname"><span class="pre">get_displayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><span class="pre">ConfigHandler</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../simulation/display.html#qnav.simulation.display.Display" title="qnav.simulation.display.Display"><span class="pre">Display</span></a></span></span><a class="reference internal" href="../../_modules/qnav/input/config.html#get_displayer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config.get_displayer" title="Link to this definition"></a></dt>
+<dd><p>Extracts values and produces the displaying instance to use.
+When called, this function reads the required variables from the
+given configuration and uses them initialise and return a display
+instance, responsible for feeding back real-time information about
+the simulation. Can also be used for stopping the simulation
+prematurely when criteria is met.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><em>ConfigHandler</em></a>) – The ConfigHandler instance to use for simulation settings.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Display instance to use in a simulation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../simulation/display.html#qnav.simulation.display.Display" title="qnav.simulation.display.Display">Display</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.input.config.get_results_settings">
+<span class="sig-prename descclassname"><span class="pre">qnav.input.config.</span></span><span class="sig-name descname"><span class="pre">get_results_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><span class="pre">ConfigHandler</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../_modules/qnav/input/config.html#get_results_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config.get_results_settings" title="Link to this definition"></a></dt>
+<dd><p>Extracts values and produces the results generation settings.
+When called, this function reads the required variables from the
+given configuration and uses them to define how results will be
+gathered after the simulation and exported.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><em>ConfigHandler</em></a>) – The ConfigHandler instance to use for simulation settings.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing settings for exporting results.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.input.config.get_figure_settings">
+<span class="sig-prename descclassname"><span class="pre">qnav.input.config.</span></span><span class="sig-name descname"><span class="pre">get_figure_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><span class="pre">ConfigHandler</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../_modules/qnav/input/config.html#get_figure_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config.get_figure_settings" title="Link to this definition"></a></dt>
+<dd><p>Extracts values to use for results figure and report generation.
+When called, this function reads the required variables from the
+given configuration and returns them in a dictionary. These can
+then be used later for generating the relevant after-simulation
+graphics and report results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference internal" href="config_handler.html#qnav.input.config_handler.ConfigHandler" title="qnav.input.config_handler.ConfigHandler"><em>ConfigHandler</em></a>) – The ConfigHandler instance to use for simulation settings.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary containing figure generation settings.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.input.config.print_banner">
+<span class="sig-prename descclassname"><span class="pre">qnav.input.config.</span></span><span class="sig-name descname"><span class="pre">print_banner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/input/config.html#print_banner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config.print_banner" title="Link to this definition"></a></dt>
+<dd><p>Used to print formatted heading in the output console.
+Simply used to group list points together cleanly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – (Optional) The text to include in the heading.
+If not provided a dividing line will be used.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.input.config.print_line">
+<span class="sig-prename descclassname"><span class="pre">qnav.input.config.</span></span><span class="sig-name descname"><span class="pre">print_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/input/config.html#print_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config.print_line" title="Link to this definition"></a></dt>
+<dd><p>Used to print formated lines in the output console.
+Simply used to produce clean uniformly spaced list points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field</strong> (<em>str</em>) – The text to place on the left-hand side.</p></li>
+<li><p><strong>value</strong> (<em>any</em>) – The value to place on the right-hand side.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../gravity/irish.html" class="btn btn-neutral float-left" title="9.5.11. qnav.gravity.irish" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="config_handler.html" class="btn btn-neutral float-right" title="9.6.2. qnav.input.config_handler" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

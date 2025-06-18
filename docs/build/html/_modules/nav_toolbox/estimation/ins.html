@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nav_toolbox.estimation.ins &mdash; Navigation Toolbox 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Navigation Toolbox
+          </a>
+              <div class="version">
+                Version 1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/installation.html">1. Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">2. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">3. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">4. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/processing.html">5. Estimation Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">6. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">7. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">8. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">9. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">10. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">11. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">12. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Navigation Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nav_toolbox.estimation.ins</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nav_toolbox.estimation.ins</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">======</span>
+<span class="sd">ins.py</span>
+<span class="sd">======</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    Implementation of a basic numerical Inertial Navigation System (INS).</span>
+<span class="sd">    This module contains the standard INS implementation which is based</span>
+<span class="sd">    of simple numerical integration. Other compatible INS solutions will</span>
+<span class="sd">    inherit from this model.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Prof. Jason Ralph - jfralph@liverpool.ac.uk</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First full implementation of module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">nav_toolbox.core.constants</span> <span class="k">as</span> <span class="nn">const</span>
+<span class="kn">import</span> <span class="nn">nav_toolbox.core.transformations</span> <span class="k">as</span> <span class="nn">trans</span>
+
+<span class="kn">from</span> <span class="nn">nav_toolbox.gravity.somigliana</span> <span class="kn">import</span> <span class="n">get_gravity_xyz</span>
+<span class="kn">from</span> <span class="nn">nav_toolbox.core.transformations</span> <span class="kn">import</span> <span class="n">cross_prod_xy</span>
+
+
+<div class="viewcode-block" id="StandardINS">
+<a class="viewcode-back" href="../../../modules/estimation/ins.html#nav_toolbox.estimation.ins.StandardINS">[docs]</a>
+<span class="k">class</span> <span class="nc">StandardINS</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The standard Inertial Navigation System (INS) featured in the project.</span>
+<span class="sd">    This INS solution is based on simple numerical integration. While its</span>
+<span class="sd">    estimation calculations are relatively primitive, it serves as a base</span>
+<span class="sd">    model that other solutions can extend from. The simple implementation</span>
+<span class="sd">    also provides straight-forward means for testing calculations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># All properties of the class</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> \
+        <span class="s1">&#39;_est_position&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_est_velocity&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_est_acceleration&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_est_attitude&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_est_angle_rates&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_altimeter_gain&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_sensor_angles_rad&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_lever_angles&#39;</span><span class="p">,</span> \
+        <span class="s1">&#39;_state_errors&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">velocity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">acceleration</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">attitude</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">angle_rates</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">altimeter_gain</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialises the INS based on initial estimates.</span>
+
+<span class="sd">        :param position: The initial estimated position vector containing the</span>
+<span class="sd">            latitude (in degrees), longitude (in degrees) and altitude (in</span>
+<span class="sd">            metres) respectively.</span>
+<span class="sd">        :type position: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param velocity: The initial estimated velocity vector for the</span>
+<span class="sd">            North, East and Down components respectively (in m/s).</span>
+<span class="sd">        :type velocity: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param acceleration: The initial estimated acceleration vector for</span>
+<span class="sd">            the North, East and Down components respectively (in m/s^2).</span>
+<span class="sd">        :type acceleration: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param attitude: The initial estimated attitude vector for the</span>
+<span class="sd">            Heading, Pitch and Roll components respectively (in degrees).</span>
+<span class="sd">        :type attitude: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param angle_rates: The initial estimated angle rate vector for</span>
+<span class="sd">            the P, Q and R body rates respectively (in deg/s).</span>
+<span class="sd">        :type angle_rates: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param altimeter_gain: The gain amount to use for fusing altimeter</span>
+<span class="sd">            measurements with the current altitude estimate (default=0.1).</span>
+<span class="sd">        :type altimeter_gain: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Initialise the start position estimate.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_position</span> <span class="o">=</span> <span class="n">position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_velocity</span> <span class="o">=</span> <span class="n">velocity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_acceleration</span> <span class="o">=</span> <span class="n">acceleration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_attitude</span> <span class="o">=</span> <span class="n">attitude</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_angle_rates</span> <span class="o">=</span> <span class="n">angle_rates</span>
+
+        <span class="c1"># self._est_position = position.astype(np.float128)</span>
+        <span class="c1"># self._est_velocity = velocity.astype(np.float128)</span>
+        <span class="c1"># self._est_acceleration = acceleration.astype(np.float128)</span>
+        <span class="c1"># self._est_attitude = attitude.astype(np.float128)</span>
+        <span class="c1"># self._est_angle_rates = angle_rates.astype(np.float128)</span>
+
+        <span class="c1"># Initialise the sensor and lever angles.</span>
+        <span class="c1"># TODO: Set these in constructor?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_angles_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lever_angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Set the altimeter gain amounts.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_altimeter_gain</span> <span class="o">=</span> <span class="n">altimeter_gain</span>
+
+        <span class="c1"># Introduced for compatability (not used).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_errors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-9</span>
+
+<div class="viewcode-block" id="StandardINS.take_inertia_measurement">
+<a class="viewcode-back" href="../../../modules/estimation/ins.html#nav_toolbox.estimation.ins.StandardINS.take_inertia_measurement">[docs]</a>
+    <span class="k">def</span> <span class="nf">take_inertia_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                 <span class="n">measured_acceleration</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                 <span class="n">measured_angle_rates</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Processes given acceleration and angle rate measurements and uses</span>
+<span class="sd">        them to update the internal estimation states.</span>
+
+<span class="sd">        :param time_step: The timestep since the last measurement was</span>
+<span class="sd">            provided (in sqrt seconds)</span>
+<span class="sd">        :type time_step: float</span>
+
+<span class="sd">        :param measured_acceleration: The measured acceleration vector for</span>
+<span class="sd">            the North, East and Down components respectively (in m/s^2).</span>
+<span class="sd">        :type measured_acceleration: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param measured_angle_rates: The measured angle rate vector for</span>
+<span class="sd">            the P, Q and R body rates respectively (in deg/s).</span>
+<span class="sd">        :type measured_angle_rates: numpy.ndarray (3-elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">est_lat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_est_position</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">est_alt</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_est_position</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="c1"># Calculate the estimated gravity vector</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">get_gravity_xyz</span><span class="p">(</span><span class="n">est_lat</span><span class="p">,</span> <span class="n">est_alt</span><span class="p">)</span>
+
+        <span class="c1"># Define Angular velocity for Earth&#39;s rotation (in local NED axes)</span>
+        <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">est_lat</span><span class="p">)</span>
+        <span class="n">omega_e</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">OMEGA_E</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)])</span>
+
+        <span class="c1"># Set up acceleration and angle rate measurements (Sensor axes)</span>
+        <span class="n">acceleration_s1</span> <span class="o">=</span> <span class="n">measured_acceleration</span>
+        <span class="n">angle_rate_s1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">measured_angle_rates</span><span class="p">)</span>
+
+        <span class="c1"># Convert measured acceleration and angle rates to Body axes</span>
+        <span class="n">angle_rate_b0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_est_angle_rates</span><span class="p">)</span>
+
+        <span class="n">rot_body2sensor</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_sensor_angles_rad</span><span class="p">)</span>
+        <span class="c1"># # try np.linalg.solve(rot_body2sensor, angle_rate_s1)</span>
+        <span class="c1"># angle_rate_b1 = np.linalg.lstsq(rot_body2sensor, angle_rate_s1, rcond=None)[0]</span>
+        <span class="c1"># acceleration_b1 = np.linalg.lstsq(rot_body2sensor, acceleration_s1, rcond=None)[0] - np.cross(</span>
+        <span class="c1">#     angle_rate_b0, np.cross(angle_rate_b0, self.__lever_angles))</span>
+
+        <span class="n">angle_rate_b1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_body2sensor</span><span class="p">,</span> <span class="n">angle_rate_s1</span><span class="p">)</span>
+        <span class="c1"># acceleration_b1 = np.linalg.solve(rot_body2sensor, acceleration_s1) - np.cross(</span>
+        <span class="c1">#     angle_rate_b0, np.cross(angle_rate_b0, self._lever_angles))</span>
+        <span class="n">acceleration_b1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_body2sensor</span><span class="p">,</span> <span class="n">acceleration_s1</span><span class="p">)</span> <span class="o">-</span> <span class="n">cross_prod_xy</span><span class="p">(</span>
+            <span class="n">angle_rate_b0</span><span class="p">,</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">angle_rate_b0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lever_angles</span><span class="p">))</span>
+
+        <span class="c1"># Calculate estimated body axes from Earth-oriented axes.</span>
+        <span class="n">attitude_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_est_attitude</span><span class="p">)</span>
+        <span class="n">psi_0</span><span class="p">,</span> <span class="n">theta_0</span><span class="p">,</span> <span class="n">phi_0</span> <span class="o">=</span> <span class="n">attitude_0</span>
+        <span class="n">rot_earth2body_0</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">attitude_0</span><span class="p">)</span>
+
+        <span class="c1"># ------------------------------------------------------------------------</span>
+
+        <span class="c1"># Convert position to local NED co-ordinates</span>
+        <span class="n">ref_lla</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_position</span>
+        <span class="n">position_e0</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">lla2ned</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">)</span>
+
+        <span class="c1"># Convert velocity from body axes to Earth Axes</span>
+        <span class="n">velocity_b0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_velocity</span>
+        <span class="c1"># velocity_e0 = np.linalg.lstsq(rot_earth2body_0, velocity_b0, rcond=None)[0]</span>
+        <span class="n">velocity_e0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_earth2body_0</span><span class="p">,</span> <span class="n">velocity_b0</span><span class="p">)</span>
+
+        <span class="c1"># Convert measured acceleration from body axes to Earth axes</span>
+        <span class="c1"># and remove Coriolis and gravity terms</span>
+        <span class="c1"># acceleration_e1 = np.linalg.lstsq(</span>
+        <span class="c1">#     rot_earth2body_0, acceleration_b1, rcond=None)[0] + g</span>
+        <span class="n">acceleration_e1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_earth2body_0</span><span class="p">,</span> <span class="n">acceleration_b1</span><span class="p">)</span> <span class="o">+</span> <span class="n">g</span>
+
+        <span class="n">omega_tr</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">get_transport_rate</span><span class="p">(</span><span class="n">ref_lla</span><span class="p">,</span> <span class="n">velocity_e0</span><span class="p">)</span>
+        <span class="c1"># acceleration_e1 -= 2.0 * np.cross(omega_e, velocity_e0)</span>
+        <span class="c1"># acceleration_e1 -= np.cross(omega_tr, velocity_e0)  # NEW</span>
+        <span class="n">acceleration_e1</span> <span class="o">-=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">omega_e</span><span class="p">,</span> <span class="n">velocity_e0</span><span class="p">)</span>
+        <span class="n">acceleration_e1</span> <span class="o">-=</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">omega_tr</span><span class="p">,</span> <span class="n">velocity_e0</span><span class="p">)</span>  <span class="c1"># NEW</span>
+
+        <span class="n">position_e1</span> <span class="o">=</span> <span class="n">position_e0</span> <span class="o">+</span> <span class="n">velocity_e0</span> <span class="o">*</span> <span class="n">time_step</span> \
+            <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">acceleration_e1</span> <span class="o">*</span> <span class="n">time_step</span> <span class="o">**</span> <span class="mi">2</span>
+
+        <span class="c1"># Velocity increments (calculated in Earth axes)</span>
+        <span class="n">velocity_e1</span> <span class="o">=</span> <span class="n">velocity_e0</span> <span class="o">+</span> <span class="n">acceleration_e1</span> <span class="o">*</span> <span class="n">time_step</span>
+        <span class="n">angle_rate_b1</span> <span class="o">-=</span> <span class="n">rot_earth2body_0</span> <span class="o">@</span> <span class="n">omega_e</span>
+        <span class="n">angle_rate_b1</span> <span class="o">-=</span> <span class="n">rot_earth2body_0</span> <span class="o">@</span> <span class="n">omega_tr</span>
+        <span class="c1"># angle_rate_b1 += rot_earth2body_0 @ omega_tr   # NEW</span>
+
+        <span class="n">d_theta_dt_1</span> <span class="o">=</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi_0</span><span class="p">)</span> <span class="o">-</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi_0</span><span class="p">)</span>
+        <span class="n">d_psi_dt_1</span> <span class="o">=</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi_0</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta_0</span><span class="p">)</span> <span class="o">+</span> \
+            <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi_0</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta_0</span><span class="p">)</span>
+        <span class="n">d_phi_dt_1</span> <span class="o">=</span> <span class="n">angle_rate_b1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">d_psi_dt_1</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta_0</span><span class="p">)</span>
+
+        <span class="c1"># Attitudes</span>
+        <span class="n">d_psi_1</span> <span class="o">=</span> <span class="n">d_psi_dt_1</span> <span class="o">*</span> <span class="n">time_step</span>
+        <span class="n">d_theta_1</span> <span class="o">=</span> <span class="n">d_theta_dt_1</span> <span class="o">*</span> <span class="n">time_step</span>
+        <span class="n">d_phi_1</span> <span class="o">=</span> <span class="n">d_phi_dt_1</span> <span class="o">*</span> <span class="n">time_step</span>
+
+        <span class="c1"># Add attitude angle updates</span>
+        <span class="n">pi</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span>
+        <span class="n">attitude_b1</span> <span class="o">=</span> <span class="n">attitude_0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">d_psi_1</span><span class="p">,</span> <span class="n">d_theta_1</span><span class="p">,</span> <span class="n">d_phi_1</span><span class="p">])</span>
+        <span class="n">attitude_b1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">attitude_b1</span> <span class="o">+</span> <span class="n">pi</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">pi</span>
+
+        <span class="c1"># Rotation matrix from Earth to body axes with updated rotation angles</span>
+        <span class="n">rot_earth2body_1</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">attitude_b1</span><span class="p">)</span>
+
+        <span class="c1"># lat_rad = math.radians(position_e1[0])</span>
+        <span class="c1"># g = get_gravity_xyz(position_e1[0], position_e1[2])</span>
+        <span class="c1"># omega_e = const.OMEGA_E * np.array([math.cos(lat_rad), 0.0, -math.sin(lat_rad)])</span>
+        <span class="c1"># omega_tr = trans.get_transport_rate(position_e1, velocity_e1)</span>
+
+        <span class="c1"># Add effect of Coriolis term due to Earth&#39;s rotation (in Local NED axes)</span>
+        <span class="c1"># acceleration_e1 += 2.0 * np.cross(omega_e, velocity_e1)</span>
+        <span class="c1"># acceleration_e1 += np.cross(omega_tr, velocity_e1)</span>
+        <span class="n">acceleration_e1</span> <span class="o">+=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">omega_e</span><span class="p">,</span> <span class="n">velocity_e1</span><span class="p">)</span>
+        <span class="n">acceleration_e1</span> <span class="o">+=</span> <span class="n">cross_prod_xy</span><span class="p">(</span><span class="n">omega_tr</span><span class="p">,</span> <span class="n">velocity_e1</span><span class="p">)</span>
+
+        <span class="c1"># Convert Velocities from Earth Axes to Body Axes</span>
+        <span class="n">velocity_b1</span> <span class="o">=</span> <span class="n">rot_earth2body_1</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">velocity_e1</span><span class="p">)</span>
+
+        <span class="c1"># Add gravity terms and convert acceleration from Earth axes to Body Axes</span>
+        <span class="n">acceleration_b1</span> <span class="o">=</span> <span class="n">rot_earth2body_1</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">acceleration_e1</span> <span class="o">-</span> <span class="n">g</span><span class="p">)</span>
+
+        <span class="c1"># Update angle rate to include Earth rotation rate</span>
+        <span class="c1"># angle_rate_b1 += rot_earth2body_1.dot(omega_e)</span>
+
+        <span class="c1"># Update the estimated variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_position</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">ned2lla</span><span class="p">(</span><span class="n">position_e1</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_velocity</span> <span class="o">=</span> <span class="n">velocity_b1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_acceleration</span> <span class="o">=</span> <span class="n">acceleration_b1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_attitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">attitude_b1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_angle_rates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">angle_rate_b1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="StandardINS.take_altimeter_measurement">
+<a class="viewcode-back" href="../../../modules/estimation/ins.html#nav_toolbox.estimation.ins.StandardINS.take_altimeter_measurement">[docs]</a>
+    <span class="k">def</span> <span class="nf">take_altimeter_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measured_altitude</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Processes given altitude measurement and uses it to update the</span>
+<span class="sd">        internal estimation states.</span>
+
+<span class="sd">        :param measured_altitude: The measured altitude value (in metres</span>
+<span class="sd">            above sea level) to fuse with the current estimated altitude.</span>
+<span class="sd">        :type measured_altitude: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_position</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_altimeter_gain</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_position</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> \
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_altimeter_gain</span> <span class="o">*</span> <span class="n">measured_altitude</span></div>
+
+
+<div class="viewcode-block" id="StandardINS.set_altimeter_gain">
+<a class="viewcode-back" href="../../../modules/estimation/ins.html#nav_toolbox.estimation.ins.StandardINS.set_altimeter_gain">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_altimeter_gain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_gain</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the gain amount for processing altimeter measurements.</span>
+
+<span class="sd">        :param new_gain: The new gain amount (between 0 and 1) for fusing</span>
+<span class="sd">            given altimeter measurements with the current estimated altitude.</span>
+<span class="sd">        :type new_gain: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">new_gain</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span> \
+            <span class="s2">&quot;Altimeter gain should be between 0.0 and 1.0&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_altimeter_gain</span> <span class="o">=</span> <span class="n">new_gain</span></div>
+
+
+<div class="viewcode-block" id="StandardINS.get_estimate">
+<a class="viewcode-back" href="../../../modules/estimation/ins.html#nav_toolbox.estimation.ins.StandardINS.get_estimate">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the current estimated states as a tuple.</span>
+
+<span class="sd">        :return: A tuple containing the estimated position, velocity,</span>
+<span class="sd">            acceleration, attitude and angle rates respectively.</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_est_position</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_est_velocity</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_est_acceleration</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_est_attitude</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_est_angle_rates</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="StandardINS.get_estimate_array">
+<a class="viewcode-back" href="../../../modules/estimation/ins.html#nav_toolbox.estimation.ins.StandardINS.get_estimate_array">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_estimate_array</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the current estimated states as an array.</span>
+
+<span class="sd">        :return: An array containing the estimated position, velocity,</span>
+<span class="sd">            acceleration, attitude and angle rates respectively.</span>
+<span class="sd">        :rtype: numpy.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_estimate</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="StandardINS.overwrite_estimates">
+<a class="viewcode-back" href="../../../modules/estimation/ins.html#nav_toolbox.estimation.ins.StandardINS.overwrite_estimates">[docs]</a>
+    <span class="k">def</span> <span class="nf">overwrite_estimates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="n">velocity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">acceleration</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="n">attitude</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">angle_rates</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overwrites selected current estimated states.</span>
+<span class="sd">        This is namely used when estimation fusion is applied externally.</span>
+
+<span class="sd">        :param position: The replacement position vector containing the</span>
+<span class="sd">            latitude (in degrees), longitude (in degrees) and altitude</span>
+<span class="sd">            (in metres) respectively.</span>
+<span class="sd">        :type position: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param velocity: The replacement velocity vector for the</span>
+<span class="sd">            North, East and Down components respectively (in m/s).</span>
+<span class="sd">        :type velocity: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param acceleration: The replacement acceleration vector for</span>
+<span class="sd">            the North, East and Down components respectively (in m/s^2).</span>
+<span class="sd">        :type acceleration: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param attitude: The replacement attitude vector for the Heading,</span>
+<span class="sd">            Pitch and Roll components respectively (in degrees).</span>
+<span class="sd">        :type attitude: numpy.ndarray (3-elements)</span>
+
+<span class="sd">        :param angle_rates: The replacement angle rate vector for the</span>
+<span class="sd">            P, Q and R body rates respectively (in deg/s).</span>
+<span class="sd">        :type angle_rates: numpy.ndarray (3-elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">position</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_est_position</span> <span class="o">=</span> <span class="n">position</span>
+
+        <span class="k">if</span> <span class="n">velocity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_est_velocity</span> <span class="o">=</span> <span class="n">velocity</span>
+
+        <span class="k">if</span> <span class="n">acceleration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_est_acceleration</span> <span class="o">=</span> <span class="n">acceleration</span>
+
+        <span class="k">if</span> <span class="n">attitude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_est_attitude</span> <span class="o">=</span> <span class="n">attitude</span>
+
+        <span class="k">if</span> <span class="n">angle_rates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_est_angle_rates</span> <span class="o">=</span> <span class="n">angle_rates</span></div>
+
+
+<div class="viewcode-block" id="StandardINS.get_state_errors">
+<a class="viewcode-back" href="../../../modules/estimation/ins.html#nav_toolbox.estimation.ins.StandardINS.get_state_errors">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_state_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the current state error matrix.</span>
+
+<span class="sd">        :return: The current state error matrix.</span>
+<span class="sd">        :rtype: numpy.ndarray (15-by-15 elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_errors</span></div>
+
+
+<div class="viewcode-block" id="StandardINS.overwrite_state_errors">
+<a class="viewcode-back" href="../../../modules/estimation/ins.html#nav_toolbox.estimation.ins.StandardINS.overwrite_state_errors">[docs]</a>
+    <span class="k">def</span> <span class="nf">overwrite_state_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overwrites the current state error matrix.</span>
+<span class="sd">        This is namely used when estimation fusion is applied externally.</span>
+
+<span class="sd">        :param errors: The updated state error matrix.</span>
+<span class="sd">        :type errors: numpy.ndarray (15-by-15 elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">errors</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span> \
+            <span class="s2">&quot;State error matrix must be of size 15-by-15!&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_errors</span> <span class="o">=</span> <span class="n">errors</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

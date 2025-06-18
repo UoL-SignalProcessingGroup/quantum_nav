@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.11.3. qnav.util.system &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="9.11.4. qnav.util.rng" href="rng.html" />
+    <link rel="prev" title="9.11.2. qnav.util.connections" href="connections.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../usage/packages.html">9. Software Components</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#earth">9.1. Earth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#estimation">9.2. Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#fusion">9.3. Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gps">9.4. GPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gravity">9.5. Gravity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#input">9.6. Input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#measurement">9.7. Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#output">9.8. Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#quantum">9.9. Quantum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#simulation">9.10. Simulation</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../usage/packages.html#util">9.11. Util</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="constants.html">9.11.1. constants.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="connections.html">9.11.2. connections.py</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">9.11.3. system.py</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#common-py">9.11.3.1. common.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.system.get_toolbox_version"><code class="docutils literal notranslate"><span class="pre">get_toolbox_version()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.system.get_system_name"><code class="docutils literal notranslate"><span class="pre">get_system_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.system.get_platform_details"><code class="docutils literal notranslate"><span class="pre">get_platform_details()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.system.is_window_platform"><code class="docutils literal notranslate"><span class="pre">is_window_platform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.system.is_mac_platform"><code class="docutils literal notranslate"><span class="pre">is_mac_platform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.util.system.is_linux_platform"><code class="docutils literal notranslate"><span class="pre">is_linux_platform()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="rng.html">9.11.4. rng.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#waypoints">9.12. Waypoints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../usage/packages.html"><span class="section-number">9. </span>Software Components</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">9.11.3. </span>qnav.util.system</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/modules/util/system.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qnav.util.system">
+<span id="qnav-util-system"></span><h1><span class="section-number">9.11.3. </span>qnav.util.system<a class="headerlink" href="#module-qnav.util.system" title="Link to this heading"></a></h1>
+<section id="common-py">
+<h2><span class="section-number">9.11.3.1. </span>common.py<a class="headerlink" href="#common-py" title="Link to this heading"></a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">summary<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Provides commonly used project functions.
+This module contains commonly used (non-calculation) functions that are
+called throughout the project. These are namely for providing information
+about the project and the current platform.</p>
+</dd>
+<dt class="field-even">author<span class="colon">:</span></dt>
+<dd class="field-even"><p>Michael Wright - <a class="reference external" href="mailto:mjwright&#37;&#52;&#48;liverpool&#46;ac&#46;uk">mjwright<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></p>
+</dd>
+<dt class="field-odd">version<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1.0.0 - First full implementation of module</p>
+</dd>
+</dl>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.system.get_toolbox_version">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.system.</span></span><span class="sig-name descname"><span class="pre">get_toolbox_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/qnav/util/system.html#get_toolbox_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.system.get_toolbox_version" title="Link to this definition"></a></dt>
+<dd><p>A simple function to return the current version number of the toolbox.
+This is useful for reporting information that may dependent on the build
+of the software, such as generated results or reported errors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The decimal version number for the toolbox.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.system.get_system_name">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.system.</span></span><span class="sig-name descname"><span class="pre">get_system_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/qnav/util/system.html#get_system_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.system.get_system_name" title="Link to this definition"></a></dt>
+<dd><p>Return a short string for identifying the host operating system. This is
+namely used for identifying the operating system in a human-readable
+format. This is useful for identifying the type of system used when
+running an experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>return_min</strong> (<em>bool</em>) – If set to true, only the operating system name
+and major version number will be returned.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A short string used for identifying the host operating system.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.system.get_platform_details">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.system.</span></span><span class="sig-name descname"><span class="pre">get_platform_details</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/qnav/util/system.html#get_platform_details"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.system.get_platform_details" title="Link to this definition"></a></dt>
+<dd><p>A simple function that returns a description of the platform.
+This function returns a string including the python version, processor
+platform architecture of the host system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string describing the platform.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.system.is_window_platform">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.system.</span></span><span class="sig-name descname"><span class="pre">is_window_platform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/qnav/util/system.html#is_window_platform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.system.is_window_platform" title="Link to this definition"></a></dt>
+<dd><p>A simple function which will return true if the system’s operating system
+is Microsoft Windows based. Otherwise, this function will return false.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns true if the host operating system is Windows based.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.system.is_mac_platform">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.system.</span></span><span class="sig-name descname"><span class="pre">is_mac_platform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/qnav/util/system.html#is_mac_platform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.system.is_mac_platform" title="Link to this definition"></a></dt>
+<dd><p>A simple function which will return true if the system’s operating system
+is Mac-OS based. Otherwise, this function will return false.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns true if the host operating system is Mac-OS based.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qnav.util.system.is_linux_platform">
+<span class="sig-prename descclassname"><span class="pre">qnav.util.system.</span></span><span class="sig-name descname"><span class="pre">is_linux_platform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/qnav/util/system.html#is_linux_platform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.util.system.is_linux_platform" title="Link to this definition"></a></dt>
+<dd><p>A simple function which will return true if the system’s operating system
+is Linux/Unix based. Otherwise, this function will return false.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns true if the host operating system is Linux based.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="connections.html" class="btn btn-neutral float-left" title="9.11.2. qnav.util.connections" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="rng.html" class="btn btn-neutral float-right" title="9.11.4. qnav.util.rng" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

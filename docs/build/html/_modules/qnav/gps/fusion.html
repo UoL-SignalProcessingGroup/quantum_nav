@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.gps.fusion &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.gps.fusion</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.gps.fusion</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=========</span>
+<span class="sd">fusion.py</span>
+<span class="sd">=========</span>
+
+<span class="sd">:summary:</span>
+<span class="sd">    A collection of GPS/GNSS methods for fusing GPS measurements with INS.</span>
+<span class="sd">    This module contains all the GPS fusion methods for merging GPS</span>
+<span class="sd">    position and velocity updates with the INS current estimation.</span>
+<span class="sd">    Simpler methods will simply merge the estimates, whereas more</span>
+<span class="sd">    sophisticated methods will adapt expected errors to compensate</span>
+<span class="sd">    for INS noise/drift.</span>
+
+<span class="sd">:authors:</span>
+<span class="sd">    | Kallum O&#39;Hara - sgkohara@liverpool.ac.uk</span>
+<span class="sd">    | Michael Wright - mjwright@liverpool.ac.uk</span>
+
+<span class="sd">:version:</span>
+<span class="sd">    1.0.0 - First implementation of this module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Collection</span>
+
+<span class="kn">from</span> <span class="nn">qnav.gps.satellite</span> <span class="kn">import</span> <span class="n">Satellite</span>
+<span class="kn">from</span> <span class="nn">qnav.gps.sensor</span> <span class="kn">import</span> <span class="n">GpsSensor</span>
+<span class="kn">from</span> <span class="nn">qnav.estimation.state</span> <span class="kn">import</span> <span class="n">EstimatedState</span>
+<span class="kn">from</span> <span class="nn">qnav.estimation.state</span> <span class="kn">import</span> <span class="n">KalmanEstimatedState</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">SensorFusion</span>
+<span class="kn">from</span> <span class="nn">qnav.measurement.sensor</span> <span class="kn">import</span> <span class="n">FusionTrigger</span>
+<span class="kn">from</span> <span class="nn">qnav.fusion.kalman</span> <span class="kn">import</span> <span class="n">state_vector2ned</span>
+<span class="kn">from</span> <span class="nn">qnav.fusion.kalman</span> <span class="kn">import</span> <span class="n">ned2state_vector</span>
+
+<span class="kn">import</span> <span class="nn">qnav.util.transformations</span> <span class="k">as</span> <span class="nn">trans</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+
+<div class="viewcode-block" id="GpsFusion">
+<a class="viewcode-back" href="../../../modules/gps/fusion.html#qnav.gps.fusion.GpsFusion">[docs]</a>
+<span class="k">class</span> <span class="nc">GpsFusion</span><span class="p">(</span><span class="n">SensorFusion</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The abstract base class for fusion methods.</span>
+<span class="sd">    This class outlines the structure each fusion method must extend from.</span>
+<span class="sd">    This essentially serves as a template class containing methods and</span>
+<span class="sd">    properties that must be incorporated by each GPS fusion method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gps_sensor</span><span class="p">:</span> <span class="n">GpsSensor</span><span class="p">,</span>
+                 <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">,</span>
+                 <span class="n">estimated_clock_bias</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                 <span class="n">estimated_clock_drift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                 <span class="n">burn_in_iterations</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Abstract class constructor defining the inputs and default behaviour.</span>
+<span class="sd">        Initializes the fusion with GPS sensor, initial estimated state</span>
+<span class="sd">        and optional estimates for the clock bias and drift rates.</span>
+
+<span class="sd">        :param gps_sensor: The GPS sensor used to obtain GPS measurements.</span>
+<span class="sd">        :type gps_sensor: GpsSensor</span>
+
+<span class="sd">        :param estimated_state: The initial estimated state.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+
+<span class="sd">        :param estimated_clock_bias: (Optional) The estimated clock bias</span>
+<span class="sd">            error. TODO: ADD UNITS!</span>
+<span class="sd">        :type estimated_clock_bias: float</span>
+
+<span class="sd">        :param estimated_clock_drift: (Optional) The estimated clock bias</span>
+<span class="sd">            drift rate error. TODO: ADD UNITS</span>
+<span class="sd">        :type estimated_clock_drift: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Call parent class&#39;s constructor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">FusionTrigger</span><span class="o">.</span><span class="n">ANY</span><span class="p">,</span> <span class="n">gps_sensor</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gps_sensor</span> <span class="o">=</span> <span class="n">gps_sensor</span>
+
+        <span class="c1"># Record the amount of burn in iterations requested.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_burn_in_iterations</span> <span class="o">=</span> <span class="n">burn_in_iterations</span>
+
+        <span class="c1"># Unpack the estimated state</span>
+        <span class="n">est_position</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">position</span>
+        <span class="n">est_velocity</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">velocity</span>
+        <span class="n">est_attitude</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">attitude</span>
+
+        <span class="c1"># Convert velocity from body to earth frame</span>
+        <span class="n">rot_earth2body</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">est_attitude</span><span class="p">))</span>
+        <span class="n">est_velocity_ned</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rot_earth2body</span><span class="p">,</span> <span class="n">est_velocity</span><span class="p">)</span>
+
+        <span class="c1"># Record the initial estimated position in ECEF</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_estimated_pos_ecef</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">lla2ecef</span><span class="p">(</span><span class="n">est_position</span><span class="p">)</span>
+
+        <span class="c1"># Record the initial estimated velocity in ECEF</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_estimated_vel_ecef</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">vned2vecef</span><span class="p">(</span><span class="n">est_velocity_ned</span><span class="p">,</span> <span class="n">est_position</span><span class="p">)</span>
+
+        <span class="c1"># Record the initial estimated clock bias and drift</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_estimated_clock_bias</span> <span class="o">=</span> <span class="n">estimated_clock_bias</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_estimated_clock_drift</span> <span class="o">=</span> <span class="n">estimated_clock_drift</span>
+
+<div class="viewcode-block" id="GpsFusion.solve">
+<a class="viewcode-back" href="../../../modules/gps/fusion.html#qnav.gps.fusion.GpsFusion.solve">[docs]</a>
+    <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs solving of GPS measurements to estimated values.</span>
+<span class="sd">        Essentially this translates the GPS satellite measurements into</span>
+<span class="sd">        internal local estimates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># If needed to perform burn in iterations</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_burn_in_iterations</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_burn_in_iterations</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gps_sensor</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_estimates</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_estimates</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_update_estimates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        When internally called, updates the estimates using last measurements.</span>
+<span class="sd">        Uses the latest GPS satellite measurements to update the internally</span>
+<span class="sd">        estimated position, velocity, clock bias and clock drift rate. This</span>
+<span class="sd">        is provided as a helper for the required perform_fusion method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Obtain the latest measurements</span>
+        <span class="c1"># measurements = self._gps_sensor.last_measurement</span>
+        <span class="n">measurements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gps_sensor</span><span class="o">.</span><span class="n">last_measurement</span><span class="p">[</span><span class="s1">&#39;sat_measurements&#39;</span><span class="p">]</span>
+        <span class="n">num_measurements</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">measurements</span><span class="p">)</span>  <span class="c1"># Count the satellites</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">num_measurements</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>  <span class="c1"># Satellite Geometric Matrix</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_measurements</span><span class="p">)</span>  <span class="c1"># Residuals Vector</span>
+        <span class="n">r_vel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_measurements</span><span class="p">)</span>  <span class="c1"># Velocity Residuals Vector</span>
+
+        <span class="c1"># For each satellite in the collection:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">measurement</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">measurements</span><span class="p">):</span>
+
+            <span class="c1"># Extract the satellite measurement properties.</span>
+            <span class="n">pseudo_range</span> <span class="o">=</span> <span class="n">measurement</span><span class="p">[</span><span class="s1">&#39;pseudoRangeNoisy&#39;</span><span class="p">]</span>
+            <span class="n">pseudo_range_rate</span> <span class="o">=</span> <span class="n">measurement</span><span class="p">[</span><span class="s1">&#39;pseudoRangeRatesNoisy&#39;</span><span class="p">]</span>
+            <span class="n">sat_pos_ecef</span> <span class="o">=</span> <span class="n">measurement</span><span class="p">[</span><span class="s1">&#39;satellitePosition&#39;</span><span class="p">]</span>
+            <span class="n">sat_vel_ecef</span> <span class="o">=</span> <span class="n">measurement</span><span class="p">[</span><span class="s1">&#39;satelliteVelocity&#39;</span><span class="p">]</span>
+
+            <span class="c1"># Relative position of satellite to estimated antenna position</span>
+            <span class="n">d_p</span> <span class="o">=</span> <span class="n">sat_pos_ecef</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimated_pos_ecef</span>
+
+            <span class="c1"># Estimated pseudo range</span>
+            <span class="c1"># est_rho = (np.dot(d_p.transpose(), d_p)) ** 0.5</span>
+            <span class="n">est_rho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d_p</span><span class="p">)</span>  <span class="c1"># Optimised</span>
+
+            <span class="c1"># Pseudo range residual</span>
+            <span class="n">rho_res</span> <span class="o">=</span> <span class="n">pseudo_range</span> <span class="o">-</span> <span class="n">est_rho</span>
+
+            <span class="c1"># Estimated relative velocity</span>
+            <span class="n">est_relative_vel</span> <span class="o">=</span> <span class="p">(</span><span class="n">sat_vel_ecef</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimated_vel_ecef</span><span class="p">)</span>
+
+            <span class="c1"># Estimated Line-of-sight vector</span>
+            <span class="n">est_los</span> <span class="o">=</span> <span class="n">d_p</span> <span class="o">/</span> <span class="n">est_rho</span>
+
+            <span class="c1"># Estimated Pseudo range Rate</span>
+            <span class="n">est_rho_rate</span> <span class="o">=</span> <span class="n">est_los</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">est_relative_vel</span><span class="p">)</span>
+
+            <span class="c1"># est_rho_rate = est_rho_rate</span>
+            <span class="n">rho_rate_res</span> <span class="o">=</span> <span class="n">pseudo_range_rate</span> <span class="o">-</span> <span class="n">est_rho_rate</span>
+
+            <span class="c1"># Update Residuals Vector</span>
+            <span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rho_res</span>
+            <span class="n">r_vel</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rho_rate_res</span>
+
+            <span class="c1"># Update Satellite Geometric Matrix</span>
+            <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">d_p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">est_rho</span><span class="p">,</span> <span class="o">-</span><span class="n">d_p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">est_rho</span><span class="p">,</span> <span class="o">-</span><span class="n">d_p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">est_rho</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Update the estimated position and estimated clock bias.</span>
+        <span class="n">update_vec_pos</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">))</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">T</span><span class="p">))</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_estimated_pos_ecef</span> <span class="o">+=</span> <span class="n">update_vec_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_estimated_clock_bias</span> <span class="o">+=</span> <span class="n">update_vec_pos</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Update the estimated velocity and estimated clock bias drift.</span>
+        <span class="n">update_vec_vel</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">))</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">T</span><span class="p">))</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r_vel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_estimated_vel_ecef</span> <span class="o">+=</span> <span class="n">update_vec_vel</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_estimated_clock_drift</span> <span class="o">+=</span> <span class="n">update_vec_vel</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_hold_update</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function used to determine if GPS updates should be held.</span>
+<span class="sd">        This is subject to the last measurements.</span>
+
+<span class="sd">        :return: True if fusion updates should NOT be applied at this time.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">last_measurement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gps_sensor</span><span class="o">.</span><span class="n">last_measurement</span>
+        <span class="k">return</span> <span class="n">last_measurement</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">last_measurement</span><span class="p">[</span><span class="s1">&#39;is_usable&#39;</span><span class="p">]</span></div>
+
+
+
+
+<div class="viewcode-block" id="GpsFixedGainFusion">
+<a class="viewcode-back" href="../../../modules/gps/fusion.html#qnav.gps.fusion.GpsFixedGainFusion">[docs]</a>
+<span class="k">class</span> <span class="nc">GpsFixedGainFusion</span><span class="p">(</span><span class="n">GpsFusion</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs simple fixed-gain GPS fusion.</span>
+<span class="sd">    Updates the estimated state&#39;s position and velocity using simple fixed</span>
+<span class="sd">    gained fusion. Can be used with any estimated state class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gps_sensor</span><span class="p">:</span> <span class="n">GpsSensor</span><span class="p">,</span>
+                 <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">,</span>
+                 <span class="n">gain_amount</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates fixed-gained GPS fusion instance.</span>
+<span class="sd">        Performs fixed-gained fusion for GPS measurements with given sensors</span>
+<span class="sd">        and gain amount.</span>
+
+<span class="sd">        :param gps_sensor: The GPS sensor used to obtain GPS measurements.</span>
+<span class="sd">        :type gps_sensor: GpsSensor</span>
+
+<span class="sd">        :param estimated_state: The initial estimated state.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+
+<span class="sd">        :param gain_amount: The gain amount to apply between 0.0 and 1.0.</span>
+<span class="sd">        :type gain_amount: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Call parent class&#39;s constructor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">gps_sensor</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">)</span>
+
+        <span class="c1"># Record the gain amount</span>
+        <span class="k">if</span> <span class="n">gain_amount</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">gain_amount</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;gain_amount must be between 0 and 1&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gain_amount</span> <span class="o">=</span> <span class="n">gain_amount</span>
+
+
+<div class="viewcode-block" id="GpsFixedGainFusion.perform_fusion">
+<a class="viewcode-back" href="../../../modules/gps/fusion.html#qnav.gps.fusion.GpsFixedGainFusion.perform_fusion">[docs]</a>
+    <span class="k">def</span> <span class="nf">perform_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">EstimatedState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs GPS correction using simple fixed-gained fusion.</span>
+
+<span class="sd">        :param estimated_state: The current estimated state.</span>
+<span class="sd">        :type estimated_state: EstimatedState</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Update the current internal states</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+
+        <span class="c1"># TODO: New - Used for delaying zones</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hold_update</span><span class="p">():</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Unpack the estimated state</span>
+        <span class="n">ins_position</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">position</span>
+        <span class="n">ins_velocity</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">velocity</span>
+        <span class="n">ins_attitude</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">attitude</span>
+
+        <span class="c1"># Obtain the vehicle&#39;s position currently estimated by the GPS</span>
+        <span class="n">gps_est_position</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">ecef2lla</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimated_pos_ecef</span><span class="p">)</span>
+
+        <span class="c1"># Convert GPS velocity into local NED/Earth axes</span>
+        <span class="n">gps_velocity_ned</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">vel_ecef2vel_ned</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_estimated_vel_ecef</span><span class="p">,</span> <span class="n">gps_est_position</span><span class="p">)</span>
+
+        <span class="c1"># GPS velocity is now produced in NED axes rather than ECEF</span>
+        <span class="n">attitude_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">ins_attitude</span><span class="p">)</span>
+        <span class="n">rot_earth2body</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">rotate_3d</span><span class="p">(</span><span class="o">*</span><span class="n">attitude_rad</span><span class="p">)</span>
+
+        <span class="c1"># Convert GPS velocity from Earth axes to Body axes</span>
+        <span class="n">gps_velocity</span> <span class="o">=</span> <span class="n">rot_earth2body</span> <span class="o">@</span> <span class="n">gps_velocity_ned</span>
+
+        <span class="n">ins_position</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gain_amount</span> <span class="o">*</span> <span class="p">(</span><span class="n">gps_est_position</span> <span class="o">-</span> <span class="n">ins_position</span><span class="p">)</span>
+        <span class="n">ins_velocity</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gain_amount</span> <span class="o">*</span> <span class="p">(</span><span class="n">gps_velocity</span> <span class="o">-</span> <span class="n">ins_velocity</span><span class="p">)</span>
+
+        <span class="c1"># Finally, update the current INS estimates</span>
+        <span class="n">estimated_state</span><span class="o">.</span><span class="n">update_estimates</span><span class="p">(</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">ins_position</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="n">ins_velocity</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="GpsLooseFusion">
+<a class="viewcode-back" href="../../../modules/gps/fusion.html#qnav.gps.fusion.GpsLooseFusion">[docs]</a>
+<span class="k">class</span> <span class="nc">GpsLooseFusion</span><span class="p">(</span><span class="n">GpsFusion</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs loosely-coupled based GPS fusion.</span>
+<span class="sd">    A fusion method that uses loosely-coupled fusion for updating the INS</span>
+<span class="sd">    with given GPS estimates. To further improve the accuracy of the</span>
+<span class="sd">    navigation solution, the error states are fed back to the INS.</span>
+<span class="sd">    Must be used with a Kalman estimated state class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gps_sensor</span><span class="p">:</span> <span class="n">GpsSensor</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">KalmanEstimatedState</span><span class="p">,</span>
+                 <span class="n">pos_cov_mat_ned</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">vel_cov_mat_ned</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a Loosely-coupled GPS fusion instance.</span>
+<span class="sd">        This instance is initialed by setting the initial position and</span>
+<span class="sd">        velocity covariance matrices.</span>
+
+<span class="sd">        :param gps_sensor: The GPS sensor used to obtain GPS measurements.</span>
+<span class="sd">        :type gps_sensor: GpsSensor</span>
+
+<span class="sd">        :param estimated_state: The initial estimated state.</span>
+<span class="sd">        :type estimated_state: KalmanEstimatedState</span>
+
+<span class="sd">        :param pos_cov_mat_ned: The position covariance matrix (in NED).</span>
+<span class="sd">        :type pos_cov_mat_ned: numpy.array (3-by-3 elements)</span>
+
+<span class="sd">        :param vel_cov_mat_ned: The velocity covariance matrix (in NED).</span>
+<span class="sd">        :type vel_cov_mat_ned: numpy.array (3-by-3 elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">gps_sensor</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">estimated_state</span><span class="p">,</span> <span class="n">KalmanEstimatedState</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;estimated_state must be KalmanEstimatedState&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pos_cov_mat_ned</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;pos_cov_mat_ned must be of shape (4,4)&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">vel_cov_mat_ned</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;vel_cov_mat_ned must be of shape (4,4)&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pos_cov_mat_ned</span> <span class="o">=</span> <span class="n">pos_cov_mat_ned</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__vel_cov_mat_ned</span> <span class="o">=</span> <span class="n">vel_cov_mat_ned</span>
+
+<div class="viewcode-block" id="GpsLooseFusion.perform_fusion">
+<a class="viewcode-back" href="../../../modules/gps/fusion.html#qnav.gps.fusion.GpsLooseFusion.perform_fusion">[docs]</a>
+    <span class="k">def</span> <span class="nf">perform_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kalman_state</span><span class="p">:</span> <span class="n">KalmanEstimatedState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies loose-coupled fusion using GPS estimates and INS solution.</span>
+<span class="sd">        This method updates the given INS instance&#39;s estimates by fusing them</span>
+<span class="sd">        with the given GPS estimates. The INS states are updated internally.</span>
+
+<span class="sd">        :param kalman_state: The current estimated state.</span>
+<span class="sd">        :type kalman_state: KalmanEstimatedState</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Update the current internal states</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+
+        <span class="c1"># TODO: New - Used for delaying zones</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hold_update</span><span class="p">():</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Obtain the vehicle&#39;s position currently estimated by the GPS</span>
+        <span class="n">gps_position_lla</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">ecef2lla</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimated_pos_ecef</span><span class="p">)</span>
+
+        <span class="c1"># Convert GPS velocity into local NED/Earth axes</span>
+        <span class="n">gps_velocity_ned</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">vel_ecef2vel_ned</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_estimated_vel_ecef</span><span class="p">,</span> <span class="n">gps_position_lla</span><span class="p">)</span>
+
+        <span class="c1"># Unpack the estimates state</span>
+        <span class="n">ref_lla</span> <span class="o">=</span> <span class="n">kalman_state</span><span class="o">.</span><span class="n">position</span>
+        <span class="n">gravity_model</span> <span class="o">=</span> <span class="n">kalman_state</span><span class="o">.</span><span class="n">gravity_model</span>
+        <span class="n">state_vector</span> <span class="o">=</span> <span class="n">kalman_state</span><span class="o">.</span><span class="n">state_vector</span>
+
+        <span class="c1"># Convert estimated state to NED format</span>
+        <span class="n">state_vector_ned</span> <span class="o">=</span> <span class="n">state_vector2ned</span><span class="p">(</span>
+            <span class="n">state_vector</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">,</span> <span class="n">gravity_model</span><span class="p">)</span>
+
+        <span class="c1"># Fuse GPS Position update with current INS state</span>
+        <span class="n">h_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+
+        <span class="c1"># Construct measurement covariance matrix</span>
+        <span class="n">r_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="n">r_m</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pos_cov_mat_ned</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">r_m</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vel_cov_mat_ned</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="c1"># Position in local NED/Earth axes</span>
+        <span class="n">ins_measurement</span> <span class="o">=</span> <span class="n">h_m</span> <span class="o">@</span> <span class="n">state_vector_ned</span>
+        <span class="n">gps_measurement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">gps_measurement</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">lla2ned</span><span class="p">(</span><span class="n">gps_position_lla</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">)</span>
+        <span class="n">gps_measurement</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">gps_velocity_ned</span>
+
+        <span class="c1"># Obtain the GPS innovation vector</span>
+        <span class="n">innovation_vec</span> <span class="o">=</span> <span class="n">gps_measurement</span> <span class="o">-</span> <span class="n">ins_measurement</span>
+
+        <span class="c1"># Kalman Filter Equations</span>
+        <span class="c1"># Calculate Kalman Gain</span>
+        <span class="n">state_errors</span> <span class="o">=</span> <span class="n">kalman_state</span><span class="o">.</span><span class="n">state_errors</span>
+        <span class="n">s_m</span> <span class="o">=</span> <span class="n">r_m</span> <span class="o">+</span> <span class="n">h_m</span> <span class="o">@</span> <span class="n">state_errors</span> <span class="o">@</span> <span class="n">h_m</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">k_m</span> <span class="o">=</span> <span class="n">state_errors</span> <span class="o">@</span> <span class="n">h_m</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">s_m</span><span class="p">)</span>
+
+        <span class="c1"># Update state with innovation</span>
+        <span class="n">state_vector_ned</span> <span class="o">+=</span> <span class="n">k_m</span> <span class="o">@</span> <span class="n">innovation_vec</span>
+
+        <span class="c1"># Update errors after measurement</span>
+        <span class="n">state_errors</span> <span class="o">-=</span> <span class="n">k_m</span> <span class="o">@</span> <span class="n">s_m</span> <span class="o">@</span> <span class="n">k_m</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="c1"># Convert state vector back from NED format</span>
+        <span class="n">state_vector</span> <span class="o">=</span> <span class="n">ned2state_vector</span><span class="p">(</span><span class="n">state_vector_ned</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">,</span> <span class="n">gravity_model</span><span class="p">)</span>
+
+        <span class="c1"># Finally, update the estimated state</span>
+        <span class="n">kalman_state</span><span class="o">.</span><span class="n">update_estimates</span><span class="p">(</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">state_vector</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">]],</span>
+            <span class="n">velocity</span><span class="o">=</span><span class="n">state_vector</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">]],</span>
+            <span class="n">acceleration</span><span class="o">=</span><span class="n">state_vector</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">]],</span>
+            <span class="n">attitude</span><span class="o">=</span><span class="n">state_vector</span><span class="p">[[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">]],</span>
+            <span class="n">angle_rates</span><span class="o">=</span><span class="n">state_vector</span><span class="p">[[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">]],</span>
+            <span class="n">state_errors</span><span class="o">=</span><span class="n">state_errors</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="GpsTightFusion">
+<a class="viewcode-back" href="../../../modules/gps/fusion.html#qnav.gps.fusion.GpsTightFusion">[docs]</a>
+<span class="k">class</span> <span class="nc">GpsTightFusion</span><span class="p">(</span><span class="n">GpsFusion</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tightly-coupled based GPS fusion.</span>
+<span class="sd">    A fusion method that uses tightly-coupled fusion for updating the INS</span>
+<span class="sd">    with given GPS estimates. This method uses a centralized Kalman filter</span>
+<span class="sd">    that integrates the estimated Pseudo Ranges and Doppler shift from the</span>
+<span class="sd">    GNSS receiver, along with the estimated position, velocity and attitude</span>
+<span class="sd">    from the INS. Must be used with a Kalman estimated state class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gps_sensor</span><span class="p">:</span> <span class="n">GpsSensor</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">KalmanEstimatedState</span><span class="p">,</span>
+                 <span class="n">tight_state_vector</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">tight_state_errors</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a Tightly-coupled GPS fusion instance.</span>
+<span class="sd">        This instance is initialed by setting the initial tight state vector</span>
+<span class="sd">        and tight state errors.</span>
+
+<span class="sd">        :param gps_sensor: The GPS sensor used to obtain GPS measurements.</span>
+<span class="sd">        :type gps_sensor: GpsSensor</span>
+
+<span class="sd">        :param estimated_state: The initial estimated state.</span>
+<span class="sd">        :type estimated_state: KalmanEstimatedState</span>
+
+<span class="sd">        :param tight_state_vector: The initial tight state vector with 17</span>
+<span class="sd">            states (including clock static bias mean and drift rate).</span>
+<span class="sd">            Information for all typical states will be taken from the INS.</span>
+<span class="sd">        :type tight_state_vector: numpy.array (17-elements)</span>
+
+<span class="sd">        :param tight_state_errors: The initial tight state errors for 17</span>
+<span class="sd">            states (including clock static bias mean and drift rate).</span>
+<span class="sd">            Information for all typical states will be taken from the INS.</span>
+<span class="sd">        :type tight_state_errors: numpy.array (17-by-17 elements)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Call parent class&#39;s constructor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">gps_sensor</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">estimated_state</span><span class="p">,</span> <span class="n">KalmanEstimatedState</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;estimated_state must be KalmanEstimatedState&#39;</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">tight_state_vector</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">17</span><span class="p">,),</span> \
+            <span class="s2">&quot;Tight state vector must contain 17 elements!&quot;</span>
+
+        <span class="k">assert</span> <span class="n">tight_state_errors</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">17</span><span class="p">,</span> <span class="mi">17</span><span class="p">),</span> \
+            <span class="s2">&quot;Tight state error must be of size 17 x 17!&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__tight_state_vector</span> <span class="o">=</span> <span class="n">tight_state_vector</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__tight_state_errors</span> <span class="o">=</span> <span class="n">tight_state_errors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dx</span> <span class="o">=</span> <span class="mf">0.0001</span>
+
+<div class="viewcode-block" id="GpsTightFusion.perform_fusion">
+<a class="viewcode-back" href="../../../modules/gps/fusion.html#qnav.gps.fusion.GpsTightFusion.perform_fusion">[docs]</a>
+    <span class="k">def</span> <span class="nf">perform_fusion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimated_state</span><span class="p">:</span> <span class="n">KalmanEstimatedState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies tightly-coupled fusion using GPS estimates and INS solution.</span>
+<span class="sd">        This method updates the given INS instance&#39;s estimates by fusing them</span>
+<span class="sd">        with the given GPS estimates. The INS states are updated internally.</span>
+
+<span class="sd">        :param estimated_state: The current estimated state.</span>
+<span class="sd">        :type estimated_state: KalmanEstimatedState</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Update the current internal states</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+
+        <span class="c1"># TODO: New - Used for delaying zones</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hold_update</span><span class="p">():</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Ensure the state vector is up-to-date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__tight_state_vector</span><span class="p">[:</span><span class="mi">15</span><span class="p">]</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">state_vector</span>
+
+        <span class="c1"># Ensure the state errors are up-to-date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__tight_state_errors</span><span class="p">[:</span><span class="mi">15</span><span class="p">,</span> <span class="p">:</span><span class="mi">15</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">estimated_state</span><span class="o">.</span><span class="n">state_errors</span><span class="p">)</span>
+
+        <span class="n">ref_lla</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">position</span>
+        <span class="n">gravity_model</span> <span class="o">=</span> <span class="n">estimated_state</span><span class="o">.</span><span class="n">gravity_model</span>
+
+        <span class="c1"># Convert State Vector from LLA/Body co-ordinates to Local NED/Earth axes.</span>
+        <span class="n">state_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__tight_state_vector</span><span class="p">)</span>
+        <span class="n">state_vector</span><span class="p">[:</span><span class="mi">15</span><span class="p">]</span> <span class="o">=</span> <span class="n">state_vector2ned</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__tight_state_vector</span><span class="p">[:</span><span class="mi">15</span><span class="p">],</span> <span class="n">ref_lla</span><span class="p">,</span> <span class="n">gravity_model</span><span class="p">)</span>
+
+        <span class="c1"># Fuse GPS Position update with current INS state Number of satellites</span>
+        <span class="n">satellites</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gps_sensor</span><span class="o">.</span><span class="n">last_measurement</span><span class="p">[</span><span class="s1">&#39;sat_measurements&#39;</span><span class="p">]</span>
+        <span class="c1"># satellites = self._gps_sensor.last_measurement</span>
+
+
+        <span class="n">num_sat</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">satellites</span><span class="p">)</span>
+        <span class="n">h_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="n">num_sat</span><span class="p">,</span> <span class="mi">17</span><span class="p">])</span>
+        <span class="n">gps_measurement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">num_sat</span><span class="p">)</span>
+
+        <span class="c1"># For all satellites:</span>
+        <span class="k">for</span> <span class="n">sat_index</span><span class="p">,</span> <span class="n">sat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">satellites</span><span class="p">):</span>
+
+            <span class="n">sat_pos_ecef</span> <span class="o">=</span> <span class="n">sat</span><span class="p">[</span><span class="s1">&#39;satellitePosition&#39;</span><span class="p">]</span>
+            <span class="n">sat_pos_ned</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">ecef2ned</span><span class="p">(</span><span class="n">sat_pos_ecef</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">)</span>
+
+            <span class="c1"># Pseudo-ranges</span>
+            <span class="n">rho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">sat_pos_ned</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">state_vector</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span>
+                <span class="p">(</span><span class="n">sat_pos_ned</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">state_vector</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span>
+                <span class="p">(</span><span class="n">sat_pos_ned</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">state_vector</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">state_vector</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span>
+
+            <span class="n">gps_measurement</span><span class="p">[</span><span class="n">sat_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">sat</span><span class="p">[</span><span class="s1">&#39;pseudoRangeNoisy&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">rho</span>
+
+            <span class="c1"># Pseudo-range rates</span>
+            <span class="n">los_vector_ned</span> <span class="o">=</span> <span class="p">(</span><span class="n">sat_pos_ned</span> <span class="o">-</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span> <span class="o">/</span> <span class="n">rho</span>
+
+            <span class="c1"># Actual user velocity (NED axes)</span>
+            <span class="n">imu_vel_ned</span> <span class="o">=</span> <span class="n">state_vector</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">]]</span>
+
+            <span class="c1"># Satellite velocity in NED</span>
+            <span class="n">sat_vel_ecef</span> <span class="o">=</span> <span class="n">sat</span><span class="p">[</span><span class="s1">&#39;satelliteVelocity&#39;</span><span class="p">]</span>
+            <span class="n">sat_vel</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">vel_ecef2vel_ned</span><span class="p">(</span><span class="n">sat_vel_ecef</span><span class="p">,</span> <span class="n">ref_lla</span><span class="p">)</span>
+
+            <span class="n">vel_relative_ned</span> <span class="o">=</span> <span class="n">sat_vel</span> <span class="o">-</span> <span class="n">imu_vel_ned</span>
+            <span class="n">rho_dot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">los_vector_ned</span><span class="p">,</span> <span class="n">vel_relative_ned</span><span class="p">)</span>
+            <span class="n">gps_measurement</span><span class="p">[</span><span class="n">sat_index</span> <span class="o">+</span> <span class="n">num_sat</span><span class="p">]</span> <span class="o">=</span> <span class="n">sat</span><span class="p">[</span><span class="s1">&#39;pseudoRangeRatesNoisy&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">rho_dot</span>
+
+            <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dx</span>
+
+            <span class="c1"># For each of the states covered in the matrix:</span>
+            <span class="k">for</span> <span class="n">state_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">17</span><span class="p">):</span>
+
+                <span class="n">state_vector_dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">state_vector</span><span class="p">)</span>
+                <span class="n">state_vector_dx</span><span class="p">[</span><span class="n">state_index</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dx</span>
+
+                <span class="n">rho_dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">sat_pos_ned</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">state_vector_dx</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span>
+                    <span class="p">(</span><span class="n">sat_pos_ned</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">state_vector_dx</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span>
+                    <span class="p">(</span><span class="n">sat_pos_ned</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">state_vector_dx</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">state_vector_dx</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span>
+
+                <span class="n">d_rho_dx</span> <span class="o">=</span> <span class="p">(</span><span class="n">rho_dx</span> <span class="o">-</span> <span class="n">rho</span><span class="p">)</span> <span class="o">/</span> <span class="n">dx</span>
+                <span class="n">h_m</span><span class="p">[</span><span class="n">sat_index</span><span class="p">][</span><span class="n">state_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">d_rho_dx</span>
+
+                <span class="c1"># Pseudo-range rates</span>
+                <span class="n">los_vector_ned_dx</span> <span class="o">=</span> <span class="p">(</span><span class="n">sat_pos_ned</span> <span class="o">-</span> <span class="n">state_vector_dx</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span> <span class="o">/</span> <span class="n">rho</span>
+
+                <span class="c1"># Actual user velocity (NED axes)</span>
+                <span class="n">imu_vel_ned_dx</span> <span class="o">=</span> <span class="n">state_vector_dx</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">]]</span>
+                <span class="n">vel_rel_ned_dx</span> <span class="o">=</span> <span class="n">sat_vel</span> <span class="o">-</span> <span class="n">imu_vel_ned_dx</span>
+
+                <span class="n">rho_dot_dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">los_vector_ned_dx</span><span class="p">,</span> <span class="n">vel_rel_ned_dx</span><span class="p">)</span>
+                <span class="n">d_rho_dot_dx</span> <span class="o">=</span> <span class="p">(</span><span class="n">rho_dot_dx</span> <span class="o">-</span> <span class="n">rho_dot</span><span class="p">)</span> <span class="o">/</span> <span class="n">dx</span>
+
+                <span class="n">h_m</span><span class="p">[</span><span class="n">sat_index</span> <span class="o">+</span> <span class="n">num_sat</span><span class="p">][</span><span class="n">state_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">d_rho_dot_dx</span>
+
+        <span class="c1"># Construct measurement covariance matrix</span>
+        <span class="n">r_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="n">num_sat</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">num_sat</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">sat_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_sat</span><span class="p">):</span>
+            <span class="n">r_m</span><span class="p">[</span><span class="n">sat_index</span><span class="p">][</span><span class="n">sat_index</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">r_m</span><span class="p">[</span><span class="n">sat_index</span> <span class="o">+</span> <span class="n">num_sat</span><span class="p">][</span><span class="n">sat_index</span> <span class="o">+</span> <span class="n">num_sat</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.05</span> <span class="o">**</span> <span class="mi">2</span>
+
+        <span class="n">innovation_vec</span> <span class="o">=</span> <span class="n">gps_measurement</span>
+
+        <span class="c1"># Kalman Filter Equations</span>
+        <span class="n">s_m</span> <span class="o">=</span> <span class="n">r_m</span> <span class="o">+</span> <span class="n">h_m</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tight_state_errors</span> <span class="o">@</span> <span class="n">h_m</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="c1"># Calculate Kalman Gain</span>
+        <span class="n">k_m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tight_state_errors</span> <span class="o">@</span> <span class="n">h_m</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">s_m</span><span class="p">)</span>
+
+        <span class="c1"># Update state with innovation</span>
+        <span class="n">state_vector</span> <span class="o">+=</span> <span class="n">k_m</span> <span class="o">@</span> <span class="n">innovation_vec</span>
+
+        <span class="c1"># Update errors after measurement</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__tight_state_errors</span> <span class="o">-=</span> <span class="n">k_m</span> <span class="o">@</span> <span class="n">s_m</span> <span class="o">@</span> <span class="n">k_m</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="c1"># Update state vector for output (and convert back to LLA/Body axes)</span>
+        <span class="n">state_vector</span><span class="p">[:</span><span class="mi">15</span><span class="p">]</span> <span class="o">=</span> <span class="n">ned2state_vector</span><span class="p">(</span>
+            <span class="n">state_vector</span><span class="p">[:</span><span class="mi">15</span><span class="p">],</span> <span class="n">ref_lla</span><span class="p">,</span> <span class="n">gravity_model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__tight_state_vector</span> <span class="o">=</span> <span class="n">state_vector</span>
+
+        <span class="c1"># Finally, update the estimated state</span>
+        <span class="n">estimated_state</span><span class="o">.</span><span class="n">update_estimates</span><span class="p">(</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">state_vector</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">]],</span>
+            <span class="n">velocity</span><span class="o">=</span><span class="n">state_vector</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">]],</span>
+            <span class="n">acceleration</span><span class="o">=</span><span class="n">state_vector</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">]],</span>
+            <span class="n">attitude</span><span class="o">=</span><span class="n">state_vector</span><span class="p">[[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">]],</span>
+            <span class="n">angle_rates</span><span class="o">=</span><span class="n">state_vector</span><span class="p">[[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">]],</span>
+            <span class="n">state_errors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__tight_state_errors</span><span class="p">[:</span><span class="mi">15</span><span class="p">,</span> <span class="p">:</span><span class="mi">15</span><span class="p">]</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="calculate_cov_mat">
+<a class="viewcode-back" href="../../../modules/gps/fusion.html#qnav.gps.fusion.calculate_cov_mat">[docs]</a>
+<span class="k">def</span> <span class="nf">calculate_cov_mat</span><span class="p">(</span><span class="n">satellites</span><span class="p">:</span> <span class="n">Collection</span><span class="p">[</span><span class="n">Satellite</span><span class="p">],</span>
+                      <span class="n">ant_pos_lla</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                      <span class="n">sigma_position</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+                      <span class="n">sigma_velocity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Produces the covariance matrices for loosely-coupled fusion.</span>
+<span class="sd">    This method produces and returns the covariance matrices for position</span>
+<span class="sd">    and velocity based on the current position. These are namely required</span>
+<span class="sd">    for initialising a loosely-coupled GPS fusion instance (if matrices</span>
+<span class="sd">    are not produced manually).</span>
+
+<span class="sd">    :param satellites: The GPS satellites involved in measurements.</span>
+<span class="sd">    :type satellites: Collection[Satellite]</span>
+
+<span class="sd">    :param ant_pos_lla: The true antenna position (latitude, longitude</span>
+<span class="sd">        and altitude given in deg-deg-metres).</span>
+<span class="sd">    :type ant_pos_lla: numpy.array (3-elements)</span>
+
+<span class="sd">    :param sigma_position: The pseudo-range position error (in metres).</span>
+<span class="sd">    :type sigma_position: float</span>
+
+<span class="sd">    :param sigma_velocity: The pseudo-range velocity error (in metres/sec).</span>
+<span class="sd">    :type sigma_velocity: float</span>
+
+<span class="sd">    :return: A tuple containing the constructed position and velocity</span>
+<span class="sd">        covariance matrices, respectively.</span>
+<span class="sd">    :rtype: tuple[np.ndarray, np.ndarray]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">num_satellites</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">satellites</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">num_satellites</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+
+    <span class="c1"># For each satellite in the collection:</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">satellites</span><span class="p">):</span>
+
+        <span class="n">azimuth</span><span class="p">,</span> <span class="n">elev</span> <span class="o">=</span> <span class="n">sat</span><span class="o">.</span><span class="n">get_location_azimuth_elevation</span><span class="p">(</span><span class="n">ant_pos_lla</span><span class="p">)</span>
+        <span class="n">azimuth_rad</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">azimuth</span><span class="p">)</span>
+        <span class="n">elev_rad</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">elev</span><span class="p">)</span>
+        <span class="n">cel</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">elev_rad</span><span class="p">)</span>
+        <span class="n">caz</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">azimuth_rad</span><span class="p">)</span>
+        <span class="n">sel</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">elev_rad</span><span class="p">)</span>
+        <span class="n">saz</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">azimuth_rad</span><span class="p">)</span>
+        <span class="n">sat_vec</span> <span class="o">=</span> <span class="p">(</span><span class="n">cel</span> <span class="o">*</span> <span class="n">caz</span><span class="p">,</span> <span class="n">cel</span> <span class="o">*</span> <span class="n">saz</span><span class="p">,</span> <span class="o">-</span><span class="n">sel</span><span class="p">)</span>
+        <span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">sat_vec</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">sat_vec</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">sat_vec</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Calculate dilution of precision matrix</span>
+    <span class="n">dop_mat_ned</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">g</span><span class="p">)</span>
+
+    <span class="n">pos_cov_mat</span> <span class="o">=</span> <span class="n">dop_mat_ned</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma_position</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">vel_cov_mat</span> <span class="o">=</span> <span class="n">dop_mat_ned</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma_velocity</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pos_cov_mat</span><span class="p">,</span> <span class="n">vel_cov_mat</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

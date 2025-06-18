@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>5. Gravity Modelling &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="6. Sensor Processing" href="measurement.html" />
+    <link rel="prev" title="4. Trajectory Generation" href="trajectory.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">5. Gravity Modelling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#gravity-functions">5.1. Gravity Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fixed-constant-value">5.1.1. Fixed Constant Value</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simple-uniform-sphere">5.1.2. Simple Uniform Sphere</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#somigliana-formula">5.1.3. Somigliana Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nimas-wgs-84-gravity">5.1.4. NIMA’s WGS-84 Gravity</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gravity-correction-maps">5.2. Gravity Correction Maps</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#egm-models">5.2.1. EGM Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#geosat-44">5.2.2. Geosat-44</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#marine-gravity-map">5.2.3. Marine Gravity Map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ggm-plus">5.2.4. GGM Plus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#srtm2gravity">5.2.5. SRTM2Gravity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#irish-sea-model">5.2.6. Irish Sea Model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><span class="section-number">5. </span>Gravity Modelling</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/gravity_modelling.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="gravity-modelling">
+<h1><span class="section-number">5. </span>Gravity Modelling<a class="headerlink" href="#gravity-modelling" title="Link to this heading"></a></h1>
+<p>The project include a small collection of gravity models. Each is equipped with their own methods for calculating
+various values, such as the vector acceleration, vertical gravity gradient and expected anomaly or disturbance values
+for given positions.</p>
+<p>Gravity models are grouped into two sets, being functions and correction maps. Gravity functions serve as a simple
+and quick approximation for the gravity at a position. These can be applied for any location and are used as base
+values. Extending from these are the gravity correction maps, which as suggested apply a correction on top of a
+selected base gravity function. These provide correction records, but can only be applied in areas they cover. If
+data for the requested position is unavailable, no correction to the value produced by the base function will be
+applied.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For simple usage, only a basic gravity function will be needed. However, for applying realistic gravity behaviour,
+which is required for some forms of sensing, a high resolution correction map will also be needed.</p>
+</div>
+<section id="gravity-functions">
+<h2><span class="section-number">5.1. </span>Gravity Functions<a class="headerlink" href="#gravity-functions" title="Link to this heading"></a></h2>
+<section id="fixed-constant-value">
+<h3><span class="section-number">5.1.1. </span>Fixed Constant Value<a class="headerlink" href="#fixed-constant-value" title="Link to this heading"></a></h3>
+<p>Essentially not a function, serving a fixed value of 9.81 used for vertical acceleration at any position.
+This is primarily used for debugging.</p>
+</section>
+<section id="simple-uniform-sphere">
+<h3><span class="section-number">5.1.2. </span>Simple Uniform Sphere<a class="headerlink" href="#simple-uniform-sphere" title="Link to this heading"></a></h3>
+<p>Approximates the Earth as uniform sphere with height extrapolation. A slight improvement over the Fixed Constant model,
+but is again primarily used for debugging.</p>
+</section>
+<section id="somigliana-formula">
+<h3><span class="section-number">5.1.3. </span>Somigliana Formula<a class="headerlink" href="#somigliana-formula" title="Link to this heading"></a></h3>
+<p>The standardised “Normal” gravity function with height extrapolation (named after Carlo Somigliana (1860–1955). Also
+known as the International Gravity Formula 1980. This is far more accurate than the previous models, and also prooduces
+east component values in calculated gravity vectors.</p>
+</section>
+<section id="nimas-wgs-84-gravity">
+<h3><span class="section-number">5.1.4. </span>NIMA’s WGS-84 Gravity<a class="headerlink" href="#nimas-wgs-84-gravity" title="Link to this heading"></a></h3>
+<p>Calculations provided by National Imagery and Mapping Agency (NIMA) in “Department of Defense World Geodetic System
+1984, Its Definition and Relationship with Local Geodetic Systems.”. This shares many similarities with the Somigliana
+model. This was namely included due to it being used in software such as MATLAB as standard.</p>
+</section>
+</section>
+<section id="gravity-correction-maps">
+<h2><span class="section-number">5.2. </span>Gravity Correction Maps<a class="headerlink" href="#gravity-correction-maps" title="Link to this heading"></a></h2>
+<section id="egm-models">
+<h3><span class="section-number">5.2.1. </span>EGM Models<a class="headerlink" href="#egm-models" title="Link to this heading"></a></h3>
+<p>Application of 7 Earth Gravitation Models defining geoid undulations in raster form. These essentially provide the
+geoid height correction on top of the WGS-84 reference ellipsoid. Supported EGM models include:</p>
+<ul class="simple">
+<li><p>EGM-1984 (in 30 and 15 arc-minute resolutions)</p></li>
+<li><p>EGM-1996 (in 15 and 5 arc-minute resolutions)</p></li>
+<li><p>EGM-2008 (in 5, 2.5 and 1 arc-minute resolutions)</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While EGM-2020 has been technically released, it is currently unavailable for public access.</p>
+</div>
+</section>
+<section id="geosat-44">
+<h3><span class="section-number">5.2.2. </span>Geosat-44<a class="headerlink" href="#geosat-44" title="Link to this heading"></a></h3>
+<p>the Geosat-44 gravity model provided data collected in 1999 from satellite altimeter measurements, which contain
+precise geoid and gravity anomaly profiles constructed from the average of 44 repeat cycles. In total, this dataset
+contains 987,755 ascending records and 991,313 descending records between the latitude bounds +/- 72 degrees
+north/south. This model is represented as scatter points, which are triangulated and used in interpolation.</p>
+</section>
+<section id="marine-gravity-map">
+<h3><span class="section-number">5.2.3. </span>Marine Gravity Map<a class="headerlink" href="#marine-gravity-map" title="Link to this heading"></a></h3>
+<p>The marine gravity map provides gravity anomaly values for acquired from satellite altimeter data in 2013. It is based
+on previous data from CryoSat-2 and Jason-1 satellite projects. The resulting model is a 9,600 x 21,600 raster grid,
+between the latitude bounds +/- 80 degrees north, with interpolation performed for land space.</p>
+</section>
+<section id="ggm-plus">
+<h3><span class="section-number">5.2.4. </span>GGM Plus<a class="headerlink" href="#ggm-plus" title="Link to this heading"></a></h3>
+<p>The Global Gravity Map Plus (GGM Plus) model is the result of a joint research initiative by Curtin University and
+TU Munich University in 2013. It provides records of gravitational acceleration and distributable at a 7.2 arc-second
+(approximately 200 metres) spatial resolution, for all land and near-coastal areas. The resulting model consists of
+3,062,677,383 points, partitioned into 5 x 5 degree tiles, covering latitude bounds +/- 60 degrees north/south.</p>
+</section>
+<section id="srtm2gravity">
+<h3><span class="section-number">5.2.5. </span>SRTM2Gravity<a class="headerlink" href="#srtm2gravity" title="Link to this heading"></a></h3>
+<p>The SRTM2Gravity model extends from GGM Plus by performing the conversion of Shuttle Radar Topography Mission-based
+digital elevation data to implied gravity effects. It provides records for full-scale and residual gravity at 3
+arc-second (approximately 90 metres) spatial resolution, for all land and near-coastal areas. The resulting model is
+partitioned into 1 x 1 degree tiles, covering latitude bounds +/- 60 degrees north/south.</p>
+</section>
+<section id="irish-sea-model">
+<h3><span class="section-number">5.2.6. </span>Irish Sea Model<a class="headerlink" href="#irish-sea-model" title="Link to this heading"></a></h3>
+<p>A bespoke marine gravity anomaly map covering an area a north western region Irish sea. Support for this model
+was included by request.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="trajectory.html" class="btn btn-neutral float-left" title="4. Trajectory Generation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="measurement.html" class="btn btn-neutral float-right" title="6. Sensor Processing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

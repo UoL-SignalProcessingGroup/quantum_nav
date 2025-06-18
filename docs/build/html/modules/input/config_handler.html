@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9.6.2. qnav.input.config_handler &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="9.7.1. qnav.measurement.sensor" href="../measurement/sensor.html" />
+    <link rel="prev" title="9.6.1. qnav.input.config" href="config.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../usage/packages.html">9. Software Components</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#earth">9.1. Earth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#estimation">9.2. Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#fusion">9.3. Fusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gps">9.4. GPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#gravity">9.5. Gravity</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../usage/packages.html#input">9.6. Input</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="config.html">9.6.1. config.py</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">9.6.2. config_handler.py</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#config-handler-py">9.6.2.1. config_handler.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.input.config_handler.ConfigHandler"><code class="docutils literal notranslate"><span class="pre">ConfigHandler</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.input.config_handler.NavConfigWarning"><code class="docutils literal notranslate"><span class="pre">NavConfigWarning</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qnav.input.config_handler.NavConfigError"><code class="docutils literal notranslate"><span class="pre">NavConfigError</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#measurement">9.7. Measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#output">9.8. Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#quantum">9.9. Quantum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#simulation">9.10. Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#util">9.11. Util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/packages.html#waypoints">9.12. Waypoints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/tutorials.html">11. Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../usage/packages.html"><span class="section-number">9. </span>Software Components</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">9.6.2. </span>qnav.input.config_handler</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/modules/input/config_handler.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qnav.input.config_handler">
+<span id="qnav-input-config-handler"></span><h1><span class="section-number">9.6.2. </span>qnav.input.config_handler<a class="headerlink" href="#module-qnav.input.config_handler" title="Link to this heading"></a></h1>
+<section id="config-handler-py">
+<h2><span class="section-number">9.6.2.1. </span>config_handler.py<a class="headerlink" href="#config-handler-py" title="Link to this heading"></a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">summary<span class="colon">:</span></dt>
+<dd class="field-odd"><p>This class provides a wrapper for Python’s ConfigHandler class.
+This supplies additional functionality such as automatically reading from
+sub-configuration files and providing platform independent means for
+extracting configuration values in usable formats.</p>
+</dd>
+<dt class="field-even">authors<span class="colon">:</span></dt>
+<dd class="field-even"><p>Michael Wright - <a class="reference external" href="mailto:mjwright&#37;&#52;&#48;liverpool&#46;ac&#46;uk">mjwright<span>&#64;</span>liverpool<span>&#46;</span>ac<span>&#46;</span>uk</a></p>
+</dd>
+<dt class="field-odd">version<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1.0.0 - First implementation of class.</p>
+</dd>
+</dl>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.input.config_handler.</span></span><span class="sig-name descname"><span class="pre">ConfigHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('default_settings.ini')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler" title="Link to this definition"></a></dt>
+<dd><p>This class provides means for reading the user’s configuration preferences
+from a given configuration file. Once read, values can be extracted within
+various formats (strings, booleans, floats, arrays, etc..). This class is
+essentially a wrapper for Python’s ConfigHandler class, providing
+additional functionality such as the ability to split configuration
+across multiple files.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.get_config_name">
+<span class="sig-name descname"><span class="pre">get_config_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.get_config_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.get_config_name" title="Link to this definition"></a></dt>
+<dd><p>This simple function returns the name of the configuration file being
+used. This function will automatically remove the project database_dir
+from the returned name (if the selected config is located within the
+project database_dir).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The short name of the selected configuration file that is
+being used.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.load_configuration">
+<span class="sig-name descname"><span class="pre">load_configuration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.load_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.load_configuration" title="Link to this definition"></a></dt>
+<dd><p>This function reads and records the content of the given configuration
+file (and expected sub-files). Expected sections/sensors are
+automatically searched and their sub-files are also included within
+the loading process. This function can be used to re-load/re-read the
+information from configuration files (if changes are made during
+runtime).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.append_config">
+<span class="sig-name descname"><span class="pre">append_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.append_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.append_config" title="Link to this definition"></a></dt>
+<dd><p>This function will read and record the values of an external
+configuration files (i.e. a sub-configuration) and merge the read
+information with the current ConfigHandler instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config_file</strong> (<em>str</em>) – The sub-configuration file to read.</p></li>
+<li><p><strong>from_section</strong> (<em>str</em>) – The section within the sub-configuration
+file to read and record.</p></li>
+<li><p><strong>to_section</strong> (<em>str</em>) – The section within the current instance to append
+the read information to (can be a new section).</p></li>
+<li><p><strong>to_overwrite</strong> (<em>bool</em>) – If set to true, previous existing values from
+the main configuration will be overwritten by those read from
+sub-configuration files (default=False).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.expand_section">
+<span class="sig-name descname"><span class="pre">expand_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_file_section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.expand_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.expand_section" title="Link to this definition"></a></dt>
+<dd><p>Expand section by importing the referenced sub-configuration path.
+Imports additional properties into section, for a given section and
+property referencing the sub-configuration file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>section</strong> (<em>str</em>) – The section containing the property with the
+sub-configuration path.</p></li>
+<li><p><strong>path_property</strong> (<em>str</em>) – The property containing the sub-
+configuration path.</p></li>
+<li><p><strong>sub_file_section</strong> (<em>str</em>) – (Optional) The section to import from the
+sub-configuration file.</p></li>
+<li><p><strong>to_overwrite</strong> (<em>bool</em>) – Should this import overwrite existing settings?</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.quick_append_config">
+<span class="sig-name descname"><span class="pre">quick_append_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">external_section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.quick_append_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.quick_append_config" title="Link to this definition"></a></dt>
+<dd><p>This function simplifies merging multiple configuration file sections
+to the current configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>from_section</strong> (<em>numpy.typing.ArrayLike</em>) – The sections within the main configuration file
+that contain the variables to read from.</p></li>
+<li><p><strong>from_variable</strong> (<em>numpy.typing.ArrayLike</em>) – The filepath variable names from the given
+section stating the external configuration files to read from.</p></li>
+<li><p><strong>external_section</strong> (<em>numpy.typing.ArrayLike</em>) – The external sub-configuration file sections
+to merge with the main configuration.</p></li>
+<li><p><strong>to_overwrite</strong> (<em>bool</em>) – If set to true, previous existing values from
+the main configuration will be overwritten by those read from
+sub-configuration files (default=False).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.get_all_values">
+<span class="sig-name descname"><span class="pre">get_all_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.get_all_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.get_all_values" title="Link to this definition"></a></dt>
+<dd><p>This function returns a matrix containing all the values read from the
+given configuration file(s). This function is namely for debugging
+purposes. Values are displayed as raw strings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An N-by-3 matrix of values containing the section, variable
+name and value for each option read.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.get_sections">
+<span class="sig-name descname"><span class="pre">get_sections</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.get_sections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.get_sections" title="Link to this definition"></a></dt>
+<dd><p>This function returns a list of all the sections read from the given
+configuration file(s). This is useful for debugging and ensure
+required content is being correctly read.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list containing all section names.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.get_str">
+<span class="sig-name descname"><span class="pre">get_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.get_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.get_str" title="Link to this definition"></a></dt>
+<dd><p>This function will return the string value for a parameter in the
+selected configuration file, identified by its section and name. If
+the value is missing, an optional default value can be used instead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>section</strong> (<em>str</em>) – The section of the configuration file.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the variable to read from the given section.</p></li>
+<li><p><strong>fallback</strong> (<em>str</em>) – (Optional) The default value to use if not found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns either the string found within the config file
+for the given section and name, or the default value if not
+found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.get_str_alpha">
+<span class="sig-name descname"><span class="pre">get_str_alpha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.get_str_alpha"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.get_str_alpha" title="Link to this definition"></a></dt>
+<dd><p>This function will return the alphanumeric string value for a
+parameter in the selected configuration file, identified by its section
+and name. If the value is missing, an optional default value can be
+used instead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>section</strong> (<em>str</em>) – The section of the configuration file.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the variable to read from the given section.</p></li>
+<li><p><strong>fallback</strong> (<em>str</em>) – (Optional) The default value to use if not found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns either the alphanumeric parts of the string found
+within the config file for the given section and name, or the
+default value if not found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.get_int">
+<span class="sig-name descname"><span class="pre">get_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.get_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.get_int" title="Link to this definition"></a></dt>
+<dd><p>This function will return the integer value for a parameter in the
+selected configuration file, identified by its section and name.
+If the value is missing, an optional default value can be used instead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>section</strong> (<em>str</em>) – The section of the configuration file.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the variable to read from the given section.</p></li>
+<li><p><strong>fallback</strong> (<em>int</em>) – (Optional) The default value to use if not found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns either the integer value found within the config file
+for the given section and name, or the default value if not found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.get_float">
+<span class="sig-name descname"><span class="pre">get_float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.get_float"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.get_float" title="Link to this definition"></a></dt>
+<dd><p>This function will return the float value for a parameter in the
+selected configuration file, identified by its section and name.
+This function returns a numpy 64-bit float instead of a normal float.
+If the value is missing, an optional default value can be used instead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>section</strong> (<em>str</em>) – The section of the configuration file.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the variable to read from the given section.</p></li>
+<li><p><strong>fallback</strong> (<em>float</em>) – (Optional) The default value to use if not found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns either the float value found within the config file
+for the given section and name, or the default value if not found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.get_bool">
+<span class="sig-name descname"><span class="pre">get_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.get_bool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.get_bool" title="Link to this definition"></a></dt>
+<dd><p>This function will return the boolean value for a parameter in the
+selected configuration file, identified by its section and name.
+Acceptable True values are ‘yes’, ‘true’, ‘on’ and ‘1’. Acceptable
+False values are ‘no’, ‘false’, ‘off’ and ‘0’. If the value is missing,
+an optional default value can be used instead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>section</strong> (<em>str</em>) – The section of the configuration file.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the variable to read from the given section.</p></li>
+<li><p><strong>fallback</strong> (<em>bool</em>) – (Optional) The default value to use if not found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns either the boolean found within the config file for
+the given section and name, or the default value if not found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.get_csv_numeric">
+<span class="sig-name descname"><span class="pre">get_csv_numeric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">','</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Buffer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.get_csv_numeric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.get_csv_numeric" title="Link to this definition"></a></dt>
+<dd><p>This function will return an array of values that are separated by a
+common character (comma by default) from the selected configuration
+file, identified by its section and name. This function returns a
+numpy array. If the value is missing, an optional default value can
+be used instead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>section</strong> (<em>str</em>) – The section of the configuration file.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the variable to read from the given section.</p></li>
+<li><p><strong>fallback</strong> (<em>list</em>) – (Optional) The default value(s) to use if not found.</p></li>
+<li><p><strong>sep</strong> – (Optional) The item separator character (default=’,’).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A numpy array containing the written items.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.get_csv_str">
+<span class="sig-name descname"><span class="pre">get_csv_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">','</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.get_csv_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.get_csv_str" title="Link to this definition"></a></dt>
+<dd><p>This function will return an array of string values that are
+separated by a common character (comma by default) from the selected
+configuration file, identified by its section and name. This function
+returns a list of one or more character values. If the value is
+missing, an optional default value can be used instead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>section</strong> (<em>str</em>) – The section of the configuration file.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the variable to read from the given section.</p></li>
+<li><p><strong>fallback</strong> (<em>list</em><em> | </em><em>None</em>) – (Optional) The default value(s) to use if not found.</p></li>
+<li><p><strong>sep</strong> – (Optional) The item separator character (default=’,’).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Python list containing the written items.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.get_value_filepath">
+<span class="sig-name descname"><span class="pre">get_value_filepath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">must_exist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.get_value_filepath"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.get_value_filepath" title="Link to this definition"></a></dt>
+<dd><p>This function will return a local filepath read for a parameter in the
+selected configuration file, identified by its section and name. This
+function will handle read paths in a platform independent manner,
+automatically deciding and converting when needed. This allows paths
+read from the configuration file to be written in either Linux/Unix or
+Windows/NT format without affecting behaviour on different platforms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>section</strong> (<em>str</em>) – The section of the configuration file.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the variable to read from the given section.</p></li>
+<li><p><strong>fallback</strong> (<em>str</em>) – (Optional) The default value to use if not found.</p></li>
+<li><p><strong>must_exist</strong> – (Optional) Should the path exist on the filesystem?
+If enabled an error will raise if the given path is not found on
+the system (default=True).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A valid filepath for the current system to the given
+location/resources.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.get_value_filepath_str">
+<span class="sig-name descname"><span class="pre">get_value_filepath_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.get_value_filepath_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.get_value_filepath_str" title="Link to this definition"></a></dt>
+<dd><p>This function will return a local filepath read for a parameter in the
+selected configuration file, identified by its section and name. This
+function will handle read paths in a platform independent manner,
+automatically deciding and converting when needed. This allows paths
+read from the configuration file to be written in either Linux/Unix or
+Windows/NT format without affecting behaviour on different platforms.</p>
+<p>Unlike ‘get_value_filepath’ this function does not enforce the
+existence of a requested file/database_dir.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>section</strong> (<em>str</em>) – The section of the configuration file.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the variable to read from the given section.</p></li>
+<li><p><strong>fallback</strong> (<em>str</em>) – (Optional) The default value to use if not found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A filepath for the current system to the given location/
+resources. This resource does not have to exist.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.is_value_set">
+<span class="sig-name descname"><span class="pre">is_value_set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.is_value_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.is_value_set" title="Link to this definition"></a></dt>
+<dd><p>Returns true if there is an entry for (all of) the given sections and
+values. This function works for both single values and lists of
+values. For multiple values, both lists must be of the same length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>section</strong> (<em>list</em><em> or </em><em>str</em>) – A single or list of sections names.</p></li>
+<li><p><strong>value</strong> – A single or list of value names.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if an entry could be found in the provided configuration
+for all the given section-list pairs. False if one or more entries
+could not be found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.overwrite_value">
+<span class="sig-name descname"><span class="pre">overwrite_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.overwrite_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.overwrite_value" title="Link to this definition"></a></dt>
+<dd><p>This simple function can be used to overwrite or insert any value
+extracted from the given configuration file. This is only to be used
+for automatically generated values and is not an alternative to
+fallbacks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>section</strong> (<em>str</em>) – The section name of the variable to override</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the variable to read from the given section.</p></li>
+<li><p><strong>new_value</strong> (<em>str</em><em>, </em><em>int</em><em>, </em><em>float</em>) – The new value to use for the given section and name.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.copy_file">
+<span class="sig-name descname"><span class="pre">copy_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.copy_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.copy_file" title="Link to this definition"></a></dt>
+<dd><p>Copies the configuration file to a destination.
+This method produces a copy of the configuration file at the
+requested destination.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dest</strong> (<em>Path</em>) – The location to write the file to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qnav.input.config_handler.ConfigHandler.write_file">
+<span class="sig-name descname"><span class="pre">write_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#ConfigHandler.write_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.ConfigHandler.write_file" title="Link to this definition"></a></dt>
+<dd><p>Writes the configuration values to a file.
+This method writes the configuration values in their current state
+(including modifications) to a requested file. The produced file can
+then be re-used as a settings file to repeat experimentation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dest</strong> (<em>Path</em>) – The location to write the file to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="qnav.input.config_handler.NavConfigWarning">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.input.config_handler.</span></span><span class="sig-name descname"><span class="pre">NavConfigWarning</span></span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#NavConfigWarning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.NavConfigWarning" title="Link to this definition"></a></dt>
+<dd><p>A custom warning type used to inform the user about invalid, unsuitable
+or missing values present in the configuration file. If these warnings
+generated can be safely ignored, this warning type can be suppressed
+to hide all configuration file warnings for the session. Suppressing
+this warning type will not affect the displaying of other warnings.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="qnav.input.config_handler.NavConfigError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qnav.input.config_handler.</span></span><span class="sig-name descname"><span class="pre">NavConfigError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_desc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qnav/input/config_handler.html#NavConfigError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qnav.input.config_handler.NavConfigError" title="Link to this definition"></a></dt>
+<dd><p>A custom exception type used for inform the user about erroneous values
+present in the provided configuration file that cannot be ignored. This
+includes syntax, value type and conflicting value errors. This exception
+type is primarily used for formatting the errors being displayed. This
+custom class also allows configuration based errors to be distinguished
+from serious errors such faults not detected until after delivery.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="config.html" class="btn btn-neutral float-left" title="9.6.1. qnav.input.config" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../measurement/sensor.html" class="btn btn-neutral float-right" title="9.7.1. qnav.measurement.sensor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+
+Estimation Processing
+=====================
+The toolbox contains various modules that assist with navigation. These modules can be flexibly customised with
+aspects such as update frequencies, noise values and error probabilities freely being selectable by the user.
+Some modules can be entirely disabled if not needed.
+
+|
+
+Inertial Navigation
+-------------------
+The Inertial Navigation System (INS) is the core component for producing estimations. It takes measurements from
+virtual hardware such as configured accelerometers, gyroscopes and altimeters. Furthermore, updates external updates
+such as GPS measurements interface with the INS via fusion methods. These measurement updates are fed at a fixed
+rate. Unlike the other system it cannot be disabled. The supported integration methods (along with their
+configuration method keys) are listed below:
+
+#. :ref:`Classic Numerical <ins.py>` (``Numerical``)
+#. :ref:`Kalman Filter <kalman.py>` (``Kalman``)
+#. :ref:`4th Order Runge Kutta <runge_kutta.py>` (``Runge_Kutta``)
+#. :ref:`Adams Bashforth Integration <adams_bashforth.py>` (``Adams_Bashforth``)
+
+|
+
+Altimeter
+---------
+If enabled, an :ref:`altimeter <altimeter.py>` component is included to provide simple fixed gain filtering for
+the vertical channel. This supplies additional processing to improve the current altitude estimation. This is useful
+for when the estimated altitude is included in other calculations such as acceleration or gravity mapping.
+
+To enable the altimeter, ensure that the variable ``altimeterEnabled`` is set to ``true``. This is either located
+within an altimeter sub-configuration file or under the Measurement subsection.
+
+|
+
+GPS/GNSS Systems
+----------------
+The toolbox can also include the use of :ref:`GPS navigation <satellite.py>` within its estimation. Calculated
+GPS positions and velocities are merged with the current estimation using 1 of 3 methods. The supported methods
+(along with their configuration method keys) are listed below:
+
+#. :ref:`Fixed Gain Fusion <fusion.py>` (``Fixed``)
+#. :ref:`Loose Fusion <fusion.py>` (``Loose``)
+#. :ref:`Tight Fusion <fusion.py>` (``Tight``)
+
+To enable the GPS systems/processing ensure that the variable ``gpsEnabled`` (under GPS) is set to ``true``
+and that ``gpsFusionMethod`` (under Estimation) is set to one of the above.
+
+In addition to this, rough *dead zones*, *jamming zones* or *deactivation zones* can be supplied by describing
+polygon shapes with latitude and longitude coordinates. The variables ``gpsDisabledShapeLat`` and
+``gpsDisabledShapeLon`` (under the GPS section) can be used to state which areas the GPS cannot be used in.
+In contrast, the variables ``gpsEnabledShapeLat`` and ``gpsEnabledShapeLon`` can be used to state which areas the GPS
+can be used in (overriding disabled zones to allow for more advanced shapes). To provide more than one polygon,
+separate coordinates lists with the value ``nan`` By default, the GPS is enabled everywhere.
+
+Please note, enabling GPS systems involves additional processing steps for the environment state (simulating GNSS
+satellite activity for the requested date) which can result in slightly longer processing times due to the
+added complexity.

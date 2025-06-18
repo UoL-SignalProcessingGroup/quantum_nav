@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qnav.output.formats &mdash; Quantum Navigation 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Quantum Navigation
+          </a>
+              <div class="version">
+                Version 1.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/structure.html">1. Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/execution.html">2. Software Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/technical.html">3. Technical Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/trajectory.html">4. Trajectory Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/gravity_modelling.html">5. Gravity Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/measurement.html">6. Sensor Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/fusion.html">7. Fusion Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/configuration.html">8. User Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/packages.html">9. Software Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/requirements.html">10. System Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/tutorials.html">11. Toolbox Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/faq.html">12. Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/future.html">13. Potential Future Work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/legal.html">14. Software Licence</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Quantum Navigation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qnav.output.formats</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qnav.output.formats</h1><div class="highlight"><pre>
+<span></span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">scipy.io</span> <span class="kn">import</span> <span class="n">savemat</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+
+
+<span class="kn">from</span> <span class="nn">qnav.output.data</span> <span class="kn">import</span> <span class="n">ResultsTable</span>
+
+
+<div class="viewcode-block" id="FileFormat">
+<a class="viewcode-back" href="../../../modules/output/formats.html#qnav.output.formats.FileFormat">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">FileFormat</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Defines the fields for each supported file format.</span>
+<span class="sd">    Included as a simpler way to represent the SaveFormat enum class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">match_id</span><span class="p">:</span> <span class="nb">str</span>       <span class="c1"># A name used for identifying the file format.</span>
+    <span class="n">file_ext</span><span class="p">:</span> <span class="nb">str</span>       <span class="c1"># The file extension used by the file format.</span></div>
+
+
+
+<div class="viewcode-block" id="SaveFormat">
+<a class="viewcode-back" href="../../../modules/output/formats.html#qnav.output.formats.SaveFormat">[docs]</a>
+<span class="k">class</span> <span class="nc">SaveFormat</span><span class="p">(</span><span class="n">FileFormat</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A collection of the supported file formats for results table.</span>
+<span class="sd">    Controllable flags for selecting the use of the supported file formats</span>
+<span class="sd">    when exporting data. A useful way to efficiently export data in</span>
+<span class="sd">    multiple formats, without employing multiple functions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">CSV</span> <span class="o">=</span> <span class="s1">&#39;csv&#39;</span><span class="p">,</span> <span class="s1">&#39;.csv&#39;</span>                     <span class="c1"># Comma Seperated Value format (.csv)</span>
+    <span class="n">CSV_COMP</span> <span class="o">=</span> <span class="s1">&#39;csv_comp&#39;</span><span class="p">,</span> <span class="s1">&#39;.csv.gz&#39;</span>        <span class="c1"># Comma Seperated Value compress (.csv.gz)</span>
+    <span class="n">NUMPY</span> <span class="o">=</span> <span class="s1">&#39;numpy&#39;</span><span class="p">,</span> <span class="s1">&#39;.npy&#39;</span>                 <span class="c1"># Numpy array file format (.np)</span>
+    <span class="n">NUMPY_COMP</span> <span class="o">=</span> <span class="s1">&#39;numpy_comp&#39;</span><span class="p">,</span> <span class="s1">&#39;.npz&#39;</span>       <span class="c1"># Numpy array compressed file format (.npz)</span>
+    <span class="n">BINARY</span> <span class="o">=</span> <span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="s1">&#39;.bin&#39;</span>               <span class="c1"># Standard 64-bit float binary format (.bin)</span>
+    <span class="n">MATLAB</span> <span class="o">=</span> <span class="s1">&#39;matlab&#39;</span><span class="p">,</span> <span class="s1">&#39;.mat&#39;</span>               <span class="c1"># MATLAB save file format (.mat)</span>
+    <span class="n">MATLAB_COMP</span> <span class="o">=</span> <span class="s1">&#39;matlab_comp&#39;</span><span class="p">,</span> <span class="s1">&#39;.z.mat&#39;</span>   <span class="c1"># MATLAB save file format compressed (.z.mat)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Displays the Enum instance as a clean string.</span>
+
+<span class="sd">        :return: Simply returns the name of the enum for strings.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
+
+
+
+
+<span class="k">def</span> <span class="nf">__get_data_values</span><span class="p">(</span><span class="n">results</span><span class="p">:</span> <span class="n">ResultsTable</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;table&#39;</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">values</span><span class="p">[::</span><span class="n">down_sample</span><span class="p">,</span> <span class="p">:]</span>
+
+
+<span class="k">def</span> <span class="nf">__get_data_columns</span><span class="p">(</span><span class="n">results</span><span class="p">:</span> <span class="n">ResultsTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;table&#39;</span><span class="p">][</span><span class="s1">&#39;columns&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="save_as_csv">
+<a class="viewcode-back" href="../../../modules/output/formats.html#qnav.output.formats.save_as_csv">[docs]</a>
+<span class="k">def</span> <span class="nf">save_as_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">ResultsTable</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Exports the given results table as a CSV file.</span>
+
+<span class="sd">    :param file_path: The file path to save the CSV data to.</span>
+<span class="sd">    :type file_path: pathlib.Path</span>
+
+<span class="sd">    :param results: The results to convert to CSV.</span>
+<span class="sd">    :type results: ResultsTable</span>
+
+<span class="sd">    :param down_sample: Optional down-sampling factor to apply.</span>
+<span class="sd">    :type down_sample: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">__get_data_columns</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">__get_data_values</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">)</span>
+    <span class="n">header_text</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">header_text</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="save_as_csv_comp">
+<a class="viewcode-back" href="../../../modules/output/formats.html#qnav.output.formats.save_as_csv_comp">[docs]</a>
+<span class="k">def</span> <span class="nf">save_as_csv_comp</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">ResultsTable</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Exports the given results table as a compressed CSV file.</span>
+
+<span class="sd">    :param file_path: The file path to save the compressed CSV data to.</span>
+<span class="sd">    :type file_path: pathlib.Path</span>
+
+<span class="sd">    :param results: The results to convert to compressed CSV.</span>
+<span class="sd">    :type results: ResultsTable</span>
+
+<span class="sd">    :param down_sample: Optional down-sampling factor to apply.</span>
+<span class="sd">    :type down_sample: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">save_as_csv</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.gz&#39;</span><span class="p">),</span> <span class="n">results</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="save_as_numpy">
+<a class="viewcode-back" href="../../../modules/output/formats.html#qnav.output.formats.save_as_numpy">[docs]</a>
+<span class="k">def</span> <span class="nf">save_as_numpy</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">ResultsTable</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Exports the given results table as a numpy data file.</span>
+
+<span class="sd">    :param file_path: The file path to save the numpy data to.</span>
+<span class="sd">    :type file_path: pathlib.Path</span>
+
+<span class="sd">    :param results: The results to convert to numpy save file.</span>
+<span class="sd">    :type results: ResultsTable</span>
+
+<span class="sd">    :param down_sample: Optional down-sampling factor to apply.</span>
+<span class="sd">    :type down_sample: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">__get_data_values</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="save_as_numpy_comp">
+<a class="viewcode-back" href="../../../modules/output/formats.html#qnav.output.formats.save_as_numpy_comp">[docs]</a>
+<span class="k">def</span> <span class="nf">save_as_numpy_comp</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">ResultsTable</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Exports the given results table as a compressed numpy data file.</span>
+
+<span class="sd">    :param file_path: The file path to save the compressed numpy data to.</span>
+<span class="sd">    :type file_path: pathlib.Path</span>
+
+<span class="sd">    :param results: The results to convert to compressed numpy save file.</span>
+<span class="sd">    :type results: ResultsTable</span>
+
+<span class="sd">    :param down_sample: Optional down-sampling factor to apply.</span>
+<span class="sd">    :type down_sample: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">__get_data_values</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savez_compressed</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="save_as_binary">
+<a class="viewcode-back" href="../../../modules/output/formats.html#qnav.output.formats.save_as_binary">[docs]</a>
+<span class="k">def</span> <span class="nf">save_as_binary</span><span class="p">(</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">ResultsTable</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Exports the given results table as a compressed numpy data file.</span>
+
+<span class="sd">    :param file_path: The file path to save the compressed numpy data to.</span>
+<span class="sd">    :type file_path: pathlib.Path</span>
+
+<span class="sd">    :param results: The results to convert to compressed numpy save file.</span>
+<span class="sd">    :type results: ResultsTable</span>
+
+<span class="sd">    :param down_sample: Optional down-sampling factor to apply.</span>
+<span class="sd">    :type down_sample: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">__get_data_values</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">)</span>
+    <span class="n">values</span><span class="o">.</span><span class="n">tofile</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.18e</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">__save_as_mat</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">ResultsTable</span><span class="p">,</span> <span class="n">do_compression</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;table&#39;</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">][::</span><span class="n">down_sample</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;table&#39;</span><span class="p">][</span><span class="s1">&#39;columns&#39;</span><span class="p">]</span>
+    <span class="n">to_save</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;columns&#39;</span><span class="p">:</span> <span class="n">columns</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">:</span> <span class="n">values</span><span class="p">}</span>
+    <span class="n">savemat</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">to_save</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;5&#39;</span><span class="p">,</span> <span class="n">do_compression</span><span class="o">=</span><span class="n">do_compression</span><span class="p">)</span>
+
+<div class="viewcode-block" id="save_as_matlab">
+<a class="viewcode-back" href="../../../modules/output/formats.html#qnav.output.formats.save_as_matlab">[docs]</a>
+<span class="k">def</span> <span class="nf">save_as_matlab</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">ResultsTable</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Exports the given results table as a (non-compressed) MATLAB data file.</span>
+
+<span class="sd">    :param file_path: The file path to save the MATLAB data to.</span>
+<span class="sd">    :type file_path: pathlib.Path</span>
+
+<span class="sd">    :param results: The results to convert to MATLAB file.</span>
+<span class="sd">    :type results: ResultsTable</span>
+
+<span class="sd">    :param down_sample: Optional down-sampling factor to apply.</span>
+<span class="sd">    :type down_sample: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__save_as_mat</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="save_as_matlab_comp">
+<a class="viewcode-back" href="../../../modules/output/formats.html#qnav.output.formats.save_as_matlab_comp">[docs]</a>
+<span class="k">def</span> <span class="nf">save_as_matlab_comp</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">ResultsTable</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Exports the given results table as a MATLAB data file (with compression).</span>
+
+<span class="sd">    :param file_path: The file path to save the MATLAB data to.</span>
+<span class="sd">    :type file_path: pathlib.Path</span>
+
+<span class="sd">    :param results: The results to convert to MATLAB file.</span>
+<span class="sd">    :type results: ResultsTable</span>
+
+<span class="sd">    :param down_sample: Optional down-sampling factor to apply.</span>
+<span class="sd">    :type down_sample: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__save_as_mat</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="save_as">
+<a class="viewcode-back" href="../../../modules/output/formats.html#qnav.output.formats.save_as">[docs]</a>
+<span class="k">def</span> <span class="nf">save_as</span><span class="p">(</span><span class="n">file_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">ResultsTable</span><span class="p">,</span>
+            <span class="n">down_sample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">formats</span><span class="p">:</span> <span class="n">SaveFormat</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Saves the given results as one or format types.</span>
+
+<span class="sd">    :param file_dir: The location to write results to.</span>
+<span class="sd">    :type file_dir: pathlib.Path</span>
+
+<span class="sd">    :param file_name: The filename prefix to use.</span>
+<span class="sd">    :type file_name: str</span>
+
+<span class="sd">    :param results: The results to convert and write.</span>
+<span class="sd">    :type results: ResultsTable</span>
+
+<span class="sd">    :param down_sample: Optional down-sampling factor to apply.</span>
+<span class="sd">    :type down_sample: int</span>
+
+<span class="sd">    :param formats: The output formats to use.</span>
+<span class="sd">    :type formats: SaveFormat</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">file_dir</span> <span class="o">/</span> <span class="n">file_name</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="o">.</span><span class="n">is_data_loaded</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">file_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">file_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">sf</span> <span class="ow">in</span> <span class="n">SaveFormat</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sf</span> <span class="ow">in</span> <span class="n">formats</span><span class="p">:</span>
+
+            <span class="n">save_file</span> <span class="o">=</span> <span class="n">file_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">file_ext</span><span class="p">)</span>
+
+            <span class="k">match</span> <span class="n">sf</span><span class="p">:</span>
+
+                <span class="k">case</span> <span class="n">SaveFormat</span><span class="o">.</span><span class="n">CSV</span><span class="p">:</span>
+                    <span class="n">save_as_csv</span><span class="p">(</span><span class="n">save_file</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">)</span>
+
+                <span class="k">case</span> <span class="n">SaveFormat</span><span class="o">.</span><span class="n">CSV_COMP</span><span class="p">:</span>
+                    <span class="n">save_as_csv_comp</span><span class="p">(</span><span class="n">save_file</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">)</span>
+
+                <span class="k">case</span> <span class="n">SaveFormat</span><span class="o">.</span><span class="n">NUMPY</span><span class="p">:</span>
+                    <span class="n">save_as_numpy</span><span class="p">(</span><span class="n">save_file</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">)</span>
+
+                <span class="k">case</span> <span class="n">SaveFormat</span><span class="o">.</span><span class="n">NUMPY_COMP</span><span class="p">:</span>
+                    <span class="n">save_as_numpy_comp</span><span class="p">(</span><span class="n">save_file</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">)</span>
+
+                <span class="k">case</span> <span class="n">SaveFormat</span><span class="o">.</span><span class="n">BINARY</span><span class="p">:</span>
+                    <span class="n">save_as_binary</span><span class="p">(</span><span class="n">save_file</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">)</span>
+
+                <span class="k">case</span> <span class="n">SaveFormat</span><span class="o">.</span><span class="n">MATLAB</span><span class="p">:</span>
+                    <span class="n">save_as_matlab</span><span class="p">(</span><span class="n">save_file</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">)</span>
+
+                <span class="k">case</span> <span class="n">SaveFormat</span><span class="o">.</span><span class="n">MATLAB_COMP</span><span class="p">:</span>
+                    <span class="n">save_as_matlab_comp</span><span class="p">(</span><span class="n">save_file</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">down_sample</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># if __name__ == &#39;__main__&#39;:</span>
+<span class="c1">#</span>
+<span class="c1">#     test_format = SaveFormat.MATLAB_COMP</span>
+<span class="c1">#     print(test_format)</span>
+
+    <span class="c1"># test_file = Path(&quot;testing.qnr&quot;)</span>
+    <span class="c1"># test_rt = ResultsTable(test_file, auto_load=True)</span>
+    <span class="c1"># # test_data = test_rt.get_data()</span>
+    <span class="c1">#</span>
+    <span class="c1"># output_dir = Path()</span>
+
+    <span class="c1"># save_as_csv(output_dir / &quot;testing.csv&quot;, test_rt)</span>
+    <span class="c1"># save_as_csv_comp(output_dir / &quot;testing.csv.gz&quot;, test_rt)</span>
+    <span class="c1"># save_as_numpy(output_dir / &quot;testing.npy&quot;, test_rt)</span>
+    <span class="c1"># save_as_numpy_comp(output_dir / &quot;testing.npz&quot;, test_rt)</span>
+    <span class="c1"># save_as_matlab(output_dir / &quot;testing.mat&quot;, test_rt)</span>
+    <span class="c1"># save_as_matlab_comp(output_dir / &quot;testing.z.mat&quot;, test_rt)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, University of Liverpool.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
