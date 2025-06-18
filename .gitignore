@@ -176,6 +176,7 @@ cython_debug/
 # MacOS
 .DS_Store
 .gitignore
+**/.DS_Store
 
 # Exceptions
 !docs/build/
