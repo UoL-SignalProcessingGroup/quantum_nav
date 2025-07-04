@@ -1,6 +1,6 @@
 
 # Python Navigation Toolbox
-## Last Updated October 2024
+## Last Updated 4th July 2025
 
 This software is a Position, Navigation and Timing (PNT) enumeration testing 
 environment design for navigation study. This toolbox supplies features for 
@@ -43,10 +43,6 @@ default configuration file) by executing the following command:
 python run.py
 ```
 
-If you have multiple versions of Python installed, you may need to replace 
-the `Python` command with `Python3` or `Python3.12` to avoid attempting to run
-the project with an incompatible version of Python. 
-
 ## Configuration
 On execution, the software will extract its settings and user preferences from
  a provided configuration file. A requested configuration can be state by 
@@ -58,4 +54,15 @@ On execution, the software will extract its settings and user preferences from
 ```bash
 python run.py custom_config.ini
 ```
+
+## Run Series
+The toolbox can also execute a series of simulations simultaneously via 
+ the `run_all.py` script. By presenting the path to a directory, the script
+ will recursively find all configuration files and execute them in a 
+ parallel pool. The number of threads to use can also be passed as the 
+ second command line argument (or left blank to auto assign). For example:
+```bash
+python run_all.py path/to/config/dir/ 10
+```
+
 
