@@ -123,7 +123,6 @@ def get_trajectory(config: ConfigHandler) -> Trajectory:
 
     gravity = grav_conf.get_true_gravity_model(config)
 
-    # TODO: NEW
     # Set the default grid for calculating gravity gradient
     grid_params = grav_conf.get_gradient_grid(config)
     set_default_grid(**grid_params)
@@ -306,6 +305,7 @@ def get_results_settings(config: ConfigHandler) -> dict:
         'copy_config': out_conf.get_copy_config(config),
         'down_sampling': out_conf.get_output_downsample(config),
         'formats': out_conf.get_output_formats(config),
+        'save_summary': out_conf.get_include_summary(config),
     }
 
     print_line(f"Include Full Configuration", settings['copy_config'])

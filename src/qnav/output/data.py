@@ -180,38 +180,3 @@ class ResultsTable:
         return self._data_table is not None
 
 
-
-
-
-
-
-if __name__ == "__main__":
-#
-#     sf = SaveFormat.CSV
-#
-#     l = list()
-#     for a in SaveFormat:
-#         print(a)
-#         l.append(a)
-
-    # np.random.seed(0)
-    # test_data = np.random.random((10, 6))
-    #
-    # test_times = np.arange(10)
-    # test_field_1 = test_data[:, 0]
-    # test_field_2 = test_data[:, 1:3]
-    # test_field_3 = test_data[:, 3:6]
-
-    test_file = Path("testing.qnr")
-    rt = ResultsTable(test_file, auto_load=False)
-
-    # rt.write("Testing123", test_times,
-    #          field1=test_field_1,
-    #          field2=test_field_2,
-    #          field3=test_field_3)
-
-    rt.read(virtual_memory=False)
-    t = rt.get_data()
-
-
-

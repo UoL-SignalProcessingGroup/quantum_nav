@@ -299,6 +299,34 @@ class ConfigHandler:
         # Finally, return the resulting matrix.
         return to_return
 
+    def as_tuples(self) -> tuple:
+        """
+        Returns the loaded contents of configuration as series of tuples.
+        Each child tuple contains the section, key and value for each
+        configuration variable, respectively.
+
+        :return: A tuple of configuration sections, keys and values.
+        :rtype: tuple
+        """
+
+        # Collection to return
+        to_return = []
+
+        # For each of the read sections:
+        for section in self.get_sections():
+
+            # Obtain all values for the current section.
+            contents = np.array(self.parser.items(section))
+            for (key, value) in contents:
+
+                # Convert to readable strings:
+                key_str = str(key).strip()
+                value_str = str(value).split("#", 1)[0].strip()
+                to_return.append((section, key_str, value_str))
+
+        # Finally, return tuple of collection.
+        return tuple(to_return)
+
     def get_sections(self):
         """
         This function returns a list of all the sections read from the given
@@ -901,6 +929,14 @@ class ConfigHandler:
             warning_msg = "Unable to write configuration file!"
             warn(warning_msg, NavConfigWarning)
 
+    def __hash__(self):
+        """
+        Provides support for hashing object instance.
+        Allows the generation of a hash number that can be used to verify if
+        two configurations are identical.
+        """
+        return hash(self.as_tuples())
+
 
 class NavConfigWarning(UserWarning):
     """
@@ -1002,5 +1038,9 @@ class NavConfigError(Exception):
         return f"{class_name}:\t{self.message}"
 
 
-if __name__ == '__main__':
-    pass
+# if __name__ == '__main__':
+#     project_dir = Path(__file__).resolve().parent.parent.parent
+#     test_file = project_dir / 'default_settings.ini'
+#     test_config = ConfigHandler(test_file)
+#     all_values = test_config.as_tuples()
+

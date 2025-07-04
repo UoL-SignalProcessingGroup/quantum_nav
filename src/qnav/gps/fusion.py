@@ -183,8 +183,7 @@ class GpsFusion(SensorFusion, ABC):
         :rtype: bool
         """
         last_measurement = self._gps_sensor.last_measurement
-        return last_measurement is None or last_measurement['is_usable']
-
+        return last_measurement is None or not last_measurement['is_usable']
 
 
 class GpsFixedGainFusion(GpsFusion):

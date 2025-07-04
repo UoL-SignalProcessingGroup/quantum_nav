@@ -19,6 +19,7 @@ display.py
 from abc import ABC
 from abc import abstractmethod
 from datetime import datetime
+from enum import IntEnum, auto
 from sys import stdin
 
 from qnav.estimation.state import EstimatedState
@@ -27,6 +28,7 @@ from qnav.waypoints.trajectory import Trajectory
 from qnav.util.transformations import lla2ned
 
 import numpy as np
+import multiprocessing as mp
 
 #: Ascii/Terminal character for line up.
 _LINE_UP = '\033[1A'
@@ -159,7 +161,7 @@ class ConsoleDisplay(Display):
     in the output console. Namely used as an example display class.
     """
 
-    __slots__ = ('_start_time', 'end_time')
+    __slots__ = ('_start_time', '_end_time')
 
     def __init__(self, update_interval: float):
         """
@@ -389,6 +391,264 @@ class MultilineDisplay(ConsoleDisplayPlus):
 
         assert np.linalg.norm(position_error) <= self._max_error, \
             f"Estimated position error has exceeded threshold of {self._max_error} metres"
+
+
+class DisplayStatus(IntEnum):
+    """
+    Progress states used by some displayers.
+    Used to indicate the current progress of simulations.
+    """
+    NOT_STARTED = auto(),
+    STARTING = auto(),
+    RUNNING = auto(),
+    FINISHED = auto(),
+    FAILURE = auto()
+
+
+class NoDisplay(Display):
+    """
+    A displayer that retains progress, but does not display or print it.
+    Useful when automating simulations or running them silently. As this
+    displayer still holds progress it can be monitored by other methods.
+    """
+
+    __slots__ = ('_start_time', '_end_time', '_status')
+
+    def __init__(self, update_interval: float):
+        """
+        Initialise console printing by giving the update time interval.
+        This defines how often displaying updates will be given (in
+        simulation time).
+
+        :param update_interval: The time intervals between updates in seconds.
+        :type update_interval: float
+        """
+
+        # Call construct and typical initialisation
+        super().__init__(update_interval)
+        self._update_interval = update_interval
+        self._start_time = float('nan')
+        self._end_time = float('nan')
+
+        # Record default status and progress percentage
+        self._status = DisplayStatus.NOT_STARTED
+        self._progress = 0.0
+
+    def on_start(self, trajectory: Trajectory):
+        """
+        Called at the start of the simulation before first iteration.
+        Used to obtain the start and end times of the trajectory.
+
+        :param trajectory: The ground truth trajectory instance.
+        :type trajectory: Trajectory
+        """
+        self._start_time = trajectory.start_time
+        self._end_time = trajectory.end_time
+        self._status = DisplayStatus.RUNNING
+
+    def on_update(self, timestamp: float, estimated_state: EstimatedState, ground_truth: GroundTruth):
+        """
+        Called during the simulation after each fusion update.
+        Updates the runtime progress of the simulation.
+
+        :param timestamp: The current (true) simulation time in seconds.
+        :type timestamp: float
+
+        :param estimated_state: The current estimated state of the simulation.
+        :type estimated_state: EstimatedState
+
+        :param ground_truth: The current ground truth state of the simulation.
+        :type ground_truth: GroundTruth
+        """
+        self._progress = timestamp / self._end_time
+
+    def on_finish(self, timestamp: float, estimated_state: EstimatedState, ground_truth: GroundTruth):
+        """
+        Called at the end of the simulation after final iteration.
+        Marks simulation as complete
+
+        :param timestamp: The final (true) simulation time in seconds.
+        :type timestamp: float
+
+        :param estimated_state: The final estimated state of the simulation.
+        :type estimated_state: EstimatedState
+
+        :param ground_truth: The final ground truth state of the simulation.
+        :type ground_truth: GroundTruth
+        """
+        self._progress = 1.0
+        self._status = DisplayStatus.FINISHED
+
+    @property
+    def status(self) -> DisplayStatus:
+        """
+        The current display status of the simulation.
+        Can be NOT_STARTED, STARTED, FINISHED, or FAILURE.
+
+        :return: The current display status of the simulation.
+        :rtype: DisplayStatus
+        """
+        return self._status
+
+    @status.setter
+    def status(self, new_status: DisplayStatus):
+        """
+        Set the current display status of the simulation.
+        Supports NOT_STARTED, STARTED, FINISHED, or FAILURE.
+
+        :param new_status: The new display status of the simulation.
+        :type new_status: DisplayStatus
+        """
+        self._status = new_status
+
+    @property
+    def progress(self) -> float:
+        """
+        The current simulation progress percentage.
+
+        :return: The simulation percentage between 0.0 and 1.0.
+        :rtype: float
+        """
+        return self._progress
+
+    @property
+    def update_interval(self) -> float:
+        """
+        The requested update interval in simulated seconds.
+
+        :return: The would be print delay in simulation seconds.
+        :rtype: float
+        """
+        return self._update_interval
+
+
+class MPDisplay(Display):
+    """
+    A displayer for multi-process simulations.
+    This displayers is used when multiple simulations are being executed in
+    parallel, where each holds the information for an individual simulation.
+    """
+
+    def __init__(self, update_interval: float,
+                 simulation_index: int,
+                 shared_progress: mp.RawArray,
+                 shared_status: mp.RawArray):
+        """
+        Initialise console printing by giving the update time interval.
+        This defines how often displaying updates will be given (in
+        simulation time).
+
+        :param update_interval: The time intervals between updates in seconds.
+        :type update_interval: float
+        """
+
+        # Call construct and typical initialisation
+        super().__init__(update_interval)
+        self._update_interval = update_interval
+        self._start_time = float('nan')
+        self._end_time = float('nan')
+
+        # Add additional fields
+        self._progress: float = 0.0
+        self._status = DisplayStatus.NOT_STARTED
+
+        # Copy the index and shared progress arrays
+        self._simulation_index = simulation_index
+        self._shared_progress_array = shared_progress
+        self._shared_status_array = shared_status
+
+    def on_start(self, trajectory: Trajectory):
+        """
+        Called at the start of the simulation before first iteration.
+        Used to obtain the start and end times of the trajectory.
+
+        :param trajectory: The ground truth trajectory instance.
+        :type trajectory: Trajectory
+        """
+        self._start_time = trajectory.start_time
+        self._end_time = trajectory.end_time
+        self.status = DisplayStatus.RUNNING
+
+    def on_update(self, timestamp: float, estimated_state: EstimatedState, ground_truth: GroundTruth):
+        """
+        Called during the simulation after each fusion update.
+        Updates the runtime progress of the simulation.
+
+        :param timestamp: The current (true) simulation time in seconds.
+        :type timestamp: float
+
+        :param estimated_state: The current estimated state of the simulation.
+        :type estimated_state: EstimatedState
+
+        :param ground_truth: The current ground truth state of the simulation.
+        :type ground_truth: GroundTruth
+        """
+        self.progress = timestamp / self._end_time
+
+    def on_finish(self, timestamp: float, estimated_state: EstimatedState, ground_truth: GroundTruth):
+        """
+        Called at the end of the simulation after final iteration.
+        Marks simulation as complete
+
+        :param timestamp: The final (true) simulation time in seconds.
+        :type timestamp: float
+
+        :param estimated_state: The final estimated state of the simulation.
+        :type estimated_state: EstimatedState
+
+        :param ground_truth: The final ground truth state of the simulation.
+        :type ground_truth: GroundTruth
+        """
+        self.progress = 1.0
+        self.status = DisplayStatus.FINISHED
+
+    @property
+    def status(self) -> DisplayStatus:
+        """
+        The current display status of the simulation.
+        Enumerator making current run status of simulation.
+
+        :return: The current display status of the simulation.
+        :rtype: DisplayStatus
+        """
+        return self._status
+
+    @status.setter
+    def status(self, new_status: DisplayStatus):
+        """
+        Controlled setting of the simulation display status.
+        Updates the local flag and shared status.
+
+        :param new_status: The new display status of the simulation.
+        :type new_status: DisplayStatus
+        """
+        self._status = new_status
+        ind = self._simulation_index
+        self._shared_status_array[ind] = new_status.value
+
+    @property
+    def progress(self) -> float:
+        """
+        The current progress percentage of the simulation.
+        A progress percentage between 0.0 and 1.0.
+
+        :return: The current progress percentage of the simulation.
+        :rtype: float
+        """
+        return self._progress
+
+    @progress.setter
+    def progress(self, new_progress: float):
+        """
+        Controlled setting of the simulation progress.
+        Updates the local progress and shared percentage.
+
+        :param new_progress: The new progress percentage of the simulation.
+        :type new_progress: float
+        """
+        self._progress = new_progress
+        ind = self._simulation_index
+        self._shared_progress_array[ind] = new_progress
 
 
 if __name__ == '__main__':

@@ -27,7 +27,7 @@ from qnav.input.config_handler import ConfigHandler, NavConfigError
 from qnav.input.ini.estimation_config import use_virtual_memory
 from qnav.input.ini.measurement_config import get_imu_frequency
 from qnav.output.formats import SaveFormat
-from qnav.simulation.display import Display, ConsoleDisplayPlus, ConsoleDisplay, MultilineDisplay
+from qnav.simulation.display import Display, ConsoleDisplayPlus, ConsoleDisplay, MultilineDisplay, NoDisplay
 from qnav.simulation.results import ResultsCapture, CaptureAtFixedRate
 
 # The shared section name to use
@@ -79,6 +79,9 @@ def get_displayer(config: ConfigHandler) -> Display:
     # Return the requested fusion method:
     match display_mode:
 
+        case 'none':
+            return NoDisplay(update_interval)
+
         case 'time':
             return ConsoleDisplay(update_interval)
 
@@ -110,6 +113,11 @@ def get_output_dir(config: ConfigHandler) -> Path:
         output_dir.mkdir(parents=True)
 
     return output_dir
+
+
+def get_include_summary(config: ConfigHandler) -> bool:
+    get_bool = partial(config.get_bool, __SECTION_ID)
+    return get_bool("saveSummary", True)
 
 
 def get_output_downsample(config: ConfigHandler) -> int:
