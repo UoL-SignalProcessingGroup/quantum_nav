@@ -401,7 +401,7 @@ if __name__ == '__main__':
 
     # Execute all configurations concurrently
     print_freq = 0.66  # In seconds
-    outputs = run_all_configs(configs[:-4], override_settings, max_threads, print_freq)
+    outputs = run_all_configs(configs, override_settings, max_threads, print_freq)
     # output = _run_configuration(configs[0], override_settings)
 
     # Collect summary results for all:
