@@ -21,6 +21,7 @@ create_measurements.py
 :version:
     1.0.0 - Original first implementation
 """
+import json
 
 # Other imports
 import numpy as np
@@ -249,10 +250,53 @@ def get_measurements(sensor: Accelerometer | Gyroscope | Altimeter, traj: Trajec
         'measurements': measurements
     }
 
-def save_measurements(results: dict, filepath: Path):
+
+def save_trajectory(traj: Trajectory, filepath: Path) -> None:
+    """
+    Writes trajectory records to given CSV file.
+    Creates a CSV containing required trajectory ground truth records.
+
+    :param traj: A trajectory instance to acquire records from.
+    :type traj: Trajectory
+
+    :param filepath: Path to CSV file.
+    :type filepath: Path
+    """
+
+    # Create parent directories if missing:
+    if not filepath.parent.exists():
+        filepath.parent.mkdir(parents=True)
+
+    # Get the start and end times of trajectory
+    start_time = traj.start_time
+    end_time = traj.end_time
+
+    # Interpolate records for required timestamps
+    first_record = traj.get_record(start_time).as_numpy()
+    last_record = traj.get_record(end_time).as_numpy()
+
+    # Format the file header comment
+    file_header = ', '.join(['Timestamp',
+                   'Latitude', 'Longitude', 'Altitude',
+                   'Velocity Along', 'Velocity Across', 'Velocity Down',
+                   'Acc. Along', 'Acc. Across', 'Acc. Down',
+                   'Heading', 'Pitch', 'Roll',
+                   'P Rate', 'Q Rate', 'R Rate'])
+
+    # Concatenate and write results to csv file
+    data = np.vstack((first_record, last_record))
+    np.savetxt(filepath, data, fmt='%.18e', delimiter=',', header=file_header)
+
+def save_measurements(results: dict, filepath: Path) -> None:
     """
     Writes measurement results to given CSV file.
     Creates a CSV file containing the measurement times and records.
+
+    :param results: Dictionary containing measurement results.
+    :type results: dict
+
+    :param filepath: Path to CSV file to write records to.
+    :type filepath: Path
     """
 
     # Create parent directories if missing:
@@ -263,42 +307,52 @@ def save_measurements(results: dict, filepath: Path):
     timestamps = results['timestamps']
     measurements = results['measurements']
 
+    # Format the file header comment
+    measurement_size = measurements.shape[1]
+    file_columns = ['Timestamp']
+    file_columns += [f'Measurement [{i+1}]' for i in range(measurement_size)]
+    file_header = ', '.join(file_columns)
+
     # Concatenate and write results to csv file
     data = np.column_stack((timestamps, measurements))
-    np.savetxt(filepath, data, fmt='%.18e', delimiter=',')
+    np.savetxt(filepath, data, fmt='%.18e', delimiter=',', header=file_header)
 
 
 # Run if script is called directly
 if __name__ == '__main__':
 
     # 1. Generate low-resolution trajectory
-    print('[1/6] Generating trajectory...')
+    print('[1/7] Generating trajectory...')
     trajectory = get_trajectory()
 
     # 2. Define sensors to use
-    print('[2/6] Initialising sensor instances...')
+    print('[2/7] Initialising sensor instances...')
     accelerometer = get_accelerometer(freq=500.0)
     gyroscope = get_gyroscope(freq=500.0)
     altimeter = get_altimeter(freq=1.0)
 
     # 3. Extract accelerometer measurements
-    print('[3/6] Capturing accelerometer measurements...')
+    print('[3/7] Capturing accelerometer measurements...')
     acc_measurements = get_measurements(accelerometer, trajectory)
 
     # 4. Extract gyroscope measurements
-    print('[4/6] Capturing gyroscope measurements...')
+    print('[4/7] Capturing gyroscope measurements...')
     gyro_measurements = get_measurements(gyroscope, trajectory)
 
     # 5. Extract altimeter measurements
-    print('[5/6] Capturing altimeter measurements...')
+    print('[5/7] Capturing altimeter measurements...')
     alt_measurements = get_measurements(altimeter, trajectory)
 
-    # 6. Save results to disk
-    print('[6/6] Saving results...')
-    output_dir = Path('sensor_measurements')  # Change me to prevent overwriting results
-    save_measurements(acc_measurements, output_dir / 'accelerometer_measurements.csv')
-    save_measurements(gyro_measurements, output_dir / 'gyroscope_measurements.csv')
-    save_measurements(alt_measurements, output_dir / 'altimeter_measurements.csv')
+    # 6. Save measurement results to disk
+    print('[6/7] Saving measurements...')
+    output_dir = Path('sensor_data')  # Change me to prevent overwriting results
+    save_measurements(acc_measurements, output_dir / 'accelerometer.csv')
+    save_measurements(gyro_measurements, output_dir / 'gyroscope.csv')
+    save_measurements(alt_measurements, output_dir / 'altimeter.csv')
+
+    # 7. Save ground truth records to disk
+    print('[7/7] Saving ground truth...')
+    save_trajectory(trajectory, output_dir / 'ground_truth.csv')
 
     # 7. Finish and any clean-up
     print(f'Done.\n\nResults saved to: {output_dir.absolute()}')
