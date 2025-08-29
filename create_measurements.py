@@ -17,9 +17,10 @@ create_measurements.py
         2.  Initialise IMU sensors
         3.  Capture IMU outputs
         4.  Save produced measurements
+        5.  Save selected ground truth records
 
 :version:
-    1.0.0 - Original first implementation
+    1.1.0 - Included exporting of ground truth records
 """
 import json
 
@@ -354,5 +355,5 @@ if __name__ == '__main__':
     print('[7/7] Saving ground truth...')
     save_trajectory(trajectory, output_dir / 'ground_truth.csv')
 
-    # 7. Finish and any clean-up
+    # 8. Finish and any clean-up
     print(f'Done.\n\nResults saved to: {output_dir.absolute()}')
