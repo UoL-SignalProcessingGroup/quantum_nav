@@ -22,7 +22,6 @@ create_measurements.py
 :version:
     1.1.0 - Included exporting of ground truth records
 """
-import json
 
 # Other imports
 import numpy as np
@@ -356,4 +355,4 @@ if __name__ == '__main__':
     save_trajectory(trajectory, output_dir / 'ground_truth.csv')
 
     # 8. Finish and any clean-up
-    print(f'Done.\n\nResults saved to: {output_dir.absolute()}')
+    print(f'\n\nResults saved to: {output_dir.absolute()}')
