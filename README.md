@@ -1,7 +1,5 @@
 
 # Python Navigation Toolbox
-## Seperated Sensor Branch
-### Last Updated 4th July 2025
 
 This software is a Position, Navigation and Timing (PNT) enumeration testing 
 environment design for navigation study. This toolbox supplies features for 
