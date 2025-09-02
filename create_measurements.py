@@ -148,7 +148,7 @@ def get_gyroscope(freq: float) -> Gyroscope:
     """
 
     # Define the gyroscope error profile
-    acc_errors = ErrorProperties(
+    gyro_errors = ErrorProperties(
         bias_error=np.random.randn(3) * 0.0,        # (micro-radians/sec)
         bias_drift_rate=np.random.randn(3) * 0.0,   # (micro-rad/sec.root sec)
         scale_error=np.random.randn(3) * 0.0,       # (ppm)
@@ -157,16 +157,16 @@ def get_gyroscope(freq: float) -> Gyroscope:
     )
 
     # Define the gyroscope sensor axis
-    acc_axis = SensorAxis(
+    gyro_axis = SensorAxis(
         sensor_angles=np.zeros(3),
         lever_arm=np.zeros(3)
     )
 
     # Define internal random number generation seed to use
-    acc_seed = 12345  # (Use None to randomise each time)
+    gyro_seed = 12345  # (Use None to randomise each time)
 
     # Finally, initialise and return an gyroscope sensor
-    return Gyroscope(freq, acc_errors, acc_axis, rand_seed=acc_seed)
+    return Gyroscope(freq, gyro_errors, gyro_axis, rand_seed=gyro_seed)
 
 def get_altimeter(freq: float) -> Altimeter:
     """
@@ -249,7 +249,6 @@ def get_measurements(sensor: Accelerometer | Gyroscope | Altimeter, traj: Trajec
         'timestamps': time_steps,
         'measurements': measurements
     }
-
 
 def save_trajectory(traj: Trajectory, filepath: Path) -> None:
     """
