@@ -14,7 +14,7 @@ run.py
     | Michael Wright - mjwright@liverpool.ac.uk
 
 :version:
-    1.0.0 - Updated 3rd October 2024
+    1.1.0 - Included summary with writing results
 """
 
 # Required to ensure qnav is on path!
@@ -28,6 +28,7 @@ import qnav.output.figures as plot
 
 from qnav.input.config_handler import ConfigHandler
 from qnav.simulation.results import ResultsCapture
+from qnav.output.summary import write_summary_file
 from qnav.output.formats import save_as
 from qnav.output.data import ResultsTable
 from qnav import __version__ as qnav_version
@@ -123,6 +124,7 @@ def save_results(config: ConfigHandler, results: ResultsCapture) -> Path:
 
     # Extract the requested settings.
     settings = cfg.get_results_settings(config)
+    save_summary = settings['save_summary']
     copy_config = settings['copy_config']
     output_dir = settings['output_dir']
     formats = settings['formats']
@@ -134,6 +136,7 @@ def save_results(config: ConfigHandler, results: ResultsCapture) -> Path:
     estimates_table = ResultsTable(estimates_file)
     true_data_table = ResultsTable(truth_file)
 
+    # Include copy of configuration file if requested:
     if copy_config:
         config.copy_file(output_dir / "config.ini")
         config.write_file(output_dir / "config_full.ini")
@@ -143,8 +146,15 @@ def save_results(config: ConfigHandler, results: ResultsCapture) -> Path:
     save_as(output_dir, 'estimation', estimates_table, ds, *formats)
     save_as(output_dir, 'ground_truth', true_data_table, ds, *formats)
 
+    # Include summary results of simulation if requested:
+    if save_summary:
+        summary_file = output_dir / 'summary.json'
+        write_summary_file(summary_file, config, estimates_table, true_data_table)
+
     # Generate all result figures and graphs (if requested).
     generate_figures(config, output_dir, estimates_table, true_data_table)
+
+    # Lastly, return where results are saved to
     return output_dir
 
 
@@ -172,10 +182,10 @@ def generate_figures(config: ConfigHandler,
 
     # Extract the requested settings.
     settings = cfg.get_figure_settings(config)
-    save_figs = settings["do_save"]
-    show_figs = settings["do_show"]
-    renderer = settings["renderer"]
-    formats = settings["formats"]
+    save_figs = settings['do_save']
+    show_figs = settings['do_show']
+    renderer = settings['renderer']
+    formats = settings['formats']
 
     if not save_figs and not show_figs:
         return
