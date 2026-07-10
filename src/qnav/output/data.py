@@ -41,7 +41,19 @@ class ResultsTable:
         if auto_load and file_path.exists():
             self.read()
 
+    def _release_memmap(self) -> None:
+        """Release this table's Windows file mapping before replacement."""
+        data = self._data_table
+        if isinstance(data, np.memmap):
+            self._time_steps = None
+            mapping = getattr(data, "_mmap", None)
+            if mapping is not None:
+                mapping.close()
+        self._data_table = None
+
     def read(self, virtual_memory: bool = True):
+
+        self._release_memmap()
 
         # Open the file and attempt to read header:
         with self._file_path.open('rb') as f:
@@ -107,6 +119,8 @@ class ResultsTable:
         if self._read_only:
             raise ValueError("Cannot write data in read-only mode")
 
+        self._release_memmap()
+
         header = self.__generate_header(desc, time_steps, **data)
         data_size = header["size"]
         fields = header["fields"]
@@ -132,11 +146,19 @@ class ResultsTable:
             else:
                 to_write[:, index:index + size] = data[field]
 
-        self._description = desc
-        self._time_steps = to_write[:, 0]
-        self._data_table = to_write
-        self._index_dict = fields
         to_write.flush()
+        # Writers retain an in-memory view so they do not keep the destination
+        # mapped and block a later atomic rerun/overwrite on Windows. Explicit
+        # readers still use virtual memory by default.
+        loaded = np.array(to_write)
+        mapping = getattr(to_write, "_mmap", None)
+        if mapping is not None:
+            mapping.close()
+
+        self._description = desc
+        self._time_steps = loaded[:, 0]
+        self._data_table = loaded
+        self._index_dict = fields
 
     def get_data(self) -> dict:
 
