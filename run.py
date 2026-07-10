@@ -152,6 +152,11 @@ def save_results(config: ConfigHandler,
         results.write(estimates_table)
         results.write_report(output_dir / 'ingestion_report.json')
         results.write_processed_imu(output_dir)
+        if results.reference:
+            truth_file = output_dir / 'ground_truth.qnr'
+            candidate_table = ResultsTable(truth_file, auto_load=False)
+            results.write_reference(candidate_table)
+            true_data_table = candidate_table
     else:
         truth_file = output_dir / 'ground_truth.qnr'
         true_data_table = ResultsTable(truth_file)

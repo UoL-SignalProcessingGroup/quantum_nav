@@ -208,3 +208,163 @@ saveProcessedImu = yes
     for field in ("x", "y", "z"):
         assert np.array_equal(first[field], second[field])
     assert not np.allclose(first["z"], -9.80665)
+
+
+def _reference_replay_config(tmp_path: Path, initial_state: str = "") -> Path:
+    config_path = tmp_path / "reference_replay.ini"
+    config_path.write_text(
+        f"""
+[Input]
+inputMode = raw
+
+[RawData]
+timeUnit = s
+imuInputLevel = truth
+
+{initial_state}
+
+[RawAccelerometer]
+file = imu.csv
+timestampColumn = time
+xColumn = ax
+yColumn = ay
+zColumn = az
+accelerationUnits = m/s2
+
+[RawGyroscope]
+file = imu.csv
+timestampColumn = time
+xColumn = gx
+yColumn = gy
+zColumn = gz
+angularRateUnits = deg/s
+
+[RawReference]
+file = truth.csv
+timestampColumn = time
+latitudeColumn = lat
+longitudeColumn = lon
+altitudeColumn = alt
+velocityXColumn = vx
+velocityYColumn = vy
+velocityZColumn = vz
+velocityFrame = body
+quaternionWColumn = qw
+quaternionXColumn = qx
+quaternionYColumn = qy
+quaternionZColumn = qz
+quaternionDirection = bodyToNed
+
+[Measurement]
+imuMeasurementFreq = 10
+accelerometerInitialStaticBiasMean = 0
+accelerometerBiasDriftRate = 0
+accelerometerScaleErrorMean = 0
+accelerometerMeasurementError = 0
+accelerometerNonOrthogonalityMean = 0
+gyroscopeInitialStaticBiasMean = 0
+gyroscopeBiasDriftRate = 0
+gyroscopeScaleErrorMean = 0
+gyroscopeMeasurementError = 0
+gyroscopeNonOrthogonalityMean = 0
+useGaussianMarkovNoise = no
+
+[Estimation]
+estimatedStateModel = simple
+integrationMethod = numerical
+
+[Gravity]
+estimatedGravityFunction = somigliana
+estimatedGravityCorrectionMap = none
+
+[Geoid]
+estimatedGeoidModel = none
+
+[Database]
+geoidDatabase = databases/geoid
+
+[Random]
+initialRandomSeed = 123
+errorRandomSeed = 456
+
+[Output]
+resultsDownSampleRate = 1
+""",
+        encoding="utf-8",
+    )
+    return config_path
+
+
+def test_reference_initializes_and_exports_on_exact_estimate_times(tmp_path: Path):
+    (tmp_path / "imu.csv").write_text(
+        "time,ax,ay,az,gx,gy,gz\n"
+        "0.0,0,0,-9.80665,0,0,0\n"
+        "0.1,0,0,-9.80665,0,0,0\n"
+        "0.2,0,0,-9.80665,0,0,0\n",
+        encoding="utf-8",
+    )
+    root_half = np.sqrt(0.5)
+    (tmp_path / "truth.csv").write_text(
+        "time,lat,lon,alt,vx,vy,vz,qw,qx,qy,qz\n"
+        f"0.0,52,-2,100,1,2,3,{root_half},0,0,{root_half}\n"
+        f"0.1,52.0001,-2,101,4,5,6,{root_half},0,0,{root_half}\n"
+        f"0.2,52.0002,-2,102,7,8,9,{root_half},0,0,{root_half}\n",
+        encoding="utf-8",
+    )
+
+    results = run_raw_replay(ConfigHandler(_reference_replay_config(tmp_path)))
+
+    np.testing.assert_allclose(results.time_steps, [0, 0.1, 0.2])
+    np.testing.assert_allclose(results.states[0, 1:4], [52, -2, 100])
+    np.testing.assert_allclose(results.states[0, 4:7], [1, 2, 3])
+    np.testing.assert_allclose(results.states[0, 10:13], [90, 0, 0])
+    np.testing.assert_allclose(results.reference["position"][:, 0],
+                               [52, 52.0001, 52.0002])
+    np.testing.assert_allclose(results.reference["velocity"],
+                               [[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    np.testing.assert_allclose(results.reference["attitude"],
+                               [[90, 0, 0]] * 3, atol=1e-12)
+
+    table = ResultsTable(tmp_path / "ground_truth.qnr")
+    assert results.write_reference(table)
+    np.testing.assert_array_equal(table.get_data()["time_steps"], results.time_steps)
+    assert set(table.get_data()["data"]) == {"position", "velocity", "attitude"}
+
+
+def test_reference_slerp_has_no_extrapolation_and_preserves_initial_tick(tmp_path: Path):
+    (tmp_path / "imu.csv").write_text(
+        "time,ax,ay,az,gx,gy,gz\n"
+        "0.0,0,0,-9.80665,0,0,0\n"
+        "0.1,0,0,-9.80665,0,0,0\n"
+        "0.2,0,0,-9.80665,0,0,0\n"
+        "0.3,0,0,-9.80665,0,0,0\n",
+        encoding="utf-8",
+    )
+    root_half = np.sqrt(0.5)
+    (tmp_path / "truth.csv").write_text(
+        "time,lat,lon,alt,vx,vy,vz,qw,qx,qy,qz\n"
+        "0.05,52,-2,100,0,0,0,1,0,0,0\n"
+        f"0.25,52,-2,100,0,0,0,{-root_half},0,0,{-root_half}\n",
+        encoding="utf-8",
+    )
+    initial = """
+[RawInitialState]
+latitude = 52
+longitude = -2
+altitude = 100
+velocityX = 0
+velocityY = 0
+velocityZ = 0
+heading = 0
+pitch = 0
+roll = 0
+"""
+
+    results = run_raw_replay(ConfigHandler(
+        _reference_replay_config(tmp_path, initial)))
+
+    np.testing.assert_allclose(results.time_steps, [0, 0.1, 0.2, 0.3])
+    assert np.isnan(results.reference["attitude"][[0, 3]]).all()
+    np.testing.assert_allclose(
+        results.reference["attitude"][1:3],
+        [[22.5, 0, 0], [67.5, 0, 0]], atol=1e-10)
