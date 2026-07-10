@@ -242,7 +242,8 @@ class SensorFusion(ABC):
         return self._sensors
 
     @abstractmethod
-    def perform_fusion(self, estimated_state: EstimatedState) -> None:
+    def perform_fusion(self, estimated_state: EstimatedState,
+                       time_step: float = None) -> None:
         """
         Performs the fusion with sensors and updates the estimated state.
         When called at scheduled time during a simulation loop, this method
@@ -253,5 +254,23 @@ class SensorFusion(ABC):
         :param estimated_state: The current estimated states of the platform.
                                 This is what the fusion method will update.
         :type estimated_state: EstimatedState
+
+        :param time_step: Optional elapsed time since the previous fusion in
+            seconds. Fusion methods use their sensors' configured interval
+            when this is omitted.
+        :type time_step: float
         """
         pass
+
+
+def resolve_time_step(time_step: float, default: float) -> float:
+    """Return a validated explicit or configured fusion interval.
+
+    The optional interval keeps simulation callers backward compatible while
+    allowing recorded measurements to drive fusion with their actual timing.
+    """
+    resolved = default if time_step is None else time_step
+    if not isinstance(resolved, (int, float, np.integer, np.floating)) \
+            or not isfinite(float(resolved)) or resolved <= 0:
+        raise ValueError("Fusion time step must be a positive finite value")
+    return float(resolved)
