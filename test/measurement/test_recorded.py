@@ -59,4 +59,3 @@ def test_quantum_and_gradiometer_proxy_shapes():
     gradiometer = RecordedGravityGradiometer()
     assert gradiometer.push(2, (0.1, 0.2)) == (0.1, 0.2)
     assert gradiometer.num_steps == 1
-
