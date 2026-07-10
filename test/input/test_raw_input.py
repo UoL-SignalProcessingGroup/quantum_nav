@@ -217,6 +217,7 @@ def test_initial_state_components_are_exposed(tmp_path):
 inputMode = raw
 [RawData]
 file = imu.csv
+imuInputLevel = truth
 [RawInitialState]
 latitude = 53
 longitude = -3
@@ -229,9 +230,11 @@ xColumn = x
 yColumn = y
 zColumn = z
 """)
-    initial = load_raw_dataset(config).config.initial_state
+    raw_config = load_raw_dataset(config).config
+    initial = raw_config.initial_state
     assert initial.position == (53, -3, None)
     assert initial.attitude == (90, 1, -2)
+    assert raw_config.imu_input_level == "truth"
 
 
 def test_parser_without_input_section_defaults_to_simulation():

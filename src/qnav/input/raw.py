@@ -146,6 +146,7 @@ class RawInputConfig:
     raw_config: Path | None = None
     mapping_config: ConfigParser | None = field(default=None, repr=False, compare=False)
     declaring_base: Path | None = None
+    imu_input_level: str = "measurement"
 
     def spec_for(self, kind: str) -> SensorSpec | None:
         """Return the enabled specification for a sensor kind, if present."""
@@ -353,6 +354,11 @@ def _load_raw_config(config: ConfigHandler | ConfigParser | Path | str) -> RawIn
     policy = str(view.get("RawData", "invalidRecordPolicy", "strict")).lower()
     if policy not in {"strict", "drop"}:
         raise ValueError("[RawData] invalidRecordPolicy must be 'strict' or 'drop'")
+    imu_input_level = str(
+        view.get("RawData", "imuInputLevel", "measurement")).strip().lower()
+    if imu_input_level not in {"measurement", "truth"}:
+        raise ValueError(
+            "[RawData] imuInputLevel must be 'measurement' or 'truth'")
     specs = tuple(_build_spec(view, section, kind) for section, kind in _SENSOR_SECTIONS.items()
                   if _section_enabled(view, section))
     if not specs:
@@ -367,8 +373,9 @@ def _load_raw_config(config: ConfigHandler | ConfigParser | Path | str) -> RawIn
             for name, value in raw_parser.items(section):
                 effective.set(section, name, value)
     declaring_base = (raw_path or main_path).parent
-    return RawInputConfig(specs, chunk_size, policy, initial, main_path, raw_path,
-                          effective, declaring_base)
+    return RawInputConfig(
+        specs, chunk_size, policy, initial, main_path, raw_path,
+        effective, declaring_base, imu_input_level)
 
 
 def _section_enabled(view: _ConfigView, section: str) -> bool:

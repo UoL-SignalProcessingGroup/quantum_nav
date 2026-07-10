@@ -151,6 +151,7 @@ def save_results(config: ConfigHandler,
     if isinstance(results, ReplayResults):
         results.write(estimates_table)
         results.write_report(output_dir / 'ingestion_report.json')
+        results.write_processed_imu(output_dir)
     else:
         truth_file = output_dir / 'ground_truth.qnr'
         true_data_table = ResultsTable(truth_file)

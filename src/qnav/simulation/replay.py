@@ -8,8 +8,11 @@ from itertools import groupby
 from pathlib import Path
 from typing import Iterable
 
+import csv
 import json
 import numpy as np
+import shutil
+import tempfile
 
 from qnav.estimation.state import EstimatedState, KalmanEstimatedState
 from qnav.gps.recorded import (
@@ -21,6 +24,7 @@ from qnav.gravity.map import set_default_grid
 from qnav.input.config_handler import ConfigHandler, NavConfigError
 from qnav.input.ini import estimation_config as est_conf
 from qnav.input.ini import gravity_config as grav_conf
+from qnav.input.ini import measurement_config as measurement_conf
 from qnav.input.ini import vehicle_config as vehicle_conf
 from qnav.input.raw import MeasurementEvent, RawDataset, load_raw_dataset
 from qnav.measurement.recorded import RecordedAccelerometer, RecordedGyroscope
@@ -37,6 +41,7 @@ class ReplayResults:
     states: np.ndarray
     utc_time: np.ndarray | None
     report: object
+    processed_imu: "_ProcessedImuCapture | None" = None
 
     def write(self, estimates: ResultsTable) -> None:
         fields = {
@@ -53,6 +58,53 @@ class ReplayResults:
     def write_report(self, path: Path) -> None:
         report = self.report.as_dict() if hasattr(self.report, "as_dict") else dict(self.report)
         path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+    def write_processed_imu(self, output_dir: Path) -> None:
+        if self.processed_imu is not None:
+            self.processed_imu.copy_to(output_dir)
+
+
+class _ProcessedImuCapture:
+    """Stream generated IMU measurements to temporary CSV files."""
+
+    def __init__(self):
+        self._directory = tempfile.TemporaryDirectory(prefix="qnav_processed_imu_")
+        base = Path(self._directory.name)
+        self._paths = {
+            "accelerometer": base / "processed_accelerometer.csv",
+            "gyroscope": base / "processed_gyroscope.csv",
+        }
+        self._handles = {}
+        self._writers = {}
+        for kind, path in self._paths.items():
+            handle = path.open("w", newline="", encoding="utf-8")
+            writer = csv.writer(handle)
+            writer.writerow(("time", "utc_time", "x", "y", "z"))
+            self._handles[kind] = handle
+            self._writers[kind] = writer
+
+    def record(self, kind: str, timestamp: float,
+               utc_time: float | None, value) -> None:
+        self._writers[kind].writerow((
+            timestamp, "" if utc_time is None else utc_time,
+            *np.asarray(value, dtype=float)))
+
+    def close(self) -> None:
+        for handle in self._handles.values():
+            if not handle.closed:
+                handle.close()
+
+    def copy_to(self, output_dir: Path) -> None:
+        self.close()
+        for path in self._paths.values():
+            shutil.copyfile(path, output_dir / path.name)
+
+    def cleanup(self) -> None:
+        self.close()
+        self._directory.cleanup()
+
+    def __del__(self):
+        self.cleanup()
 
 
 class _Recorder:
@@ -137,15 +189,22 @@ def _initial_state(config: ConfigHandler, dataset: RawDataset, discovery):
     return state, start_event
 
 
-def _build_fusions(config: ConfigHandler, kinds: set[str], state: EstimatedState):
+def _build_fusions(config: ConfigHandler, kinds: set[str], state: EstimatedState,
+                   imu_input_level: str):
     sensors = {}
     fusions = {}
     axis = vehicle_conf.get_sensor_axis(config)
 
     if "accelerometer" in kinds:
-        sensors["accelerometer"] = RecordedAccelerometer(sensor_axis=axis)
+        sensors["accelerometer"] = (
+            measurement_conf.get_accelerometer(config)
+            if imu_input_level == "truth"
+            else RecordedAccelerometer(sensor_axis=axis))
     if "gyroscope" in kinds:
-        sensors["gyroscope"] = RecordedGyroscope(sensor_axis=axis)
+        sensors["gyroscope"] = (
+            measurement_conf.get_gyroscope(config)
+            if imu_input_level == "truth"
+            else RecordedGyroscope(sensor_axis=axis))
     if ("accelerometer" in sensors) != ("gyroscope" in sensors):
         raise NavConfigError(
             "RawData", "IMU", "Missing stream",
@@ -199,7 +258,15 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
     recorder.record(0.0, state)
 
     kinds = {spec.kind for spec in dataset.specs}
-    sensors, fusions = _build_fusions(config, kinds, state)
+    imu_input_level = dataset.config.imu_input_level
+    sensors, fusions = _build_fusions(config, kinds, state, imu_input_level)
+    save_processed_imu = config.get_bool("Output", "saveProcessedImu", False)
+    if save_processed_imu and imu_input_level != "truth":
+        raise NavConfigError(
+            "Output", "saveProcessedImu", "Incompatible input",
+            "Processed IMU output is only available for imuInputLevel=truth")
+    processed_imu = _ProcessedImuCapture() if save_processed_imu else None
+    ideal_imu = {"accelerometer": None, "gyroscope": None}
     last_ins_time = 0.0
     discarded = 0
 
@@ -213,10 +280,30 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
 
         for event in events:
             if event.kind in ("accelerometer", "gyroscope"):
-                sensors[event.kind].push(elapsed, event.payload)
+                if imu_input_level == "truth":
+                    ideal_imu[event.kind] = np.asarray(event.payload, dtype=float)
+                else:
+                    sensors[event.kind].push(elapsed, event.payload)
                 imu_changed = True
             elif event.kind == "gnss":
                 sensors["gnss"].push(elapsed, event.payload)
+
+        if (imu_input_level == "truth" and imu_changed
+                and all(value is not None for value in ideal_imu.values())):
+            truth = GroundTruth(
+                elapsed, state.position, state.velocity,
+                ideal_imu["accelerometer"], state.attitude,
+                ideal_imu["gyroscope"])
+            utc_time = next((event.absolute_time.timestamp() for event in events
+                             if event.absolute_time is not None), None)
+            for kind in ("accelerometer", "gyroscope"):
+                if any(event.kind == kind for event in events):
+                    sensor = sensors[kind]
+                    sensor.take_measurement(elapsed, truth)
+                    if processed_imu is not None:
+                        processed_imu.record(
+                            kind, elapsed, utc_time, sensor.last_measurement)
+                    sensor.update(elapsed)
 
         if imu_changed and "ins" in fusions:
             acc_ready = sensors["accelerometer"].last_measurement is not None
@@ -239,7 +326,9 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
     print(
         f"Raw input: {dataset.report.accepted} events accepted, "
         f"{dataset.report.rejected} rejected, {discarded} before initialization")
-    return recorder.finish(dataset.report)
+    results = recorder.finish(dataset.report)
+    results.processed_imu = processed_imu
+    return results
 
 
 __all__ = ["ReplayResults", "run_raw_replay"]
