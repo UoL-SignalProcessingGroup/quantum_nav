@@ -444,40 +444,57 @@ def plot_summary(table_1: ResultsTable, table_2: ResultsTable) -> go.Figure:
 
 
 
-def generate_all_figures(estimates: ResultsTable, ground_truth: ResultsTable) -> dict:
+def generate_all_figures(estimates: ResultsTable,
+                         ground_truth: ResultsTable = None) -> dict:
+    """Generate every plot supported by the fields that are available."""
 
-    all_figures = [
-        plot_summary(estimates, ground_truth),
-        generate_map_plot(estimates, ground_truth),
-        generate_3d_plot(estimates, ground_truth),
-        generate_2d_plot(estimates, ground_truth),
-        *generate_all_compare_plots(estimates, ground_truth),
+    if not estimates.is_data_loaded:
+        estimates.read()
+    estimate_fields = set(estimates.get_data()['data'])
 
+    reference_fields = set()
+    if ground_truth is not None:
+        if not ground_truth.is_data_loaded:
+            ground_truth.read()
+        reference_fields = set(ground_truth.get_data()['data'])
+
+    all_figures = []
+    all_tiles = []
+    sizes = []
+
+    position_tables = [estimates]
+    if ground_truth is not None and 'position' in reference_fields:
+        position_tables.append(ground_truth)
+
+    if 'position' in estimate_fields:
+        all_figures.extend([
+            generate_map_plot(*position_tables),
+            generate_3d_plot(*position_tables),
+            generate_2d_plot(*position_tables),
+        ])
+        all_tiles.extend(['world_map', 'trajectory_3d', 'trajectory_2d'])
+        sizes.extend([{'width': 1000, 'height': 1000}] * 3)
+
+    compare_args = [
+        ('position', ['Latitude', 'Longitude', 'Altitude'], ['deg', 'deg', 'm']),
+        ('velocity', ['Along', 'Across', 'Down'], ['m/s'] * 3),
+        ('acceleration', ['Along', 'Across', 'Down'], ['m/s^2'] * 3),
+        ('attitude', ['Heading', 'Pitch', 'Roll'], ['deg'] * 3),
+        ('angle_rates', ['P', 'Q', 'R'], ['deg/s'] * 3),
     ]
-
-    all_tiles = [
-        "summary",
-        "world_map",
-        "trajectory_3d",
-        "trajectory_2d",
-        "position",
-        "velocity",
-        "acceleration",
-        "attitude",
-        "angle_rates",
-    ]
-
-    sizes = [
-        {'width': 900, 'height': 1000},
-        {'width': 1000, 'height': 1000},
-        {'width': 1000, 'height': 1000},
-        {'width': 1000, 'height': 1000},
-        {'width': 1600, 'height': 900},
-        {'width': 1600, 'height': 900},
-        {'width': 1600, 'height': 900},
-        {'width': 1600, 'height': 900},
-        {'width': 1600, 'height': 900},
-    ]
+    if ground_truth is not None:
+        shared = estimate_fields & reference_fields
+        if all(field in shared for field, _, _ in compare_args):
+            all_figures.insert(0, plot_summary(estimates, ground_truth))
+            all_tiles.insert(0, 'summary')
+            sizes.insert(0, {'width': 900, 'height': 1000})
+        for field, rows, units in compare_args:
+            if field in shared:
+                all_figures.append(generate_compare_plot(
+                    estimates, ground_truth, field_id=field,
+                    row_names=rows, units=units))
+                all_tiles.append(field)
+                sizes.append({'width': 1600, 'height': 900})
 
     # a4_width: int = 2480
     # a4_height: int = 3508
