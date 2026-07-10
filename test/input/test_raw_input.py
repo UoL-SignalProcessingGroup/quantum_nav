@@ -241,3 +241,217 @@ def test_parser_without_input_section_defaults_to_simulation():
     parser = ConfigParser()
     parser.read_dict({"RawData": {"file": "unused.csv"}})
     assert not is_raw_mode(parser)
+
+
+def test_reference_quaternion_is_normalized_and_converted_to_euler(tmp_path):
+    _write(tmp_path / "truth.csv", """
+t,qw,qx,qy,qz
+0,2,0,0,2
+""")
+    config = _write(tmp_path / "raw.ini", """
+[Input]
+inputMode = raw
+[RawData]
+file = truth.csv
+[RawReference]
+timestampColumn = t
+quaternionWColumn = qw
+quaternionXColumn = qx
+quaternionYColumn = qy
+quaternionZColumn = qz
+quaternionDirection = bodyToNed
+""")
+
+    dataset = load_raw_dataset(config)
+    event = next(iter(dataset))
+    payload = event.payload
+    assert payload["quaternion_w"] == pytest.approx(math.sqrt(0.5))
+    assert payload["quaternion_x"] == pytest.approx(0)
+    assert payload["quaternion_y"] == pytest.approx(0)
+    assert payload["quaternion_z"] == pytest.approx(math.sqrt(0.5))
+    assert payload["heading"] == pytest.approx(90)
+    assert payload["pitch"] == pytest.approx(0)
+    assert payload["roll"] == pytest.approx(0)
+    assert dataset.discover().first_reference_event.payload == payload
+
+
+def test_reference_ned_to_body_quaternion_is_conjugated(tmp_path):
+    _write(tmp_path / "truth.csv", "t,qw,qx,qy,qz\n0,1,0,0,-1")
+    config = _write(tmp_path / "raw.ini", """
+[Input]
+inputMode = raw
+[RawData]
+file = truth.csv
+[RawReference]
+timestampColumn = t
+quaternionWColumn = qw
+quaternionXColumn = qx
+quaternionYColumn = qy
+quaternionZColumn = qz
+quaternionDirection = ned_to_body
+""")
+    payload = next(iter(load_raw_dataset(config))).payload
+    assert payload["quaternion_z"] == pytest.approx(math.sqrt(0.5))
+    assert payload["heading"] == pytest.approx(90)
+
+
+@pytest.mark.parametrize("direction, error", [
+    (None, "quaternionDirection is required"),
+    ("spacecraftToWorld", "quaternionDirection must be bodyToNed or nedToBody"),
+])
+def test_reference_quaternion_direction_is_explicit(tmp_path, direction, error):
+    _write(tmp_path / "truth.csv", "t,qw,qx,qy,qz\n0,1,0,0,0")
+    direction_line = "" if direction is None else f"quaternionDirection = {direction}"
+    config = _write(tmp_path / "raw.ini", f"""
+[Input]
+inputMode = raw
+[RawData]
+file = truth.csv
+[RawReference]
+timestampColumn = t
+quaternionWColumn = qw
+quaternionXColumn = qx
+quaternionYColumn = qy
+quaternionZColumn = qz
+{direction_line}
+""")
+    with pytest.raises(ValueError, match=error):
+        load_raw_dataset(config)
+
+
+def test_reference_rejects_incomplete_groups_and_zero_quaternion(tmp_path):
+    _write(tmp_path / "truth.csv", "t,qw,qx,qy,qz\n0,0,0,0,0")
+    incomplete = _write(tmp_path / "incomplete.ini", """
+[Input]
+inputMode = raw
+[RawData]
+file = truth.csv
+[RawReference]
+timestampColumn = t
+quaternionWColumn = qw
+quaternionXColumn = qx
+quaternionYColumn = qy
+quaternionDirection = bodyToNed
+""")
+    with pytest.raises(ValueError, match="quaternion attitude mappings must be complete"):
+        load_raw_dataset(incomplete)
+
+    complete = _write(tmp_path / "complete.ini", """
+[Input]
+inputMode = raw
+[RawData]
+file = truth.csv
+[RawReference]
+timestampColumn = t
+quaternionWColumn = qw
+quaternionXColumn = qx
+quaternionYColumn = qy
+quaternionZColumn = qz
+quaternionDirection = bodyToNed
+""")
+    with pytest.raises(ValueError, match="quaternion norm must be non-zero"):
+        list(load_raw_dataset(complete))
+
+
+def test_reference_groups_are_optional_per_row_but_complete_when_present(tmp_path):
+    _write(tmp_path / "truth.csv", """
+t,lat,lon,alt,vx,vy,vz
+0,0.1,0.2,10,,,
+1,,,,1,2,3
+2,0.3,,12,,,
+""")
+    config = _write(tmp_path / "raw.ini", """
+[Input]
+inputMode = raw
+[RawData]
+file = truth.csv
+[RawReference]
+timestampColumn = t
+latitudeColumn = lat
+longitudeColumn = lon
+altitudeColumn = alt
+velocityXColumn = vx
+velocityYColumn = vy
+velocityZColumn = vz
+velocityFrame = body
+""")
+    dataset = load_raw_dataset(config)
+    events = dataset.iter_events()
+    assert next(events).payload == {"latitude": .1, "longitude": .2, "altitude": 10}
+    assert next(events).payload == {
+        "velocity_x": 1, "velocity_y": 2, "velocity_z": 3}
+    with pytest.raises(ValueError, match="partial reference position measurement"):
+        next(events)
+
+
+def test_reference_units_frames_and_vector_signs_normalize_to_body(tmp_path):
+    _write(tmp_path / "truth.csv", """
+t,lat,lon,alt,h,p,r,v1,v2,v3,ax,ay,az,wx,wy,wz
+0,0.5,-0.25,100,1.5707963267948966,0,0,1,2,3,4,5,6,0.1,0.2,0.3
+""")
+    config = _write(tmp_path / "raw.ini", """
+[Input]
+inputMode = raw
+[RawData]
+file = truth.csv
+[RawReference]
+timestampColumn = t
+latitudeColumn = lat
+longitudeColumn = lon
+altitudeColumn = alt
+headingColumn = h
+pitchColumn = p
+rollColumn = r
+velocityXColumn = v1
+velocityYColumn = v2
+velocityZColumn = v3
+accelerationXColumn = ax
+accelerationYColumn = ay
+accelerationZColumn = az
+angularRateXColumn = wx
+angularRateYColumn = wy
+angularRateZColumn = wz
+coordinateUnits = radians
+attitudeUnits = radians
+velocityUnits = km/h
+accelerationUnits = g
+angularRateUnits = rad/s
+velocityFrame = enu
+xSign = -1
+ySign = 1
+zSign = -1
+""")
+    payload = next(iter(load_raw_dataset(config))).payload
+    assert payload["latitude"] == pytest.approx(math.degrees(.5))
+    assert payload["longitude"] == pytest.approx(math.degrees(-.25))
+    assert payload["heading"] == pytest.approx(90)
+    # Signed ENU (-E, N, -U) -> NED (N, -E, U), then heading 90 NED->body.
+    assert tuple(payload[f"velocity_{axis}"] for axis in "xyz") == pytest.approx(
+        (-1 / 3.6, -2 / 3.6, 3 / 3.6))
+    assert tuple(payload[f"acceleration_{axis}"] for axis in "xyz") == pytest.approx(
+        (-4 * 9.80665, 5 * 9.80665, -6 * 9.80665))
+    assert tuple(payload[f"angular_rate_{axis}"] for axis in "xyz") == pytest.approx(
+        tuple(value * 180 / math.pi for value in (-.1, .2, -.3)))
+
+
+def test_reference_angle_units_remains_fallback_for_both_angle_domains(tmp_path):
+    _write(tmp_path / "truth.csv", "t,lat,lon,alt,h,p,r\n0,0.1,0.2,3,0.3,0.4,0.5")
+    config = _write(tmp_path / "raw.ini", """
+[Input]
+inputMode = raw
+[RawData]
+file = truth.csv
+[RawReference]
+timestampColumn = t
+latitudeColumn = lat
+longitudeColumn = lon
+altitudeColumn = alt
+headingColumn = h
+pitchColumn = p
+rollColumn = r
+angleUnits = radians
+""")
+    payload = next(iter(load_raw_dataset(config))).payload
+    for name, value in (("latitude", .1), ("longitude", .2),
+                        ("heading", .3), ("pitch", .4), ("roll", .5)):
+        assert payload[name] == pytest.approx(math.degrees(value))

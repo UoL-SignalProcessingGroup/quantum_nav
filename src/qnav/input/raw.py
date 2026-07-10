@@ -20,7 +20,11 @@ import numpy as np
 import pandas as pd
 
 from qnav.input.config_handler import ConfigHandler
-from qnav.util.transformations import vel_ecef2vel_ned
+from qnav.util.transformations import (
+    quaternion_to_euler,
+    rotate_3d,
+    vel_ecef2vel_ned,
+)
 
 
 _G = 9.80665
@@ -132,6 +136,7 @@ class SensorSpec:
     frame: str | None = None
     signs: tuple[float, float, float] = (1.0, 1.0, 1.0)
     quality: Mapping[str, float] = field(default_factory=dict)
+    quaternion_direction: str | None = None
 
 
 @dataclass(frozen=True)
@@ -178,6 +183,7 @@ class RawDiscovery:
     latest_event: MeasurementEvent | None
     first_gnss_event: MeasurementEvent | None
     report: IngestionReport
+    first_reference_event: MeasurementEvent | None = None
 
     @property
     def first_gnss_fix(self) -> GnssFix | None:
@@ -255,7 +261,7 @@ class RawDataset:
 
     def discover(self) -> RawDiscovery:
         """Scan timing and initialization facts without materializing events."""
-        earliest = latest = first_gnss = None
+        earliest = latest = first_gnss = first_reference = None
         # Keep the discovery diagnostics available to its caller without
         # overwriting the report belonging to the later replay pass.
         previous_report = self.report
@@ -267,9 +273,12 @@ class RawDataset:
                 fix = event.payload
                 if isinstance(fix, GnssFix) and fix.accepted:
                     first_gnss = event
+            if first_reference is None and event.kind == "reference":
+                first_reference = event
         discovery_report = self.report
         self.report = previous_report
-        return RawDiscovery(earliest, latest, first_gnss, discovery_report)
+        return RawDiscovery(
+            earliest, latest, first_gnss, discovery_report, first_reference)
 
     # A name useful to callers performing an explicit prepass.
     summary = discover
@@ -448,6 +457,10 @@ def _build_spec(view: _ConfigView, section: str, kind: str) -> SensorSpec:
             "acceleration_x": ("accelerationXColumn",), "acceleration_y": ("accelerationYColumn",),
             "acceleration_z": ("accelerationZColumn",), "heading": ("headingColumn",),
             "pitch": ("pitchColumn",), "roll": ("rollColumn",),
+            "quaternion_w": ("quaternionWColumn",),
+            "quaternion_x": ("quaternionXColumn",),
+            "quaternion_y": ("quaternionYColumn",),
+            "quaternion_z": ("quaternionZColumn",),
             "angular_rate_x": ("angularRateXColumn",), "angular_rate_y": ("angularRateYColumn",),
             "angular_rate_z": ("angularRateZColumn",),
         }
@@ -455,17 +468,44 @@ def _build_spec(view: _ConfigView, section: str, kind: str) -> SensorSpec:
             value = view.get(section, names)
             if value:
                 columns[field_name] = value
+        groups = {
+            "position": ("latitude", "longitude", "altitude"),
+            "velocity": ("velocity_x", "velocity_y", "velocity_z"),
+            "acceleration": ("acceleration_x", "acceleration_y", "acceleration_z"),
+            "Euler attitude": ("heading", "pitch", "roll"),
+            "quaternion attitude": (
+                "quaternion_w", "quaternion_x", "quaternion_y", "quaternion_z"),
+            "angular rate": ("angular_rate_x", "angular_rate_y", "angular_rate_z"),
+        }
+        mapped_groups = []
+        for group_name, fields in groups.items():
+            mapped = [field_name in columns for field_name in fields]
+            if any(mapped) and not all(mapped):
+                raise ValueError(
+                    f"[RawReference] {group_name} mappings must be complete")
+            if all(mapped):
+                mapped_groups.append(group_name)
+        if not mapped_groups:
+            raise ValueError("[RawReference] must map at least one complete state group")
+        if "Euler attitude" in mapped_groups and "quaternion attitude" in mapped_groups:
+            raise ValueError(
+                "[RawReference] map either Euler or quaternion attitude, not both")
         required = tuple(name for name in columns if name != "timestamp")
-        if not required:
-            raise ValueError("[RawReference] must map at least one state field")
 
     options = _csv_options(view, section)
+    angle_fallback = view.get(section, "angleUnits", "degrees")
     units = {
         "acceleration": str(view.get(section, "accelerationUnits",
                                      view.get(section, "units", "m/s^2"))).lower(),
         "angular_rate": str(view.get(section, ("angularRateUnits", "rateUnits"),
                                      view.get(section, "units", "deg/s"))).lower(),
-        "angle": str(view.get(section, ("angleUnits", "coordinateUnits"), "degrees")).lower(),
+        # Keep angle for callers/specs created before coordinate and attitude
+        # units were made independent.
+        "angle": str(angle_fallback).lower(),
+        "coordinate_angle": str(
+            view.get(section, "coordinateUnits", angle_fallback)).lower(),
+        "attitude_angle": str(
+            view.get(section, "attitudeUnits", angle_fallback)).lower(),
         "length": str(view.get(section, ("lengthUnits", "altitudeUnits"),
                                  view.get(section, "units", "m"))).lower(),
         "velocity": str(view.get(section, "velocityUnits", "m/s")).lower(),
@@ -481,6 +521,17 @@ def _build_spec(view: _ConfigView, section: str, kind: str) -> SensorSpec:
         value = view.get(section, name)
         if value is not None:
             quality[name] = _number(value, name)
+    quaternion_direction = None
+    if kind == "reference" and "quaternion_w" in columns:
+        direction = view.get(section, "quaternionDirection")
+        if direction is None:
+            raise ValueError(
+                "[RawReference] quaternionDirection is required for quaternion mappings")
+        normalized_direction = _normalize_direction(str(direction))
+        if normalized_direction not in {"bodytoned", "nedtobody"}:
+            raise ValueError(
+                "[RawReference] quaternionDirection must be bodyToNed or nedToBody")
+        quaternion_direction = normalized_direction
     return SensorSpec(
         section, kind, file_path, columns, required, options,
         str(view.get(section, "timeUnit", view.get("RawData", "timeUnit", "auto"))).lower(),
@@ -488,7 +539,8 @@ def _build_spec(view: _ConfigView, section: str, kind: str) -> SensorSpec:
                  view.get("RawData", ("datetimeFormat", "timestampFormat"))),
         str(view.get(section, ("timezone", "sourceTimezone"),
                      view.get("RawData", ("timezone", "sourceTimezone"), "UTC"))),
-        units, str(frame).lower() if frame else None, signs, quality)
+        units, str(frame).lower() if frame else None, signs, quality,
+        quaternion_direction)
 
 
 def _column(view: _ConfigView, section: str, field_name: str, *aliases: str) -> str:
@@ -609,12 +661,16 @@ def _iter_file(path: Path, specs: list[SensorSpec], config: RawInputConfig,
 
 def _event_from_row(spec: SensorSpec, row: Mapping[str, Any], source: Path,
                     row_number: int) -> MeasurementEvent | None:
-    required_values = [row[spec.columns[name]] for name in spec.required]
-    present = [not _missing(value) for value in required_values]
-    if not any(present):
-        return None
-    if not all(present):
-        raise ValueError(f"partial {spec.kind} measurement")
+    if spec.kind == "reference":
+        if not _validate_reference_row(spec, row):
+            return None
+    else:
+        required_values = [row[spec.columns[name]] for name in spec.required]
+        present = [not _missing(value) for value in required_values]
+        if not any(present):
+            return None
+        if not all(present):
+            raise ValueError(f"partial {spec.kind} measurement")
     raw_time = row[spec.columns["timestamp"]]
     if _missing(raw_time):
         raise ValueError(f"missing timestamp for {spec.kind} measurement")
@@ -646,7 +702,7 @@ def _payload(spec: SensorSpec, row: Mapping[str, Any]) -> Any:
                                   for axis, sign in zip("xyz", spec.signs)),
         }
     if spec.kind == "gnss":
-        angle = _angle_factor(spec.units["angle"])
+        angle = _angle_factor(spec.units.get("coordinate_angle", spec.units["angle"]))
         length = _length_factor(spec.units["length"])
         latitude = get("latitude") * angle
         longitude = get("longitude") * angle
@@ -690,23 +746,104 @@ def _payload(spec: SensorSpec, row: Mapping[str, Any]) -> Any:
             optional.get("fix_type"), optional.get("satellite_count"),
             optional.get("horizontal_accuracy"), optional.get("vertical_accuracy"),
             optional.get("speed_accuracy"), bool(accepted))
-    # Partial reference is represented as named, normalized scalar fields.
+    return _reference_payload(spec, row, get)
+
+
+_REFERENCE_GROUPS = {
+    "position": ("latitude", "longitude", "altitude"),
+    "velocity": ("velocity_x", "velocity_y", "velocity_z"),
+    "acceleration": ("acceleration_x", "acceleration_y", "acceleration_z"),
+    "Euler attitude": ("heading", "pitch", "roll"),
+    "quaternion attitude": (
+        "quaternion_w", "quaternion_x", "quaternion_y", "quaternion_z"),
+    "angular rate": ("angular_rate_x", "angular_rate_y", "angular_rate_z"),
+}
+
+
+def _validate_reference_row(spec: SensorSpec, row: Mapping[str, Any]) -> bool:
+    """Validate complete independently optional state groups in one row."""
+    has_group = False
+    for group_name, fields in _REFERENCE_GROUPS.items():
+        if not all(name in spec.columns for name in fields):
+            continue
+        present = [not _missing(row[spec.columns[name]]) for name in fields]
+        if any(present) and not all(present):
+            raise ValueError(f"partial reference {group_name} measurement")
+        has_group |= all(present)
+    return has_group
+
+
+def _reference_payload(spec: SensorSpec, row: Mapping[str, Any],
+                       get: Callable[[str], float]) -> dict[str, float]:
+    """Normalize a reference row while retaining its flat payload contract."""
     result = {}
     for name, column in spec.columns.items():
-        if name == "timestamp" or _missing(row[column]):
+        if (name == "timestamp" or name.startswith("quaternion_")
+                or name.startswith("velocity_") or _missing(row[column])):
             continue
         value = _number(row[column], column)
-        if name in {"latitude", "longitude", "heading", "pitch", "roll"}:
-            value *= _angle_factor(spec.units["angle"])
+        if name in {"latitude", "longitude"}:
+            value *= _angle_factor(
+                spec.units.get("coordinate_angle", spec.units["angle"]))
+        elif name in {"heading", "pitch", "roll"}:
+            value *= _angle_factor(
+                spec.units.get("attitude_angle", spec.units["angle"]))
         elif name == "altitude":
             value *= _length_factor(spec.units["length"])
-        elif name.startswith("velocity_"):
-            value *= _velocity_factor(spec.units["velocity"])
         elif name.startswith("acceleration_"):
             value *= _acceleration_factor(spec.units["acceleration"])
+            value *= spec.signs["xyz".index(name[-1])]
         elif name.startswith("angular_rate_"):
             value *= _angular_factor(spec.units["angular_rate"])
+            value *= spec.signs["xyz".index(name[-1])]
         result[name] = value
+
+    quaternion_fields = (
+        "quaternion_w", "quaternion_x", "quaternion_y", "quaternion_z")
+    if all(name in spec.columns and not _missing(row[spec.columns[name]])
+           for name in quaternion_fields):
+        quaternion = np.asarray([get(name) for name in quaternion_fields])
+        norm = float(np.linalg.norm(quaternion))
+        if not math.isfinite(norm) or norm <= 1e-12:
+            raise ValueError("reference quaternion norm must be non-zero")
+        quaternion /= norm
+        if spec.quaternion_direction == "nedtobody":
+            quaternion[1:] *= -1
+        for name, value in zip(quaternion_fields, quaternion):
+            result[name] = float(value)
+        attitude = quaternion_to_euler(quaternion)
+        result.update(zip(("heading", "pitch", "roll"), map(float, attitude)))
+
+    velocity_fields = ("velocity_x", "velocity_y", "velocity_z")
+    if all(name in spec.columns and not _missing(row[spec.columns[name]])
+           for name in velocity_fields):
+        factor = _velocity_factor(spec.units["velocity"])
+        velocity = np.asarray([
+            get(name) * factor * sign
+            for name, sign in zip(velocity_fields, spec.signs)
+        ])
+        frame = spec.frame or "body"
+        if frame != "body":
+            if frame == "enu":
+                velocity = velocity[[1, 0, 2]]
+                velocity[2] *= -1
+            elif frame == "ecef":
+                position_fields = ("latitude", "longitude", "altitude")
+                if not all(name in result for name in position_fields):
+                    raise ValueError(
+                        "reference ECEF velocity requires position in the same row")
+                velocity = vel_ecef2vel_ned(
+                    velocity, np.asarray([result[name] for name in position_fields]))
+            elif frame != "ned":
+                raise ValueError(
+                    f"unsupported reference velocity frame '{frame}'")
+            attitude_fields = ("heading", "pitch", "roll")
+            if not all(name in result for name in attitude_fields):
+                raise ValueError(
+                    "reference non-body velocity requires attitude in the same row")
+            attitude = np.radians([result[name] for name in attitude_fields])
+            velocity = rotate_3d(*attitude) @ velocity
+        result.update(zip(velocity_fields, map(float, velocity)))
     return result
 
 
@@ -783,6 +920,11 @@ def _maximum(value: float | None, threshold: float | None) -> bool:
 
 def _normalize_unit(unit: str) -> str:
     return unit.lower().replace(" ", "").replace("²", "2").replace("°", "deg")
+
+
+def _normalize_direction(direction: str) -> str:
+    return (direction.strip().lower().replace("_", "")
+            .replace("-", "").replace(" ", "").replace("2", "to"))
 
 
 def _acceleration_factor(unit: str) -> float:
