@@ -138,6 +138,7 @@ def _get_stats(table: dict) -> dict:
     return stats
 
 def _get_errors(table_a: dict, table_b: dict) -> dict:
+    _require_aligned_times(table_a, table_b)
     stats = {'initial': {}, 'final': {}}
     for field in __FIELD_NAMES:
         if field not in table_a['data'] or field not in table_b['data']:
@@ -157,24 +158,58 @@ def _get_final_record(table: dict, field_name: str) -> np.ndarray | float:
     return None if last_ind is None else _array_to_python(records[last_ind])
 
 def _get_initial_error(table_a: dict, table_b: dict, field_name: str) -> np.ndarray | float:
-    index_a = _first_valid_index(table_a['data'][field_name])
-    index_b = _first_valid_index(table_b['data'][field_name])
-    if index_a is None or index_b is None:
+    index = _first_paired_valid_index(
+        table_a['data'][field_name], table_b['data'][field_name])
+    if index is None:
         return None
-    record_a = table_a['data'][field_name][index_a]
-    record_b = table_b['data'][field_name][index_b]
+    record_a = table_a['data'][field_name][index]
+    record_b = table_b['data'][field_name][index]
     error = _calculate_error(record_a, record_b, field_name)
     return _array_to_python(error)
 
 def _get_final_error(table_a: dict, table_b: dict, field_name: str) -> np.ndarray | float:
     records_a = table_a['data'][field_name]
     records_b = table_b['data'][field_name]
-    index_a = _last_valid_index(records_a)
-    index_b = _last_valid_index(records_b)
-    if index_a is None or index_b is None:
+    index = _last_paired_valid_index(records_a, records_b)
+    if index is None:
         return None
-    error = _calculate_error(records_a[index_a], records_b[index_b], field_name)
+    error = _calculate_error(records_a[index], records_b[index], field_name)
     return _array_to_python(error)
+
+
+def _require_aligned_times(table_a: dict, table_b: dict) -> None:
+    times_a = np.asarray(table_a['time_steps'])
+    times_b = np.asarray(table_b['time_steps'])
+    if times_a.shape != times_b.shape or not np.array_equal(times_a, times_b):
+        raise ValueError(
+            "estimate and ground-truth timestamps must be exactly aligned")
+
+
+def _complete_rows(data: np.ndarray) -> np.ndarray:
+    values = np.asarray(data)
+    finite = np.isfinite(values)
+    return finite if values.ndim == 1 else np.all(finite, axis=1)
+
+
+def _paired_valid_rows(data_a: np.ndarray, data_b: np.ndarray) -> np.ndarray:
+    if np.shape(data_a) != np.shape(data_b):
+        raise ValueError(
+            "estimate and ground-truth fields must have matching shapes")
+    valid_a = _complete_rows(data_a)
+    valid_b = _complete_rows(data_b)
+    return valid_a & valid_b
+
+
+def _first_paired_valid_index(data_a: np.ndarray,
+                              data_b: np.ndarray) -> int | None:
+    indices = np.flatnonzero(_paired_valid_rows(data_a, data_b))
+    return None if len(indices) == 0 else int(indices[0])
+
+
+def _last_paired_valid_index(data_a: np.ndarray,
+                             data_b: np.ndarray) -> int | None:
+    indices = np.flatnonzero(_paired_valid_rows(data_a, data_b))
+    return None if len(indices) == 0 else int(indices[-1])
 
 def _valid_rows(data: np.ndarray) -> np.ndarray:
     values = np.asarray(data)
@@ -194,8 +229,10 @@ def _last_valid_index(data: np.ndarray) -> int | None:
 def _calculate_error(record_a, record_b, field_name) -> float | np.ndarray:
     if field_name == "position":
         return lla2ned(record_a, record_b)
-    else:
-        return record_b - record_a
+    error = record_b - record_a
+    if field_name == "attitude":
+        error = (error + 180.0) % 360.0 - 180.0
+    return error
 
 def _array_to_python(data: np.ndarray) -> list | float:
     return data.squeeze().tolist()

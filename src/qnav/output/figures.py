@@ -430,6 +430,8 @@ def plot_summary(table_1: ResultsTable, table_2: ResultsTable) -> go.Figure:
             data_error = lla2ned_vec(data_1, data_2)
         else:
             data_error = data_2 - data_1
+            if item == "attitude":
+                data_error = (data_error + 180.0) % 360.0 - 180.0
 
         fig.add_trace(get_summary_table(data_error.T, rows), row=i, col=1)
         i += 1
