@@ -7,6 +7,7 @@ import pytest
 from qnav.fusion.ins import NumericalINS
 from qnav.input.config_handler import ConfigHandler
 from qnav.output.data import ResultsTable
+import qnav.simulation.replay as replay_module
 from qnav.simulation.replay import run_raw_replay
 
 
@@ -518,3 +519,135 @@ roll = 0
     np.testing.assert_allclose(
         results.reference["attitude"][1:3],
         [[22.5, 0, 0], [67.5, 0, 0]], atol=1e-10)
+
+
+def test_replay_dispatches_altimeter_quantum_imu_and_gradiometer(
+        tmp_path: Path, monkeypatch):
+    csv_path = tmp_path / "extended_sensors.csv"
+    csv_path.write_text(
+        "time,ax,ay,az,gx,gy,gz,alt,qax,qay,qaz,qgx,qgy,qgz,top,bottom\n"
+        "0,0,0,-9.80665,0,0,0,300,1,2,3,4,5,6,0.6,0.1\n"
+        "1,0,0,-9.80665,0,0,0,321,7,8,9,10,11,12,0.9,0.2\n",
+        encoding="utf-8",
+    )
+    config_path = tmp_path / "extended.ini"
+    config_path.write_text(
+        f"""
+[Input]
+inputMode = raw
+[RawData]
+combinedFile = {csv_path.name}
+timeUnit = s
+[RawInitialState]
+latitude = 52
+longitude = -2
+altitude = 100
+velocityX = 0
+velocityY = 0
+velocityZ = 0
+accelerationX = 0
+accelerationY = 0
+accelerationZ = -9.80665
+heading = 0
+pitch = 0
+roll = 0
+angularRateX = 0
+angularRateY = 0
+angularRateZ = 0
+[RawAccelerometer]
+timestampColumn = time
+xColumn = ax
+yColumn = ay
+zColumn = az
+accelerationUnits = m/s2
+frame = sensor
+[RawGyroscope]
+timestampColumn = time
+xColumn = gx
+yColumn = gy
+zColumn = gz
+angularRateUnits = deg/s
+frame = sensor
+[RawAltimeter]
+timestampColumn = time
+altitudeColumn = alt
+altitudeUnits = m
+[RawQuantumImu]
+timestampColumn = time
+accelerationXColumn = qax
+accelerationYColumn = qay
+accelerationZColumn = qaz
+angularRateXColumn = qgx
+angularRateYColumn = qgy
+angularRateZColumn = qgz
+accelerationUnits = m/s2
+angularRateUnits = deg/s
+frame = sensor
+[RawGravityGradiometer]
+timestampColumn = time
+topSignalColumn = top
+bottomSignalColumn = bottom
+[Measurement]
+imuMeasurementFreq = 1
+[Estimation]
+estimatedStateModel = simple
+integrationMethod = numerical
+[Altimeter]
+altimeterFusion = fixedgain
+altimeterGainAmount = 1
+[Gravity]
+estimatedGravityFunction = somigliana
+estimatedGravityCorrectionMap = none
+[Geoid]
+estimatedGeoidModel = none
+[Database]
+geoidDatabase = databases/geoid
+[Output]
+resultsDownSampleRate = 1
+""",
+        encoding="utf-8",
+    )
+
+    quantum_measurements = []
+    gradient_measurements = []
+
+    class QuantumFusion:
+        def __init__(self, sensor):
+            self.sensor = sensor
+
+        def perform_fusion(self, state):
+            acceleration, angle_rates = self.sensor.last_measurement
+            quantum_measurements.append((acceleration, angle_rates))
+            state.update_estimates(
+                acceleration=acceleration, angle_rates=angle_rates)
+            self.sensor.reset()
+
+    class GradientFusion:
+        def __init__(self, sensor):
+            self.sensor = sensor
+
+        def perform_fusion(self, state):
+            top, bottom = self.sensor.last_measurement
+            gradient_measurements.append((top, bottom))
+            position = state.position
+            position[1] = top - bottom
+            state.update_estimates(position=position)
+            self.sensor.reset()
+
+    monkeypatch.setattr(
+        replay_module.quantum_conf, "get_quantum_imu_fusion",
+        lambda config, sensor, accelerometer, gyroscope: QuantumFusion(sensor))
+    monkeypatch.setattr(
+        replay_module.quantum_grav_conf, "get_quantum_grav_fusion",
+        lambda config, sensor: GradientFusion(sensor))
+
+    results = run_raw_replay(ConfigHandler(config_path))
+
+    assert results.report.accepted == 10
+    assert len(quantum_measurements) == len(gradient_measurements) == 2
+    np.testing.assert_allclose(quantum_measurements[-1][0], [7, 8, 9])
+    np.testing.assert_allclose(quantum_measurements[-1][1], [10, 11, 12])
+    np.testing.assert_allclose(gradient_measurements[-1], [0.9, 0.2])
+    np.testing.assert_allclose(results.states[-1, 1:4], [52, 0.7, 321])
+    np.testing.assert_allclose(results.states[-1, 7:10], [7, 8, 9])
+    np.testing.assert_allclose(results.states[-1, 13:16], [10, 11, 12])

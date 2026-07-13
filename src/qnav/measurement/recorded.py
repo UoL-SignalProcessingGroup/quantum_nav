@@ -101,6 +101,23 @@ class RecordedScalarSensor(_RecordedSensor):
 class RecordedQuantumImu(_RecordedSensor):
     """Replay adapter for completed quantum acceleration/rate measurements."""
 
+    def __init__(
+        self,
+        frequency: float = 1.0,
+        full_frequency: float | None = None,
+        sensor_axis: SensorAxis | None = None,
+        start_time: float = 0.0,
+    ):
+        super().__init__(frequency, sensor_axis, start_time)
+        if full_frequency is None:
+            self._num_steps = 1
+        else:
+            if full_frequency <= 0 or full_frequency > frequency:
+                raise ValueError(
+                    "quantum frequency must be positive and no higher than "
+                    "the conventional IMU frequency")
+            self._num_steps = max(1, int(frequency / full_frequency))
+
     @staticmethod
     def _vector(value: npt.ArrayLike, name: str) -> np.ndarray:
         vector = np.asarray(value, dtype=float)
@@ -139,11 +156,11 @@ class RecordedQuantumImu(_RecordedSensor):
 
     @property
     def num_active_steps(self) -> int:
-        return 1
+        return self._num_steps
 
     @property
     def num_steps(self) -> int:
-        return 1
+        return self._num_steps
 
 
 class RecordedGravityGradiometer(_RecordedSensor):

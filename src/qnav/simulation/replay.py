@@ -22,12 +22,21 @@ from qnav.gps.recorded import (
 )
 from qnav.gravity.map import set_default_grid
 from qnav.input.config_handler import ConfigHandler, NavConfigError
+from qnav.input.ini import altimeter_config as altimeter_conf
 from qnav.input.ini import estimation_config as est_conf
 from qnav.input.ini import gravity_config as grav_conf
 from qnav.input.ini import measurement_config as measurement_conf
+from qnav.input.ini import quantum_config as quantum_conf
+from qnav.input.ini import quantum_grav_config as quantum_grav_conf
 from qnav.input.ini import vehicle_config as vehicle_conf
 from qnav.input.raw import MeasurementEvent, RawDataset, load_raw_dataset
-from qnav.measurement.recorded import RecordedAccelerometer, RecordedGyroscope
+from qnav.measurement.recorded import (
+    RecordedAccelerometer,
+    RecordedAltimeter,
+    RecordedGravityGradiometer,
+    RecordedGyroscope,
+    RecordedQuantumImu,
+)
 from qnav.output.data import ResultsTable
 from qnav.util import transformations as trans
 from qnav.waypoints.trajectory import GroundTruth
@@ -381,17 +390,20 @@ def _build_fusions(config: ConfigHandler, kinds: set[str], state: EstimatedState
     sensors = {}
     fusions = {}
     axis = vehicle_conf.get_sensor_axis(config)
+    imu_frequency = measurement_conf.get_imu_frequency(config)
 
     if "accelerometer" in kinds:
         sensors["accelerometer"] = (
             measurement_conf.get_accelerometer(config)
             if imu_input_level == "truth"
-            else RecordedAccelerometer(sensor_axis=axis))
+            else RecordedAccelerometer(
+                frequency=imu_frequency, sensor_axis=axis))
     if "gyroscope" in kinds:
         sensors["gyroscope"] = (
             measurement_conf.get_gyroscope(config)
             if imu_input_level == "truth"
-            else RecordedGyroscope(sensor_axis=axis))
+            else RecordedGyroscope(
+                frequency=imu_frequency, sensor_axis=axis))
     if ("accelerometer" in sensors) != ("gyroscope" in sensors):
         raise NavConfigError(
             "RawData", "IMU", "Missing stream",
@@ -420,6 +432,33 @@ def _build_fusions(config: ConfigHandler, kinds: set[str], state: EstimatedState
             raise NavConfigError(
                 "GPS", "gpsFusionMethod", "Unsupported raw mode",
                 "Receiver-fix replay supports fixedgain or loose fusion")
+
+    if "altimeter" in kinds:
+        sensor = RecordedAltimeter()
+        sensors["altimeter"] = sensor
+        fusions["altimeter"] = altimeter_conf.get_fusion(config, sensor)
+
+    if "quantum_imu" in kinds:
+        if "accelerometer" not in sensors:
+            raise NavConfigError(
+                "RawQuantumImu", "IMU", "Missing stream",
+                "Raw quantum IMU fusion requires conventional accelerometer "
+                "and gyroscope streams")
+        sensor = RecordedQuantumImu(
+            frequency=imu_frequency,
+            full_frequency=config.get_float(
+                "Quantum", "quantumImuFrequency", 1.0),
+            sensor_axis=axis,
+        )
+        sensors["quantum_imu"] = sensor
+        fusions["quantum_imu"] = quantum_conf.get_quantum_imu_fusion(
+            config, sensor, sensors["accelerometer"], sensors["gyroscope"])
+
+    if "gradiometer" in kinds:
+        sensor = RecordedGravityGradiometer(sensor_axis=axis)
+        sensors["gradiometer"] = sensor
+        fusions["gradiometer"] = quantum_grav_conf.get_quantum_grav_fusion(
+            config, sensor)
     return sensors, fusions
 
 
@@ -448,6 +487,22 @@ def _normalize_imu_frame(event: MeasurementEvent, sensor,
     # Recorded adapters feed fusion directly, which expects sensor-frame
     # measurements and removes the configured mounting there.
     return body_to_sensor @ value if frame == "body" else value
+
+
+def _normalize_quantum_imu_frame(event: MeasurementEvent, sensor) \
+        -> tuple[np.ndarray, np.ndarray]:
+    """Convert a recorded quantum IMU pair to its configured sensor frame."""
+    acceleration = np.asarray(event.payload["acceleration"], dtype=float)
+    angle_rates = np.asarray(event.payload["angular_rate"], dtype=float)
+    frame = (event.frame or "sensor").strip().lower()
+    if frame not in {"body", "sensor"}:
+        raise ValueError(
+            f"raw quantum_imu frame must be 'body' or 'sensor', got '{frame}'")
+    if frame == "body":
+        body_to_sensor = sensor.sensor_axis.body2sensor_mat
+        acceleration = body_to_sensor @ acceleration
+        angle_rates = body_to_sensor @ angle_rates
+    return acceleration, angle_rates
 
 
 def run_raw_replay(config: ConfigHandler) -> ReplayResults:
@@ -505,6 +560,15 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
                 imu_changed = True
             elif event.kind == "gnss":
                 sensors["gnss"].push(elapsed, event.payload)
+            elif event.kind == "altimeter":
+                sensors["altimeter"].push(elapsed, event.payload)
+            elif event.kind == "quantum_imu":
+                acceleration, angle_rates = _normalize_quantum_imu_frame(
+                    event, sensors["quantum_imu"])
+                sensors["quantum_imu"].push(
+                    elapsed, acceleration, angle_rates)
+            elif event.kind == "gradiometer":
+                sensors["gradiometer"].push(elapsed, event.payload)
             elif event.kind == "reference" and reference_aligner is not None:
                 reference_aligner.push(elapsed, event.payload)
 
@@ -543,6 +607,23 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
 
         if any(event.kind == "gnss" for event in events) and "gnss" in fusions:
             fusions["gnss"].perform_fusion(state)
+            did_fuse = True
+
+        if (any(event.kind == "altimeter" for event in events)
+                and "altimeter" in fusions):
+            fusions["altimeter"].perform_fusion(state)
+            did_fuse = True
+
+        if (imu_changed
+                and "quantum_imu" in fusions
+                and sensors["accelerometer"].last_measurement is not None
+                and sensors["gyroscope"].last_measurement is not None):
+            fusions["quantum_imu"].perform_fusion(state)
+            did_fuse = True
+
+        if (any(event.kind == "gradiometer" for event in events)
+                and "gradiometer" in fusions):
+            fusions["gradiometer"].perform_fusion(state)
             did_fuse = True
 
         if did_fuse:

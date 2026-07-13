@@ -1055,8 +1055,15 @@ class GravityGradientPF(SensorFusion):
     def _acceleration_to_sensor_axis(self, angle_rates, acceleration_b_z0, acceleration_b_z1):
 
         # Obtain the sensor axis for each sensor
-        top_axis = self._gravity_gradiometer._qs_top_accelerometer.sensor_axis
-        btm_axis = self._gravity_gradiometer._qs_btm_accelerometer.sensor_axis
+        sensor = self._gravity_gradiometer
+        if hasattr(sensor, "_qs_top_accelerometer"):
+            top_axis = sensor._qs_top_accelerometer.sensor_axis
+            btm_axis = sensor._qs_btm_accelerometer.sensor_axis
+        else:
+            top_axis = _offset_vertical_axis(
+                sensor.sensor_axis, self._interferometer.sensor_z_top)
+            btm_axis = _offset_vertical_axis(
+                sensor.sensor_axis, self._interferometer.sensor_z_bottom)
 
         # Obtain the angle rate acceleration for top and bottom sensors
         angle_rates_top = cross_prod_xy(angle_rates, cross_prod_xy(angle_rates, top_axis.lever_arm))

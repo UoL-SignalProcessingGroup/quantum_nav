@@ -1,9 +1,13 @@
 import numpy as np
 import pytest
 
+from qnav.input.config_handler import ConfigHandler
+from qnav.input.ini import quantum_config, quantum_grav_config
 from qnav.measurement.platform import SensorAxis
 from qnav.measurement.recorded import (
+    RecordedAccelerometer,
     RecordedGravityGradiometer,
+    RecordedGyroscope,
     RecordedQuantumImu,
     RecordedScalarSensor,
     RecordedVectorSensor,
@@ -56,6 +60,36 @@ def test_quantum_and_gradiometer_proxy_shapes():
     np.testing.assert_array_equal(rates, [4, 5, 6])
     assert quantum.num_active_steps == quantum.num_steps == 1
 
+    slow_quantum = RecordedQuantumImu(frequency=100, full_frequency=2)
+    assert slow_quantum.num_active_steps == slow_quantum.num_steps == 50
+
     gradiometer = RecordedGravityGradiometer()
     assert gradiometer.push(2, (0.1, 0.2)) == (0.1, 0.2)
     assert gradiometer.num_steps == 1
+
+
+def test_recorded_quantum_sensors_use_existing_configured_fusions(tmp_path):
+    config_path = tmp_path / "quantum.ini"
+    config_path.write_text(
+        """
+[Measurement]
+imuMeasurementFreq = 1
+[Quantum]
+quantumGravFusionNumParticles = 2
+[Random]
+initialRandomSeed = 123
+errorRandomSeed = 456
+""",
+        encoding="utf-8",
+    )
+    config = ConfigHandler(config_path)
+    accelerometer = RecordedAccelerometer()
+    gyroscope = RecordedGyroscope()
+
+    quantum_fusion = quantum_config.get_quantum_imu_fusion(
+        config, RecordedQuantumImu(), accelerometer, gyroscope)
+    gradient_fusion = quantum_grav_config.get_quantum_grav_fusion(
+        config, RecordedGravityGradiometer())
+
+    assert quantum_fusion.__class__.__name__ == "ConceptQuantumFusion"
+    assert gradient_fusion.__class__.__name__ == "GravityGradientPF"
