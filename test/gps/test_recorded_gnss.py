@@ -64,6 +64,34 @@ def test_fixed_gain_ignores_explicitly_invalid_fix():
     np.testing.assert_array_equal(state.as_numpy(), original)
 
 
+def test_fixed_gain_uses_shortest_longitude_correction_across_antimeridian():
+    for initial_longitude, fix_longitude, expected_longitude in (
+        (179.0, -179.0, 179.5),
+        (-179.0, 179.0, -179.5),
+    ):
+        state = EstimatedState(_truth(position=(0.0, initial_longitude, 100.0)))
+        sensor = RecordedGnssSensor()
+        sensor.push(1, SimpleNamespace(
+            position=[0.0, fix_longitude, 100.0], valid=True))
+
+        RecordedGnssFixedGainFusion(
+            sensor, state, gain_amount=0.25).perform_fusion(state)
+
+        assert state.position[1] == expected_longitude
+        np.testing.assert_allclose(state.position[[0, 2]], [0.0, 100.0])
+
+
+def test_full_fixed_gain_reaches_fix_across_antimeridian():
+    state = EstimatedState(_truth(position=(0.0, 179.0, 100.0)))
+    sensor = RecordedGnssSensor()
+    sensor.push(1, SimpleNamespace(position=[0.0, -179.0, 110.0]))
+
+    RecordedGnssFixedGainFusion(
+        sensor, state, gain_amount=1.0).perform_fusion(state)
+
+    np.testing.assert_allclose(state.position, [0.0, -179.0, 110.0])
+
+
 def test_missing_validity_is_usable_but_rejected_ingestion_fix_is_not():
     state = EstimatedState(_truth())
     sensor = RecordedGnssSensor()

@@ -57,6 +57,11 @@ def _velocity_ned(fix: Any) -> np.ndarray | None:
     return None if value is None else _vector(value, "NED velocity")
 
 
+def _wrap_longitude(longitude: float) -> float:
+    """Normalize a longitude to the half-open interval [-180, 180)."""
+    return (float(longitude) + 180.0) % 360.0 - 180.0
+
+
 def _is_usable(fix: Any) -> bool:
     valid_value = _field(fix, "valid", "is_usable", default=True)
     accepted_value = _field(fix, "accepted", default=True)
@@ -116,7 +121,12 @@ class RecordedGnssFixedGainFusion(SensorFusion):
 
         ins_position = estimated_state.position
         fix_position = _position(fix)
-        position = ins_position + self._gain_amount * (fix_position - ins_position)
+        position_delta = fix_position - ins_position
+        # Longitude is periodic. Use the shortest signed correction so a fix
+        # across the antimeridian cannot pull the estimate through Greenwich.
+        position_delta[1] = _wrap_longitude(position_delta[1])
+        position = ins_position + self._gain_amount * position_delta
+        position[1] = _wrap_longitude(position[1])
 
         updates: dict[str, np.ndarray] = {"position": position}
         fix_velocity_ned = _velocity_ned(fix)
