@@ -428,6 +428,28 @@ def _event_groups(events: Iterable[MeasurementEvent]):
         yield timestamp, list(group)
 
 
+def _normalize_imu_frame(event: MeasurementEvent, sensor,
+                         input_level: str) -> np.ndarray:
+    """Convert one raw IMU vector to the frame expected by its sensor path."""
+    value = np.asarray(event.payload, dtype=float)
+    default_frame = "body" if input_level == "truth" else "sensor"
+    frame = (event.frame or default_frame).strip().lower()
+    if frame not in {"body", "sensor"}:
+        raise ValueError(
+            f"raw {event.kind} frame must be 'body' or 'sensor', got '{frame}'")
+
+    body_to_sensor = sensor.sensor_axis.body2sensor_mat
+    if input_level == "truth":
+        # Simulated sensor models consume ideal body-frame truth and apply the
+        # configured mounting themselves.
+        return (np.linalg.solve(body_to_sensor, value)
+                if frame == "sensor" else value)
+
+    # Recorded adapters feed fusion directly, which expects sensor-frame
+    # measurements and removes the configured mounting there.
+    return body_to_sensor @ value if frame == "body" else value
+
+
 def run_raw_replay(config: ConfigHandler) -> ReplayResults:
     """Load configured recorded data and run the selected navigation methods."""
     dataset = load_raw_dataset(config)
@@ -456,7 +478,7 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
             "Processed IMU output is only available for imuInputLevel=truth")
     processed_imu = _ProcessedImuCapture() if save_processed_imu else None
     ideal_imu = {"accelerometer": None, "gyroscope": None}
-    last_ins_time = 0.0
+    last_ins_time = None
     discarded = 0
 
     for source_time, events in _event_groups(dataset.iter_events()):
@@ -474,10 +496,12 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
 
         for event in events:
             if event.kind in ("accelerometer", "gyroscope"):
+                normalized = _normalize_imu_frame(
+                    event, sensors[event.kind], imu_input_level)
                 if imu_input_level == "truth":
-                    ideal_imu[event.kind] = np.asarray(event.payload, dtype=float)
+                    ideal_imu[event.kind] = normalized
                 else:
-                    sensors[event.kind].push(elapsed, event.payload)
+                    sensors[event.kind].push(elapsed, normalized)
                 imu_changed = True
             elif event.kind == "gnss":
                 sensors["gnss"].push(elapsed, event.payload)
@@ -504,11 +528,18 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
         if imu_changed and "ins" in fusions:
             acc_ready = sensors["accelerometer"].last_measurement is not None
             gyro_ready = sensors["gyroscope"].last_measurement is not None
-            dt = elapsed - last_ins_time
-            if acc_ready and gyro_ready and dt > 0:
-                fusions["ins"].perform_fusion(state, time_step=dt)
-                last_ins_time = elapsed
-                did_fuse = True
+            if acc_ready and gyro_ready:
+                if last_ins_time is None:
+                    # The first complete pair establishes the IMU clock. It
+                    # cannot describe motion over any earlier initialization
+                    # or sensor-start gap.
+                    last_ins_time = elapsed
+                else:
+                    dt = elapsed - last_ins_time
+                    if dt > 0:
+                        fusions["ins"].perform_fusion(state, time_step=dt)
+                        last_ins_time = elapsed
+                        did_fuse = True
 
         if any(event.kind == "gnss" for event in events) and "gnss" in fusions:
             fusions["gnss"].perform_fusion(state)

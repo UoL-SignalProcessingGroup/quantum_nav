@@ -1,10 +1,160 @@
 from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
+import pytest
 
+from qnav.fusion.ins import NumericalINS
 from qnav.input.config_handler import ConfigHandler
 from qnav.output.data import ResultsTable
 from qnav.simulation.replay import run_raw_replay
+
+
+def _write_imu_replay_config(
+        tmp_path: Path, *, input_level: str = "measurement",
+        frame: str = "sensor", include_gnss: bool = False) -> Path:
+    gnss_section = """
+[RawGnss]
+timestampColumn = time
+latitudeColumn = lat
+longitudeColumn = lon
+altitudeColumn = alt
+""" if include_gnss else ""
+    config_path = tmp_path / "imu_replay.ini"
+    config_path.write_text(
+        f"""
+[Input]
+inputMode = raw
+
+[RawData]
+combinedFile = imu.csv
+timeUnit = s
+imuInputLevel = {input_level}
+
+[RawInitialState]
+latitude = 52
+longitude = -2
+altitude = 100
+heading = 0
+pitch = 0
+roll = 0
+
+[RawAccelerometer]
+timestampColumn = time
+xColumn = ax
+yColumn = ay
+zColumn = az
+accelerationUnits = m/s2
+frame = {frame}
+
+[RawGyroscope]
+timestampColumn = time
+xColumn = gx
+yColumn = gy
+zColumn = gz
+angularRateUnits = deg/s
+frame = {frame}
+
+{gnss_section}
+
+[Measurement]
+imuMeasurementFreq = 10
+accelerometerInitialStaticBiasMean = 0
+accelerometerBiasDriftRate = 0
+accelerometerScaleErrorMean = 0
+accelerometerMeasurementError = 0
+accelerometerNonOrthogonalityMean = 0
+gyroscopeInitialStaticBiasMean = 0
+gyroscopeBiasDriftRate = 0
+gyroscopeScaleErrorMean = 0
+gyroscopeMeasurementError = 0
+gyroscopeNonOrthogonalityMean = 0
+useGaussianMarkovNoise = no
+
+[Vehicle]
+sensorAngleX = 90
+sensorAngleY = 0
+sensorAngleZ = 0
+leverArmAngleX = 0
+leverArmAngleY = 0
+leverArmAngleZ = 0
+
+[Estimation]
+estimatedStateModel = simple
+integrationMethod = numerical
+
+[GPS]
+gpsFusionMethod = fixedgain
+gpsFixedGain = 1
+
+[Gravity]
+estimatedGravityFunction = somigliana
+estimatedGravityCorrectionMap = none
+
+[Geoid]
+estimatedGeoidModel = none
+
+[Database]
+geoidDatabase = databases/geoid
+
+[Random]
+initialRandomSeed = 123
+errorRandomSeed = 456
+
+[Output]
+resultsDownSampleRate = 1
+""",
+        encoding="utf-8",
+    )
+    return config_path
+
+
+def test_first_complete_imu_pair_only_starts_the_integration_clock(
+        tmp_path: Path):
+    (tmp_path / "imu.csv").write_text(
+        "time,ax,ay,az,gx,gy,gz,lat,lon,alt\n"
+        "0,,,,,,,52,-2,100\n"
+        "5,1,0,-9.80665,0,0,0,,,\n"
+        "6,1,0,-9.80665,0,0,0,,,\n",
+        encoding="utf-8",
+    )
+    intervals = []
+
+    def capture_interval(self, state, time_step=None):
+        intervals.append(time_step)
+
+    with patch.object(NumericalINS, "perform_fusion", capture_interval):
+        run_raw_replay(ConfigHandler(_write_imu_replay_config(
+            tmp_path, include_gnss=True)))
+
+    assert intervals == [pytest.approx(1.0)]
+
+
+@pytest.mark.parametrize(
+    ("input_level", "frame", "acceleration"),
+    [
+        ("measurement", "body", (1.0, 0.0, -9.80665)),
+        ("measurement", "sensor", (0.0, -1.0, -9.80665)),
+        ("truth", "body", (1.0, 0.0, -9.80665)),
+        ("truth", "sensor", (0.0, -1.0, -9.80665)),
+    ],
+)
+def test_raw_imu_frame_is_honored_with_nonzero_mounting(
+        tmp_path: Path, input_level: str, frame: str, acceleration):
+    ax, ay, az = acceleration
+    (tmp_path / "imu.csv").write_text(
+        "time,ax,ay,az,gx,gy,gz\n"
+        f"0,{ax},{ay},{az},0,0,0\n"
+        f"0.1,{ax},{ay},{az},0,0,0\n",
+        encoding="utf-8",
+    )
+
+    results = run_raw_replay(ConfigHandler(_write_imu_replay_config(
+        tmp_path, input_level=input_level, frame=frame)))
+
+    final_velocity = results.states[-1, 4:7]
+    assert final_velocity[0] == pytest.approx(0.1, rel=5e-3)
+    assert final_velocity[1] == pytest.approx(0.0, abs=1e-5)
 
 
 def test_raw_imu_gnss_replay_end_to_end(tmp_path: Path):
