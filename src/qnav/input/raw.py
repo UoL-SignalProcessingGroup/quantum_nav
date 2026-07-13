@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from configparser import ConfigParser, ExtendedInterpolation
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from heapq import heappop, heappush
 from pathlib import Path
 from typing import Any, Callable, Iterable, Iterator, Mapping
@@ -262,10 +262,19 @@ class RawDataset:
     def discover(self) -> RawDiscovery:
         """Scan timing and initialization facts without materializing events."""
         earliest = latest = first_gnss = first_reference = None
+        time_domain = None
         # Keep the discovery diagnostics available to its caller without
         # overwriting the report belonging to the later replay pass.
         previous_report = self.report
         for event in self.iter_events(update_report=True):
+            event_domain = "absolute" if event.absolute_time is not None else "relative"
+            if time_domain is None:
+                time_domain = event_domain
+            elif event_domain != time_domain:
+                raise ValueError(
+                    "Raw input mixes relative numeric and absolute timestamps; "
+                    "use a consistent time domain and a unix_* timeUnit for "
+                    "numeric Unix timestamps")
             if earliest is None:
                 earliest = event
             latest = event
@@ -611,51 +620,85 @@ def _validate_headers(config: RawInputConfig) -> None:
 
 def _iter_file(path: Path, specs: list[SensorSpec], config: RawInputConfig,
                report: IngestionReport) -> Iterator[MeasurementEvent]:
-    options = specs[0].options
-    usecols = list(dict.fromkeys(column for spec in specs for column in spec.columns.values()))
-    last_time: dict[str, float] = {}
+    """Merge independently ordered sensor streams declared in one CSV.
+
+    A combined file may map a different timestamp column for each sensor.
+    Reading one row at a time and yielding that row's events is not sufficient:
+    a later row for one sensor can precede an earlier row for another.  Each
+    sensor projection is therefore streamed independently and heap-merged.
+    This retains bounded memory and does not assume row-level time alignment.
+    """
+    streams = [
+        iter(_iter_spec_file(path, spec, config, report, index == 0))
+        for index, spec in enumerate(specs)
+    ]
+    heap: list[tuple[float, int, MeasurementEvent,
+                     Iterator[MeasurementEvent]]] = []
+    serial = 0
+    for stream in streams:
+        try:
+            event = next(stream)
+        except StopIteration:
+            continue
+        heappush(heap, (event.timestamp, serial, event, stream))
+        serial += 1
+    while heap:
+        _, _, event, stream = heappop(heap)
+        yield event
+        try:
+            following = next(stream)
+        except StopIteration:
+            continue
+        heappush(heap, (following.timestamp, serial, following, stream))
+        serial += 1
+
+
+def _iter_spec_file(path: Path, spec: SensorSpec, config: RawInputConfig,
+                    report: IngestionReport,
+                    count_rows: bool) -> Iterator[MeasurementEvent]:
+    """Stream and validate one sensor projection from a CSV file."""
+    options = spec.options
+    usecols = list(dict.fromkeys(spec.columns.values()))
+    last_time: float | None = None
     row_offset = 2
     chunks = pd.read_csv(path, usecols=usecols, chunksize=config.chunk_size,
                          sep=options.delimiter, quotechar=options.quotechar,
                          comment=options.comment, encoding=options.encoding,
                          decimal=options.decimal, dtype=object)
     for chunk in chunks:
-        report.rows_read += len(chunk)
+        if count_rows:
+            report.rows_read += len(chunk)
         for row_values in chunk.itertuples(index=False, name=None):
             row = dict(zip(chunk.columns, row_values))
-            row_events = []
-            for spec in specs:
-                try:
-                    event = _event_from_row(spec, row, path, row_offset)
-                except (TypeError, ValueError, OverflowError) as error:
-                    if config.invalid_record_policy == "strict":
-                        raise ValueError(f"{path}:{row_offset}: {error}") from error
-                    report.rejected += 1
-                    report.errors.append(f"{path}:{row_offset}: {error}")
-                    if "partial" in str(error).lower():
-                        report.partial_records += 1
-                    continue
-                if event is not None:
-                    if event.kind == "gnss" and not event.payload.accepted:
-                        report.quality_filtered += 1
-                    else:
-                        row_events.append(event)
-            row_events.sort(key=lambda event: event.timestamp)
-            for event in row_events:
-                previous = last_time.get(event.kind)
-                if previous is not None and event.timestamp <= previous:
-                    duplicate = event.timestamp == previous
+            try:
+                event = _event_from_row(spec, row, path, row_offset)
+            except (TypeError, ValueError, OverflowError) as error:
+                if config.invalid_record_policy == "strict":
+                    raise ValueError(f"{path}:{row_offset}: {error}") from error
+                report.rejected += 1
+                report.errors.append(f"{path}:{row_offset}: {error}")
+                if "partial" in str(error).lower():
+                    report.partial_records += 1
+                row_offset += 1
+                continue
+            if event is not None:
+                if event.kind == "gnss" and not event.payload.accepted:
+                    report.quality_filtered += 1
+                elif last_time is not None and event.timestamp <= last_time:
+                    duplicate = event.timestamp == last_time
                     if duplicate:
                         report.duplicate_timestamps += 1
                     else:
                         report.backward_timestamps += 1
                     if config.invalid_record_policy == "strict":
                         relation = "duplicate" if duplicate else "backward"
-                        raise ValueError(f"{path}:{row_offset}: {relation} timestamp {event.timestamp}")
+                        raise ValueError(
+                            f"{path}:{row_offset}: {relation} timestamp "
+                            f"{event.timestamp}")
                     report.rejected += 1
-                    continue
-                last_time[event.kind] = event.timestamp
-                yield event
+                else:
+                    last_time = event.timestamp
+                    yield event
             row_offset += 1
 
 
@@ -855,8 +898,26 @@ def _timestamp(value: Any, spec: SensorSpec) -> tuple[float, datetime | None]:
         "us": 1e-6, "microsecond": 1e-6, "microseconds": 1e-6,
         "ns": 1e-9, "nanosecond": 1e-9, "nanoseconds": 1e-9,
     }
+    unix_factors = {
+        "unix": 1.0, "unixs": 1.0, "unix_s": 1.0,
+        "epoch": 1.0, "epochs": 1.0, "epoch_s": 1.0,
+        "unixms": 1e-3, "unix_ms": 1e-3,
+        "epochms": 1e-3, "epoch_ms": 1e-3,
+        "unixus": 1e-6, "unix_us": 1e-6,
+        "epochus": 1e-6, "epoch_us": 1e-6,
+        "unixns": 1e-9, "unix_ns": 1e-9,
+        "epochns": 1e-9, "epoch_ns": 1e-9,
+    }
     if unit in factors:
         return _number(value, spec.columns["timestamp"]) * factors[unit], None
+    if unit in unix_factors:
+        timestamp = (
+            _number(value, spec.columns["timestamp"]) * unix_factors[unit])
+        try:
+            absolute = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+        except (OSError, OverflowError, ValueError) as error:
+            raise ValueError(f"invalid Unix timestamp '{value}'") from error
+        return timestamp, absolute
     if unit == "auto":
         try:
             return _number(value, spec.columns["timestamp"]), None

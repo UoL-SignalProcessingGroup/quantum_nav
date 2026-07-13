@@ -1,6 +1,7 @@
 """Focused tests for configuration-driven recorded sensor input."""
 
 from configparser import ConfigParser
+from datetime import datetime, timezone
 from pathlib import Path
 
 import math
@@ -66,6 +67,40 @@ units = rad/s
     assert discovery.earliest_event.timestamp == 0
     assert discovery.latest_event.timestamp == 2
     assert discovery.first_gnss_fix is None
+
+
+def test_combined_independent_timestamp_columns_are_globally_ordered(tmp_path):
+    _write(tmp_path / "sensors.csv", """
+accel_time,ax,ay,az,gyro_time,gx,gy,gz
+0,1,2,3,10,7,8,9
+1,4,5,6,11,10,11,12
+""")
+    config = _write(tmp_path / "raw.ini", """
+[Input]
+inputMode = raw
+[RawData]
+combinedFile = sensors.csv
+chunkSize = 1
+[RawAccelerometer]
+timestampColumn = accel_time
+xColumn = ax
+yColumn = ay
+zColumn = az
+[RawGyroscope]
+timestampColumn = gyro_time
+xColumn = gx
+yColumn = gy
+zColumn = gz
+""")
+
+    dataset = load_raw_dataset(config)
+    events = list(dataset)
+
+    assert [(event.timestamp, event.kind) for event in events] == [
+        (0, "accelerometer"), (1, "accelerometer"),
+        (10, "gyroscope"), (11, "gyroscope"),
+    ]
+    assert dataset.report.rows_read == 2
 
 
 def test_raw_subconfig_and_each_csv_resolve_against_declaring_file(tmp_path):
@@ -145,6 +180,72 @@ maximumHorizontalAccuracy = 3
     assert fix.velocity_frame == "ned"
     assert dataset.report.quality_filtered == 1
     assert dataset.discover().first_gnss_fix == fix
+
+
+def test_discovery_rejects_mixed_relative_and_absolute_time_domains(tmp_path):
+    _write(tmp_path / "accel.csv", "t,x,y,z\n0,1,2,3\n1,4,5,6")
+    _write(tmp_path / "gyro.csv", """
+t,x,y,z
+2026-07-10T09:00:00Z,1,2,3
+2026-07-10T09:00:01Z,4,5,6
+""")
+    config = _write(tmp_path / "raw.ini", """
+[Input]
+inputMode = raw
+[RawAccelerometer]
+file = accel.csv
+timestampColumn = t
+timeUnit = s
+xColumn = x
+yColumn = y
+zColumn = z
+[RawGyroscope]
+file = gyro.csv
+timestampColumn = t
+timeUnit = datetime
+xColumn = x
+yColumn = y
+zColumn = z
+""")
+
+    dataset = load_raw_dataset(config)
+    with pytest.raises(ValueError, match="mixes relative numeric and absolute"):
+        dataset.discover()
+
+
+def test_numeric_unix_and_iso_timestamps_share_absolute_domain(tmp_path):
+    iso_time = datetime(2026, 7, 10, 9, tzinfo=timezone.utc)
+    unix_time = iso_time.timestamp()
+    _write(tmp_path / "accel.csv", f"t,x,y,z\n{unix_time},1,2,3")
+    _write(tmp_path / "gyro.csv", "t,x,y,z\n2026-07-10T09:00:00Z,4,5,6")
+    config = _write(tmp_path / "raw.ini", """
+[Input]
+inputMode = raw
+[RawAccelerometer]
+file = accel.csv
+timestampColumn = t
+timeUnit = unix_s
+xColumn = x
+yColumn = y
+zColumn = z
+[RawGyroscope]
+file = gyro.csv
+timestampColumn = t
+timeUnit = datetime
+xColumn = x
+yColumn = y
+zColumn = z
+""")
+
+    dataset = load_raw_dataset(config)
+    events = list(dataset)
+    discovery = dataset.discover()
+
+    assert [event.timestamp for event in events] == pytest.approx(
+        [unix_time, unix_time])
+    assert all(event.absolute_time == iso_time for event in events)
+    assert discovery.earliest_event.timestamp == pytest.approx(unix_time)
+    assert discovery.latest_event.timestamp == pytest.approx(unix_time)
 
 
 def test_drop_policy_reports_partial_and_backward_records(tmp_path):
