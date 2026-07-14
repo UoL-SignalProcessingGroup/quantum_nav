@@ -180,6 +180,7 @@ cython_debug/
 
 # Local recorded datasets and generated navigation results
 /raw_data_example_1/
+/*Shared Data*/
 /output/
 
 # Exceptions
