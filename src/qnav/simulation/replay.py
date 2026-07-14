@@ -223,10 +223,10 @@ class _ReferenceAligner:
     """Align a streaming reference onto the retained estimate time grid."""
 
     def __init__(self):
-        self._previous = None
-        self._current = None
+        self._previous = {field: None for field in _REFERENCE_FIELDS}
+        self._current = {field: None for field in _REFERENCE_FIELDS}
         self._rows: list[dict[str, np.ndarray]] = []
-        self._pending: list[tuple[int, float]] = []
+        self._pending = {field: [] for field in _REFERENCE_FIELDS}
 
     @staticmethod
     def _same_time(first: float, second: float) -> bool:
@@ -235,44 +235,48 @@ class _ReferenceAligner:
     def add_target(self, timestamp: float) -> None:
         index = len(self._rows)
         self._rows.append({})
-        if self._current is not None and self._same_time(timestamp, self._current[0]):
-            self._rows[index] = self._exact(self._current[1])
-        elif (self._previous is not None and self._current is not None
-              and self._previous[0] <= timestamp <= self._current[0]):
-            self._rows[index] = self._between(timestamp)
-        else:
-            self._pending.append((index, timestamp))
+        for field in _REFERENCE_FIELDS:
+            if not self._resolve(field, index, timestamp):
+                self._pending[field].append((index, timestamp))
 
     def push(self, timestamp: float, payload: dict) -> None:
         record = _reference_record(payload)
-        if self._current is not None:
-            self._previous = self._current
-        self._current = (timestamp, record)
+        for field in _REFERENCE_FIELDS:
+            if field not in record:
+                continue
+            if self._current[field] is not None:
+                self._previous[field] = self._current[field]
+            self._current[field] = (timestamp, record)
 
-        remaining = []
-        for index, target in self._pending:
-            if self._same_time(target, timestamp):
-                self._rows[index] = self._exact(record)
-            elif self._previous is not None and self._previous[0] <= target <= timestamp:
-                self._rows[index] = self._between(target)
-            elif target > timestamp:
-                remaining.append((index, target))
-            # Targets before the first/bracketing reference remain empty: no
-            # extrapolation is performed.
-        self._pending = remaining
+            remaining = []
+            for index, target in self._pending[field]:
+                if not self._resolve(field, index, target) and target > timestamp:
+                    remaining.append((index, target))
+                # Older unbracketed targets remain empty: reference data is
+                # never extrapolated.
+            self._pending[field] = remaining
 
-    @staticmethod
-    def _exact(record: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        return {field: value.copy() for field, value in record.items()
-                if field != "quaternion"}
+    def _resolve(self, field: str, index: int, timestamp: float) -> bool:
+        current = self._current[field]
+        previous = self._previous[field]
+        if current is not None and self._same_time(timestamp, current[0]):
+            self._rows[index][field] = current[1][field].copy()
+            return True
+        if (previous is not None and current is not None
+                and previous[0] <= timestamp <= current[0]):
+            self._rows[index][field] = self._between(
+                field, timestamp, previous, current)
+            return True
+        return False
 
-    def _between(self, timestamp: float) -> dict[str, np.ndarray]:
-        first_time, first = self._previous
-        second_time, second = self._current
+    def _between(self, field: str, timestamp: float, previous, current) \
+            -> np.ndarray:
+        first_time, first = previous
+        second_time, second = current
         if self._same_time(first_time, second_time):
-            return self._exact(second)
+            return second[field].copy()
         fraction = (timestamp - first_time) / (second_time - first_time)
-        return _interpolate_reference(first, second, fraction)
+        return _interpolate_reference(first, second, fraction)[field]
 
     def finish(self) -> dict[str, np.ndarray] | None:
         fields = set()
@@ -534,6 +538,7 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
     processed_imu = _ProcessedImuCapture() if save_processed_imu else None
     ideal_imu = {"accelerometer": None, "gyroscope": None}
     last_ins_time = None
+    quantum_imu_ready = {"accelerometer": False, "gyroscope": False}
     discarded = 0
 
     for source_time, events in _event_groups(dataset.iter_events()):
@@ -546,7 +551,8 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
             discarded += len(events)
             continue
         elapsed = source_time - origin
-        imu_changed = False
+        imu_event_kinds = set()
+        imu_updated_kinds = set()
         did_fuse = False
 
         for event in events:
@@ -557,7 +563,7 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
                     ideal_imu[event.kind] = normalized
                 else:
                     sensors[event.kind].push(elapsed, normalized)
-                imu_changed = True
+                imu_event_kinds.add(event.kind)
             elif event.kind == "gnss":
                 sensors["gnss"].push(elapsed, event.payload)
             elif event.kind == "altimeter":
@@ -572,7 +578,7 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
             elif event.kind == "reference" and reference_aligner is not None:
                 reference_aligner.push(elapsed, event.payload)
 
-        if (imu_input_level == "truth" and imu_changed
+        if (imu_input_level == "truth" and imu_event_kinds
                 and all(value is not None for value in ideal_imu.values())):
             truth = GroundTruth(
                 elapsed, state.position, state.velocity,
@@ -581,15 +587,18 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
             utc_time = next((event.absolute_time.timestamp() for event in events
                              if event.absolute_time is not None), None)
             for kind in ("accelerometer", "gyroscope"):
-                if any(event.kind == kind for event in events):
+                if kind in imu_event_kinds or sensors[kind].last_measurement is None:
                     sensor = sensors[kind]
                     sensor.take_measurement(elapsed, truth)
+                    imu_updated_kinds.add(kind)
                     if processed_imu is not None:
                         processed_imu.record(
                             kind, elapsed, utc_time, sensor.last_measurement)
                     sensor.update(elapsed)
+        elif imu_input_level != "truth":
+            imu_updated_kinds.update(imu_event_kinds)
 
-        if imu_changed and "ins" in fusions:
+        if imu_updated_kinds and "ins" in fusions:
             acc_ready = sensors["accelerometer"].last_measurement is not None
             gyro_ready = sensors["gyroscope"].last_measurement is not None
             if acc_ready and gyro_ready:
@@ -614,12 +623,15 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
             fusions["altimeter"].perform_fusion(state)
             did_fuse = True
 
-        if (imu_changed
-                and "quantum_imu" in fusions
+        for kind in imu_updated_kinds:
+            quantum_imu_ready[kind] = True
+        if ("quantum_imu" in fusions
+                and all(quantum_imu_ready.values())
                 and sensors["accelerometer"].last_measurement is not None
                 and sensors["gyroscope"].last_measurement is not None):
-            fusions["quantum_imu"].perform_fusion(state)
-            did_fuse = True
+            quantum_applied = fusions["quantum_imu"].perform_fusion(state)
+            quantum_imu_ready = {"accelerometer": False, "gyroscope": False}
+            did_fuse = bool(quantum_applied) or did_fuse
 
         if (any(event.kind == "gradiometer" for event in events)
                 and "gradiometer" in fusions):
