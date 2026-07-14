@@ -9,6 +9,7 @@ from qnav.measurement.recorded import (
     RecordedGyroscope,
     RecordedQuantumImu,
 )
+from qnav.measurement.platform import SensorAxis
 from qnav.quantum.base import ConceptQuantumFusion
 from qnav.util import transformations as trans
 from qnav.waypoints.trajectory import GroundTruth
@@ -72,6 +73,69 @@ def test_delayed_quantum_measurement_does_not_drop_simultaneous_imu_pair():
     assert fusion._step == 1
     np.testing.assert_allclose(fusion._imu_acc_data[0], 3.0)
     np.testing.assert_allclose(fusion._imu_gyro_data[0], 3.0)
+
+
+def test_completed_windows_queue_while_quantum_measurement_is_delayed():
+    fusion, quantum_imu, accelerometer, gyroscope = _fusion()
+    state = _state()
+    for timestamp in range(6):
+        value = np.full(3, timestamp, dtype=float)
+        accelerometer.push(timestamp, value)
+        gyroscope.push(timestamp, value)
+        assert not fusion.perform_fusion(state, time_step=1.0)
+
+    assert len(fusion._pending_windows) == 2
+    np.testing.assert_allclose(
+        fusion._pending_windows[0][1][:, 0], [0, 1, 2])
+    np.testing.assert_allclose(
+        fusion._pending_windows[1][1][:, 0], [3, 4, 5])
+
+    quantum_imu.push(5.1, np.zeros(3), np.zeros(3))
+    with patch.object(ConceptQuantumFusion, "_perform_correction"):
+        assert fusion.apply_pending_measurement(state)
+
+    assert len(fusion._pending_windows) == 1
+    assert fusion._window_full
+
+
+def test_quantum_reprocessing_preserves_each_recorded_interval():
+    fusion, quantum_imu, accelerometer, gyroscope = _fusion()
+    state = _state()
+    for timestamp, time_step in ((0.0, None), (0.1, 0.1), (0.3, 0.2)):
+        accelerometer.push(timestamp, np.zeros(3))
+        gyroscope.push(timestamp, np.zeros(3))
+        assert not fusion.perform_fusion(state, time_step=time_step)
+
+    quantum_imu.push(0.31, np.zeros(3), np.zeros(3))
+    intervals = []
+
+    def capture_interval(self, estimated_state, time_step=None):
+        intervals.append(time_step)
+
+    with patch.object(NumericalINS, "perform_fusion", capture_interval):
+        assert fusion.apply_pending_measurement(state)
+
+    assert intervals == [0.1, 0.2, 0.1, 0.2]
+
+
+def test_quantum_gyro_mount_conversion_applies_each_rotation_once():
+    axis = SensorAxis(sensor_angles=[90.0, 0.0, 0.0])
+    accelerometer = RecordedAccelerometer(frequency=1.0, sensor_axis=axis)
+    gyroscope = RecordedGyroscope(frequency=1.0, sensor_axis=axis)
+    quantum_imu = RecordedQuantumImu(
+        frequency=1.0, full_frequency=1.0, sensor_axis=axis)
+    fusion = ConceptQuantumFusion(
+        quantum_imu, accelerometer, gyroscope)
+    body_acceleration = np.array([0.0, 0.0, -9.80665])
+    body_rate = np.array([1.0, 2.0, 3.0])
+    sensor_acceleration = axis.body2sensor_mat @ body_acceleration
+    sensor_rate = axis.body2sensor_mat @ body_rate
+
+    converted_acceleration, converted_rate = fusion._measurement_to_imu_axis(
+        sensor_acceleration, sensor_rate)
+
+    np.testing.assert_allclose(converted_acceleration, sensor_acceleration)
+    np.testing.assert_allclose(converted_rate, sensor_rate)
 
 
 def test_quantum_correction_preserves_aiding_applied_inside_window():

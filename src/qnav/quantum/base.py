@@ -22,6 +22,7 @@ from qnav.measurement.platform import SensorAxis
 from qnav.measurement.sensor import Sensor
 from qnav.measurement.sensor import SensorFusion
 from qnav.measurement.sensor import FusionTrigger
+from qnav.measurement.sensor import resolve_time_step
 from qnav.estimation.state import EstimatedState
 from qnav.quantum.dummy import DummyGyroscope
 from qnav.quantum.dummy import DummyAccelerometer
@@ -29,6 +30,7 @@ from qnav.waypoints.trajectory import GroundTruth
 from qnav.fusion.ins import NumericalINS
 from qnav.util import transformations as trans
 
+from collections import deque
 import numpy as np
 
 
@@ -312,15 +314,18 @@ class ConceptQuantumFusion(SensorFusion):
         self._step = 0
         self._num_steps = self._qs_imu.num_steps
         self._window_full = False
+        self._pending_windows = deque()
 
         # Set-up measurement table
         self._imu_acc_data = np.zeros([self._num_steps, 3])
         self._imu_gyro_data = np.zeros([self._num_steps, 3])
+        self._imu_time_steps = np.full(self._num_steps, np.nan)
 
         # Pre-allocate last estimated state
         self._estimated_state = None
 
-    def perform_fusion(self, estimated_state: EstimatedState) -> bool:
+    def perform_fusion(self, estimated_state: EstimatedState,
+                       time_step: float = None) -> bool:
         """
         Collects measurements and applies position fixing.
         Each cycle collects measurements from the typical IMU sensors and
@@ -331,9 +336,6 @@ class ConceptQuantumFusion(SensorFusion):
         :param estimated_state: The current estimated state to update.
         :type estimated_state: EstimatedState
         """
-
-        if self._window_full:
-            return self.apply_pending_measurement(estimated_state)
 
         # Get latest conventional IMU measurements.
         acc_measurement = self._accelerometer.last_measurement
@@ -349,11 +351,21 @@ class ConceptQuantumFusion(SensorFusion):
         # Record latest IMU measurements:
         self._imu_acc_data[self._step, :] = acc_measurement
         self._imu_gyro_data[self._step, :] = ang_measurement
+        self._imu_time_steps[self._step] = np.nan
+        if time_step is not None:
+            self._imu_time_steps[self._step] = resolve_time_step(
+                time_step, self._accelerometer.time_step)
 
-        # On the final conventional IMU step, keep the completed window until
-        # its quantum measurement is available. Recorded quantum data can
-        # arrive in a later timestamp group.
+        # Queue completed windows until their quantum measurement is
+        # available, while immediately allowing the next window to start.
         if self._step == (self._num_steps - 1):
+            self._pending_windows.append((
+                self._estimated_state,
+                np.copy(self._imu_acc_data),
+                np.copy(self._imu_gyro_data),
+                np.copy(self._imu_time_steps),
+            ))
+            self._step = 0
             self._window_full = True
             return self.apply_pending_measurement(estimated_state)
 
@@ -363,13 +375,27 @@ class ConceptQuantumFusion(SensorFusion):
     def apply_pending_measurement(self, estimated_state: EstimatedState) -> bool:
         """Apply a completed quantum sample to its buffered IMU window."""
         qs_measurement = self._qs_imu.last_measurement
-        if not self._window_full or qs_measurement is None:
+        if not self._pending_windows or qs_measurement is None:
             return False
 
+        window = self._pending_windows[0]
         qs_measurement_imu = self._measurement_to_imu_axis(*qs_measurement)
-        acc_bias, gyro_bias = self._calculate_bias_errors(*qs_measurement_imu)
-        self._perform_correction(acc_bias, gyro_bias, estimated_state)
-        self.reset()
+        active_window = (
+            self._estimated_state, self._imu_acc_data, self._imu_gyro_data)
+        try:
+            self._estimated_state = window[0]
+            self._imu_acc_data = window[1]
+            self._imu_gyro_data = window[2]
+            acc_bias, gyro_bias = self._calculate_bias_errors(
+                *qs_measurement_imu)
+        finally:
+            (self._estimated_state,
+             self._imu_acc_data, self._imu_gyro_data) = active_window
+        self._perform_correction(
+            acc_bias, gyro_bias, estimated_state, window=window)
+        self._pending_windows.popleft()
+        self._qs_imu.reset()
+        self._window_full = bool(self._pending_windows)
         return True
 
 
@@ -382,6 +408,8 @@ class ConceptQuantumFusion(SensorFusion):
         self._qs_imu.reset()
         self._step = 0
         self._window_full = False
+        self._pending_windows.clear()
+        self._imu_time_steps[:] = np.nan
 
 
     def _measurement_to_imu_axis(self, acceleration_qs,
@@ -413,21 +441,25 @@ class ConceptQuantumFusion(SensorFusion):
         # Obtain the measured acceleration and angle rate.
         # acceleration_qs, angle_rate_qs = qs_measurement
         angle_rate_qs = np.radians(angle_rate_qs)
+        angle_rate_qs_body = np.linalg.solve(
+            qs_rot_body2sensor, angle_rate_qs)
 
         # Convert acceleration from quantum sensors to body axes
         # (includes the lever arm correction).
         acceleration_qs_body = np.linalg.solve(
             qs_rot_body2sensor, acceleration_qs) - np.cross(
-            angle_rate_qs, np.cross(angle_rate_qs, qs_lever_arm))
+            angle_rate_qs_body,
+            np.cross(angle_rate_qs_body, qs_lever_arm))
 
         # Convert acceleration from body axes to IMU sensor axes
         # (includes the lever arm correction).
         acceleration_qs_imu = acc_rot_body2sensor.dot(
-            acceleration_qs_body + np.cross(angle_rate_qs, np.cross(
-                angle_rate_qs, acc_lever_arm)))
+            acceleration_qs_body + np.cross(
+                angle_rate_qs_body,
+                np.cross(angle_rate_qs_body, acc_lever_arm)))
 
         # Rotate angle rates from body axes to IMU axes.
-        angle_rate_qs_imu = gyro_rot_body2sensor.dot(angle_rate_qs)
+        angle_rate_qs_imu = gyro_rot_body2sensor.dot(angle_rate_qs_body)
         angle_rate_qs_imu = np.degrees(angle_rate_qs_imu)  # TODO: NEW
 
         return acceleration_qs_imu, angle_rate_qs_imu
@@ -474,7 +506,8 @@ class ConceptQuantumFusion(SensorFusion):
 
     def _perform_correction(self, acc_bias: np.ndarray,
                             gyro_bias: np.ndarray,
-                            estimated_state: EstimatedState):
+                            estimated_state: EstimatedState,
+                            window=None):
         """
         Reprocesses IMU solution using estimated biases and correct for
         biases in measurement record.
@@ -493,16 +526,28 @@ class ConceptQuantumFusion(SensorFusion):
             print("Rejecting correction and resetting...\n")
             return
 
+        if window is None:
+            start_state = self._estimated_state
+            nominal_acceleration = self._imu_acc_data
+            nominal_angle_rates = self._imu_gyro_data
+            time_steps = self._imu_time_steps
+        else:
+            (start_state, nominal_acceleration,
+             nominal_angle_rates, time_steps) = window
+
         # Correct for biases in measurement record.
-        acc_data = self._imu_acc_data - acc_bias
-        gyro_data = self._imu_gyro_data - gyro_bias
+        acc_data = nominal_acceleration - acc_bias
+        gyro_data = nominal_angle_rates - gyro_bias
 
         # Reprocess both the nominal and corrected paths from the same saved
         # state. Applying their difference preserves aiding updates made to
         # the live state while the quantum window was being collected.
         nominal_state = self._reprocess_window(
-            self._imu_acc_data, self._imu_gyro_data)
-        corrected_state = self._reprocess_window(acc_data, gyro_data)
+            nominal_acceleration, nominal_angle_rates,
+            start_state=start_state, time_steps=time_steps)
+        corrected_state = self._reprocess_window(
+            acc_data, gyro_data,
+            start_state=start_state, time_steps=time_steps)
 
         position_delta = trans.lla2ned(
             corrected_state.position, nominal_state.position)
@@ -547,15 +592,22 @@ class ConceptQuantumFusion(SensorFusion):
         )
 
     def _reprocess_window(self, acceleration: np.ndarray,
-                          angle_rates: np.ndarray) -> EstimatedState:
-        state = self._estimated_state.clone()
+                          angle_rates: np.ndarray,
+                          start_state: EstimatedState = None,
+                          time_steps: np.ndarray = None) -> EstimatedState:
+        start_state = (
+            self._estimated_state if start_state is None else start_state)
+        state = start_state.clone()
         dummy_accelerometer = DummyAccelerometer(self._accelerometer)
         dummy_gyroscope = DummyGyroscope(self._gyroscope)
         ins = NumericalINS(dummy_accelerometer, dummy_gyroscope)
         for index in range(1, self._num_steps):
             dummy_accelerometer.last_measurement = acceleration[index, :]
             dummy_gyroscope.last_measurement = angle_rates[index, :]
-            ins.perform_fusion(state)
+            time_step = None
+            if time_steps is not None and np.isfinite(time_steps[index]):
+                time_step = time_steps[index]
+            ins.perform_fusion(state, time_step=time_step)
         return state
 
     @property

@@ -11,6 +11,24 @@ import qnav.simulation.replay as replay_module
 from qnav.simulation.replay import run_raw_replay
 
 
+def test_recorder_storage_scales_with_retained_rows_not_duration():
+    class State:
+        @staticmethod
+        def as_numpy():
+            return np.arange(16, dtype=float)
+
+    recorder = replay_module._Recorder(24 * 60 * 60, 100, None)
+    assert recorder.record(0.0, State()) == 0
+    assert recorder.record(0.001, State()) is None
+    assert recorder.record(24 * 60 * 60, State()) == 1
+
+    results = recorder.finish({})
+
+    assert isinstance(results.states, np.memmap)
+    np.testing.assert_allclose(results.time_steps, [0.0, 24 * 60 * 60])
+    assert results.states.shape == (2, 16)
+
+
 def _write_imu_replay_config(
         tmp_path: Path, *, input_level: str = "measurement",
         frame: str = "sensor", include_gnss: bool = False) -> Path:
@@ -131,6 +149,31 @@ def test_first_complete_imu_pair_only_starts_the_integration_clock(
     assert intervals == [pytest.approx(1.0)]
 
 
+def test_unix_nanosecond_replay_passes_precise_elapsed_interval(tmp_path: Path):
+    base = 1_783_674_000_000_000_000
+    (tmp_path / "imu.csv").write_text(
+        "time,ax,ay,az,gx,gy,gz\n"
+        f"{base},0,0,-9.80665,0,0,0\n"
+        f"{base + 1},0,0,-9.80665,0,0,0\n",
+        encoding="utf-8",
+    )
+    config_path = _write_imu_replay_config(tmp_path)
+    config_path.write_text(
+        config_path.read_text(encoding="utf-8").replace(
+            "timeUnit = s", "timeUnit = unix_ns"),
+        encoding="utf-8",
+    )
+    intervals = []
+
+    def capture_interval(self, state, time_step=None):
+        intervals.append(time_step)
+
+    with patch.object(NumericalINS, "perform_fusion", capture_interval):
+        run_raw_replay(ConfigHandler(config_path))
+
+    assert intervals == pytest.approx([1e-9])
+
+
 def test_staggered_truth_imu_initializes_held_pair_without_losing_interval(
         tmp_path: Path):
     (tmp_path / "imu.csv").write_text(
@@ -194,10 +237,11 @@ quantumImuFrequency = 1
             self.accelerometer = accelerometer
             self.gyroscope = gyroscope
 
-        def perform_fusion(self, state):
+        def perform_fusion(self, state, time_step=None):
             calls.append((
                 self.accelerometer.timestamp,
                 self.gyroscope.timestamp,
+                time_step,
             ))
             return False
 
@@ -212,11 +256,12 @@ quantumImuFrequency = 1
 
     run_raw_replay(ConfigHandler(config_path))
 
-    assert calls == pytest.approx([
-        (0.0, 0.005),
-        (0.010, 0.015),
-        (0.020, 0.025),
-    ])
+    assert calls[0] == (0.0, 0.005, None)
+    np.testing.assert_allclose(
+        [call[:2] for call in calls[1:]],
+        [(0.010, 0.015), (0.020, 0.025)])
+    np.testing.assert_allclose(
+        [call[2] for call in calls[1:]], [0.010, 0.010])
     assert pending_calls == pytest.approx([0.020])
 
 
@@ -715,6 +760,9 @@ integrationMethod = numerical
 [Altimeter]
 altimeterFusion = fixedgain
 altimeterGainAmount = 1
+altimeterMeasurementFreq = 20
+[Quantum]
+quantumGravFrequency = 0.5
 [Gravity]
 estimatedGravityFunction = somigliana
 estimatedGravityCorrectionMap = none
@@ -730,6 +778,7 @@ resultsDownSampleRate = 1
 
     quantum_measurements = []
     gradient_measurements = []
+    initial_cadences = {}
 
     class QuantumFusion:
         def __init__(self, sensor):
@@ -738,7 +787,7 @@ resultsDownSampleRate = 1
         def apply_pending_measurement(self, state):
             return False
 
-        def perform_fusion(self, state):
+        def perform_fusion(self, state, time_step=None):
             acceleration, angle_rates = self.sensor.last_measurement
             quantum_measurements.append((acceleration, angle_rates))
             state.update_estimates(
@@ -748,6 +797,7 @@ resultsDownSampleRate = 1
     class GradientFusion:
         def __init__(self, sensor):
             self.sensor = sensor
+            initial_cadences["gradiometer"] = sensor.time_step
 
         def perform_fusion(self, state):
             top, bottom = self.sensor.last_measurement
@@ -757,6 +807,14 @@ resultsDownSampleRate = 1
             state.update_estimates(position=position)
             self.sensor.reset()
 
+    real_altimeter_fusion = replay_module.altimeter_conf.get_fusion
+
+    def capture_altimeter_cadence(config, sensor):
+        initial_cadences["altimeter"] = sensor.time_step
+        return real_altimeter_fusion(config, sensor)
+
+    monkeypatch.setattr(
+        replay_module.altimeter_conf, "get_fusion", capture_altimeter_cadence)
     monkeypatch.setattr(
         replay_module.quantum_conf, "get_quantum_imu_fusion",
         lambda config, sensor, accelerometer, gyroscope: QuantumFusion(sensor))
@@ -768,6 +826,10 @@ resultsDownSampleRate = 1
 
     assert results.report.accepted == 10
     assert len(quantum_measurements) == len(gradient_measurements) == 2
+    assert initial_cadences == pytest.approx({
+        "altimeter": 0.05,
+        "gradiometer": 2.0,
+    })
     np.testing.assert_allclose(quantum_measurements[-1][0], [7, 8, 9])
     np.testing.assert_allclose(quantum_measurements[-1][1], [10, 11, 12])
     np.testing.assert_allclose(gradient_measurements[-1], [0.9, 0.2])

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from itertools import groupby
 from pathlib import Path
@@ -52,6 +52,7 @@ class ReplayResults:
     report: object
     processed_imu: "_ProcessedImuCapture | None" = None
     reference: "dict[str, np.ndarray] | None" = None
+    _storage: object | None = field(default=None, repr=False)
 
     def write(self, estimates: ResultsTable) -> None:
         fields = {
@@ -127,29 +128,39 @@ class _ProcessedImuCapture:
 class _Recorder:
     def __init__(self, duration: float, frequency: float, utc_origin: float | None):
         self._frequency = max(float(frequency), np.finfo(float).eps)
-        size = max(2, int(np.ceil(max(duration, 0.0) * self._frequency)) + 2)
-        self._times = np.full(size, np.nan)
-        self._states = np.full((size, 16), np.nan)
-        self._utc = np.full(size, np.nan) if utc_origin is not None else None
         self._utc_origin = utc_origin
+        self._width = 18 if utc_origin is not None else 17
+        self._file = tempfile.TemporaryFile()
+        self._count = 0
+        self._last_bucket = None
+        self._mapped = None
 
     def record(self, timestamp: float, state: EstimatedState) -> int | None:
-        index = min(int(np.floor(timestamp * self._frequency + 1e-10)), len(self._times) - 1)
-        if index < 0:
+        bucket = int(np.floor(timestamp * self._frequency + 1e-10))
+        if bucket < 0:
             return None
-        if not np.isnan(self._times[index]):
+        if self._last_bucket is not None and bucket <= self._last_bucket:
             return None
-        self._times[index] = timestamp
-        self._states[index] = state.as_numpy()
-        if self._utc is not None:
-            self._utc[index] = self._utc_origin + timestamp
+        row = np.empty(self._width, dtype=np.float64)
+        row[0] = timestamp
+        row[1:17] = state.as_numpy()
+        if self._utc_origin is not None:
+            row[17] = self._utc_origin + timestamp
+        self._file.write(row.tobytes())
+        index = self._count
+        self._count += 1
+        self._last_bucket = bucket
         return index
 
     def finish(self, report: object) -> ReplayResults:
-        used = ~np.isnan(self._times)
+        self._file.flush()
+        self._mapped = np.memmap(
+            self._file, dtype=np.float64, mode="r",
+            shape=(self._count, self._width))
         return ReplayResults(
-            self._times[used], self._states[used],
-            None if self._utc is None else self._utc[used], report)
+            self._mapped[:, 0], self._mapped[:, 1:17],
+            None if self._utc_origin is None else self._mapped[:, 17],
+            report, _storage=self)
 
 
 _REFERENCE_FIELDS = {
@@ -447,7 +458,8 @@ def _build_fusions(config: ConfigHandler, kinds: set[str], state: EstimatedState
                 "Receiver-fix replay supports fixedgain or loose fusion")
 
     if "altimeter" in kinds:
-        sensor = RecordedAltimeter()
+        sensor = RecordedAltimeter(frequency=config.get_float(
+            "Altimeter", "altimeterMeasurementFreq", 1.0))
         sensors["altimeter"] = sensor
         fusions["altimeter"] = altimeter_conf.get_fusion(config, sensor)
 
@@ -468,7 +480,10 @@ def _build_fusions(config: ConfigHandler, kinds: set[str], state: EstimatedState
             config, sensor, sensors["accelerometer"], sensors["gyroscope"])
 
     if "gradiometer" in kinds:
-        sensor = RecordedGravityGradiometer(sensor_axis=axis)
+        sensor = RecordedGravityGradiometer(
+            frequency=config.get_float(
+                "Quantum", "quantumGravFrequency", 1.0),
+            sensor_axis=axis)
         sensors["gradiometer"] = sensor
         fusions["gradiometer"] = quantum_grav_conf.get_quantum_grav_fusion(
             config, sensor)
@@ -528,7 +543,7 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
     state, start_event = _initial_state(config, dataset, discovery)
     origin = start_event.timestamp
     utc_origin = start_event.absolute_time.timestamp() if start_event.absolute_time else None
-    duration = max(0.0, discovery.latest_event.timestamp - origin)
+    duration = float(max(0.0, discovery.latest_event.timestamp - origin))
     output_frequency = config.get_float("Measurement", "imuMeasurementFreq", 100.0)
     output_frequency /= max(1, config.get_int("Output", "resultsDownSampleRate", 1))
     recorder = _Recorder(duration, output_frequency, utc_origin)
@@ -547,6 +562,7 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
     processed_imu = _ProcessedImuCapture() if save_processed_imu else None
     ideal_imu = {"accelerometer": None, "gyroscope": None}
     last_ins_time = None
+    last_quantum_pair_time = None
     quantum_imu_ready = {"accelerometer": False, "gyroscope": False}
     discarded = 0
 
@@ -556,10 +572,13 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
                 for event in events:
                     if event.kind == "reference":
                         reference_aligner.push(
-                            source_time - origin, event.payload)
+                            float(source_time - origin), event.payload)
             discarded += len(events)
             continue
-        elapsed = source_time - origin
+        # Raw Unix timestamps may use exact Fraction values so adjacent
+        # nanoseconds remain ordered.  Subtract before converting at the
+        # fusion boundary to retain the precise elapsed interval.
+        elapsed = float(source_time - origin)
         imu_event_kinds = set()
         imu_updated_kinds = set()
         did_fuse = False
@@ -643,7 +662,12 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
                 and all(quantum_imu_ready.values())
                 and sensors["accelerometer"].last_measurement is not None
                 and sensors["gyroscope"].last_measurement is not None):
-            quantum_applied = fusions["quantum_imu"].perform_fusion(state)
+            quantum_time_step = (
+                None if last_quantum_pair_time is None
+                else elapsed - last_quantum_pair_time)
+            quantum_applied = fusions["quantum_imu"].perform_fusion(
+                state, time_step=quantum_time_step)
+            last_quantum_pair_time = elapsed
             quantum_imu_ready = {"accelerometer": False, "gyroscope": False}
             did_fuse = bool(quantum_applied) or did_fuse
 
