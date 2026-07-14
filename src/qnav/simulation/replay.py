@@ -625,12 +625,20 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
 
         for kind in imu_updated_kinds:
             quantum_imu_ready[kind] = True
+        quantum_pair_complete = False
         if ("quantum_imu" in fusions
                 and all(quantum_imu_ready.values())
                 and sensors["accelerometer"].last_measurement is not None
                 and sensors["gyroscope"].last_measurement is not None):
             quantum_applied = fusions["quantum_imu"].perform_fusion(state)
             quantum_imu_ready = {"accelerometer": False, "gyroscope": False}
+            quantum_pair_complete = True
+            did_fuse = bool(quantum_applied) or did_fuse
+        if ("quantum_imu" in fusions
+                and not quantum_pair_complete
+                and any(event.kind == "quantum_imu" for event in events)):
+            quantum_applied = fusions[
+                "quantum_imu"].apply_pending_measurement(state)
             did_fuse = bool(quantum_applied) or did_fuse
 
         if (any(event.kind == "gradiometer" for event in events)

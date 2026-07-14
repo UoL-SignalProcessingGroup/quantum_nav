@@ -162,7 +162,8 @@ def test_quantum_fusion_advances_once_per_complete_staggered_imu_pair(
         "0.010,0,0,-9.80665,,,,,,,,,\n"
         "0.015,,,,0,0,0,,,,,,\n"
         "0.020,0,0,-9.80665,,,,,,,,,\n"
-        "0.025,,,,0,0,0,0,0,-9.80665,0,0,0\n",
+        "0.025,,,,0,0,0,,,,,,\n"
+        "0.030,,,,,,,0,0,-9.80665,0,0,0\n",
         encoding="utf-8",
     )
     config_path = _write_imu_replay_config(tmp_path)
@@ -186,6 +187,7 @@ quantumImuFrequency = 1
 """
         )
     calls = []
+    pending_calls = []
 
     class QuantumFusion:
         def __init__(self, accelerometer, gyroscope):
@@ -199,6 +201,10 @@ quantumImuFrequency = 1
             ))
             return False
 
+        def apply_pending_measurement(self, state):
+            pending_calls.append(self.accelerometer.timestamp)
+            return True
+
     monkeypatch.setattr(
         replay_module.quantum_conf, "get_quantum_imu_fusion",
         lambda config, sensor, accelerometer, gyroscope: QuantumFusion(
@@ -211,6 +217,7 @@ quantumImuFrequency = 1
         (0.010, 0.015),
         (0.020, 0.025),
     ])
+    assert pending_calls == pytest.approx([0.020])
 
 
 @pytest.mark.parametrize(
