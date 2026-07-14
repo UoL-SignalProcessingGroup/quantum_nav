@@ -19,6 +19,7 @@ run.py
 
 # Required to ensure qnav is on path!
 import sys; from pathlib import Path
+import shutil
 src_path = Path(__file__).parent / 'src'
 sys.path.append(str(src_path))
 
@@ -112,6 +113,28 @@ def run_simulation(config: ConfigHandler) -> ResultsCapture | ReplayResults:
     return results
 
 
+def _clear_previous_results(output_dir: Path) -> None:
+    """Remove artifacts produced by an earlier run in this directory."""
+    for stem in ("estimation", "ground_truth"):
+        for path in output_dir.glob(f"{stem}.*"):
+            if path.is_file():
+                path.unlink()
+    for name in (
+        "ingestion_report.json",
+        "summary.json",
+        "processed_accelerometer.csv",
+        "processed_gyroscope.csv",
+        "config.ini",
+        "config_full.ini",
+    ):
+        path = output_dir / name
+        if path.is_file():
+            path.unlink()
+    figures = output_dir / "figures"
+    if figures.is_dir():
+        shutil.rmtree(figures)
+
+
 def save_results(config: ConfigHandler,
                  results: ResultsCapture | ReplayResults) -> Path:
     """
@@ -136,6 +159,8 @@ def save_results(config: ConfigHandler,
     output_dir = settings['output_dir']
     formats = settings['formats']
     ds = settings["down_sampling"]
+
+    _clear_previous_results(output_dir)
 
     # Specify where results are to be saved.
     estimates_file = output_dir / 'estimation.qnr'

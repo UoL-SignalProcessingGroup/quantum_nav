@@ -12,6 +12,50 @@ accepts receiver latitude, longitude and altitude, with optional NED velocity
 and quality columns. Accelerometer values are normalized to m/s2, gyroscope
 values to degrees/s, positions to degrees/metres, and velocity to m/s.
 
+Additional recorded sensors use the same section-per-stream style::
+
+    [RawAltimeter]
+    timestampColumn = time
+    altitudeColumn = pressure_altitude
+    altitudeUnits = ft
+
+    [RawQuantumImu]
+    timestampColumn = time
+    accelerationXColumn = qax
+    accelerationYColumn = qay
+    accelerationZColumn = qaz
+    angularRateXColumn = qp
+    angularRateYColumn = qq
+    angularRateZColumn = qr
+    accelerationUnits = g
+    angularRateUnits = rad/s
+    frame = sensor
+
+    [RawGravityGradiometer]
+    timestampColumn = time
+    topSignalColumn = upper_signal
+    bottomSignalColumn = lower_signal
+
+Altimeter measurements feed the configured ``[Altimeter]`` fusion. Quantum
+IMU replay also requires conventional accelerometer and gyroscope streams and
+uses the configured ``[Quantum]`` fusion. Gradiometer columns are the
+dimensionless upper and lower interferometer signals used by the configured
+quantum-gravity fusion.
+
+Supported input conversions include acceleration in ``m/s2``, ``m/s^2``,
+``g`` or ``mg``; angular rates in degrees/s or radians/s; lengths in metres or
+feet; velocities in m/s, km/h or knots; and coordinate/attitude angles in
+degrees or radians. ``xSign``, ``ySign`` and ``zSign`` may each be ``1`` or
+``-1`` when a source axis convention needs reversing. Values are normalized
+to QNav's m/s2, degrees/s, metres, m/s and degree conventions before replay.
+
+``timeUnit`` accepts relative seconds, milliseconds, microseconds and
+nanoseconds (including common long-form aliases). Numeric Unix/epoch time uses
+``unix``, ``unix_s``, ``unix_ms``, ``unix_us`` or ``unix_ns``; the equivalent
+``epoch`` aliases are also accepted. ISO/date-time columns use ``datetime`` or
+``iso8601`` with optional ``datetimeFormat`` and ``timezone``. Do not mix
+relative timestamps with Unix or date-time streams in one run.
+
 By default, ``imuInputLevel = measurement`` treats the IMU columns as final
 sensor measurements. Set ``imuInputLevel = truth`` under ``[RawData]`` to
 interpret them as ideal body-frame specific force and ideal body P/Q/R rates.
