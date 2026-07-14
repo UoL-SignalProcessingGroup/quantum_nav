@@ -2,6 +2,7 @@
 
 from configparser import ConfigParser
 from datetime import datetime, timezone
+from fractions import Fraction
 from pathlib import Path
 
 import math
@@ -9,6 +10,7 @@ import pytest
 
 from qnav.input.config_handler import ConfigHandler
 from qnav.input.raw import GnssFix, load_raw_dataset, is_raw_mode
+import qnav.input.raw as raw_module
 
 
 def _write(path: Path, text: str) -> Path:
@@ -67,6 +69,43 @@ units = rad/s
     assert discovery.earliest_event.timestamp == 0
     assert discovery.latest_event.timestamp == 2
     assert discovery.first_gnss_fix is None
+
+
+def test_time_aligned_combined_csv_is_read_once_per_event_pass(
+        tmp_path, monkeypatch):
+    _write(tmp_path / "sensors.csv", """
+time,ax,ay,az,gx,gy,gz
+0,1,2,3,4,5,6
+1,7,8,9,10,11,12
+""")
+    config = _write(tmp_path / "raw.ini", """
+[Input]
+inputMode = raw
+[RawData]
+combinedFile = sensors.csv
+[RawAccelerometer]
+timestampColumn = time
+xColumn = ax
+yColumn = ay
+zColumn = az
+[RawGyroscope]
+timestampColumn = time
+xColumn = gx
+yColumn = gy
+zColumn = gz
+""")
+    original = raw_module.pd.read_csv
+    calls = []
+
+    def counted(*args, **kwargs):
+        calls.append(args[0])
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(raw_module.pd, "read_csv", counted)
+    dataset = load_raw_dataset(config)
+    assert len(calls) == 1  # Header validation.
+    assert len(list(dataset)) == 4
+    assert len(calls) == 2  # One shared scan, not one scan per sensor.
 
 
 def test_combined_independent_timestamp_columns_are_globally_ordered(tmp_path):
@@ -141,6 +180,60 @@ rawDataConfig = raw/mapping.ini
     ]
 
 
+def test_raw_subconfig_merges_missing_options_from_main_per_option(tmp_path):
+    raw_dir = tmp_path / "raw"
+    raw_dir.mkdir()
+    _write(tmp_path / "imu.csv", "t,x,y,z\n0,1,2,3")
+    _write(raw_dir / "mapping.ini", """
+[RawData]
+timeUnit = s
+[RawAccelerometer]
+timestampColumn = t
+xColumn = x
+yColumn = y
+zColumn = z
+""")
+    main = _write(tmp_path / "main.ini", """
+[Input]
+inputMode = raw
+rawDataConfig = raw/mapping.ini
+[RawData]
+file = imu.csv
+chunkSize = 7
+invalidRecordPolicy = drop
+[RawAccelerometer]
+accelerationUnits = g
+""")
+
+    dataset = load_raw_dataset(main)
+    assert dataset.config.chunk_size == 7
+    assert dataset.config.invalid_record_policy == "drop"
+    assert dataset.config.spec_for("accelerometer").file == tmp_path / "imu.csv"
+    assert next(iter(dataset)).payload == pytest.approx(
+        (9.80665, 19.6133, 29.41995))
+
+
+def test_decimal_comma_values_are_parsed_with_object_csv_columns(tmp_path):
+    _write(tmp_path / "imu.csv", "t;x;y;z\n0,0;1,25;2,5;3,75")
+    config = _write(tmp_path / "raw.ini", """
+[Input]
+inputMode = raw
+[RawData]
+file = imu.csv
+delimiter = ;
+decimal = ,
+[RawAccelerometer]
+timestampColumn = t
+xColumn = x
+yColumn = y
+zColumn = z
+""")
+
+    event = next(iter(load_raw_dataset(config)))
+    assert event.timestamp == 0
+    assert event.payload == pytest.approx((1.25, 2.5, 3.75))
+
+
 def test_datetime_gnss_quality_and_velocity_normalization(tmp_path):
     _write(tmp_path / "gnss.csv", """
 utc,lat,lon,height,ve,vn,vu,valid,sats,hacc
@@ -180,6 +273,62 @@ maximumHorizontalAccuracy = 3
     assert fix.velocity_frame == "ned"
     assert dataset.report.quality_filtered == 1
     assert dataset.discover().first_gnss_fix == fix
+
+
+def test_gnss_accuracy_values_and_thresholds_use_normalized_units(tmp_path):
+    _write(tmp_path / "gnss.csv", """
+t,lat,lon,alt,hacc,vacc,sacc
+0,52,-2,100,10,8,5
+""")
+    config = _write(tmp_path / "raw.ini", """
+[Input]
+inputMode = raw
+[RawData]
+file = gnss.csv
+[RawGnss]
+timestampColumn = t
+latitudeColumn = lat
+longitudeColumn = lon
+altitudeColumn = alt
+horizontalAccuracyColumn = hacc
+verticalAccuracyColumn = vacc
+speedAccuracyColumn = sacc
+lengthUnits = ft
+velocityUnits = knots
+maximumHorizontalAccuracy = 11
+maximumVerticalAccuracy = 9
+maximumSpeedAccuracy = 6
+""")
+
+    dataset = load_raw_dataset(config)
+    fix = next(iter(dataset)).payload
+    assert fix.horizontal_accuracy == pytest.approx(10 * .3048)
+    assert fix.vertical_accuracy == pytest.approx(8 * .3048)
+    assert fix.speed_accuracy == pytest.approx(5 * .5144444444444445)
+    assert fix.accepted
+    quality = dataset.config.spec_for("gnss").quality
+    assert quality["maximumHorizontalAccuracy"] == pytest.approx(11 * .3048)
+    assert quality["maximumSpeedAccuracy"] == pytest.approx(
+        6 * .5144444444444445)
+
+
+def test_gnss_velocity_mapping_must_include_all_components(tmp_path):
+    _write(tmp_path / "gnss.csv", "t,lat,lon,alt,vx\n0,52,-2,100,1")
+    config = _write(tmp_path / "raw.ini", """
+[Input]
+inputMode = raw
+[RawData]
+file = gnss.csv
+[RawGnss]
+timestampColumn = t
+latitudeColumn = lat
+longitudeColumn = lon
+altitudeColumn = alt
+velocityXColumn = vx
+""")
+
+    with pytest.raises(ValueError, match="velocity mappings must include all three"):
+        load_raw_dataset(config)
 
 
 def test_discovery_rejects_mixed_relative_and_absolute_time_domains(tmp_path):
@@ -248,6 +397,34 @@ zColumn = z
     assert discovery.latest_event.timestamp == pytest.approx(unix_time)
 
 
+def test_unix_nanosecond_timestamps_remain_distinct(tmp_path):
+    base = 1_783_674_000_000_000_000
+    _write(tmp_path / "imu.csv", f"""
+t,x,y,z
+{base},1,2,3
+{base + 1},4,5,6
+""")
+    config = _write(tmp_path / "raw.ini", """
+[Input]
+inputMode = raw
+[RawData]
+file = imu.csv
+[RawAccelerometer]
+timestampColumn = t
+timeUnit = unix_ns
+xColumn = x
+yColumn = y
+zColumn = z
+""")
+
+    dataset = load_raw_dataset(config)
+    events = list(dataset)
+    assert len(events) == 2
+    assert events[1].timestamp - events[0].timestamp == Fraction(
+        1, 1_000_000_000)
+    assert dataset.report.duplicate_timestamps == 0
+
+
 def test_drop_policy_reports_partial_and_backward_records(tmp_path):
     _write(tmp_path / "imu.csv", """
 t,x,y,z
@@ -274,6 +451,29 @@ zColumn = z
     assert dataset.report.rejected == 2
     assert dataset.report.partial_records == 1
     assert dataset.report.backward_timestamps == 1
+
+
+def test_drop_policy_bounds_stored_error_diagnostics(tmp_path):
+    rows = "\n".join(f"{index},bad,2,3" for index in range(105))
+    _write(tmp_path / "imu.csv", f"t,x,y,z\n{rows}")
+    config = _write(tmp_path / "raw.ini", """
+[Input]
+inputMode = raw
+[RawData]
+file = imu.csv
+invalidRecordPolicy = drop
+[RawAccelerometer]
+timestampColumn = t
+xColumn = x
+yColumn = y
+zColumn = z
+""")
+
+    dataset = load_raw_dataset(config)
+    assert list(dataset) == []
+    assert dataset.report.rejected == 105
+    assert len(dataset.report.errors) == 100
+    assert dataset.report.errors_omitted == 5
 
 
 def test_strict_policy_rejects_duplicate_timestamps(tmp_path):

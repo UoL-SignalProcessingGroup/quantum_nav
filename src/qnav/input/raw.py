@@ -10,6 +10,7 @@ from __future__ import annotations
 from configparser import ConfigParser, ExtendedInterpolation
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from fractions import Fraction
 from heapq import heappop, heappush
 from pathlib import Path
 from typing import Any, Callable, Iterable, Iterator, Mapping
@@ -28,6 +29,7 @@ from qnav.util.transformations import (
 
 
 _G = 9.80665
+_MAX_REPORTED_ERRORS = 100
 _SENSOR_SECTIONS = {
     "RawAccelerometer": "accelerometer",
     "RawGyroscope": "gyroscope",
@@ -68,7 +70,7 @@ class MeasurementEvent:
     IMU/reference values, and a two-tuple for gradiometers.
     """
 
-    timestamp: float
+    timestamp: float | Fraction
     kind: str
     payload: Any
     absolute_time: datetime | None = None
@@ -94,9 +96,10 @@ class IngestionReport:
     backward_timestamps: int = 0
     partial_records: int = 0
     source_files: tuple[Path, ...] = ()
-    earliest_timestamp: float | None = None
-    latest_timestamp: float | None = None
+    earliest_timestamp: float | Fraction | None = None
+    latest_timestamp: float | Fraction | None = None
     errors: list[str] = field(default_factory=list)
+    errors_omitted: int = 0
 
     @property
     def accepted_events(self) -> int:
@@ -109,6 +112,9 @@ class IngestionReport:
     def as_dict(self) -> dict[str, Any]:
         result = vars(self).copy()
         result["source_files"] = [str(path) for path in self.source_files]
+        for name in ("earliest_timestamp", "latest_timestamp"):
+            if isinstance(result[name], Fraction):
+                result[name] = float(result[name])
         return result
 
 
@@ -306,22 +312,44 @@ class _ConfigView:
             return self.raw, self.raw_path
         return self.main, self.main_path
 
+    def _parsers_for(self, section: str):
+        """Yield option sources in precedence order.
+
+        A reusable raw mapping overrides options it declares, while the main
+        run configuration can still supply options absent from that mapping.
+        """
+        if self.raw is not None and self.raw.has_section(section):
+            yield self.raw, self.raw_path
+        if self.main.has_section(section):
+            yield self.main, self.main_path
+
     def has_section(self, section: str) -> bool:
-        parser, _ = self.parser_for(section)
-        return parser.has_section(section)
+        return any(True for _ in self._parsers_for(section))
 
     def get(self, section: str, names: str | Iterable[str],
             fallback: Any = None) -> Any:
-        parser, _ = self.parser_for(section)
-        if not parser.has_section(section):
-            return fallback
         if isinstance(names, str):
             names = (names,)
-        for name in names:
-            if parser.has_option(section, name):
-                value = parser.get(section, name).strip()
-                return value if value != "" else fallback
+        for parser, _ in self._parsers_for(section):
+            for name in names:
+                if parser.has_option(section, name):
+                    value = parser.get(section, name).strip()
+                    if value != "":
+                        return value
         return fallback
+
+    def get_with_base(self, section: str, names: str | Iterable[str],
+                      fallback: Any = None) -> tuple[Any, Path | None]:
+        """Return an option together with the file that declared it."""
+        if isinstance(names, str):
+            names = (names,)
+        for parser, path in self._parsers_for(section):
+            for name in names:
+                if parser.has_option(section, name):
+                    value = parser.get(section, name).strip()
+                    if value != "":
+                        return value, path
+        return fallback, None
 
     def base(self, section: str) -> Path:
         return self.parser_for(section)[1].parent
@@ -406,14 +434,18 @@ def _section_enabled(view: _ConfigView, section: str) -> bool:
 
 
 def _build_spec(view: _ConfigView, section: str, kind: str) -> SensorSpec:
-    global_file = view.get("RawData", ("file", "combinedFile"))
-    file_name = view.get(section, ("file", "inputFile"), global_file)
+    global_file, global_path = view.get_with_base(
+        "RawData", ("file", "combinedFile"))
+    file_name, file_declaring_path = view.get_with_base(
+        section, ("file", "inputFile"), global_file)
+    if file_declaring_path is None:
+        file_declaring_path = global_path
     if not file_name:
         raise ValueError(f"[{section}] needs file or [RawData] combinedFile")
-    base_section = section if view.get(section, ("file", "inputFile")) else "RawData"
     file_path = Path(str(file_name))
     if not file_path.is_absolute():
-        file_path = view.base(base_section) / file_path
+        declaring_path = file_declaring_path or view.main_path
+        file_path = declaring_path.parent / file_path
     file_path = file_path.resolve()
     if not file_path.is_file():
         raise FileNotFoundError(f"[{section}] input file not found: {file_path}")
@@ -443,6 +475,11 @@ def _build_spec(view: _ConfigView, section: str, kind: str) -> SensorSpec:
             value = view.get(section, aliases)
             if value:
                 columns[field_name] = value
+        velocity_fields = ("velocity_x", "velocity_y", "velocity_z")
+        mapped_velocity = [name in columns for name in velocity_fields]
+        if any(mapped_velocity) and not all(mapped_velocity):
+            raise ValueError(
+                "[RawGnss] velocity mappings must include all three components")
         required = ("latitude", "longitude", "altitude")
     elif kind == "altimeter":
         columns["altitude"] = _column(view, section, "altitude", "altitudeColumn", "heightColumn")
@@ -530,6 +567,11 @@ def _build_spec(view: _ConfigView, section: str, kind: str) -> SensorSpec:
         value = view.get(section, name)
         if value is not None:
             quality[name] = _number(value, name)
+    for name in ("maximumHorizontalAccuracy", "maximumVerticalAccuracy"):
+        if name in quality:
+            quality[name] *= _length_factor(units["length"])
+    if "maximumSpeedAccuracy" in quality:
+        quality["maximumSpeedAccuracy"] *= _velocity_factor(units["velocity"])
     quaternion_direction = None
     if kind == "reference" and "quaternion_w" in columns:
         direction = view.get(section, "quaternionDirection")
@@ -628,6 +670,15 @@ def _iter_file(path: Path, specs: list[SensorSpec], config: RawInputConfig,
     sensor projection is therefore streamed independently and heap-merged.
     This retains bounded memory and does not assume row-level time alignment.
     """
+    timing = {
+        (spec.columns["timestamp"], spec.time_unit,
+         spec.datetime_format, spec.timezone)
+        for spec in specs
+    }
+    if len(timing) == 1:
+        yield from _iter_shared_timestamp_file(path, specs, config, report)
+        return
+
     streams = [
         iter(_iter_spec_file(path, spec, config, report, index == 0))
         for index, spec in enumerate(specs)
@@ -653,6 +704,35 @@ def _iter_file(path: Path, specs: list[SensorSpec], config: RawInputConfig,
         serial += 1
 
 
+def _iter_shared_timestamp_file(
+        path: Path, specs: list[SensorSpec], config: RawInputConfig,
+        report: IngestionReport) -> Iterator[MeasurementEvent]:
+    """Read a conventionally time-aligned combined CSV once per pass."""
+    options = specs[0].options
+    usecols = list(dict.fromkeys(
+        column for spec in specs for column in spec.columns.values()))
+    last_times: dict[str, float | Fraction | None] = {
+        spec.section: None for spec in specs}
+    row_offset = 2
+    chunks = pd.read_csv(
+        path, usecols=usecols, chunksize=config.chunk_size,
+        sep=options.delimiter, quotechar=options.quotechar,
+        comment=options.comment, encoding=options.encoding,
+        decimal=options.decimal, dtype=object)
+    for chunk in chunks:
+        report.rows_read += len(chunk)
+        for row_values in chunk.itertuples(index=False, name=None):
+            row = dict(zip(chunk.columns, row_values))
+            for spec in specs:
+                event, last_time = _validated_event(
+                    spec, row, path, row_offset, last_times[spec.section],
+                    config, report)
+                last_times[spec.section] = last_time
+                if event is not None:
+                    yield event
+            row_offset += 1
+
+
 def _iter_spec_file(path: Path, spec: SensorSpec, config: RawInputConfig,
                     report: IngestionReport,
                     count_rows: bool) -> Iterator[MeasurementEvent]:
@@ -670,36 +750,54 @@ def _iter_spec_file(path: Path, spec: SensorSpec, config: RawInputConfig,
             report.rows_read += len(chunk)
         for row_values in chunk.itertuples(index=False, name=None):
             row = dict(zip(chunk.columns, row_values))
-            try:
-                event = _event_from_row(spec, row, path, row_offset)
-            except (TypeError, ValueError, OverflowError) as error:
-                if config.invalid_record_policy == "strict":
-                    raise ValueError(f"{path}:{row_offset}: {error}") from error
-                report.rejected += 1
-                report.errors.append(f"{path}:{row_offset}: {error}")
-                if "partial" in str(error).lower():
-                    report.partial_records += 1
-                row_offset += 1
-                continue
+            event, last_time = _validated_event(
+                spec, row, path, row_offset, last_time, config, report)
             if event is not None:
-                if event.kind == "gnss" and not event.payload.accepted:
-                    report.quality_filtered += 1
-                elif last_time is not None and event.timestamp <= last_time:
-                    duplicate = event.timestamp == last_time
-                    if duplicate:
-                        report.duplicate_timestamps += 1
-                    else:
-                        report.backward_timestamps += 1
-                    if config.invalid_record_policy == "strict":
-                        relation = "duplicate" if duplicate else "backward"
-                        raise ValueError(
-                            f"{path}:{row_offset}: {relation} timestamp "
-                            f"{event.timestamp}")
-                    report.rejected += 1
-                else:
-                    last_time = event.timestamp
-                    yield event
+                yield event
             row_offset += 1
+
+
+def _record_rejection_error(report: IngestionReport, message: str) -> None:
+    if len(report.errors) < _MAX_REPORTED_ERRORS:
+        report.errors.append(message)
+    else:
+        report.errors_omitted += 1
+
+
+def _validated_event(
+        spec: SensorSpec, row: Mapping[str, Any], path: Path, row_offset: int,
+        last_time: float | Fraction | None, config: RawInputConfig,
+        report: IngestionReport) -> tuple[
+            MeasurementEvent | None, float | Fraction | None]:
+    """Parse one projected row and apply stream-local validation/reporting."""
+    try:
+        event = _event_from_row(spec, row, path, row_offset)
+    except (TypeError, ValueError, OverflowError) as error:
+        if config.invalid_record_policy == "strict":
+            raise ValueError(f"{path}:{row_offset}: {error}") from error
+        report.rejected += 1
+        _record_rejection_error(report, f"{path}:{row_offset}: {error}")
+        if "partial" in str(error).lower():
+            report.partial_records += 1
+        return None, last_time
+    if event is None:
+        return None, last_time
+    if event.kind == "gnss" and not event.payload.accepted:
+        report.quality_filtered += 1
+        return None, last_time
+    if last_time is not None and event.timestamp <= last_time:
+        duplicate = event.timestamp == last_time
+        if duplicate:
+            report.duplicate_timestamps += 1
+        else:
+            report.backward_timestamps += 1
+        if config.invalid_record_policy == "strict":
+            relation = "duplicate" if duplicate else "backward"
+            raise ValueError(
+                f"{path}:{row_offset}: {relation} timestamp {event.timestamp}")
+        report.rejected += 1
+        return None, last_time
+    return event, event.timestamp
 
 
 def _event_from_row(spec: SensorSpec, row: Mapping[str, Any], source: Path,
@@ -724,7 +822,8 @@ def _event_from_row(spec: SensorSpec, row: Mapping[str, Any], source: Path,
 
 
 def _payload(spec: SensorSpec, row: Mapping[str, Any]) -> Any:
-    get = lambda name: _number(row[spec.columns[name]], spec.columns[name])
+    get = lambda name: _number(
+        row[spec.columns[name]], spec.columns[name], spec.options.decimal)
     if spec.kind == "accelerometer":
         factor = _acceleration_factor(spec.units["acceleration"])
         return tuple(get(axis) * factor * sign for axis, sign in zip("xyz", spec.signs))
@@ -772,6 +871,12 @@ def _payload(spec: SensorSpec, row: Mapping[str, Any]) -> Any:
         for name in ("fix_type", "horizontal_accuracy", "vertical_accuracy", "speed_accuracy"):
             if name in spec.columns and not _missing(row[spec.columns[name]]):
                 optional[name] = get(name)
+        for name in ("horizontal_accuracy", "vertical_accuracy"):
+            if name in optional:
+                optional[name] *= length
+        if "speed_accuracy" in optional:
+            optional["speed_accuracy"] *= _velocity_factor(
+                spec.units["velocity"])
         if "satellite_count" in spec.columns and not _missing(row[spec.columns["satellite_count"]]):
             optional["satellite_count"] = int(get("satellite_count"))
         valid = None
@@ -890,7 +995,9 @@ def _reference_payload(spec: SensorSpec, row: Mapping[str, Any],
     return result
 
 
-def _timestamp(value: Any, spec: SensorSpec) -> tuple[float, datetime | None]:
+def _timestamp(
+        value: Any, spec: SensorSpec) -> tuple[
+            float | Fraction, datetime | None]:
     unit = spec.time_unit.replace(" ", "").lower()
     factors = {
         "s": 1.0, "sec": 1.0, "second": 1.0, "seconds": 1.0,
@@ -909,18 +1016,21 @@ def _timestamp(value: Any, spec: SensorSpec) -> tuple[float, datetime | None]:
         "epochns": 1e-9, "epoch_ns": 1e-9,
     }
     if unit in factors:
-        return _number(value, spec.columns["timestamp"]) * factors[unit], None
+        return (_number(value, spec.columns["timestamp"], spec.options.decimal)
+                * factors[unit]), None
     if unit in unix_factors:
-        timestamp = (
-            _number(value, spec.columns["timestamp"]) * unix_factors[unit])
+        timestamp = _fraction_number(
+            value, spec.columns["timestamp"], spec.options.decimal)
+        timestamp *= Fraction(str(unix_factors[unit]))
         try:
-            absolute = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+            absolute = datetime.fromtimestamp(float(timestamp), tz=timezone.utc)
         except (OSError, OverflowError, ValueError) as error:
             raise ValueError(f"invalid Unix timestamp '{value}'") from error
         return timestamp, absolute
     if unit == "auto":
         try:
-            return _number(value, spec.columns["timestamp"]), None
+            return _number(
+                value, spec.columns["timestamp"], spec.options.decimal), None
         except ValueError:
             pass
     elif unit not in {"datetime", "iso8601", "date", "timestamp"}:
@@ -943,15 +1053,35 @@ def _missing(value: Any) -> bool:
     return value is None or (isinstance(value, str) and not value.strip()) or bool(pd.isna(value))
 
 
-def _number(value: Any, field_name: str) -> float:
+def _normalized_numeric_text(value: Any, decimal: str) -> str:
+    text = str(value).strip()
+    if decimal != ".":
+        text = text.replace(decimal, ".")
+    return text
+
+
+def _number(value: Any, field_name: str, decimal: str = ".") -> float:
     if _missing(value):
         raise ValueError(f"missing numeric value for {field_name}")
     try:
-        number = float(value)
+        number = float(_normalized_numeric_text(value, decimal))
     except (TypeError, ValueError) as error:
         raise ValueError(f"invalid numeric value '{value}' for {field_name}") from error
     if not math.isfinite(number):
         raise ValueError(f"non-finite numeric value for {field_name}")
+    return number
+
+
+def _fraction_number(value: Any, field_name: str,
+                     decimal: str = ".") -> Fraction:
+    """Parse a finite decimal without discarding sub-float timestamp bits."""
+    if _missing(value):
+        raise ValueError(f"missing numeric value for {field_name}")
+    try:
+        number = Fraction(_normalized_numeric_text(value, decimal))
+    except (TypeError, ValueError, ZeroDivisionError) as error:
+        raise ValueError(
+            f"invalid numeric value '{value}' for {field_name}") from error
     return number
 
 
