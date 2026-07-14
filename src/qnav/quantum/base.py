@@ -515,13 +515,31 @@ class ConceptQuantumFusion(SensorFusion):
             estimated_state.attitude + attitude_delta + 180.0
         ) % 360.0 - 180.0
 
+        nominal_rotation = trans.rotate_3d(
+            *np.radians(nominal_state.attitude))
+        corrected_rotation = trans.rotate_3d(
+            *np.radians(corrected_state.attitude))
+        live_rotation = trans.rotate_3d(
+            *np.radians(estimated_state.attitude))
+        output_rotation = trans.rotate_3d(*np.radians(corrected_attitude))
+
+        def corrected_body_vector(live_vector, nominal_vector,
+                                  corrected_vector):
+            live_ned = np.linalg.solve(live_rotation, live_vector)
+            nominal_ned = np.linalg.solve(nominal_rotation, nominal_vector)
+            corrected_ned = np.linalg.solve(
+                corrected_rotation, corrected_vector)
+            return output_rotation @ (
+                live_ned + corrected_ned - nominal_ned)
+
         estimated_state.update_estimates(
             position=corrected_position,
-            velocity=(estimated_state.velocity + corrected_state.velocity
-                      - nominal_state.velocity),
-            acceleration=(estimated_state.acceleration
-                          + corrected_state.acceleration
-                          - nominal_state.acceleration),
+            velocity=corrected_body_vector(
+                estimated_state.velocity, nominal_state.velocity,
+                corrected_state.velocity),
+            acceleration=corrected_body_vector(
+                estimated_state.acceleration, nominal_state.acceleration,
+                corrected_state.acceleration),
             attitude=corrected_attitude,
             angle_rates=(estimated_state.angle_rates
                          + corrected_state.angle_rates

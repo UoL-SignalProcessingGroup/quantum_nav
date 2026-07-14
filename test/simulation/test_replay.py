@@ -637,6 +637,8 @@ def test_reference_aligner_interpolates_sparse_groups_independently():
          + replay_module.trans.lla2ecef(second_position)) / 2)
     np.testing.assert_allclose(result["position"][0], expected_position)
     np.testing.assert_allclose(result["velocity"][0], [1, 2, 3])
+    assert all(not aligner._pending[field] for field in (
+        "acceleration", "attitude", "angle_rates"))
 
 
 def test_replay_dispatches_altimeter_quantum_imu_and_gradiometer(
@@ -732,6 +734,9 @@ resultsDownSampleRate = 1
     class QuantumFusion:
         def __init__(self, sensor):
             self.sensor = sensor
+
+        def apply_pending_measurement(self, state):
+            return False
 
         def perform_fusion(self, state):
             acceleration, angle_rates = self.sensor.last_measurement

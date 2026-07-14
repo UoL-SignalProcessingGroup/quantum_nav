@@ -226,6 +226,8 @@ class _ReferenceAligner:
         self._previous = {field: None for field in _REFERENCE_FIELDS}
         self._current = {field: None for field in _REFERENCE_FIELDS}
         self._rows: list[dict[str, np.ndarray]] = []
+        self._target_times: list[float] = []
+        self._seen_fields = set()
         self._pending = {field: [] for field in _REFERENCE_FIELDS}
 
     @staticmethod
@@ -235,7 +237,8 @@ class _ReferenceAligner:
     def add_target(self, timestamp: float) -> None:
         index = len(self._rows)
         self._rows.append({})
-        for field in _REFERENCE_FIELDS:
+        self._target_times.append(timestamp)
+        for field in self._seen_fields:
             if not self._resolve(field, index, timestamp):
                 self._pending[field].append((index, timestamp))
 
@@ -244,12 +247,18 @@ class _ReferenceAligner:
         for field in _REFERENCE_FIELDS:
             if field not in record:
                 continue
+            first_sample = field not in self._seen_fields
+            self._seen_fields.add(field)
             if self._current[field] is not None:
                 self._previous[field] = self._current[field]
             self._current[field] = (timestamp, record)
 
+            pending = (
+                list(enumerate(self._target_times))
+                if first_sample else self._pending[field]
+            )
             remaining = []
-            for index, target in self._pending[field]:
+            for index, target in pending:
                 if not self._resolve(field, index, target) and target > timestamp:
                     remaining.append((index, target))
                 # Older unbracketed targets remain empty: reference data is
@@ -625,20 +634,17 @@ def run_raw_replay(config: ConfigHandler) -> ReplayResults:
 
         for kind in imu_updated_kinds:
             quantum_imu_ready[kind] = True
-        quantum_pair_complete = False
+        quantum_event = any(event.kind == "quantum_imu" for event in events)
+        if "quantum_imu" in fusions and quantum_event:
+            quantum_applied = fusions[
+                "quantum_imu"].apply_pending_measurement(state)
+            did_fuse = bool(quantum_applied) or did_fuse
         if ("quantum_imu" in fusions
                 and all(quantum_imu_ready.values())
                 and sensors["accelerometer"].last_measurement is not None
                 and sensors["gyroscope"].last_measurement is not None):
             quantum_applied = fusions["quantum_imu"].perform_fusion(state)
             quantum_imu_ready = {"accelerometer": False, "gyroscope": False}
-            quantum_pair_complete = True
-            did_fuse = bool(quantum_applied) or did_fuse
-        if ("quantum_imu" in fusions
-                and not quantum_pair_complete
-                and any(event.kind == "quantum_imu" for event in events)):
-            quantum_applied = fusions[
-                "quantum_imu"].apply_pending_measurement(state)
             did_fuse = bool(quantum_applied) or did_fuse
 
         if (any(event.kind == "gradiometer" for event in events)
