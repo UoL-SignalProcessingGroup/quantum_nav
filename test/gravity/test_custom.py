@@ -161,6 +161,22 @@ def test_projected_crs_lookup(tmp_path: Path):
     )
 
 
+def test_projected_crs_boundary_roundoff_remains_in_coverage(
+    tmp_path: Path,
+):
+    model, _, _, expected = _make_map(tmp_path, crs="EPSG:3413")
+    inverse = Transformer.from_crs(
+        "EPSG:3413", "EPSG:4326", always_xy=True)
+    x = np.array([model.map_data.x[0], model.map_data.x[-1]])
+    y = np.array([model.map_data.y[0], model.map_data.y[-1]])
+    longitude, latitude = inverse.transform(x, y)
+
+    result = model.get_residual_vec(latitude, longitude)
+
+    np.testing.assert_allclose(
+        result, np.stack((expected[0, 0], expected[-1, -1])), atol=1e-12)
+
+
 def test_rejects_mismatched_query_shapes(tmp_path: Path):
     model, _, _, _ = _make_map(tmp_path)
 

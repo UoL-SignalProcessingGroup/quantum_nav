@@ -11,6 +11,7 @@ from qnav.input.config_handler import NavConfigError
 from qnav.input.ini.custom_gravity_config import (
     read_custom_gravity_config,
 )
+from qnav.util.transformations import ecef2ned_transform_vec
 
 
 def _write_csv_inputs(tmp_path: Path):
@@ -202,3 +203,180 @@ def test_rejects_wrong_row_order(tmp_path: Path):
     with pytest.raises(ValueError, match="rowOrder"):
         load_custom_map_data(
             read_custom_gravity_config(config_file))
+
+
+def test_loads_mat_grid_struct(tmp_path: Path):
+    _, _, total = _write_csv_inputs(tmp_path)
+    savemat(
+        tmp_path / "map.mat",
+        {
+            "coord": {
+                "x": np.array([0.0, 100.0, 200.0]),
+                "y": np.array([1000.0, 1100.0]),
+                "height": np.full((3, 2), 50.0),
+            },
+            "gravity": np.moveaxis(total, -1, 0),
+        },
+    )
+    config_file = tmp_path / "map.ini"
+    config_file.write_text(
+        """
+[CustomGravityMap]
+crs = EPSG:3413
+mode = residual
+
+[Grid]
+format = mat
+file = map.mat
+xVariable = coord.x
+yVariable = coord.y
+heightVariable = coord.height
+
+[Field]
+format = mat
+file = map.mat
+dataVariable = gravity
+axisOrder = component,x,y
+northIndex = 0
+eastIndex = 1
+downIndex = 2
+units = m/s2
+frame = NED
+""",
+        encoding="utf-8",
+    )
+
+    loaded = load_custom_map_data(
+        read_custom_gravity_config(config_file))
+
+    np.testing.assert_allclose(loaded.residual, total)
+    np.testing.assert_allclose(loaded.height, 50.0)
+
+
+def test_converts_custom_frame_to_ned(tmp_path: Path):
+    _write_csv_inputs(tmp_path)
+    pd.DataFrame({
+        "x": np.full(6, 1.0),
+        "y": np.full(6, 2.0),
+        "z": np.full(6, 3.0),
+    }).to_csv(tmp_path / "custom.csv", index=False)
+    field_section = """
+[Field]
+format = csv
+file = custom.csv
+xColumn = x
+yColumn = y
+zColumn = z
+units = m/s2
+frame = custom
+customToNed = 0,-1,0,1,0,0,0,0,1
+rowOrder = x_fastest
+"""
+    config_file = _write_config(
+        tmp_path, field_section, mode="residual")
+
+    loaded = load_custom_map_data(
+        read_custom_gravity_config(config_file))
+
+    expected = np.broadcast_to(
+        np.array([-2.0, 1.0, 3.0]), loaded.residual.shape)
+    np.testing.assert_allclose(loaded.residual, expected)
+
+
+def test_rejects_non_rotation_custom_matrix(tmp_path: Path):
+    _write_csv_inputs(tmp_path)
+    pd.DataFrame({
+        "x": np.full(6, 1.0),
+        "y": np.full(6, 2.0),
+        "z": np.full(6, 3.0),
+    }).to_csv(tmp_path / "custom.csv", index=False)
+    field_section = """
+[Field]
+format = csv
+file = custom.csv
+xColumn = x
+yColumn = y
+zColumn = z
+units = m/s2
+frame = custom
+customToNed = 1,0,0,0,1,0,0,0,2
+rowOrder = x_fastest
+"""
+    config_file = _write_config(
+        tmp_path, field_section, mode="residual")
+
+    with pytest.raises(NavConfigError, match="orthonormal"):
+        load_custom_map_data(
+            read_custom_gravity_config(config_file))
+
+
+def test_converts_ecef_vectors_at_each_grid_node(tmp_path: Path):
+    _write_csv_inputs(tmp_path)
+    pd.DataFrame({
+        "x": np.full(6, 1.0),
+        "y": np.full(6, 2.0),
+        "z": np.full(6, 3.0),
+    }).to_csv(tmp_path / "ecef.csv", index=False)
+    field_section = """
+[Field]
+format = csv
+file = ecef.csv
+xColumn = x
+yColumn = y
+zColumn = z
+units = m/s2
+frame = ECEF
+rowOrder = x_fastest
+"""
+    config_file = _write_config(
+        tmp_path, field_section, mode="residual")
+
+    loaded = load_custom_map_data(
+        read_custom_gravity_config(config_file))
+
+    lla = np.column_stack((
+        loaded.latitude.ravel(),
+        loaded.longitude.ravel(),
+        np.zeros(loaded.latitude.size),
+    ))
+    expected = np.einsum(
+        "nij,j->ni",
+        ecef2ned_transform_vec(lla),
+        np.array([1.0, 2.0, 3.0]),
+    ).reshape(loaded.residual.shape)
+    np.testing.assert_allclose(loaded.residual, expected)
+
+
+def test_validates_csv_tensor_shape_and_columns(tmp_path: Path):
+    _write_csv_inputs(tmp_path)
+    tensor_file = tmp_path / "tensor.csv"
+    pd.DataFrame({
+        name: np.arange(6, dtype=float)
+        for name in ("nn", "ee", "dd", "ne", "nd", "ed")
+    }).to_csv(tensor_file, index=False)
+    config_file = _write_config(
+        tmp_path,
+        _csv_field("Field", "field.csv"),
+        mode="residual",
+    )
+    with config_file.open("a", encoding="utf-8") as stream:
+        stream.write(
+            """
+[Tensor]
+format = csv
+file = tensor.csv
+nnColumn = nn
+eeColumn = ee
+ddColumn = dd
+neColumn = ne
+ndColumn = nd
+edColumn = ed
+units = E
+rowOrder = x_fastest
+"""
+        )
+
+    loaded = load_custom_map_data(
+        read_custom_gravity_config(config_file))
+
+    assert loaded.residual.shape == (3, 2, 3)

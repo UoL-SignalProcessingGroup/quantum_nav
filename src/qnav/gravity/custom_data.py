@@ -327,7 +327,8 @@ def _read_csv(file_path: Path, columns: list[str]) -> pd.DataFrame:
         raise FileNotFoundError(
             f"Custom gravity data file does not exist: {file_path}")
     try:
-        return pd.read_csv(file_path, usecols=columns)
+        return pd.read_csv(
+            file_path, usecols=columns, skipinitialspace=True)
     except ValueError as error:
         raise _data_error(
             file_path,

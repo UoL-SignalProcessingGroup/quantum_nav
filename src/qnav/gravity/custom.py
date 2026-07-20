@@ -170,9 +170,13 @@ class CustomGravityMap(GravityMap):
 
         x_values, y_values = self._query_transformer.transform(
             lon_values, lat_values)
+        x_values = _clip_transform_roundoff(
+            np.asarray(x_values, dtype=np.float64), self._data.x)
+        y_values = _clip_transform_roundoff(
+            np.asarray(y_values, dtype=np.float64), self._data.y)
         points = np.column_stack((
-            np.asarray(x_values).ravel(),
-            np.asarray(y_values).ravel(),
+            x_values.ravel(),
+            y_values.ravel(),
         ))
         residual = np.asarray(
             self._interpolator(points), dtype=np.float64)
@@ -197,3 +201,30 @@ def _validate_query_shapes(
 ) -> None:
     if np.shape(lat) != np.shape(lon) or np.shape(lat) != np.shape(alt):
         raise ValueError("lat, lon and alt must have the same shape")
+
+
+def _clip_transform_roundoff(
+    values: np.ndarray,
+    axis: np.ndarray,
+) -> np.ndarray:
+    """
+    Clip only floating-point CRS round-off at interpolation boundaries.
+
+    A projected grid node transformed to WGS-84 and back can land a few ULPs
+    outside its original bound.  This should remain an in-coverage query, but
+    genuine out-of-map coordinates must not be extrapolated.
+    """
+
+    lower = float(axis[0])
+    upper = float(axis[-1])
+    scale = max(1.0, abs(lower), abs(upper))
+    tolerance = np.finfo(np.float64).eps * scale * 64
+    return np.where(
+        (values < lower) & (values >= lower - tolerance),
+        lower,
+        np.where(
+            (values > upper) & (values <= upper + tolerance),
+            upper,
+            values,
+        ),
+    )
