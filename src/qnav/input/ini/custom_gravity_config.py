@@ -226,6 +226,17 @@ def read_custom_gravity_config(config_file: Path) -> CustomGravityConfig:
             "Scalar fields require quantity=gravity_disturbance or "
             "quantity=free_air_anomaly.",
         )
+    if (
+        field.representation == "vector"
+        and field.quantity == "free_air_anomaly"
+    ):
+        raise _error(
+            _FIELD_SECTION,
+            "quantity",
+            "Incompatible vector quantity",
+            "free_air_anomaly is a scalar quantity and requires "
+            "representation=scalar.",
+        )
     if mode == "total_minus_reference" and (
         field.representation != "vector"
         or (reference is not None and reference.representation != "vector")
@@ -237,10 +248,11 @@ def read_custom_gravity_config(config_file: Path) -> CustomGravityConfig:
             "total_minus_reference requires vector field and reference "
             "sources.",
         )
+    total_quantities = {"effective_gravity", "gravitational_attraction"}
     if mode == "total_minus_reference" and (
-        field.quantity == "residual"
+        field.quantity not in total_quantities
         or reference is None
-        or reference.quantity == "residual"
+        or reference.quantity not in total_quantities
     ):
         raise _error(
             _MAP_SECTION,

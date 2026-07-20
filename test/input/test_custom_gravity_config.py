@@ -196,6 +196,44 @@ def test_residual_mode_rejects_total_quantity(tmp_path: Path):
         read_custom_gravity_config(config_file)
 
 
+def test_rejects_vector_free_air_anomaly(tmp_path: Path):
+    body = _valid_config().replace(
+        "mode = total_minus_reference", "mode = residual")
+    body = body.split("[Reference]")[0]
+    body = body.replace(
+        "quantity = effective_gravity", "quantity = free_air_anomaly")
+    config_file = _write_config(tmp_path, body)
+
+    with pytest.raises(
+        NavConfigError, match="free_air_anomaly is a scalar quantity"
+    ):
+        read_custom_gravity_config(config_file)
+
+
+@pytest.mark.parametrize("section", ["field", "reference"])
+def test_total_minus_reference_rejects_disturbance_quantities(
+    tmp_path: Path, section: str,
+):
+    body = _valid_config()
+    if section == "field":
+        body = body.replace(
+            "quantity = effective_gravity",
+            "quantity = gravity_disturbance",
+        )
+    else:
+        body = body.replace(
+            "quantity = gravitational_attraction",
+            "quantity = gravity_disturbance",
+        )
+    config_file = _write_config(tmp_path, body)
+
+    with pytest.raises(
+        NavConfigError,
+        match="requires total effective-gravity or gravitational-attraction",
+    ):
+        read_custom_gravity_config(config_file)
+
+
 def test_orthometric_height_requires_geoid_undulation(tmp_path: Path):
     body = _valid_config().replace(
         "heightReference = ellipsoid",

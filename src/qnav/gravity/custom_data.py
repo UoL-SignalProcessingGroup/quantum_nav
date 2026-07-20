@@ -1,7 +1,9 @@
 """Data loading and normalization for configurable gravity maps."""
 
-from importlib import import_module
+import warnings
+
 from dataclasses import dataclass
+from importlib import import_module
 from pathlib import Path
 from typing import Any, Optional, TypeVar, cast
 
@@ -514,7 +516,35 @@ class CustomMapDataLoader:
             source.y_variable, source.file, "Grid yVariable")
         try:
             with xarray.open_dataset(source.file, mask_and_scale=True) as data:
-                _validate_netcdf_crs(data, crs, source.file)
+                relevant_variables = [
+                    x_name,
+                    y_name,
+                    source.height_variable,
+                    source.geoid_undulation_variable,
+                ]
+                for vector_source in (
+                    self._config.field,
+                    self._config.reference,
+                ):
+                    if (
+                        vector_source is None
+                        or vector_source.format != "netcdf"
+                        or vector_source.file != source.file
+                    ):
+                        continue
+                    relevant_variables.extend(
+                        vector_source.component_variables or ())
+                    relevant_variables.append(vector_source.value_variable)
+                _validate_netcdf_crs(
+                    data,
+                    crs,
+                    source.file,
+                    tuple(
+                        variable
+                        for variable in relevant_variables
+                        if variable is not None
+                    ),
+                )
                 x = _netcdf_axis(data, x_name, source.file)
                 y = _netcdf_axis(data, y_name, source.file)
                 x_indices, y_indices = _subset_indices(
@@ -650,7 +680,12 @@ class CustomMapDataLoader:
             self._grid_source_axes, file_path, "Grid source axes")
         try:
             with xarray.open_dataset(file_path, mask_and_scale=True) as data:
-                _validate_netcdf_crs(data, self._data_crs(), file_path)
+                _validate_netcdf_crs(
+                    data,
+                    self._data_crs(),
+                    file_path,
+                    (x_name, y_name, variable),
+                )
                 x = _netcdf_axis(data, x_name, file_path)
                 y = _netcdf_axis(data, y_name, file_path)
                 _validate_aligned_axes(x, y, expected_axes, file_path)
@@ -1127,6 +1162,7 @@ def _validate_embedded_crs(
     embedded: Any,
     configured: CRS,
     file_path: Path,
+    allow_cf_axis_normalization: bool = False,
 ) -> None:
     if embedded is None:
         return
@@ -1135,7 +1171,14 @@ def _validate_embedded_crs(
     except CRSError as error:
         raise _data_error(
             file_path, f"Embedded CRS metadata is invalid: {error}") from error
-    if not configured.equals(embedded_crs, ignore_axis_order=True):
+    equivalent = configured.equals(embedded_crs, ignore_axis_order=True)
+    if not equivalent and allow_cf_axis_normalization:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            configured_proj = configured.to_proj4()
+            embedded_proj = embedded_crs.to_proj4()
+        equivalent = configured_proj == embedded_proj
+    if not equivalent:
         raise _data_error(
             file_path,
             "Embedded CRS does not match the configured CRS: "
@@ -1252,21 +1295,46 @@ def _netcdf_array(
     return result
 
 
-def _validate_netcdf_crs(data: Any, configured: CRS, file_path: Path) -> None:
+def _validate_netcdf_crs(
+    data: Any,
+    configured: CRS,
+    file_path: Path,
+    relevant_variables: tuple[str, ...],
+) -> None:
     candidates: list[Any] = []
-    for key in ("crs_wkt", "spatial_ref", "epsg_code"):
+    for key in ("crs_wkt", "spatial_ref", "epsg_code", "crs"):
         if key in data.attrs:
             candidates.append(data.attrs[key])
-    for variable in data.variables.values():
-        for key in ("crs_wkt", "spatial_ref", "epsg_code"):
+    for name in relevant_variables:
+        if name not in data.variables:
+            continue
+        variable = data[name]
+        for key in ("crs_wkt", "spatial_ref", "epsg_code", "crs"):
             if key in variable.attrs:
                 candidates.append(variable.attrs[key])
+        mapping_name = variable.attrs.get("grid_mapping")
+        if mapping_name in data.variables:
+            mapping = data[mapping_name]
+            for key in ("crs_wkt", "spatial_ref", "epsg_code", "crs"):
+                if key in mapping.attrs:
+                    candidates.append(mapping.attrs[key])
+            if "grid_mapping_name" in mapping.attrs:
+                candidates.append(dict(mapping.attrs))
     for candidate in candidates:
         try:
-            embedded = CRS.from_user_input(candidate)
+            embedded = (
+                CRS.from_cf(candidate)
+                if isinstance(candidate, dict)
+                else CRS.from_user_input(candidate)
+            )
         except (CRSError, ValueError, TypeError):
             continue
-        _validate_embedded_crs(embedded, configured, file_path)
+        _validate_embedded_crs(
+            embedded,
+            configured,
+            file_path,
+            allow_cf_axis_normalization=isinstance(candidate, dict),
+        )
         return
 
 

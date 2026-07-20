@@ -253,6 +253,86 @@ def test_netcdf_scalar_transposes_named_dimensions(tmp_path: Path):
     assert model.get_disturbance(51.0, 12.0) == pytest.approx(6e-5)
 
 
+def test_netcdf_decodes_cf_scale_fill_and_descending_axes(tmp_path: Path):
+    xarray = pytest.importorskip("xarray")
+
+    data_file = tmp_path / "packed.nc"
+    data = xarray.Dataset(
+        data_vars={
+            "gravity": (
+                ("latitude", "longitude"),
+                np.array([[11.0, 12.0, 13.0], [21.0, np.nan, 23.0]]),
+            )
+        },
+        coords={
+            "longitude": [12.0, 11.0, 10.0],
+            "latitude": [51.0, 50.0],
+        },
+    )
+    data["gravity"].encoding = {
+        "dtype": "int16",
+        "scale_factor": 0.5,
+        "add_offset": 10.0,
+        "_FillValue": -9999,
+    }
+    data.to_netcdf(data_file, engine="scipy")
+    config = _write_scalar_config(
+        tmp_path / "map.ini",
+        "netcdf",
+        data_file.name,
+        "xVariable = longitude\nyVariable = latitude",
+        "valueVariable = gravity",
+    )
+
+    model = CustomGravityMap(FixedValue(), None, config)
+
+    np.testing.assert_allclose(model.map_data.x, [10.0, 11.0, 12.0])
+    np.testing.assert_allclose(model.map_data.y, [50.0, 51.0])
+    assert model.get_disturbance(51.0, 10.0) == pytest.approx(13e-5)
+    assert model.get_disturbance(50.0, 11.0) == 0.0
+
+
+@pytest.mark.parametrize("configured_epsg", [3413, 4326])
+def test_netcdf_validates_pure_cf_grid_mapping(
+    tmp_path: Path, configured_epsg: int,
+):
+    xarray = pytest.importorskip("xarray")
+    from pyproj import CRS
+
+    data_file = tmp_path / "cf.nc"
+    cf_attributes = CRS.from_epsg(3413).to_cf()
+    cf_attributes.pop("crs_wkt", None)
+    unrelated_cf = CRS.from_epsg(4326).to_cf()
+    unrelated_cf.pop("crs_wkt", None)
+    data = xarray.Dataset(
+        data_vars={
+            "gravity": (("y", "x"), np.ones((2, 2))),
+            "polar_mapping": ((), 0, cf_attributes),
+            "unrelated": (("y", "x"), np.ones((2, 2))),
+            "geographic_mapping": ((), 0, unrelated_cf),
+        },
+        coords={"x": [0.0, 1.0], "y": [-1.0, 0.0]},
+    )
+    data["gravity"].attrs["grid_mapping"] = "polar_mapping"
+    data["unrelated"].attrs["grid_mapping"] = "geographic_mapping"
+    data.to_netcdf(data_file, engine="scipy")
+    config = _write_scalar_config(
+        tmp_path / "map.ini",
+        "netcdf",
+        data_file.name,
+        "xVariable = x\nyVariable = y",
+        "valueVariable = gravity",
+        crs=f"EPSG:{configured_epsg}",
+    )
+
+    if configured_epsg == 3413:
+        model = CustomGravityMap(FixedValue(), None, config)
+        assert model.map_data.crs.to_epsg() == 3413
+    else:
+        with pytest.raises(ValueError, match="Embedded CRS does not match"):
+            CustomGravityMap(FixedValue(), None, config)
+
+
 def test_netcdf_rejects_non_singleton_extra_dimension(tmp_path: Path):
     xarray = pytest.importorskip("xarray")
 
