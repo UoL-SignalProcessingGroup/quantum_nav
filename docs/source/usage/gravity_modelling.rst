@@ -101,7 +101,16 @@ the map CRS before interpolation.
 
 Custom maps provide full North-East-Down acceleration residuals. They may
 contain those residuals directly, or QNav can derive them by subtracting a
-configured reference vector field from a total vector field. Residuals are
-then added to the selected base gravity function. The base function retains
-responsibility for altitude dependence, consistent with SRTM2Gravity
-residual handling.
+configured reference vector field from a total vector field. Before
+subtraction, QNav converts geodetic, geocentric-local, ECEF, ENU, or constant
+custom axes to WGS-84 geodetic NED. It also normalises gravitational
+attraction by adding centrifugal acceleration when the source does not
+already contain it. Residuals are then added to the selected base gravity
+function.
+
+Custom maps are two-dimensional surface corrections. The base function
+retains responsibility for altitude dependence, consistent with
+SRTM2Gravity residual handling. Configured height and vertical-datum
+information is used to define the local vector frame and centrifugal
+acceleration at each map node; it does not create a three-dimensional
+interpolation volume.

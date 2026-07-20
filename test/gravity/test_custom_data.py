@@ -190,6 +190,20 @@ def test_rejects_invalid_crs(tmp_path: Path):
             read_custom_gravity_config(config_file))
 
 
+def test_rejects_three_dimensional_crs(tmp_path: Path):
+    _write_csv_inputs(tmp_path)
+    config_file = _write_config(
+        tmp_path,
+        _csv_field("Field", "field.csv"),
+        mode="residual",
+        crs="EPSG:4979",
+    )
+
+    with pytest.raises(NavConfigError, match="two-dimensional"):
+        load_custom_map_data(
+            read_custom_gravity_config(config_file))
+
+
 def test_rejects_wrong_row_order(tmp_path: Path):
     _write_csv_inputs(tmp_path)
     config_file = _write_config(

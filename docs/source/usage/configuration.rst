@@ -274,25 +274,52 @@ map configuration, allowing map definitions to be moved as a unit.
 The custom map configuration separates three concepts that must not be
 conflated:
 
-* ``crs`` defines the horizontal coordinates of the grid, using any CRS
-  understood by PROJ, such as ``EPSG:3413``.
+* ``crs`` defines the horizontal coordinates of the grid. QNav accepts a
+  two-dimensional projected or geographic CRS understood by PROJ, such as
+  ``EPSG:3413``. Vertical, geocentric, three-dimensional, and compound CRSs
+  are rejected.
 * ``frame`` defines the gravity-vector axes. Supported values are ``NED``,
-  ``ENU``, ``ECEF``, and ``custom``. A custom frame requires a row-major
-  three-by-three ``customToNed`` rotation matrix.
+  ``ENU``, ``ECEF``, ``geocentric_ned``, and ``custom``.
+  ``geocentric_ned`` is a local spherical frame based on geocentric latitude;
+  QNav applies the position-dependent rotation into WGS-84 geodetic NED.
+  A custom frame requires a row-major three-by-three ``customToNed`` rotation
+  matrix and is appropriate only when that rotation is constant over the map.
 * ``units`` defines the acceleration units and supports ``m/s2``, ``Gal``,
   and ``mGal``.
+* ``quantity`` distinguishes a direct ``residual``, ``effective_gravity``
+  that already includes centrifugal acceleration, and
+  ``gravitational_attraction`` that does not. QNav adds WGS-84 centrifugal
+  acceleration to the latter before total/reference subtraction.
 
 Version 1 custom maps must be complete rectilinear grids. CSV sources use
 named columns and declare whether X or Y changes fastest. MATLAB v5 through
 v7.2 sources use a packed numeric array, zero-based component indexes, and an
 ``axisOrder`` containing ``component``, ``x``, and ``y``.
+CSV vector sources may set ``coordinateFrame = grid`` with
+``gridXColumn``/``gridYColumn``, or ``coordinateFrame = wgs84`` with
+``latitudeColumn``/``longitudeColumn``. QNav then verifies every source row
+against its grid node instead of relying only on row count and order.
+
+Grid heights are converted to WGS-84 ellipsoid height for local-frame and
+centrifugal calculations. ``heightReference = ellipsoid`` uses the configured
+height directly. ``geoid_surface`` treats it as the ellipsoid height of the
+geoid surface. ``orthometric`` requires a corresponding
+``geoidUndulationColumn`` or ``geoidUndulationVariable`` and uses
+``h = H + N``. With no height mapping, zero ellipsoid height is used for frame
+normalisation.
 
 ``mode = residual`` loads a correction directly. With
 ``mode = total_minus_reference``, QNav converts the field and reference to
-NED metres per second squared before subtracting them. The residual is added
-to the configured base gravity function. ``outOfBounds = base`` falls back to
-that function outside map coverage or at missing cells, while ``error``
-raises an exception. Custom maps never extrapolate beyond their coverage.
+geodetic NED effective gravity in metres per second squared before subtracting
+them. The residual is added to the configured base gravity function.
+``outOfBounds = base`` falls back to that function outside map coverage or at
+missing cells, while ``error`` raises an exception. Custom maps never
+extrapolate beyond their coverage.
+
+Optional tensor data is checked for shape, finite values and configured units,
+then transformed from ``NED``, ``ECEF``, ``geocentric_ned`` or a constant
+custom frame into geodetic NED. It is validated during loading but is not
+currently exposed through the gravity-model API.
 
 Geoid Settings
 ..............
