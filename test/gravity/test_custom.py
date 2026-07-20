@@ -28,6 +28,17 @@ class _ConstantGeoid:
         return np.full(np.shape(lat), self.height, dtype=np.float64)
 
 
+class _LimitedGeoid(_ConstantGeoid):
+    """Fail if fallback handling queries outside the custom map."""
+
+    def get_height_vec(
+        self, lat: np.ndarray, lon: np.ndarray,
+    ) -> np.ndarray:
+        if np.any(lat < 60.0) or np.any(lon < 0.0):
+            raise AssertionError("Geoid queried outside custom-map coverage")
+        return super().get_height_vec(lat, lon)
+
+
 def _make_map(
     tmp_path: Path,
     out_of_bounds: str = "base",
@@ -189,6 +200,24 @@ def test_scalar_anomaly_outside_coverage_returns_base(tmp_path: Path):
     assert model.get_anomaly(0.0, 0.0) == 0.0
     assert model.get_disturbance(0.0, 0.0) == 0.0
     assert model.calc_gravity_z(0.0, 0.0, 100.0) == pytest.approx(base)
+
+
+def test_vectorized_anomaly_fallback_does_not_query_geoid_outside_map(
+    tmp_path: Path,
+):
+    model = _make_scalar_map(
+        tmp_path, quantity="free_air_anomaly", geoid=_LimitedGeoid())
+    lat = np.array([70.0, 0.0])
+    lon = np.array([10.0, 0.0])
+    alt = np.array([100.0, 100.0])
+
+    disturbance = model.get_disturbance_vec(lat, lon)
+    gravity = model.calc_gravity_z_vec(lat, lon, alt)
+
+    assert disturbance[0] != 0.0
+    assert disturbance[1] == 0.0
+    assert gravity[1] == pytest.approx(
+        model.base_model.calc_gravity_z(lat[1], lon[1], alt[1]))
 
 
 def test_headerless_whitespace_scalar_map_loads_directly(tmp_path: Path):

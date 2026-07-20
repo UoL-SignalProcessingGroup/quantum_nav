@@ -318,9 +318,10 @@ class GravityMap(GravityModel, ABC):
 
     def _anomaly_to_disturbance_vec(self, lat: np.ndarray, lon: np.ndarray, g_anom: np.ndarray, dh: float = 100) -> np.ndarray:
         dh_vec = np.zeros(lat.shape) + dh
+        zero_height = np.zeros(lat.shape)
         geoid_height = self._geoid_model.get_height_vec(lat, lon)
         gamma = partial(self._base_model.calc_gravity_z_vec, lat, lon)
-        d_gamma_dh = (gamma(dh_vec) - gamma(0)) / dh_vec
+        d_gamma_dh = (gamma(dh_vec) - gamma(zero_height)) / dh_vec
         return g_anom - d_gamma_dh * geoid_height
 
     def _disturbance_to_anomaly(self, lat: float, lon: float, g_dist: float, dh: float = 100) -> float:
@@ -331,9 +332,10 @@ class GravityMap(GravityModel, ABC):
 
     def _disturbance_to_anomaly_vec(self, lat: np.ndarray, lon: np.ndarray, g_dist: np.ndarray, dh: float = 100) -> np.ndarray:
         dh_vec = np.zeros(lat.shape) + dh
+        zero_height = np.zeros(lat.shape)
         geoid_height = self._geoid_model.get_height_vec(lat, lon)
         gamma = partial(self._base_model.calc_gravity_z_vec, lat, lon)
-        d_gamma_dh = (gamma(dh_vec) - gamma(0)) / dh_vec
+        d_gamma_dh = (gamma(dh_vec) - gamma(zero_height)) / dh_vec
         return g_dist + d_gamma_dh * geoid_height
 
     def _get_anomaly_grad(self, lat: float, lon: float, alt: float, dh: float = 100) -> float:

@@ -314,7 +314,8 @@ coordinates on each axis. Supported source formats are:
   CSV instead.
 * ``geotiff``: a non-rotated affine grid with explicit band mappings. Pixel
   centres define grid coordinates, embedded CRS metadata must agree with
-  ``crs``, and NoData/masked cells are excluded from coverage.
+  ``crs``, per-band scale/offset metadata is applied, and NoData/masked cells
+  are excluded from coverage.
 * ``netcdf``: one-dimensional X/Y variables and named field variables. Field
   dimension order is detected by name; extra dimensions must be singleton.
   CF scaling, fill values, and recognised CRS metadata are honoured. GMT GRD

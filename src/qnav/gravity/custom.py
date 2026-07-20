@@ -114,12 +114,15 @@ class CustomGravityMap(GravityMap):
         if self._data.quantity != "free_air_anomaly":
             return values
         result = np.zeros_like(values)
-        result[..., 2] = self._anomaly_to_disturbance_vec(
-            np.asarray(lat, dtype=np.float64),
-            np.asarray(lon, dtype=np.float64),
-            values[..., 2],
-        )
-        result[~valid, :] = 0.0
+        valid_flat = valid.ravel()
+        if np.any(valid_flat):
+            result[..., 2].reshape(-1)[valid_flat] = (
+                self._anomaly_to_disturbance_vec(
+                    np.asarray(lat, dtype=np.float64).ravel()[valid_flat],
+                    np.asarray(lon, dtype=np.float64).ravel()[valid_flat],
+                    values[..., 2].ravel()[valid_flat],
+                )
+            )
         return result
 
     def calc_gravity_z(self, lat: float, lon: float, alt: float) -> float:
@@ -147,9 +150,8 @@ class CustomGravityMap(GravityMap):
         _validate_query_shapes(lat, lon, alt)
         if self._data.quantity == "free_air_anomaly":
             values, valid = self._query_map(lat, lon)
-            correction = self._interp_anomaly_vec(
-                lat, lon, alt, values[..., 2])
-            correction = np.where(valid, correction, 0.0)
+            correction = self._interpolate_valid_anomalies(
+                lat, lon, alt, values[..., 2], valid)
             return self._base_model.calc_gravity_z_vec(
                 lat, lon, alt) + correction
         residual = self.get_residual_vec(lat, lon)
@@ -181,9 +183,8 @@ class CustomGravityMap(GravityMap):
         base = self._base_model.calc_gravity_xyz_vec(lat, lon, alt)
         if self._data.quantity == "free_air_anomaly":
             values, valid = self._query_map(lat, lon)
-            correction = self._interp_anomaly_vec(
-                lat, lon, alt, values[..., 2])
-            base[..., 2] += np.where(valid, correction, 0.0)
+            base[..., 2] += self._interpolate_valid_anomalies(
+                lat, lon, alt, values[..., 2], valid)
             return base
         return base + self.get_residual_vec(lat, lon)
 
@@ -215,9 +216,17 @@ class CustomGravityMap(GravityMap):
         values, valid = self._query_map(lat, lon)
         if self._data.quantity == "free_air_anomaly":
             return values[..., 2]
-        disturbance = values[..., 2]
-        anomaly = self._disturbance_to_anomaly_vec(lat, lon, disturbance)
-        return np.where(valid, anomaly, 0.0)
+        anomaly = np.zeros_like(values[..., 2])
+        valid_flat = valid.ravel()
+        if np.any(valid_flat):
+            anomaly.reshape(-1)[valid_flat] = (
+                self._disturbance_to_anomaly_vec(
+                    np.asarray(lat, dtype=np.float64).ravel()[valid_flat],
+                    np.asarray(lon, dtype=np.float64).ravel()[valid_flat],
+                    values[..., 2].ravel()[valid_flat],
+                )
+            )
+        return anomaly
 
     @property
     def config(self) -> CustomGravityConfig:
@@ -230,6 +239,27 @@ class CustomGravityMap(GravityMap):
         """Return normalized axes and residual data."""
 
         return self._data
+
+    def _interpolate_valid_anomalies(
+        self,
+        lat: np.ndarray,
+        lon: np.ndarray,
+        alt: np.ndarray,
+        anomaly: np.ndarray,
+        valid: np.ndarray,
+    ) -> np.ndarray:
+        """Apply altitude conversion without querying invalid map points."""
+
+        correction = np.zeros_like(anomaly)
+        valid_flat = valid.ravel()
+        if np.any(valid_flat):
+            correction.reshape(-1)[valid_flat] = self._interp_anomaly_vec(
+                np.asarray(lat, dtype=np.float64).ravel()[valid_flat],
+                np.asarray(lon, dtype=np.float64).ravel()[valid_flat],
+                np.asarray(alt, dtype=np.float64).ravel()[valid_flat],
+                anomaly.ravel()[valid_flat],
+            )
+        return correction
 
     def _query_map(
         self,

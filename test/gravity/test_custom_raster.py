@@ -84,6 +84,38 @@ def test_geotiff_scalar_uses_pixel_centres_and_nodata(tmp_path: Path):
     assert model.get_disturbance(50.5, 11.5) == 0.0
 
 
+def test_geotiff_applies_band_scale_and_offset(tmp_path: Path):
+    rasterio = pytest.importorskip("rasterio")
+    from rasterio.transform import from_origin
+
+    data_file = tmp_path / "scaled.tif"
+    with rasterio.open(
+        data_file,
+        "w",
+        driver="GTiff",
+        width=2,
+        height=2,
+        count=1,
+        dtype="int16",
+        crs="EPSG:4326",
+        transform=from_origin(10.0, 52.0, 1.0, 1.0),
+    ) as destination:
+        destination.write(np.full((2, 2), 2, dtype=np.int16), 1)
+        destination.scales = (0.5,)
+        destination.offsets = (10.0,)
+    config = _write_scalar_config(
+        tmp_path / "map.ini",
+        "geotiff",
+        data_file.name,
+        "",
+        "valueBand = 1",
+    )
+
+    model = CustomGravityMap(FixedValue(), None, config)
+
+    assert model.get_disturbance(51.5, 10.5) == pytest.approx(11e-5)
+
+
 def test_geotiff_rejects_crs_mismatch(tmp_path: Path):
     rasterio = pytest.importorskip("rasterio")
     from rasterio.transform import from_origin

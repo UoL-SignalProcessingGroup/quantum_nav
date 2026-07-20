@@ -1186,6 +1186,16 @@ def _read_geotiff_bands(
         )
     masked = dataset.read(list(bands), window=window, masked=True)
     values = np.ma.filled(masked, np.nan).astype(np.float64, copy=False)
+    for output_index, band in enumerate(bands):
+        scale = float(dataset.scales[band - 1])
+        offset = float(dataset.offsets[band - 1])
+        if not np.isfinite(scale) or not np.isfinite(offset):
+            raise _data_error(
+                file_path,
+                f"GeoTIFF band {band} has invalid scale/offset metadata.",
+            )
+        values[output_index] *= scale
+        values[output_index] += offset
     return np.transpose(values, (2, 1, 0))
 
 

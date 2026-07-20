@@ -7,7 +7,8 @@ name = "qnav"
 description = "Quantum Navigation Toolbox"
 keywords = ["quantum", "navigation", "IMU", "INS", "GPS", "sensing"]
 license = {text = "MIT License"}
-dynamic = ["version", "readme"]
+dynamic = ["version"]
+readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "numpy>=2.1.1",
@@ -49,9 +50,22 @@ maps = [
     "h5netcdf>=1.4.0"
 ]
 
-[tool.setuptools.dynamic]
-version = {attr = "qnav.__version__"}
-readme = {file = ["README.md"]}
+[tool.hatch.version]
+path = "src/qnav/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/config",
+    "/docs",
+    "/LICENSE",
+    "/README.md",
+    "/requirements.txt",
+    "/pyproject.toml"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qnav"]
 
 
 
