@@ -48,7 +48,7 @@ format = csv
 file = reference.csv
 northColumn = north
 eastColumn = east
-downColumn = down
+upColumn = up
 units = m/s2
 frame = ENU
 rowOrder = x_fastest
@@ -67,7 +67,7 @@ def test_reads_custom_gravity_config(tmp_path: Path):
     assert result.grid.height_column == "h"
     assert result.field.data_variable == "field"
     assert result.field.axis_order == ("component", "x", "y")
-    assert result.field.north_index == 1
+    assert result.field.component_indices == (1, 2, 3)
     assert result.reference is not None
     assert result.reference.frame == "enu"
 
@@ -90,6 +90,9 @@ def test_reads_custom_rotation(tmp_path: Path):
         "frame = custom\ncustomToNed = 1,0,0,0,1,0,0,0,1",
         1,
     )
+    body = body.replace("northIndex = 1", "xIndex = 1", 1)
+    body = body.replace("eastIndex = 2", "yIndex = 2", 1)
+    body = body.replace("downIndex = 3", "zIndex = 3", 1)
     config_file = _write_config(tmp_path, body)
 
     result = read_custom_gravity_config(config_file)

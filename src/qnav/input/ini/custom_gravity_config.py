@@ -58,14 +58,10 @@ class VectorSourceConfig:
     units: str
     frame: str
     row_order: str
-    north_column: Optional[str] = None
-    east_column: Optional[str] = None
-    down_column: Optional[str] = None
+    component_columns: Optional[tuple[str, str, str]] = None
     data_variable: Optional[str] = None
     axis_order: tuple[str, ...] = ()
-    north_index: Optional[int] = None
-    east_index: Optional[int] = None
-    down_index: Optional[int] = None
+    component_indices: Optional[tuple[int, int, int]] = None
     custom_to_ned: Optional[tuple[float, ...]] = None
 
 
@@ -207,19 +203,26 @@ def _read_vector_source(
         "custom_to_ned": custom_to_ned,
     }
 
+    component_names = {
+        "ned": ("north", "east", "down"),
+        "enu": ("east", "north", "up"),
+        "ecef": ("x", "y", "z"),
+        "custom": ("x", "y", "z"),
+    }[frame]
+
     if source_format == "csv":
         return VectorSourceConfig(
             **common,
-            north_column=_required_str(config, section, "northColumn"),
-            east_column=_required_str(config, section, "eastColumn"),
-            down_column=_required_str(config, section, "downColumn"),
+            component_columns=tuple(
+                _required_str(config, section, f"{name}Column")
+                for name in component_names
+            ),
         )
 
     axis_order = _axis_order(config, section)
-    indices = (
-        _nonnegative_int(config, section, "northIndex"),
-        _nonnegative_int(config, section, "eastIndex"),
-        _nonnegative_int(config, section, "downIndex"),
+    indices = tuple(
+        _nonnegative_int(config, section, f"{name}Index")
+        for name in component_names
     )
     if len(set(indices)) != 3:
         raise _error(
@@ -230,9 +233,7 @@ def _read_vector_source(
         **common,
         data_variable=_required_str(config, section, "dataVariable"),
         axis_order=axis_order,
-        north_index=indices[0],
-        east_index=indices[1],
-        down_index=indices[2],
+        component_indices=indices,
     )
 
 
