@@ -24,7 +24,14 @@ _TENSOR_SECTION = "Tensor"
 _FORMATS = {"csv", "mat"}
 _ROW_ORDERS = {"x_fastest", "y_fastest"}
 _UNITS = {"m/s2", "gal", "mgal"}
-_FRAMES = {"ned", "enu", "ecef", "custom"}
+_FRAMES = {"ned", "enu", "ecef", "geocentric_ned", "custom"}
+_TENSOR_FRAMES = {"ned", "ecef", "geocentric_ned", "custom"}
+_QUANTITIES = {
+    "residual",
+    "effective_gravity",
+    "gravitational_attraction",
+}
+_COORDINATE_FRAMES = {"none", "grid", "wgs84"}
 _MODES = {"residual", "total_minus_reference"}
 _INTERPOLATION = {"linear", "nearest"}
 _COVERAGE = {"base", "error"}
@@ -42,9 +49,11 @@ class GridSourceConfig:
     x_column: Optional[str] = None
     y_column: Optional[str] = None
     height_column: Optional[str] = None
+    geoid_undulation_column: Optional[str] = None
     x_variable: Optional[str] = None
     y_variable: Optional[str] = None
     height_variable: Optional[str] = None
+    geoid_undulation_variable: Optional[str] = None
     height_reference: str = "ellipsoid"
 
 
@@ -57,7 +66,10 @@ class VectorSourceConfig:
     file: Path
     units: str
     frame: str
+    quantity: str
     row_order: str
+    coordinate_frame: str = "none"
+    coordinate_columns: Optional[tuple[str, str]] = None
     component_columns: Optional[tuple[str, str, str]] = None
     data_variable: Optional[str] = None
     axis_order: tuple[str, ...] = ()
@@ -72,11 +84,13 @@ class TensorSourceConfig:
     format: str
     file: Path
     units: str
+    frame: str
     row_order: str
     columns: Optional[tuple[str, ...]] = None
     data_variable: Optional[str] = None
     axis_order: tuple[str, ...] = ()
     indices: Optional[tuple[int, ...]] = None
+    custom_to_ned: Optional[tuple[float, ...]] = None
 
 
 @dataclass(frozen=True)
@@ -114,13 +128,44 @@ def read_custom_gravity_config(config_file: Path) -> CustomGravityConfig:
         config, _MAP_SECTION, "outOfBounds", _COVERAGE, "base")
 
     grid = _read_grid(config, config_file.parent)
-    field = _read_vector_source(config, _FIELD_SECTION, config_file.parent)
+    default_field_quantity = (
+        "residual" if mode == "residual" else "effective_gravity")
+    field = _read_vector_source(
+        config,
+        _FIELD_SECTION,
+        config_file.parent,
+        default_field_quantity,
+    )
 
     reference = None
     if mode == "total_minus_reference":
         _require_section(config, _REFERENCE_SECTION)
         reference = _read_vector_source(
-            config, _REFERENCE_SECTION, config_file.parent)
+            config,
+            _REFERENCE_SECTION,
+            config_file.parent,
+            "effective_gravity",
+        )
+
+    if mode == "residual" and field.quantity != "residual":
+        raise _error(
+            _FIELD_SECTION,
+            "quantity",
+            "Incompatible quantity",
+            "mode=residual requires quantity=residual.",
+        )
+    if mode == "total_minus_reference" and (
+        field.quantity == "residual"
+        or reference is None
+        or reference.quantity == "residual"
+    ):
+        raise _error(
+            _MAP_SECTION,
+            "mode",
+            "Incompatible quantity",
+            "total_minus_reference requires total effective-gravity or "
+            "gravitational-attraction fields.",
+        )
 
     tensor = _read_tensor_source(config, config_file.parent)
 
@@ -148,25 +193,57 @@ def _read_grid(config: ConfigHandler, base_dir: Path) -> GridSourceConfig:
         _HEIGHT_REFERENCES, "ellipsoid")
 
     if source_format == "csv":
+        height_column = _optional_str(
+            config, _GRID_SECTION, "heightColumn")
+        geoid_undulation_column = _optional_str(
+            config, _GRID_SECTION, "geoidUndulationColumn")
+        if (
+            height_reference == "orthometric"
+            and height_column is not None
+            and geoid_undulation_column is None
+        ):
+            raise _error(
+                _GRID_SECTION,
+                "geoidUndulationColumn",
+                "Missing vertical datum conversion",
+                "Orthometric heights require a geoid-undulation column so "
+                "they can be converted to WGS-84 ellipsoid heights.",
+            )
         return GridSourceConfig(
             format=source_format,
             file=source_file,
             row_order=row_order,
             x_column=_required_str(config, _GRID_SECTION, "xColumn"),
             y_column=_required_str(config, _GRID_SECTION, "yColumn"),
-            height_column=_optional_str(
-                config, _GRID_SECTION, "heightColumn"),
+            height_column=height_column,
+            geoid_undulation_column=geoid_undulation_column,
             height_reference=height_reference,
         )
 
+    height_variable = _optional_str(
+        config, _GRID_SECTION, "heightVariable")
+    geoid_undulation_variable = _optional_str(
+        config, _GRID_SECTION, "geoidUndulationVariable")
+    if (
+        height_reference == "orthometric"
+        and height_variable is not None
+        and geoid_undulation_variable is None
+    ):
+        raise _error(
+            _GRID_SECTION,
+            "geoidUndulationVariable",
+            "Missing vertical datum conversion",
+            "Orthometric heights require a geoid-undulation variable so "
+            "they can be converted to WGS-84 ellipsoid heights.",
+        )
     return GridSourceConfig(
         format=source_format,
         file=source_file,
         row_order=row_order,
         x_variable=_required_str(config, _GRID_SECTION, "xVariable"),
         y_variable=_required_str(config, _GRID_SECTION, "yVariable"),
-        height_variable=_optional_str(
-            config, _GRID_SECTION, "heightVariable"),
+        height_variable=height_variable,
+        geoid_undulation_variable=geoid_undulation_variable,
         height_reference=height_reference,
     )
 
@@ -175,33 +252,37 @@ def _read_vector_source(
         config: ConfigHandler,
         section: str,
         base_dir: Path,
+        default_quantity: str,
 ) -> VectorSourceConfig:
     source_format = _choice(config, section, "format", _FORMATS)
     source_file = _source_path(config, section, base_dir)
     units = _choice(config, section, "units", _UNITS)
     frame = _choice(config, section, "frame", _FRAMES)
+    quantity = _choice(
+        config, section, "quantity", _QUANTITIES, default_quantity)
     row_order = _choice(
         config, section, "rowOrder", _ROW_ORDERS, "x_fastest")
 
-    custom_to_ned = None
-    if frame == "custom":
-        values = config.get_csv_numeric(section, "customToNed")
-        if values is None or np.size(values) != 9:
-            raise _error(
-                section, "customToNed", "Invalid matrix",
-                "A custom vector frame requires nine comma-separated "
-                "custom-to-NED matrix values.")
-        custom_to_ned = tuple(
-            float(value) for value in np.asarray(values).ravel())
+    custom_to_ned = _read_custom_rotation(config, section, frame)
 
     component_names = {
         "ned": ("north", "east", "down"),
         "enu": ("east", "north", "up"),
         "ecef": ("x", "y", "z"),
+        "geocentric_ned": ("north", "east", "down"),
         "custom": ("x", "y", "z"),
     }[frame]
 
     if source_format == "csv":
+        coordinate_frame = _choice(
+            config,
+            section,
+            "coordinateFrame",
+            _COORDINATE_FRAMES,
+            "none",
+        )
+        coordinate_columns = _read_coordinate_columns(
+            config, section, coordinate_frame)
         columns = tuple(
             _required_str(config, section, f"{name}Column")
             for name in component_names
@@ -212,11 +293,29 @@ def _read_vector_source(
             file=source_file,
             units=units,
             frame=frame,
+            quantity=quantity,
             row_order=row_order,
+            coordinate_frame=coordinate_frame,
+            coordinate_columns=coordinate_columns,
             component_columns=(columns[0], columns[1], columns[2]),
             custom_to_ned=custom_to_ned,
         )
 
+    coordinate_frame = _choice(
+        config,
+        section,
+        "coordinateFrame",
+        _COORDINATE_FRAMES,
+        "none",
+    )
+    if coordinate_frame != "none":
+        raise _error(
+            section,
+            "coordinateFrame",
+            "Unsupported MAT coordinate mapping",
+            "Per-row coordinate validation is currently supported for CSV "
+            "vector sources only.",
+        )
     axis_order = _axis_order(config, section)
     indices = tuple(
         _nonnegative_int(config, section, f"{name}Index")
@@ -233,6 +332,7 @@ def _read_vector_source(
         file=source_file,
         units=units,
         frame=frame,
+        quantity=quantity,
         row_order=row_order,
         data_variable=_required_str(config, section, "dataVariable"),
         axis_order=axis_order,
@@ -253,6 +353,10 @@ def _read_tensor_source(
     source_file = _source_path(config, _TENSOR_SECTION, base_dir)
     units = _choice(
         config, _TENSOR_SECTION, "units", _TENSOR_UNITS)
+    frame = _choice(
+        config, _TENSOR_SECTION, "frame", _TENSOR_FRAMES, "ned")
+    custom_to_ned = _read_custom_rotation(
+        config, _TENSOR_SECTION, frame)
     row_order = _choice(
         config, _TENSOR_SECTION, "rowOrder", _ROW_ORDERS, "x_fastest")
 
@@ -266,8 +370,10 @@ def _read_tensor_source(
             format=source_format,
             file=source_file,
             units=units,
+            frame=frame,
             row_order=row_order,
             columns=columns,
+            custom_to_ned=custom_to_ned,
         )
 
     indices = tuple(
@@ -283,12 +389,51 @@ def _read_tensor_source(
         format=source_format,
         file=source_file,
         units=units,
+        frame=frame,
         row_order=row_order,
         data_variable=_required_str(
             config, _TENSOR_SECTION, "dataVariable"),
         axis_order=_axis_order(config, _TENSOR_SECTION),
         indices=indices,
+        custom_to_ned=custom_to_ned,
     )
+
+
+def _read_coordinate_columns(
+    config: ConfigHandler,
+    section: str,
+    coordinate_frame: str,
+) -> Optional[tuple[str, str]]:
+    if coordinate_frame == "none":
+        return None
+    if coordinate_frame == "grid":
+        return (
+            _required_str(config, section, "gridXColumn"),
+            _required_str(config, section, "gridYColumn"),
+        )
+    return (
+        _required_str(config, section, "latitudeColumn"),
+        _required_str(config, section, "longitudeColumn"),
+    )
+
+
+def _read_custom_rotation(
+    config: ConfigHandler,
+    section: str,
+    frame: str,
+) -> Optional[tuple[float, ...]]:
+    if frame != "custom":
+        return None
+    values = config.get_csv_numeric(section, "customToNed")
+    if values is None or np.size(values) != 9:
+        raise _error(
+            section,
+            "customToNed",
+            "Invalid matrix",
+            "A custom frame requires nine comma-separated custom-to-NED "
+            "matrix values.",
+        )
+    return tuple(float(value) for value in np.asarray(values).ravel())
 
 
 def _axis_order(config: ConfigHandler, section: str) -> tuple[str, ...]:

@@ -42,6 +42,7 @@ eastIndex = 2
 downIndex = 3
 units = mGal
 frame = NED
+quantity = effective_gravity
 
 [Reference]
 format = csv
@@ -51,6 +52,7 @@ eastColumn = east
 upColumn = up
 units = m/s2
 frame = ENU
+quantity = gravitational_attraction
 rowOrder = x_fastest
 """
 
@@ -68,13 +70,16 @@ def test_reads_custom_gravity_config(tmp_path: Path):
     assert result.field.data_variable == "field"
     assert result.field.axis_order == ("component", "x", "y")
     assert result.field.component_indices == (1, 2, 3)
+    assert result.field.quantity == "effective_gravity"
     assert result.reference is not None
     assert result.reference.frame == "enu"
+    assert result.reference.quantity == "gravitational_attraction"
 
 
 def test_residual_mode_does_not_require_reference(tmp_path: Path):
     body = _valid_config().replace(
         "mode = total_minus_reference", "mode = residual")
+    body = body.replace("quantity = effective_gravity\n", "", 1)
     body = body.split("[Reference]")[0]
     config_file = _write_config(tmp_path, body)
 
@@ -104,6 +109,50 @@ def test_reads_custom_rotation(tmp_path: Path):
     )
 
 
+def test_reads_geocentric_frame_and_coordinate_validation(tmp_path: Path):
+    body = _valid_config().replace(
+        "format = mat\nfile = field.mat",
+        "format = csv\nfile = field.csv",
+        1,
+    )
+    body = body.replace(
+        """dataVariable = field
+axisOrder = component,x,y
+northIndex = 1
+eastIndex = 2
+downIndex = 3""",
+        """northColumn = north
+eastColumn = east
+downColumn = down
+coordinateFrame = wgs84
+latitudeColumn = latitude
+longitudeColumn = longitude""",
+        1,
+    )
+    body = body.replace("frame = NED", "frame = geocentric_ned", 1)
+    config_file = _write_config(tmp_path, body)
+
+    result = read_custom_gravity_config(config_file)
+
+    assert result.field.frame == "geocentric_ned"
+    assert result.field.coordinate_frame == "wgs84"
+    assert result.field.coordinate_columns == ("latitude", "longitude")
+
+
+def test_defaults_quantities_compatibly_with_mode(tmp_path: Path):
+    body = _valid_config().replace(
+        "quantity = effective_gravity\n", "", 1)
+    body = body.replace(
+        "quantity = gravitational_attraction\n", "", 1)
+    config_file = _write_config(tmp_path, body)
+
+    result = read_custom_gravity_config(config_file)
+
+    assert result.field.quantity == "effective_gravity"
+    assert result.reference is not None
+    assert result.reference.quantity == "effective_gravity"
+
+
 @pytest.mark.parametrize(
     "old,new",
     [
@@ -111,6 +160,10 @@ def test_reads_custom_rotation(tmp_path: Path):
         ("mode = total_minus_reference", "mode = unsupported"),
         ("axisOrder = component,x,y", "axisOrder = component,x,x"),
         ("northIndex = 1", "northIndex = -1"),
+        (
+            "quantity = effective_gravity",
+            "quantity = residual",
+        ),
     ],
 )
 def test_rejects_invalid_configuration(
@@ -130,4 +183,25 @@ def test_reference_is_required_for_subtraction(tmp_path: Path):
     config_file = _write_config(tmp_path, body)
 
     with pytest.raises(NavConfigError, match="Reference"):
+        read_custom_gravity_config(config_file)
+
+
+def test_residual_mode_rejects_total_quantity(tmp_path: Path):
+    body = _valid_config().replace(
+        "mode = total_minus_reference", "mode = residual")
+    body = body.split("[Reference]")[0]
+    config_file = _write_config(tmp_path, body)
+
+    with pytest.raises(NavConfigError, match="mode=residual"):
+        read_custom_gravity_config(config_file)
+
+
+def test_orthometric_height_requires_geoid_undulation(tmp_path: Path):
+    body = _valid_config().replace(
+        "heightReference = ellipsoid",
+        "heightReference = orthometric",
+    )
+    config_file = _write_config(tmp_path, body)
+
+    with pytest.raises(NavConfigError, match="geoid-undulation"):
         read_custom_gravity_config(config_file)
