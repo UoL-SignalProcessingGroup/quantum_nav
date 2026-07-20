@@ -439,6 +439,25 @@ def test_projected_crs_lookup(tmp_path: Path):
     )
 
 
+def test_csv_grid_and_field_are_subset_consistently(tmp_path: Path):
+    original, _, _, expected = _make_map(tmp_path)
+    with original.config.config_file.open("a", encoding="utf-8") as file:
+        file.write(
+            "\n[Subset]\ncoordinateFrame = grid\n"
+            "minX = 10.0\nmaxX = 10.1\n"
+            "minY = 70.0\nmaxY = 70.1\n"
+            "paddingCells = 0\n"
+        )
+
+    model = CustomGravityMap(
+        FixedValue(), None, original.config.config_file)
+
+    np.testing.assert_allclose(model.map_data.x, [10.0, 10.1])
+    np.testing.assert_allclose(model.map_data.y, [70.0, 70.1])
+    np.testing.assert_allclose(
+        model.get_residual(70.1, 10.1), expected[1, 1])
+
+
 def test_projected_crs_boundary_roundoff_remains_in_coverage(
     tmp_path: Path,
 ):

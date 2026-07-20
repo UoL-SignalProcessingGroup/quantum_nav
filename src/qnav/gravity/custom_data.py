@@ -1,8 +1,9 @@
 """Data loading and normalization for configurable gravity maps."""
 
+from importlib import import_module
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional, TypeVar
+from typing import Any, Optional, TypeVar, cast
 
 import numpy as np
 import pandas as pd
@@ -16,6 +17,7 @@ from qnav.input.ini.custom_gravity_config import (
     CustomGravityConfig,
     DelimitedSourceConfig,
     GridSourceConfig,
+    SubsetConfig,
     TensorSourceConfig,
     VectorSourceConfig,
 )
@@ -43,6 +45,10 @@ class LoadedGrid:
     geocentric_latitude: np.ndarray
     flip_x: bool
     flip_y: bool
+    source_x_size: int
+    source_y_size: int
+    x_indices: np.ndarray
+    y_indices: np.ndarray
 
 
 @dataclass(frozen=True)
@@ -69,6 +75,8 @@ class CustomMapDataLoader:
         self._delimited_cache: dict[
             tuple[Path, DelimitedSourceConfig], pd.DataFrame
         ] = {}
+        self._grid_source_axes: Optional[tuple[np.ndarray, np.ndarray]] = None
+        self._grid_auxiliary_preselected = False
 
     def load(self) -> LoadedCustomMap:
         """Load, validate, and normalize the configured custom map."""
@@ -137,9 +145,42 @@ class CustomMapDataLoader:
             x, y, height, geoid_undulation = self._load_csv_grid(source)
         elif source.format == "delimited":
             x, y, height, geoid_undulation = self._load_delimited_grid(
-                source)
+                source, crs)
+        elif source.format == "geotiff":
+            x, y, height, geoid_undulation = self._load_geotiff_grid(
+                source, crs)
+        elif source.format == "netcdf":
+            x, y, height, geoid_undulation = self._load_netcdf_grid(
+                source, crs)
         else:
             x, y, height, geoid_undulation = self._load_mat_grid(source)
+
+        source_x_size = int(x.size)
+        source_y_size = int(y.size)
+        self._grid_source_axes = (
+            np.asarray(x, dtype=np.float64).copy(),
+            np.asarray(y, dtype=np.float64).copy(),
+        )
+        x_indices, y_indices = _subset_indices(
+            x, y, self._config.subset, crs)
+        x = x[x_indices]
+        y = y[y_indices]
+        if height is not None and not self._grid_auxiliary_preselected:
+            height = height[np.ix_(x_indices, y_indices)]
+        if (
+            geoid_undulation is not None
+            and not self._grid_auxiliary_preselected
+        ):
+            geoid_undulation = geoid_undulation[np.ix_(
+                x_indices, y_indices)]
+        cell_count = int(x.size * y.size)
+        if cell_count > self._config.max_cells:
+            raise _data_error(
+                source.file,
+                f"Selected grid contains {cell_count:,} cells; maxCells is "
+                f"{self._config.max_cells:,}. Configure a smaller [Subset] "
+                "or explicitly raise maxCells.",
+            )
 
         x, flip_x = _normalize_axis(x, "x")
         y, flip_y = _normalize_axis(y, "y")
@@ -227,6 +268,10 @@ class CustomMapDataLoader:
             geocentric_latitude=geocentric_latitude,
             flip_x=flip_x,
             flip_y=flip_y,
+            source_x_size=source_x_size,
+            source_y_size=source_y_size,
+            x_indices=x_indices,
+            y_indices=y_indices,
         )
 
     def _load_csv_grid(
@@ -341,6 +386,7 @@ class CustomMapDataLoader:
     def _load_delimited_grid(
         self,
         source: GridSourceConfig,
+        crs: CRS,
     ) -> tuple[
         np.ndarray,
         np.ndarray,
@@ -349,7 +395,10 @@ class CustomMapDataLoader:
     ]:
         options = _required_mapping(
             source.delimited, source.file, "Grid delimited options")
-        data = self._load_delimited(source.file, options)
+        x_mapping: str | int
+        y_mapping: str | int
+        height_mapping: str | int | None
+        geoid_mapping: str | int | None
         if options.header == "none":
             x_mapping = _required_mapping(
                 source.x_index, source.file, "Grid xIndex")
@@ -364,6 +413,17 @@ class CustomMapDataLoader:
                 source.y_column, source.file, "Grid yColumn")
             height_mapping = source.height_column
             geoid_mapping = source.geoid_undulation_column
+
+        if self._can_stream_subset_delimited(source.file):
+            data = self._load_delimited_subset(
+                source.file,
+                options,
+                x_mapping,
+                y_mapping,
+                crs,
+            )
+        else:
+            data = self._load_delimited(source.file, options)
 
         x_values = _numeric_column(data, x_mapping, source.file)
         y_values = _numeric_column(data, y_mapping, source.file)
@@ -387,6 +447,232 @@ class CustomMapDataLoader:
                 source.row_order,
             )
         return x_axis, y_axis, height, geoid_undulation
+
+    def _load_geotiff_grid(
+        self,
+        source: GridSourceConfig,
+        crs: CRS,
+    ) -> tuple[
+        np.ndarray,
+        np.ndarray,
+        Optional[np.ndarray],
+        Optional[np.ndarray],
+    ]:
+        rasterio = _optional_module("rasterio", "GeoTIFF")
+        if not source.file.is_file():
+            raise FileNotFoundError(
+                f"Custom gravity data file does not exist: {source.file}")
+        try:
+            with rasterio.open(source.file) as dataset:
+                _validate_embedded_crs(dataset.crs, crs, source.file)
+                x, y = _geotiff_axes(dataset, source.file)
+                x_indices, y_indices = _subset_indices(
+                    x, y, self._config.subset, crs)
+                window = rasterio.windows.Window(
+                    col_off=int(x_indices[0]),
+                    row_off=int(y_indices[0]),
+                    width=int(x_indices.size),
+                    height=int(y_indices.size),
+                )
+                height = _read_geotiff_bands(
+                    dataset,
+                    (source.height_band,),
+                    source.file,
+                    window=window,
+                )[:, :, 0] if source.height_band is not None else None
+                geoid = _read_geotiff_bands(
+                    dataset,
+                    (source.geoid_undulation_band,),
+                    source.file,
+                    window=window,
+                )[:, :, 0] if source.geoid_undulation_band is not None else None
+                self._grid_auxiliary_preselected = True
+        except (FileNotFoundError, ValueError, NavConfigError):
+            raise
+        except Exception as error:
+            raise _data_error(
+                source.file, f"Unable to read GeoTIFF data: {error}") from error
+        return x, y, height, geoid
+
+    def _load_netcdf_grid(
+        self,
+        source: GridSourceConfig,
+        crs: CRS,
+    ) -> tuple[
+        np.ndarray,
+        np.ndarray,
+        Optional[np.ndarray],
+        Optional[np.ndarray],
+    ]:
+        xarray = _optional_module("xarray", "NetCDF/GRD")
+        if not source.file.is_file():
+            raise FileNotFoundError(
+                f"Custom gravity data file does not exist: {source.file}")
+        x_name = _required_mapping(
+            source.x_variable, source.file, "Grid xVariable")
+        y_name = _required_mapping(
+            source.y_variable, source.file, "Grid yVariable")
+        try:
+            with xarray.open_dataset(source.file, mask_and_scale=True) as data:
+                _validate_netcdf_crs(data, crs, source.file)
+                x = _netcdf_axis(data, x_name, source.file)
+                y = _netcdf_axis(data, y_name, source.file)
+                x_indices, y_indices = _subset_indices(
+                    x, y, self._config.subset, crs)
+                x_dimension = data[x_name].dims[0]
+                y_dimension = data[y_name].dims[0]
+                height = (
+                    _netcdf_array(
+                        data,
+                        source.height_variable,
+                        x_dimension,
+                        y_dimension,
+                        source.file,
+                        x_indices=x_indices,
+                        y_indices=y_indices,
+                    )
+                    if source.height_variable is not None
+                    else None
+                )
+                geoid = (
+                    _netcdf_array(
+                        data,
+                        source.geoid_undulation_variable,
+                        x_dimension,
+                        y_dimension,
+                        source.file,
+                        x_indices=x_indices,
+                        y_indices=y_indices,
+                    )
+                    if source.geoid_undulation_variable is not None
+                    else None
+                )
+                self._grid_auxiliary_preselected = True
+        except (FileNotFoundError, ValueError, NavConfigError):
+            raise
+        except Exception as error:
+            raise _data_error(
+                source.file, f"Unable to read NetCDF data: {error}") from error
+        return x, y, height, geoid
+
+    def _load_geotiff_field(
+        self,
+        source: VectorSourceConfig,
+        grid: LoadedGrid,
+    ) -> np.ndarray:
+        bands = _required_mapping(
+            source.component_bands,
+            source.file,
+            f"{source.section} component bands",
+        )
+        return self._read_aligned_geotiff(source.file, bands, grid)
+
+    def _load_geotiff_scalar(
+        self,
+        source: VectorSourceConfig,
+        grid: LoadedGrid,
+    ) -> np.ndarray:
+        band = _required_mapping(
+            source.value_band, source.file, f"{source.section} valueBand")
+        return self._read_aligned_geotiff(
+            source.file, (band,), grid)[:, :, 0]
+
+    def _read_aligned_geotiff(
+        self,
+        file_path: Path,
+        bands: tuple[int, ...],
+        grid: LoadedGrid,
+    ) -> np.ndarray:
+        rasterio = _optional_module("rasterio", "GeoTIFF")
+        expected_axes = _required_mapping(
+            self._grid_source_axes, file_path, "Grid source axes")
+        try:
+            with rasterio.open(file_path) as dataset:
+                _validate_embedded_crs(
+                    dataset.crs, self._data_crs(), file_path)
+                x, y = _geotiff_axes(dataset, file_path)
+                _validate_aligned_axes(x, y, expected_axes, file_path)
+                window = rasterio.windows.Window(
+                    col_off=int(grid.x_indices[0]),
+                    row_off=int(grid.y_indices[0]),
+                    width=int(grid.x_indices.size),
+                    height=int(grid.y_indices.size),
+                )
+                return _read_geotiff_bands(
+                    dataset, bands, file_path, window=window)
+        except (FileNotFoundError, ValueError, NavConfigError):
+            raise
+        except Exception as error:
+            raise _data_error(
+                file_path, f"Unable to read GeoTIFF data: {error}") from error
+
+    def _load_netcdf_field(
+        self,
+        source: VectorSourceConfig,
+        grid: LoadedGrid,
+    ) -> np.ndarray:
+        variables = _required_mapping(
+            source.component_variables,
+            source.file,
+            f"{source.section} component variables",
+        )
+        arrays = [
+            self._read_aligned_netcdf(source.file, variable, grid)
+            for variable in variables
+        ]
+        return np.stack(arrays, axis=-1)
+
+    def _load_netcdf_scalar(
+        self,
+        source: VectorSourceConfig,
+        grid: LoadedGrid,
+    ) -> np.ndarray:
+        variable = _required_mapping(
+            source.value_variable,
+            source.file,
+            f"{source.section} valueVariable",
+        )
+        return self._read_aligned_netcdf(source.file, variable, grid)
+
+    def _read_aligned_netcdf(
+        self,
+        file_path: Path,
+        variable: str,
+        grid: LoadedGrid,
+    ) -> np.ndarray:
+        xarray = _optional_module("xarray", "NetCDF/GRD")
+        grid_source = self._config.grid
+        x_name = _required_mapping(
+            grid_source.x_variable, file_path, "Grid xVariable")
+        y_name = _required_mapping(
+            grid_source.y_variable, file_path, "Grid yVariable")
+        expected_axes = _required_mapping(
+            self._grid_source_axes, file_path, "Grid source axes")
+        try:
+            with xarray.open_dataset(file_path, mask_and_scale=True) as data:
+                _validate_netcdf_crs(data, self._data_crs(), file_path)
+                x = _netcdf_axis(data, x_name, file_path)
+                y = _netcdf_axis(data, y_name, file_path)
+                _validate_aligned_axes(x, y, expected_axes, file_path)
+                values = _netcdf_array(
+                    data,
+                    variable,
+                    data[x_name].dims[0],
+                    data[y_name].dims[0],
+                    file_path,
+                    x_indices=grid.x_indices,
+                    y_indices=grid.y_indices,
+                )
+                return values
+        except (FileNotFoundError, ValueError, NavConfigError):
+            raise
+        except Exception as error:
+            raise _data_error(
+                file_path, f"Unable to read NetCDF data: {error}") from error
+
+    def _data_crs(self) -> CRS:
+        """Return the already-validated configured CRS."""
+        return self._read_crs()
 
     def _load_vector(
         self,
@@ -434,7 +720,16 @@ class CustomMapDataLoader:
                 for mapping in component_mappings
             ])
             values = _reshape_rows(
-                values, grid.x.size, grid.y.size, source.row_order)
+                values,
+                grid.source_x_size,
+                grid.source_y_size,
+                source.row_order,
+            )
+            values = values[np.ix_(grid.x_indices, grid.y_indices)]
+        elif source.format == "geotiff":
+            values = self._load_geotiff_field(source, grid)
+        elif source.format == "netcdf":
+            values = self._load_netcdf_field(source, grid)
         else:
             mat_data = self._load_mat(source.file)
             data_variable = _required_mapping(
@@ -465,6 +760,15 @@ class CustomMapDataLoader:
                     f"Component index {max_index} exceeds the packed "
                     f"component axis of size {packed.shape[2]}.")
             values = packed[:, :, component_indices]
+            if values.shape[:2] != (
+                grid.source_x_size, grid.source_y_size
+            ):
+                raise _data_error(
+                    source.file,
+                    f"Vector field has source shape {values.shape[:2]}; "
+                    f"expected {(grid.source_x_size, grid.source_y_size)}.",
+                )
+            values = values[np.ix_(grid.x_indices, grid.y_indices)]
 
         expected = (grid.x.size, grid.y.size, 3)
         if values.shape != expected:
@@ -477,6 +781,11 @@ class CustomMapDataLoader:
             values = np.flip(values, axis=1)
 
         values = np.asarray(values, dtype=np.float64)
+        if np.any(np.isinf(values)):
+            raise _data_error(
+                source.file, "Vector field must not contain infinite values.")
+        missing = np.any(np.isnan(values), axis=2)
+        values[missing, :] = np.nan
         values *= _acceleration_scale(source.units)
         values = _to_ned(values, source, grid)
         return _to_effective_gravity(values, source.quantity, grid)
@@ -516,7 +825,16 @@ class CustomMapDataLoader:
             _validate_source_coordinates(data, source, grid)
             scalar = _numeric_column(data, value_mapping, source.file)
             scalar = _reshape_rows(
-                scalar, grid.x.size, grid.y.size, source.row_order)
+                scalar,
+                grid.source_x_size,
+                grid.source_y_size,
+                source.row_order,
+            )
+            scalar = scalar[np.ix_(grid.x_indices, grid.y_indices)]
+        elif source.format == "geotiff":
+            scalar = self._load_geotiff_scalar(source, grid)
+        elif source.format == "netcdf":
+            scalar = self._load_netcdf_scalar(source, grid)
         else:
             value_variable = _required_mapping(
                 source.value_variable,
@@ -540,6 +858,13 @@ class CustomMapDataLoader:
             permutation = tuple(
                 source.axis_order.index(axis) for axis in ("x", "y"))
             scalar = np.transpose(scalar, permutation)
+            if scalar.shape != (grid.source_x_size, grid.source_y_size):
+                raise _data_error(
+                    source.file,
+                    f"Scalar field has source shape {scalar.shape}; expected "
+                    f"{(grid.source_x_size, grid.source_y_size)}.",
+                )
+            scalar = scalar[np.ix_(grid.x_indices, grid.y_indices)]
 
         expected = (grid.x.size, grid.y.size)
         if scalar.shape != expected:
@@ -577,24 +902,82 @@ class CustomMapDataLoader:
         if not file_path.is_file():
             raise FileNotFoundError(
                 f"Custom gravity data file does not exist: {file_path}")
-        separator = (
-            r"\s+" if options.delimiter == "whitespace"
-            else options.delimiter
-        )
         try:
-            data = pd.read_csv(
-                file_path,
-                sep=separator,
-                header=0 if options.header == "present" else None,
-                skiprows=options.skip_rows,
-                comment=options.comment_prefix,
-                skipinitialspace=True,
-            )
+            data = pd.read_csv(file_path, **_delimited_read_kwargs(options))
         except Exception as error:
             raise _data_error(
                 file_path, f"Unable to read delimited data: {error}") from error
         if data.empty:
             raise _data_error(file_path, "Delimited data file is empty.")
+        self._delimited_cache[key] = data
+        return data
+
+    def _can_stream_subset_delimited(self, grid_file: Path) -> bool:
+        if self._config.subset is None:
+            return False
+        sources = [self._config.field]
+        if self._config.reference is not None:
+            sources.append(self._config.reference)
+        return all(
+            source.format == "delimited" and source.file == grid_file
+            for source in sources
+        )
+
+    def _load_delimited_subset(
+        self,
+        file_path: Path,
+        options: DelimitedSourceConfig,
+        x_mapping: str | int,
+        y_mapping: str | int,
+        crs: CRS,
+    ) -> pd.DataFrame:
+        key = (file_path, options)
+        if key in self._delimited_cache:
+            return self._delimited_cache[key]
+        if not file_path.is_file():
+            raise FileNotFoundError(
+                f"Custom gravity data file does not exist: {file_path}")
+        kwargs = _delimited_read_kwargs(options)
+        try:
+            x_seen: list[np.ndarray] = []
+            y_seen: list[np.ndarray] = []
+            for chunk in pd.read_csv(
+                file_path,
+                usecols=[x_mapping, y_mapping],
+                chunksize=100_000,
+                **kwargs,
+            ):
+                x_seen.append(chunk[x_mapping].to_numpy())
+                y_seen.append(chunk[y_mapping].to_numpy())
+            if not x_seen:
+                raise _data_error(file_path, "Delimited data file is empty.")
+            x_axis = pd.unique(np.concatenate(x_seen)).astype(np.float64)
+            y_axis = pd.unique(np.concatenate(y_seen)).astype(np.float64)
+            x_indices, y_indices = _subset_indices(
+                x_axis, y_axis, self._config.subset, crs)
+            selected_x = x_axis[x_indices]
+            selected_y = y_axis[y_indices]
+            selected: list[pd.DataFrame] = []
+            for chunk in pd.read_csv(
+                file_path, chunksize=100_000, **kwargs
+            ):
+                keep = (
+                    chunk[x_mapping].isin(selected_x)
+                    & chunk[y_mapping].isin(selected_y)
+                )
+                if bool(keep.any()):
+                    selected.append(chunk.loc[keep])
+            if not selected:
+                raise _data_error(
+                    file_path, "Configured subset contains no text rows.")
+            data = pd.concat(selected, ignore_index=True)
+        except (ValueError, NavConfigError):
+            raise
+        except Exception as error:
+            raise _data_error(
+                file_path,
+                f"Unable to subset delimited data: {error}",
+            ) from error
         self._delimited_cache[key] = data
         return data
 
@@ -612,7 +995,12 @@ class CustomMapDataLoader:
                 for column in columns
             ])
             values = _reshape_rows(
-                values, grid.x.size, grid.y.size, source.row_order)
+                values,
+                grid.source_x_size,
+                grid.source_y_size,
+                source.row_order,
+            )
+            values = values[np.ix_(grid.x_indices, grid.y_indices)]
         else:
             mat_data = self._load_mat(source.file)
             data_variable = _required_mapping(
@@ -641,6 +1029,15 @@ class CustomMapDataLoader:
                     f"Tensor index {max_index} exceeds the packed component "
                     f"axis of size {packed.shape[2]}.")
             values = packed[:, :, indices]
+            if values.shape[:2] != (
+                grid.source_x_size, grid.source_y_size
+            ):
+                raise _data_error(
+                    source.file,
+                    f"Tensor field has source shape {values.shape[:2]}; "
+                    f"expected {(grid.source_x_size, grid.source_y_size)}.",
+                )
+            values = values[np.ix_(grid.x_indices, grid.y_indices)]
 
         expected = (grid.x.size, grid.y.size, 6)
         if values.shape != expected:
@@ -713,6 +1110,232 @@ def geographic_longitude_period(crs: CRS) -> float:
     raise ValueError("Geographic CRS has no longitude axis.")
 
 
+def _optional_module(name: str, description: str) -> Any:
+    try:
+        return import_module(name)
+    except ImportError as error:
+        raise NavConfigError(
+            "CustomGravityMap",
+            "format",
+            "Missing optional dependency",
+            f"{description} custom maps require the optional map readers. "
+            "Install QNav with 'qnav[maps]'.",
+        ) from error
+
+
+def _validate_embedded_crs(
+    embedded: Any,
+    configured: CRS,
+    file_path: Path,
+) -> None:
+    if embedded is None:
+        return
+    try:
+        embedded_crs = CRS.from_user_input(embedded)
+    except CRSError as error:
+        raise _data_error(
+            file_path, f"Embedded CRS metadata is invalid: {error}") from error
+    if not configured.equals(embedded_crs, ignore_axis_order=True):
+        raise _data_error(
+            file_path,
+            "Embedded CRS does not match the configured CRS: "
+            f"embedded='{embedded_crs.to_string()}', "
+            f"configured='{configured.to_string()}'.",
+        )
+
+
+def _geotiff_axes(dataset: Any, file_path: Path) -> tuple[np.ndarray, np.ndarray]:
+    transform = dataset.transform
+    if bool(transform.is_identity):
+        raise _data_error(
+            file_path, "GeoTIFF must contain an explicit affine transform.")
+    scale = max(
+        1.0,
+        abs(float(transform.a)),
+        abs(float(transform.e)),
+    )
+    tolerance = np.finfo(np.float64).eps * scale * 64
+    if (
+        abs(float(transform.b)) > tolerance
+        or abs(float(transform.d)) > tolerance
+        or abs(float(transform.a)) <= tolerance
+        or abs(float(transform.e)) <= tolerance
+    ):
+        raise _data_error(
+            file_path,
+            "GeoTIFF transform must describe a non-rotated rectilinear grid.",
+        )
+    x = float(transform.c) + float(transform.a) * (
+        np.arange(dataset.width, dtype=np.float64) + 0.5)
+    y = float(transform.f) + float(transform.e) * (
+        np.arange(dataset.height, dtype=np.float64) + 0.5)
+    return x, y
+
+
+def _read_geotiff_bands(
+    dataset: Any,
+    bands: tuple[int, ...],
+    file_path: Path,
+    window: Any = None,
+) -> np.ndarray:
+    if not bands or min(bands) < 1 or max(bands) > dataset.count:
+        raise _data_error(
+            file_path,
+            f"Requested GeoTIFF bands {bands} exceed available bands "
+            f"1..{dataset.count}.",
+        )
+    masked = dataset.read(list(bands), window=window, masked=True)
+    values = np.ma.filled(masked, np.nan).astype(np.float64, copy=False)
+    return np.transpose(values, (2, 1, 0))
+
+
+def _netcdf_axis(data: Any, variable: str, file_path: Path) -> np.ndarray:
+    if variable not in data:
+        raise _data_error(
+            file_path, f"NetCDF variable '{variable}' does not exist.")
+    values = data[variable]
+    if values.ndim != 1 or len(values.dims) != 1:
+        raise _data_error(
+            file_path, f"NetCDF axis '{variable}' must be one-dimensional.")
+    return np.asarray(values.to_numpy(), dtype=np.float64)
+
+
+def _netcdf_array(
+    data: Any,
+    variable: Optional[str],
+    x_dimension: str,
+    y_dimension: str,
+    file_path: Path,
+    x_indices: Optional[np.ndarray] = None,
+    y_indices: Optional[np.ndarray] = None,
+) -> np.ndarray:
+    name = _required_mapping(variable, file_path, "NetCDF data variable")
+    if name not in data:
+        raise _data_error(
+            file_path, f"NetCDF variable '{name}' does not exist.")
+    values = data[name]
+    if x_dimension not in values.dims or y_dimension not in values.dims:
+        raise _data_error(
+            file_path,
+            f"NetCDF variable '{name}' must use dimensions "
+            f"'{x_dimension}' and '{y_dimension}'.",
+        )
+    for dimension in tuple(values.dims):
+        if dimension in {x_dimension, y_dimension}:
+            continue
+        if int(values.sizes[dimension]) != 1:
+            raise _data_error(
+                file_path,
+                f"NetCDF variable '{name}' has unsupported non-singleton "
+                f"dimension '{dimension}'.",
+            )
+        values = values.isel({dimension: 0}, drop=True)
+    if x_indices is not None:
+        values = values.isel({x_dimension: x_indices})
+    if y_indices is not None:
+        values = values.isel({y_dimension: y_indices})
+    values = values.transpose(x_dimension, y_dimension)
+    result = np.asarray(values.to_numpy(), dtype=np.float64)
+    if np.any(np.isinf(result)):
+        raise _data_error(
+            file_path, f"NetCDF variable '{name}' contains infinite values.")
+    return result
+
+
+def _validate_netcdf_crs(data: Any, configured: CRS, file_path: Path) -> None:
+    candidates: list[Any] = []
+    for key in ("crs_wkt", "spatial_ref", "epsg_code"):
+        if key in data.attrs:
+            candidates.append(data.attrs[key])
+    for variable in data.variables.values():
+        for key in ("crs_wkt", "spatial_ref", "epsg_code"):
+            if key in variable.attrs:
+                candidates.append(variable.attrs[key])
+    for candidate in candidates:
+        try:
+            embedded = CRS.from_user_input(candidate)
+        except (CRSError, ValueError, TypeError):
+            continue
+        _validate_embedded_crs(embedded, configured, file_path)
+        return
+
+
+def _validate_aligned_axes(
+    x: np.ndarray,
+    y: np.ndarray,
+    expected: tuple[np.ndarray, np.ndarray],
+    file_path: Path,
+) -> None:
+    expected_x, expected_y = expected
+    if (
+        x.shape != expected_x.shape
+        or y.shape != expected_y.shape
+        or not np.allclose(x, expected_x, rtol=1e-12, atol=1e-9)
+        or not np.allclose(y, expected_y, rtol=1e-12, atol=1e-9)
+    ):
+        raise _data_error(
+            file_path, "Field grid does not align with the configured grid.")
+
+
+def _subset_indices(
+    x: np.ndarray,
+    y: np.ndarray,
+    subset: Optional[SubsetConfig],
+    crs: CRS,
+) -> tuple[np.ndarray, np.ndarray]:
+    if subset is None:
+        return np.arange(x.size), np.arange(y.size)
+    minimum_x = subset.minimum_x
+    maximum_x = subset.maximum_x
+    minimum_y = subset.minimum_y
+    maximum_y = subset.maximum_y
+    if subset.coordinate_frame == "wgs84":
+        try:
+            transformer = Transformer.from_crs(
+                "EPSG:4326", crs, always_xy=True)
+            minimum_x, minimum_y, maximum_x, maximum_y = (
+                transformer.transform_bounds(
+                    minimum_x,
+                    minimum_y,
+                    maximum_x,
+                    maximum_y,
+                    densify_pts=21,
+                )
+            )
+        except Exception as error:
+            raise NavConfigError(
+                "Subset",
+                "bounds",
+                "Subset transformation failed",
+                f"WGS-84 subset bounds could not be transformed into the "
+                f"map CRS: {error}",
+            ) from error
+        if crs.is_geographic:
+            period = geographic_longitude_period(crs)
+            midpoint = (float(np.min(x)) + float(np.max(x))) / 2.0
+            centre = (minimum_x + maximum_x) / 2.0
+            shift = np.round((midpoint - centre) / period) * period
+            minimum_x += shift
+            maximum_x += shift
+    x_indices = np.flatnonzero((x >= minimum_x) & (x <= maximum_x))
+    y_indices = np.flatnonzero((y >= minimum_y) & (y <= maximum_y))
+    if x_indices.size == 0 or y_indices.size == 0:
+        raise ValueError("Configured custom gravity subset does not overlap the grid.")
+    x_indices = _pad_indices(x_indices, x.size, subset.padding_cells)
+    y_indices = _pad_indices(y_indices, y.size, subset.padding_cells)
+    if x_indices.size < 2 or y_indices.size < 2:
+        raise ValueError(
+            "Configured custom gravity subset must retain at least two x "
+            "and two y coordinates.")
+    return x_indices, y_indices
+
+
+def _pad_indices(indices: np.ndarray, size: int, padding: int) -> np.ndarray:
+    start = max(0, int(indices[0]) - padding)
+    stop = min(size, int(indices[-1]) + padding + 1)
+    return np.arange(start, stop)
+
+
 def _read_csv(file_path: Path, columns: list[str]) -> pd.DataFrame:
     if not file_path.is_file():
         raise FileNotFoundError(
@@ -727,6 +1350,18 @@ def _read_csv(file_path: Path, columns: list[str]) -> pd.DataFrame:
     except Exception as error:
         raise _data_error(
             file_path, f"Unable to read CSV data: {error}") from error
+
+
+def _delimited_read_kwargs(options: DelimitedSourceConfig) -> dict[str, Any]:
+    separator = (
+        r"\s+" if options.delimiter == "whitespace" else options.delimiter)
+    return {
+        "sep": separator,
+        "header": 0 if options.header == "present" else None,
+        "skiprows": options.skip_rows,
+        "comment": options.comment_prefix,
+        "skipinitialspace": True,
+    }
 
 
 def _numeric_column(
@@ -889,21 +1524,29 @@ def _validate_source_coordinates(
 ) -> None:
     if source.coordinate_frame == "none":
         return
-    mappings = _required_mapping(
-        source.coordinate_indices
-        if source.format == "delimited"
-        and source.delimited is not None
-        and source.delimited.header == "none"
-        else source.coordinate_columns,
-        source.file,
-        f"{source.section} coordinate mappings",
+    mappings = cast(
+        tuple[str | int, str | int],
+        _required_mapping(
+            source.coordinate_indices
+            if source.format == "delimited"
+            and source.delimited is not None
+            and source.delimited.header == "none"
+            else source.coordinate_columns,
+            source.file,
+            f"{source.section} coordinate mappings",
+        ),
     )
     coordinates = np.column_stack([
         _numeric_column(data, mapping, source.file)
         for mapping in mappings
     ])
     coordinates = _reshape_rows(
-        coordinates, grid.x.size, grid.y.size, source.row_order)
+        coordinates,
+        grid.source_x_size,
+        grid.source_y_size,
+        source.row_order,
+    )
+    coordinates = coordinates[np.ix_(grid.x_indices, grid.y_indices)]
     if grid.flip_x:
         coordinates = np.flip(coordinates, axis=0)
     if grid.flip_y:

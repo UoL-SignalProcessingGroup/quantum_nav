@@ -20,8 +20,9 @@ _GRID_SECTION = "Grid"
 _FIELD_SECTION = "Field"
 _REFERENCE_SECTION = "Reference"
 _TENSOR_SECTION = "Tensor"
+_SUBSET_SECTION = "Subset"
 
-_FORMATS = {"csv", "delimited", "mat"}
+_FORMATS = {"csv", "delimited", "geotiff", "mat", "netcdf"}
 _TENSOR_FORMATS = {"csv", "mat"}
 _ROW_ORDERS = {"x_fastest", "y_fastest"}
 _UNITS = {"m/s2", "gal", "mgal"}
@@ -36,6 +37,11 @@ _QUANTITIES = {
     "gravity_disturbance",
     "free_air_anomaly",
 }
+_NONPHYSICAL_ANOMALIES = {
+    "bouguer_anomaly",
+    "isostatic_anomaly",
+    "gravity_anomaly",
+}
 _COORDINATE_FRAMES = {"none", "grid", "wgs84"}
 _MODES = {"residual", "total_minus_reference"}
 _INTERPOLATION = {"linear", "nearest"}
@@ -43,6 +49,8 @@ _COVERAGE = {"base", "error"}
 _HEIGHT_REFERENCES = {"ellipsoid", "orthometric", "geoid_surface"}
 _TENSOR_UNITS = {"e", "s-2"}
 _DELIMITED_HEADERS = {"none", "present"}
+_SUBSET_FRAMES = {"grid", "wgs84"}
+_DEFAULT_MAX_CELLS = 5_000_000
 
 
 @dataclass(frozen=True)
@@ -76,6 +84,8 @@ class GridSourceConfig:
     y_index: Optional[int] = None
     height_index: Optional[int] = None
     geoid_undulation_index: Optional[int] = None
+    height_band: Optional[int] = None
+    geoid_undulation_band: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -103,6 +113,9 @@ class VectorSourceConfig:
     delimited: Optional[DelimitedSourceConfig] = None
     coordinate_indices: Optional[tuple[int, int]] = None
     value_index: Optional[int] = None
+    component_bands: Optional[tuple[int, int, int]] = None
+    value_band: Optional[int] = None
+    component_variables: Optional[tuple[str, str, str]] = None
 
 
 @dataclass(frozen=True)
@@ -131,10 +144,24 @@ class CustomGravityConfig:
     mode: str
     interpolation: str
     out_of_bounds: str
+    max_cells: int
+    subset: Optional["SubsetConfig"]
     grid: GridSourceConfig
     field: VectorSourceConfig
     reference: Optional[VectorSourceConfig]
     tensor: Optional[TensorSourceConfig]
+
+
+@dataclass(frozen=True)
+class SubsetConfig:
+    """Optional rectangular subset in grid or WGS-84 coordinates."""
+
+    coordinate_frame: str
+    minimum_x: float
+    maximum_x: float
+    minimum_y: float
+    maximum_y: float
+    padding_cells: int
 
 
 def read_custom_gravity_config(config_file: Path) -> CustomGravityConfig:
@@ -154,6 +181,10 @@ def read_custom_gravity_config(config_file: Path) -> CustomGravityConfig:
         config, _MAP_SECTION, "interpolation", _INTERPOLATION, "linear")
     out_of_bounds = _choice(
         config, _MAP_SECTION, "outOfBounds", _COVERAGE, "base")
+    max_cells = _optional_positive_int(
+        config, _MAP_SECTION, "maxCells", _DEFAULT_MAX_CELLS)
+    assert max_cells is not None
+    subset = _read_subset(config)
 
     grid = _read_grid(config, config_file.parent)
     default_field_quantity = (
@@ -221,6 +252,7 @@ def read_custom_gravity_config(config_file: Path) -> CustomGravityConfig:
 
     tensor = _read_tensor_source(config, config_file.parent)
     _validate_shared_delimited_options(grid, field, reference)
+    _validate_raster_grid_sources(grid, field, reference)
 
     return CustomGravityConfig(
         config_file=config_file,
@@ -229,6 +261,8 @@ def read_custom_gravity_config(config_file: Path) -> CustomGravityConfig:
         mode=mode,
         interpolation=interpolation,
         out_of_bounds=out_of_bounds,
+        max_cells=max_cells,
+        subset=subset,
         grid=grid,
         field=field,
         reference=reference,
@@ -260,6 +294,84 @@ def _validate_shared_delimited_options(
             )
 
 
+def _validate_raster_grid_sources(
+    grid: GridSourceConfig,
+    field: VectorSourceConfig,
+    reference: Optional[VectorSourceConfig],
+) -> None:
+    for source in (field, reference):
+        if source is None or source.format not in {"geotiff", "netcdf"}:
+            continue
+        if grid.format != source.format:
+            raise _error(
+                source.section,
+                "format",
+                "Incompatible grid format",
+                f"A {source.format} field requires the Grid section to use "
+                f"format={source.format} so axes and metadata can be "
+                "validated.",
+            )
+
+
+def _read_subset(config: ConfigHandler) -> Optional[SubsetConfig]:
+    assert config.parser is not None
+    if not config.parser.has_section(_SUBSET_SECTION):
+        return None
+    coordinate_frame = _choice(
+        config,
+        _SUBSET_SECTION,
+        "coordinateFrame",
+        _SUBSET_FRAMES,
+        "grid",
+    )
+    if coordinate_frame == "wgs84":
+        names = (
+            "minLongitude",
+            "maxLongitude",
+            "minLatitude",
+            "maxLatitude",
+        )
+    else:
+        names = ("minX", "maxX", "minY", "maxY")
+    values = tuple(
+        float(config.get_float(_SUBSET_SECTION, name)) for name in names)
+    if not np.all(np.isfinite(values)):
+        raise _error(
+            _SUBSET_SECTION,
+            "bounds",
+            "Invalid subset",
+            "Subset bounds must all be finite.",
+        )
+    minimum_x, maximum_x, minimum_y, maximum_y = values
+    if minimum_x >= maximum_x or minimum_y >= maximum_y:
+        raise _error(
+            _SUBSET_SECTION,
+            "bounds",
+            "Invalid subset",
+            "Subset minimum bounds must be less than maximum bounds.",
+        )
+    if coordinate_frame == "wgs84" and (
+        minimum_y < -90.0 or maximum_y > 90.0
+    ):
+        raise _error(
+            _SUBSET_SECTION,
+            "minLatitude/maxLatitude",
+            "Invalid subset",
+            "WGS-84 subset latitudes must lie between -90 and 90 degrees.",
+        )
+    padding_cells = _optional_nonnegative_int(
+        config, _SUBSET_SECTION, "paddingCells", fallback=1)
+    assert padding_cells is not None
+    return SubsetConfig(
+        coordinate_frame=coordinate_frame,
+        minimum_x=minimum_x,
+        maximum_x=maximum_x,
+        minimum_y=minimum_y,
+        maximum_y=maximum_y,
+        padding_cells=padding_cells,
+    )
+
+
 def _read_grid(config: ConfigHandler, base_dir: Path) -> GridSourceConfig:
     source_format = _choice(config, _GRID_SECTION, "format", _FORMATS)
     source_file = _source_path(config, _GRID_SECTION, base_dir)
@@ -268,6 +380,58 @@ def _read_grid(config: ConfigHandler, base_dir: Path) -> GridSourceConfig:
     height_reference = _choice(
         config, _GRID_SECTION, "heightReference",
         _HEIGHT_REFERENCES, "ellipsoid")
+
+    if source_format == "geotiff":
+        height_band = _optional_positive_int(
+            config, _GRID_SECTION, "heightBand")
+        geoid_band = _optional_positive_int(
+            config, _GRID_SECTION, "geoidUndulationBand")
+        if (
+            height_reference == "orthometric"
+            and height_band is not None
+            and geoid_band is None
+        ):
+            raise _error(
+                _GRID_SECTION,
+                "geoidUndulationBand",
+                "Missing vertical datum conversion",
+                "Orthometric heights require a geoid-undulation band.",
+            )
+        return GridSourceConfig(
+            format=source_format,
+            file=source_file,
+            row_order=row_order,
+            height_reference=height_reference,
+            height_band=height_band,
+            geoid_undulation_band=geoid_band,
+        )
+
+    if source_format == "netcdf":
+        height_variable = _optional_str(
+            config, _GRID_SECTION, "heightVariable")
+        geoid_variable = _optional_str(
+            config, _GRID_SECTION, "geoidUndulationVariable")
+        if (
+            height_reference == "orthometric"
+            and height_variable is not None
+            and geoid_variable is None
+        ):
+            raise _error(
+                _GRID_SECTION,
+                "geoidUndulationVariable",
+                "Missing vertical datum conversion",
+                "Orthometric heights require a geoid-undulation variable.",
+            )
+        return GridSourceConfig(
+            format=source_format,
+            file=source_file,
+            row_order=row_order,
+            x_variable=_required_str(config, _GRID_SECTION, "xVariable"),
+            y_variable=_required_str(config, _GRID_SECTION, "yVariable"),
+            height_variable=height_variable,
+            geoid_undulation_variable=geoid_variable,
+            height_reference=height_reference,
+        )
 
     if source_format in {"csv", "delimited"}:
         delimited = (
@@ -369,8 +533,7 @@ def _read_vector_source(
     units = _choice(config, section, "units", _UNITS)
     representation = _choice(
         config, section, "representation", _REPRESENTATIONS, "vector")
-    quantity = _choice(
-        config, section, "quantity", _QUANTITIES, default_quantity)
+    quantity = _read_quantity(config, section, default_quantity)
     row_order = _choice(
         config, section, "rowOrder", _ROW_ORDERS, "x_fastest")
 
@@ -398,6 +561,51 @@ def _read_vector_source(
         "geocentric_ned": ("north", "east", "down"),
         "custom": ("x", "y", "z"),
     }[frame]
+
+    if source_format == "geotiff":
+        bands = tuple(
+            _positive_int(config, section, f"{name}Band")
+            for name in component_names
+        )
+        if len(set(bands)) != 3:
+            raise _error(
+                section, "component bands", "Duplicate band",
+                "All vector components require distinct GeoTIFF bands.")
+        return VectorSourceConfig(
+            section=section,
+            format=source_format,
+            file=source_file,
+            units=units,
+            frame=frame,
+            quantity=quantity,
+            row_order=row_order,
+            representation=representation,
+            component_bands=(bands[0], bands[1], bands[2]),
+            custom_to_ned=custom_to_ned,
+        )
+
+    if source_format == "netcdf":
+        variables = tuple(
+            _required_str(config, section, f"{name}Variable")
+            for name in component_names
+        )
+        if len(set(variables)) != 3:
+            raise _error(
+                section, "component variables", "Duplicate variable",
+                "All vector components require distinct NetCDF variables.")
+        return VectorSourceConfig(
+            section=section,
+            format=source_format,
+            file=source_file,
+            units=units,
+            frame=frame,
+            quantity=quantity,
+            row_order=row_order,
+            representation=representation,
+            component_variables=(
+                variables[0], variables[1], variables[2]),
+            custom_to_ned=custom_to_ned,
+        )
 
     if source_format in {"csv", "delimited"}:
         delimited = (
@@ -436,7 +644,7 @@ def _read_vector_source(
                 row_order=row_order,
                 representation=representation,
                 coordinate_frame=coordinate_frame,
-                component_indices=indices,
+                component_indices=(indices[0], indices[1], indices[2]),
                 coordinate_indices=coordinate_indices,
                 custom_to_ned=custom_to_ned,
                 delimited=delimited,
@@ -516,6 +724,32 @@ def _read_scalar_source(
 ) -> VectorSourceConfig:
     """Read a scalar vertical gravity source."""
 
+    if source_format == "geotiff":
+        return VectorSourceConfig(
+            section=section,
+            format=source_format,
+            file=source_file,
+            units=units,
+            frame="ned",
+            quantity=quantity,
+            row_order=row_order,
+            representation="scalar",
+            vertical_direction=vertical_direction,
+            value_band=_positive_int(config, section, "valueBand"),
+        )
+    if source_format == "netcdf":
+        return VectorSourceConfig(
+            section=section,
+            format=source_format,
+            file=source_file,
+            units=units,
+            frame="ned",
+            quantity=quantity,
+            row_order=row_order,
+            representation="scalar",
+            vertical_direction=vertical_direction,
+            value_variable=_required_str(config, section, "valueVariable"),
+        )
     if source_format in {"csv", "delimited"}:
         delimited = (
             _read_delimited_options(config, section)
@@ -705,6 +939,7 @@ def _read_delimited_options(
         config, section, "header", _DELIMITED_HEADERS, "none")
     skip_rows = _optional_nonnegative_int(
         config, section, "skipRows", fallback=0)
+    assert skip_rows is not None
     comment_prefix = _optional_str(config, section, "commentPrefix")
     if comment_prefix is not None and len(comment_prefix) != 1:
         raise _error(
@@ -800,6 +1035,35 @@ def _choice(
     return normalized
 
 
+def _read_quantity(
+    config: ConfigHandler,
+    section: str,
+    fallback: str,
+) -> str:
+    value = _optional_str(config, section, "quantity", fallback)
+    normalized = value.strip().casefold()
+    if normalized in _NONPHYSICAL_ANOMALIES:
+        raise _error(
+            section,
+            "quantity",
+            "Unsupported physical quantity",
+            f"'{value}' is not a physical gravity correction. Custom "
+            "gravity maps support gravity_disturbance and "
+            "free_air_anomaly scalar quantities; Bouguer, isostatic, and "
+            "ambiguous anomaly products require a separate map-signal "
+            "interface.",
+        )
+    if normalized not in _QUANTITIES:
+        raise _error(
+            section,
+            "quantity",
+            "Unknown value",
+            f"Unsupported value '{value}'; supported values are "
+            f"{sorted(_QUANTITIES)}.",
+        )
+    return normalized
+
+
 def _nonnegative_int(
         config: ConfigHandler,
         section: str,
@@ -813,6 +1077,18 @@ def _nonnegative_int(
     return value
 
 
+def _positive_int(
+    config: ConfigHandler,
+    section: str,
+    name: str,
+) -> int:
+    value = config.get_int(section, name)
+    if value <= 0:
+        raise _error(
+            section, name, "Invalid value", "The value must be positive.")
+    return value
+
+
 def _optional_nonnegative_int(
     config: ConfigHandler,
     section: str,
@@ -822,6 +1098,17 @@ def _optional_nonnegative_int(
     if not config.is_value_set(section, name):
         return fallback
     return _nonnegative_int(config, section, name)
+
+
+def _optional_positive_int(
+    config: ConfigHandler,
+    section: str,
+    name: str,
+    fallback: Optional[int] = None,
+) -> Optional[int]:
+    if not config.is_value_set(section, name):
+        return fallback
+    return _positive_int(config, section, name)
 
 
 def _required_str(

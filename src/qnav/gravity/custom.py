@@ -267,6 +267,20 @@ class CustomGravityMap(GravityMap):
             )
         invalid = ~np.all(np.isfinite(residual), axis=1)
 
+        # Linear interpolation can propagate a neighbouring NaN even when a
+        # query lies exactly on a valid grid node (zero times NaN is NaN).
+        # Preserve the source value at exact nodes without interpolating
+        # across genuinely missing cells.
+        for index in np.flatnonzero(invalid & finite_points):
+            x_index = _exact_axis_index(points[index, 0], self._data.x)
+            y_index = _exact_axis_index(points[index, 1], self._data.y)
+            if x_index is None or y_index is None:
+                continue
+            node_value = self._data.residual[x_index, y_index]
+            if np.all(np.isfinite(node_value)):
+                residual[index] = node_value
+                invalid[index] = False
+
         if np.any(invalid):
             if self._out_of_bounds == "error":
                 count = int(np.count_nonzero(invalid))
@@ -330,3 +344,17 @@ def _normalize_periodic_axis(
     revolutions = np.round((midpoint - finite_values) / period)
     normalized[finite] = finite_values + revolutions * period
     return normalized
+
+
+def _exact_axis_index(value: float, axis: np.ndarray) -> Optional[int]:
+    """Return the index when a value is equal to a grid node within ULPs."""
+
+    candidate = int(np.searchsorted(axis, value))
+    for index in (candidate, candidate - 1):
+        if index < 0 or index >= axis.size:
+            continue
+        scale = max(1.0, abs(value), abs(float(axis[index])))
+        tolerance = np.finfo(np.float64).eps * scale * 64
+        if abs(value - float(axis[index])) <= tolerance:
+            return index
+    return None
