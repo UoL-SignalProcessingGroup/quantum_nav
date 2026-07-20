@@ -21,7 +21,8 @@ _FIELD_SECTION = "Field"
 _REFERENCE_SECTION = "Reference"
 _TENSOR_SECTION = "Tensor"
 
-_FORMATS = {"csv", "mat"}
+_FORMATS = {"csv", "delimited", "mat"}
+_TENSOR_FORMATS = {"csv", "mat"}
 _ROW_ORDERS = {"x_fastest", "y_fastest"}
 _UNITS = {"m/s2", "gal", "mgal"}
 _REPRESENTATIONS = {"vector", "scalar"}
@@ -41,6 +42,17 @@ _INTERPOLATION = {"linear", "nearest"}
 _COVERAGE = {"base", "error"}
 _HEIGHT_REFERENCES = {"ellipsoid", "orthometric", "geoid_surface"}
 _TENSOR_UNITS = {"e", "s-2"}
+_DELIMITED_HEADERS = {"none", "present"}
+
+
+@dataclass(frozen=True)
+class DelimitedSourceConfig:
+    """Parsing options for configurable delimited text files."""
+
+    delimiter: str
+    header: str
+    skip_rows: int
+    comment_prefix: Optional[str]
 
 
 @dataclass(frozen=True)
@@ -59,6 +71,11 @@ class GridSourceConfig:
     height_variable: Optional[str] = None
     geoid_undulation_variable: Optional[str] = None
     height_reference: str = "ellipsoid"
+    delimited: Optional[DelimitedSourceConfig] = None
+    x_index: Optional[int] = None
+    y_index: Optional[int] = None
+    height_index: Optional[int] = None
+    geoid_undulation_index: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -83,6 +100,9 @@ class VectorSourceConfig:
     component_indices: Optional[tuple[int, int, int]] = None
     value_variable: Optional[str] = None
     custom_to_ned: Optional[tuple[float, ...]] = None
+    delimited: Optional[DelimitedSourceConfig] = None
+    coordinate_indices: Optional[tuple[int, int]] = None
+    value_index: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -200,6 +220,7 @@ def read_custom_gravity_config(config_file: Path) -> CustomGravityConfig:
         )
 
     tensor = _read_tensor_source(config, config_file.parent)
+    _validate_shared_delimited_options(grid, field, reference)
 
     return CustomGravityConfig(
         config_file=config_file,
@@ -215,6 +236,30 @@ def read_custom_gravity_config(config_file: Path) -> CustomGravityConfig:
     )
 
 
+def _validate_shared_delimited_options(
+    grid: GridSourceConfig,
+    field: VectorSourceConfig,
+    reference: Optional[VectorSourceConfig],
+) -> None:
+    sources = [field]
+    if reference is not None:
+        sources.append(reference)
+    for source in sources:
+        if (
+            grid.format == "delimited"
+            and source.format == "delimited"
+            and grid.file == source.file
+            and grid.delimited != source.delimited
+        ):
+            raise _error(
+                source.section,
+                "delimiter/header/skipRows/commentPrefix",
+                "Inconsistent text parsing",
+                "Sections reading the same delimited file must use "
+                "identical parsing options.",
+            )
+
+
 def _read_grid(config: ConfigHandler, base_dir: Path) -> GridSourceConfig:
     source_format = _choice(config, _GRID_SECTION, "format", _FORMATS)
     source_file = _source_path(config, _GRID_SECTION, base_dir)
@@ -224,7 +269,39 @@ def _read_grid(config: ConfigHandler, base_dir: Path) -> GridSourceConfig:
         config, _GRID_SECTION, "heightReference",
         _HEIGHT_REFERENCES, "ellipsoid")
 
-    if source_format == "csv":
+    if source_format in {"csv", "delimited"}:
+        delimited = (
+            _read_delimited_options(config, _GRID_SECTION)
+            if source_format == "delimited"
+            else None
+        )
+        if delimited is not None and delimited.header == "none":
+            height_index = _optional_nonnegative_int(
+                config, _GRID_SECTION, "heightIndex")
+            geoid_index = _optional_nonnegative_int(
+                config, _GRID_SECTION, "geoidUndulationIndex")
+            if (
+                height_reference == "orthometric"
+                and height_index is not None
+                and geoid_index is None
+            ):
+                raise _error(
+                    _GRID_SECTION,
+                    "geoidUndulationIndex",
+                    "Missing vertical datum conversion",
+                    "Orthometric heights require a geoid-undulation index.",
+                )
+            return GridSourceConfig(
+                format=source_format,
+                file=source_file,
+                row_order=row_order,
+                height_reference=height_reference,
+                delimited=delimited,
+                x_index=_nonnegative_int(config, _GRID_SECTION, "xIndex"),
+                y_index=_nonnegative_int(config, _GRID_SECTION, "yIndex"),
+                height_index=height_index,
+                geoid_undulation_index=geoid_index,
+            )
         height_column = _optional_str(
             config, _GRID_SECTION, "heightColumn")
         geoid_undulation_column = _optional_str(
@@ -250,6 +327,7 @@ def _read_grid(config: ConfigHandler, base_dir: Path) -> GridSourceConfig:
             height_column=height_column,
             geoid_undulation_column=geoid_undulation_column,
             height_reference=height_reference,
+            delimited=delimited,
         )
 
     height_variable = _optional_str(
@@ -321,7 +399,12 @@ def _read_vector_source(
         "custom": ("x", "y", "z"),
     }[frame]
 
-    if source_format == "csv":
+    if source_format in {"csv", "delimited"}:
+        delimited = (
+            _read_delimited_options(config, section)
+            if source_format == "delimited"
+            else None
+        )
         coordinate_frame = _choice(
             config,
             section,
@@ -329,6 +412,35 @@ def _read_vector_source(
             _COORDINATE_FRAMES,
             "none",
         )
+        if delimited is not None and delimited.header == "none":
+            coordinate_indices = _read_coordinate_indices(
+                config, section, coordinate_frame)
+            indices = tuple(
+                _nonnegative_int(config, section, f"{name}Index")
+                for name in component_names
+            )
+            if len(set(indices)) != 3:
+                raise _error(
+                    section,
+                    "component indexes",
+                    "Duplicate index",
+                    "All vector components require distinct indexes.",
+                )
+            return VectorSourceConfig(
+                section=section,
+                format=source_format,
+                file=source_file,
+                units=units,
+                frame=frame,
+                quantity=quantity,
+                row_order=row_order,
+                representation=representation,
+                coordinate_frame=coordinate_frame,
+                component_indices=indices,
+                coordinate_indices=coordinate_indices,
+                custom_to_ned=custom_to_ned,
+                delimited=delimited,
+            )
         coordinate_columns = _read_coordinate_columns(
             config, section, coordinate_frame)
         columns = tuple(
@@ -348,6 +460,7 @@ def _read_vector_source(
             coordinate_columns=coordinate_columns,
             component_columns=(columns[0], columns[1], columns[2]),
             custom_to_ned=custom_to_ned,
+            delimited=delimited,
         )
 
     coordinate_frame = _choice(
@@ -403,7 +516,12 @@ def _read_scalar_source(
 ) -> VectorSourceConfig:
     """Read a scalar vertical gravity source."""
 
-    if source_format == "csv":
+    if source_format in {"csv", "delimited"}:
+        delimited = (
+            _read_delimited_options(config, section)
+            if source_format == "delimited"
+            else None
+        )
         coordinate_frame = _choice(
             config,
             section,
@@ -411,6 +529,24 @@ def _read_scalar_source(
             _COORDINATE_FRAMES,
             "none",
         )
+        if delimited is not None and delimited.header == "none":
+            return VectorSourceConfig(
+                section=section,
+                format=source_format,
+                file=source_file,
+                units=units,
+                frame="ned",
+                quantity=quantity,
+                row_order=row_order,
+                representation="scalar",
+                vertical_direction=vertical_direction,
+                coordinate_frame=coordinate_frame,
+                coordinate_indices=_read_coordinate_indices(
+                    config, section, coordinate_frame),
+                value_index=_nonnegative_int(
+                    config, section, "valueIndex"),
+                delimited=delimited,
+            )
         return VectorSourceConfig(
             section=section,
             format=source_format,
@@ -425,6 +561,7 @@ def _read_scalar_source(
             coordinate_columns=_read_coordinate_columns(
                 config, section, coordinate_frame),
             value_column=_required_str(config, section, "valueColumn"),
+            delimited=delimited,
         )
 
     coordinate_frame = _choice(
@@ -460,7 +597,8 @@ def _read_tensor_source(
     if not config.parser.has_section(_TENSOR_SECTION):
         return None
 
-    source_format = _choice(config, _TENSOR_SECTION, "format", _FORMATS)
+    source_format = _choice(
+        config, _TENSOR_SECTION, "format", _TENSOR_FORMATS)
     source_file = _source_path(config, _TENSOR_SECTION, base_dir)
     units = _choice(
         config, _TENSOR_SECTION, "units", _TENSOR_UNITS)
@@ -525,6 +663,61 @@ def _read_coordinate_columns(
     return (
         _required_str(config, section, "latitudeColumn"),
         _required_str(config, section, "longitudeColumn"),
+    )
+
+
+def _read_coordinate_indices(
+    config: ConfigHandler,
+    section: str,
+    coordinate_frame: str,
+) -> Optional[tuple[int, int]]:
+    if coordinate_frame == "none":
+        return None
+    if coordinate_frame == "grid":
+        return (
+            _nonnegative_int(config, section, "gridXIndex"),
+            _nonnegative_int(config, section, "gridYIndex"),
+        )
+    return (
+        _nonnegative_int(config, section, "latitudeIndex"),
+        _nonnegative_int(config, section, "longitudeIndex"),
+    )
+
+
+def _read_delimited_options(
+    config: ConfigHandler,
+    section: str,
+) -> DelimitedSourceConfig:
+    delimiter = _optional_str(
+        config, section, "delimiter", "whitespace").strip()
+    if delimiter.casefold() == "whitespace":
+        delimiter = "whitespace"
+    elif delimiter == r"\t":
+        delimiter = "\t"
+    elif len(delimiter) != 1:
+        raise _error(
+            section,
+            "delimiter",
+            "Invalid delimiter",
+            "delimiter must be 'whitespace', '\\t', or one character.",
+        )
+    header = _choice(
+        config, section, "header", _DELIMITED_HEADERS, "none")
+    skip_rows = _optional_nonnegative_int(
+        config, section, "skipRows", fallback=0)
+    comment_prefix = _optional_str(config, section, "commentPrefix")
+    if comment_prefix is not None and len(comment_prefix) != 1:
+        raise _error(
+            section,
+            "commentPrefix",
+            "Invalid comment prefix",
+            "commentPrefix must contain exactly one character.",
+        )
+    return DelimitedSourceConfig(
+        delimiter=delimiter,
+        header=header,
+        skip_rows=skip_rows,
+        comment_prefix=comment_prefix,
     )
 
 
@@ -618,6 +811,17 @@ def _nonnegative_int(
             section, name, "Invalid index",
             "Component indexes must be non-negative.")
     return value
+
+
+def _optional_nonnegative_int(
+    config: ConfigHandler,
+    section: str,
+    name: str,
+    fallback: Optional[int] = None,
+) -> Optional[int]:
+    if not config.is_value_set(section, name):
+        return fallback
+    return _nonnegative_int(config, section, name)
 
 
 def _required_str(

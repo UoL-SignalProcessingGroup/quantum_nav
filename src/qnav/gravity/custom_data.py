@@ -14,6 +14,7 @@ from scipy.io import loadmat
 from qnav.input.config_handler import NavConfigError
 from qnav.input.ini.custom_gravity_config import (
     CustomGravityConfig,
+    DelimitedSourceConfig,
     GridSourceConfig,
     TensorSourceConfig,
     VectorSourceConfig,
@@ -65,6 +66,9 @@ class CustomMapDataLoader:
     def __init__(self, config: CustomGravityConfig):
         self._config = config
         self._mat_cache: dict[Path, dict[str, Any]] = {}
+        self._delimited_cache: dict[
+            tuple[Path, DelimitedSourceConfig], pd.DataFrame
+        ] = {}
 
     def load(self) -> LoadedCustomMap:
         """Load, validate, and normalize the configured custom map."""
@@ -131,6 +135,9 @@ class CustomMapDataLoader:
         source = self._config.grid
         if source.format == "csv":
             x, y, height, geoid_undulation = self._load_csv_grid(source)
+        elif source.format == "delimited":
+            x, y, height, geoid_undulation = self._load_delimited_grid(
+                source)
         else:
             x, y, height, geoid_undulation = self._load_mat_grid(source)
 
@@ -331,6 +338,56 @@ class CustomMapDataLoader:
                 )
         return x_axis, y_axis, height, geoid_undulation
 
+    def _load_delimited_grid(
+        self,
+        source: GridSourceConfig,
+    ) -> tuple[
+        np.ndarray,
+        np.ndarray,
+        Optional[np.ndarray],
+        Optional[np.ndarray],
+    ]:
+        options = _required_mapping(
+            source.delimited, source.file, "Grid delimited options")
+        data = self._load_delimited(source.file, options)
+        if options.header == "none":
+            x_mapping = _required_mapping(
+                source.x_index, source.file, "Grid xIndex")
+            y_mapping = _required_mapping(
+                source.y_index, source.file, "Grid yIndex")
+            height_mapping = source.height_index
+            geoid_mapping = source.geoid_undulation_index
+        else:
+            x_mapping = _required_mapping(
+                source.x_column, source.file, "Grid xColumn")
+            y_mapping = _required_mapping(
+                source.y_column, source.file, "Grid yColumn")
+            height_mapping = source.height_column
+            geoid_mapping = source.geoid_undulation_column
+
+        x_values = _numeric_column(data, x_mapping, source.file)
+        y_values = _numeric_column(data, y_mapping, source.file)
+        x_axis, y_axis = _axes_from_rows(
+            x_values, y_values, source.row_order, source.file)
+
+        height = None
+        if height_mapping is not None:
+            height = _reshape_rows(
+                _numeric_column(data, height_mapping, source.file),
+                x_axis.size,
+                y_axis.size,
+                source.row_order,
+            )
+        geoid_undulation = None
+        if geoid_mapping is not None:
+            geoid_undulation = _reshape_rows(
+                _numeric_column(data, geoid_mapping, source.file),
+                x_axis.size,
+                y_axis.size,
+                source.row_order,
+            )
+        return x_axis, y_axis, height, geoid_undulation
+
     def _load_vector(
         self,
         source: Optional[VectorSourceConfig],
@@ -342,18 +399,39 @@ class CustomMapDataLoader:
         if source.representation == "scalar":
             return self._load_scalar(source, grid)
 
-        if source.format == "csv":
-            component_columns = _required_mapping(
-                source.component_columns, source.file,
-                f"{source.section} component columns")
-            requested_columns = list(component_columns)
-            if source.coordinate_columns is not None:
-                requested_columns.extend(source.coordinate_columns)
-            data = _read_csv(source.file, requested_columns)
+        if source.format in {"csv", "delimited"}:
+            if source.format == "csv":
+                data = _read_csv(
+                    source.file,
+                    list(_required_mapping(
+                        source.component_columns,
+                        source.file,
+                        f"{source.section} component columns",
+                    )) + list(source.coordinate_columns or ()),
+                )
+                component_mappings: tuple[Any, Any, Any] = _required_mapping(
+                    source.component_columns,
+                    source.file,
+                    f"{source.section} component columns",
+                )
+            else:
+                options = _required_mapping(
+                    source.delimited,
+                    source.file,
+                    f"{source.section} delimited options",
+                )
+                data = self._load_delimited(source.file, options)
+                component_mappings = _required_mapping(
+                    source.component_indices
+                    if options.header == "none"
+                    else source.component_columns,
+                    source.file,
+                    f"{source.section} component mappings",
+                )
             _validate_source_coordinates(data, source, grid)
             values = np.column_stack([
-                _numeric_column(data, column, source.file)
-                for column in component_columns
+                _numeric_column(data, mapping, source.file)
+                for mapping in component_mappings
             ])
             values = _reshape_rows(
                 values, grid.x.size, grid.y.size, source.row_order)
@@ -410,18 +488,33 @@ class CustomMapDataLoader:
     ) -> np.ndarray:
         """Load a scalar vertical disturbance or free-air anomaly."""
 
-        if source.format == "csv":
-            value_column = _required_mapping(
-                source.value_column,
-                source.file,
-                f"{source.section} valueColumn",
-            )
-            requested_columns = [value_column]
-            if source.coordinate_columns is not None:
-                requested_columns.extend(source.coordinate_columns)
-            data = _read_csv(source.file, requested_columns)
+        if source.format in {"csv", "delimited"}:
+            if source.format == "csv":
+                value_mapping: Any = _required_mapping(
+                    source.value_column,
+                    source.file,
+                    f"{source.section} valueColumn",
+                )
+                requested_columns = [value_mapping]
+                if source.coordinate_columns is not None:
+                    requested_columns.extend(source.coordinate_columns)
+                data = _read_csv(source.file, requested_columns)
+            else:
+                options = _required_mapping(
+                    source.delimited,
+                    source.file,
+                    f"{source.section} delimited options",
+                )
+                data = self._load_delimited(source.file, options)
+                value_mapping = _required_mapping(
+                    source.value_index
+                    if options.header == "none"
+                    else source.value_column,
+                    source.file,
+                    f"{source.section} value mapping",
+                )
             _validate_source_coordinates(data, source, grid)
-            scalar = _numeric_column(data, value_column, source.file)
+            scalar = _numeric_column(data, value_mapping, source.file)
             scalar = _reshape_rows(
                 scalar, grid.x.size, grid.y.size, source.row_order)
         else:
@@ -472,6 +565,38 @@ class CustomMapDataLoader:
         missing = np.isnan(scalar)
         values[missing, :] = np.nan
         return values
+
+    def _load_delimited(
+        self,
+        file_path: Path,
+        options: DelimitedSourceConfig,
+    ) -> pd.DataFrame:
+        key = (file_path, options)
+        if key in self._delimited_cache:
+            return self._delimited_cache[key]
+        if not file_path.is_file():
+            raise FileNotFoundError(
+                f"Custom gravity data file does not exist: {file_path}")
+        separator = (
+            r"\s+" if options.delimiter == "whitespace"
+            else options.delimiter
+        )
+        try:
+            data = pd.read_csv(
+                file_path,
+                sep=separator,
+                header=0 if options.header == "present" else None,
+                skiprows=options.skip_rows,
+                comment=options.comment_prefix,
+                skipinitialspace=True,
+            )
+        except Exception as error:
+            raise _data_error(
+                file_path, f"Unable to read delimited data: {error}") from error
+        if data.empty:
+            raise _data_error(file_path, "Delimited data file is empty.")
+        self._delimited_cache[key] = data
+        return data
 
     def _validate_tensor(
         self,
@@ -606,7 +731,7 @@ def _read_csv(file_path: Path, columns: list[str]) -> pd.DataFrame:
 
 def _numeric_column(
     data: pd.DataFrame,
-    column: str,
+    column: str | int,
     file_path: Path,
 ) -> np.ndarray:
     try:
@@ -615,7 +740,7 @@ def _numeric_column(
     except Exception as error:
         raise _data_error(
             file_path,
-            f"CSV column '{column}' contains nonnumeric values.") from error
+            f"Data column '{column}' contains nonnumeric values.") from error
     return values
 
 
@@ -764,14 +889,18 @@ def _validate_source_coordinates(
 ) -> None:
     if source.coordinate_frame == "none":
         return
-    columns = _required_mapping(
-        source.coordinate_columns,
+    mappings = _required_mapping(
+        source.coordinate_indices
+        if source.format == "delimited"
+        and source.delimited is not None
+        and source.delimited.header == "none"
+        else source.coordinate_columns,
         source.file,
-        f"{source.section} coordinate columns",
+        f"{source.section} coordinate mappings",
     )
     coordinates = np.column_stack([
-        _numeric_column(data, column, source.file)
-        for column in columns
+        _numeric_column(data, mapping, source.file)
+        for mapping in mappings
     ])
     coordinates = _reshape_rows(
         coordinates, grid.x.size, grid.y.size, source.row_order)

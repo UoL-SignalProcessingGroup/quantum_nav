@@ -191,6 +191,153 @@ def test_scalar_anomaly_outside_coverage_returns_base(tmp_path: Path):
     assert model.calc_gravity_z(0.0, 0.0, 100.0) == pytest.approx(base)
 
 
+def test_headerless_whitespace_scalar_map_loads_directly(tmp_path: Path):
+    rows = [
+        "1 7.000000 -5.000000 10.0 0.0 100.0",
+        "1 7.000000 -4.000000 11.0 0.0 100.0",
+        "1 7.000000 -3.000000 12.0 0.0 100.0",
+        "1 6.000000 -5.000000 20.0 0.0 100.0",
+        "1 6.000000 -4.000000 21.0 0.0 100.0",
+        "1 6.000000 -3.000000 22.0 0.0 100.0",
+    ]
+    (tmp_path / "public.xyz").write_text(
+        "\n".join(rows), encoding="utf-8")
+    config_file = tmp_path / "delimited.ini"
+    config_file.write_text(
+        """
+[CustomGravityMap]
+name = Headerless public map
+crs = EPSG:4326
+mode = residual
+interpolation = linear
+outOfBounds = error
+
+[Grid]
+format = delimited
+file = public.xyz
+delimiter = whitespace
+header = none
+xIndex = 2
+yIndex = 1
+rowOrder = x_fastest
+
+[Field]
+format = delimited
+file = public.xyz
+delimiter = whitespace
+header = none
+representation = scalar
+valueIndex = 3
+units = mGal
+quantity = gravity_disturbance
+verticalDirection = down
+coordinateFrame = grid
+gridXIndex = 2
+gridYIndex = 1
+rowOrder = x_fastest
+""",
+        encoding="utf-8",
+    )
+
+    model = CustomGravityMap(FixedValue(), None, config_file)
+
+    np.testing.assert_allclose(model.map_data.x, [-5.0, -4.0, -3.0])
+    np.testing.assert_allclose(model.map_data.y, [6.0, 7.0])
+    assert model.get_disturbance(7.0, -5.0) == pytest.approx(10e-5)
+    assert model.get_disturbance(6.0, -3.0) == pytest.approx(22e-5)
+
+
+def test_headed_delimited_map_honours_skip_rows_and_comments(tmp_path: Path):
+    (tmp_path / "headed.gdf").write_text(
+        "metadata\nlon;lat;value\n"
+        "# ignored\n10;50;1\n11;50;2\n10;51;3\n11;51;4\n",
+        encoding="utf-8",
+    )
+    config_file = tmp_path / "headed.ini"
+    config_file.write_text(
+        """
+[CustomGravityMap]
+crs = EPSG:4326
+mode = residual
+
+[Grid]
+format = delimited
+file = headed.gdf
+delimiter = ;
+header = present
+skipRows = 1
+commentPrefix = #
+xColumn = lon
+yColumn = lat
+rowOrder = x_fastest
+
+[Field]
+format = delimited
+file = headed.gdf
+delimiter = ;
+header = present
+skipRows = 1
+commentPrefix = #
+representation = scalar
+valueColumn = value
+units = mGal
+quantity = gravity_disturbance
+verticalDirection = down
+rowOrder = x_fastest
+""",
+        encoding="utf-8",
+    )
+
+    model = CustomGravityMap(FixedValue(), None, config_file)
+
+    assert model.get_disturbance(51.0, 11.0) == pytest.approx(4e-5)
+
+
+def test_headerless_delimited_vector_map_uses_component_indexes(
+    tmp_path: Path,
+):
+    (tmp_path / "vector.xyz").write_text(
+        "10 50 1 2 3\n11 50 4 5 6\n"
+        "10 51 7 8 9\n11 51 10 11 12\n",
+        encoding="utf-8",
+    )
+    config_file = tmp_path / "vector.ini"
+    config_file.write_text(
+        """
+[CustomGravityMap]
+crs = EPSG:4326
+mode = residual
+
+[Grid]
+format = delimited
+file = vector.xyz
+header = none
+xIndex = 0
+yIndex = 1
+rowOrder = x_fastest
+
+[Field]
+format = delimited
+file = vector.xyz
+header = none
+representation = vector
+northIndex = 2
+eastIndex = 3
+downIndex = 4
+units = mGal
+frame = NED
+quantity = residual
+rowOrder = x_fastest
+""",
+        encoding="utf-8",
+    )
+
+    model = CustomGravityMap(FixedValue(), None, config_file)
+
+    np.testing.assert_allclose(
+        model.get_residual(51.0, 11.0), np.array([10, 11, 12]) * 1e-5)
+
+
 def test_interpolates_full_ned_residual(tmp_path: Path):
     model, _, _, expected = _make_map(tmp_path)
 
