@@ -18,7 +18,11 @@ from qnav.input.ini.custom_gravity_config import (
     TensorSourceConfig,
     VectorSourceConfig,
 )
-from qnav.util.transformations import ecef2ned_transform_vec
+from qnav.util import constants
+from qnav.util.transformations import (
+    ecef2ned_transform_vec,
+    lla2ecef_vec,
+)
 
 
 _T = TypeVar("_T")
@@ -33,6 +37,9 @@ class LoadedGrid:
     latitude: np.ndarray
     longitude: np.ndarray
     height: Optional[np.ndarray]
+    ellipsoid_height: np.ndarray
+    ecef: np.ndarray
+    geocentric_latitude: np.ndarray
     flip_x: bool
     flip_y: bool
 
@@ -46,6 +53,7 @@ class LoadedCustomMap:
     latitude: np.ndarray
     longitude: np.ndarray
     height: Optional[np.ndarray]
+    ellipsoid_height: np.ndarray
     residual: np.ndarray
     crs: CRS
 
@@ -79,13 +87,14 @@ class CustomMapDataLoader:
             latitude=grid.latitude,
             longitude=grid.longitude,
             height=grid.height,
+            ellipsoid_height=grid.ellipsoid_height,
             residual=residual,
             crs=crs,
         )
 
     def _read_crs(self) -> CRS:
         try:
-            return CRS.from_user_input(self._config.crs)
+            crs = CRS.from_user_input(self._config.crs)
         except CRSError as error:
             raise NavConfigError(
                 "CustomGravityMap",
@@ -94,13 +103,28 @@ class CustomMapDataLoader:
                 f"The configured CRS '{self._config.crs}' could not be "
                 f"loaded: {error}",
             ) from error
+        if (
+            crs.is_compound
+            or crs.is_vertical
+            or crs.is_geocentric
+            or len(crs.axis_info) != 2
+            or not (crs.is_projected or crs.is_geographic)
+        ):
+            raise NavConfigError(
+                "CustomGravityMap",
+                "crs",
+                "Unsupported CRS",
+                "Custom gravity grids require a two-dimensional horizontal "
+                "projected or geographic CRS.",
+            )
+        return crs
 
     def _load_grid(self, crs: CRS) -> LoadedGrid:
         source = self._config.grid
         if source.format == "csv":
-            x, y, height = self._load_csv_grid(source)
+            x, y, height, geoid_undulation = self._load_csv_grid(source)
         else:
-            x, y, height = self._load_mat_grid(source)
+            x, y, height, geoid_undulation = self._load_mat_grid(source)
 
         x, flip_x = _normalize_axis(x, "x")
         y, flip_y = _normalize_axis(y, "y")
@@ -109,6 +133,12 @@ class CustomMapDataLoader:
                 height = np.flip(height, axis=0)
             if flip_y:
                 height = np.flip(height, axis=1)
+        if geoid_undulation is not None:
+            if flip_x:
+                geoid_undulation = np.flip(geoid_undulation, axis=0)
+            if flip_y:
+                geoid_undulation = np.flip(
+                    geoid_undulation, axis=1)
 
         x_grid, y_grid = np.meshgrid(x, y, indexing="ij")
         try:
@@ -131,12 +161,41 @@ class CustomMapDataLoader:
                 source.file,
                 "Grid coordinates transform to non-finite WGS-84 values.")
 
+        if height is None:
+            ellipsoid_height = np.zeros_like(latitude)
+        elif source.height_reference == "orthometric":
+            if geoid_undulation is None:
+                raise _data_error(
+                    source.file,
+                    "Orthometric heights require geoid undulation values.",
+                )
+            ellipsoid_height = height + geoid_undulation
+        else:
+            ellipsoid_height = height
+        if not np.all(np.isfinite(ellipsoid_height)):
+            raise _data_error(
+                source.file, "Grid ellipsoid heights must all be finite.")
+
+        lla = np.column_stack((
+            latitude.ravel(),
+            longitude.ravel(),
+            ellipsoid_height.ravel(),
+        ))
+        ecef = lla2ecef_vec(lla).reshape(latitude.shape + (3,))
+        geocentric_latitude = np.degrees(np.arctan2(
+            ecef[:, :, 2],
+            np.hypot(ecef[:, :, 0], ecef[:, :, 1]),
+        ))
+
         return LoadedGrid(
             x=x,
             y=y,
             latitude=latitude,
             longitude=longitude,
             height=height,
+            ellipsoid_height=ellipsoid_height,
+            ecef=ecef,
+            geocentric_latitude=geocentric_latitude,
             flip_x=flip_x,
             flip_y=flip_y,
         )
@@ -144,7 +203,12 @@ class CustomMapDataLoader:
     def _load_csv_grid(
         self,
         source: GridSourceConfig,
-    ) -> tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
+    ) -> tuple[
+        np.ndarray,
+        np.ndarray,
+        Optional[np.ndarray],
+        Optional[np.ndarray],
+    ]:
         x_column = _required_mapping(
             source.x_column, source.file, "Grid xColumn")
         y_column = _required_mapping(
@@ -152,6 +216,8 @@ class CustomMapDataLoader:
         columns = [x_column, y_column]
         if source.height_column is not None:
             columns.append(source.height_column)
+        if source.geoid_undulation_column is not None:
+            columns.append(source.geoid_undulation_column)
         data = _read_csv(source.file, columns)
 
         x_values = _numeric_column(data, x_column, source.file)
@@ -166,12 +232,28 @@ class CustomMapDataLoader:
             height = _reshape_rows(
                 height_values, x_axis.size, y_axis.size, source.row_order)
 
-        return x_axis, y_axis, height
+        geoid_undulation = None
+        if source.geoid_undulation_column is not None:
+            undulation_values = _numeric_column(
+                data, source.geoid_undulation_column, source.file)
+            geoid_undulation = _reshape_rows(
+                undulation_values,
+                x_axis.size,
+                y_axis.size,
+                source.row_order,
+            )
+
+        return x_axis, y_axis, height, geoid_undulation
 
     def _load_mat_grid(
         self,
         source: GridSourceConfig,
-    ) -> tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
+    ) -> tuple[
+        np.ndarray,
+        np.ndarray,
+        Optional[np.ndarray],
+        Optional[np.ndarray],
+    ]:
         mat_data = self._load_mat(source.file)
         x_variable = _required_mapping(
             source.x_variable, source.file, "Grid xVariable")
@@ -206,7 +288,26 @@ class CustomMapDataLoader:
                     source.file,
                     f"Height array has shape {height.shape}; expected "
                     f"{expected}.")
-        return x_axis, y_axis, height
+
+        geoid_undulation = None
+        if source.geoid_undulation_variable is not None:
+            geoid_undulation = _numeric_array(
+                _resolve_mat_value(
+                    mat_data,
+                    source.geoid_undulation_variable,
+                    source.file,
+                ),
+                source.geoid_undulation_variable,
+                source.file,
+            )
+            expected = (x_axis.size, y_axis.size)
+            if geoid_undulation.shape != expected:
+                raise _data_error(
+                    source.file,
+                    f"Geoid-undulation array has shape "
+                    f"{geoid_undulation.shape}; expected {expected}.",
+                )
+        return x_axis, y_axis, height, geoid_undulation
 
     def _load_vector(
         self,
@@ -220,7 +321,11 @@ class CustomMapDataLoader:
             component_columns = _required_mapping(
                 source.component_columns, source.file,
                 f"{source.section} component columns")
-            data = _read_csv(source.file, list(component_columns))
+            requested_columns = list(component_columns)
+            if source.coordinate_columns is not None:
+                requested_columns.extend(source.coordinate_columns)
+            data = _read_csv(source.file, requested_columns)
+            _validate_source_coordinates(data, source, grid)
             values = np.column_stack([
                 _numeric_column(data, column, source.file)
                 for column in component_columns
@@ -270,7 +375,8 @@ class CustomMapDataLoader:
 
         values = np.asarray(values, dtype=np.float64)
         values *= _acceleration_scale(source.units)
-        return _to_ned(values, source, grid)
+        values = _to_ned(values, source, grid)
+        return _to_effective_gravity(values, source.quantity, grid)
 
     def _validate_tensor(
         self,
@@ -324,6 +430,33 @@ class CustomMapDataLoader:
         if not np.all(np.isfinite(values)):
             raise _data_error(
                 source.file, "Tensor field must contain only finite values.")
+        if grid.flip_x:
+            values = np.flip(values, axis=0)
+        if grid.flip_y:
+            values = np.flip(values, axis=1)
+
+        values = np.asarray(values, dtype=np.float64)
+        values *= _tensor_scale(source.units)
+        matrices = np.empty(values.shape[:2] + (3, 3))
+        matrices[:, :, 0, 0] = values[:, :, 0]
+        matrices[:, :, 1, 1] = values[:, :, 1]
+        matrices[:, :, 2, 2] = values[:, :, 2]
+        matrices[:, :, 0, 1] = matrices[:, :, 1, 0] = values[:, :, 3]
+        matrices[:, :, 0, 2] = matrices[:, :, 2, 0] = values[:, :, 4]
+        matrices[:, :, 1, 2] = matrices[:, :, 2, 1] = values[:, :, 5]
+        rotations = _source_to_ned_rotations(
+            source.frame, source.custom_to_ned, grid, "Tensor")
+        transformed = np.einsum(
+            "xyik,xykl,xyjl->xyij",
+            rotations,
+            matrices,
+            rotations,
+        )
+        if not np.all(np.isfinite(transformed)):
+            raise _data_error(
+                source.file,
+                "Tensor frame conversion produced non-finite values.",
+            )
 
     def _load_mat(self, file_path: Path) -> dict[str, Any]:
         if file_path not in self._mat_cache:
@@ -511,41 +644,148 @@ def _acceleration_scale(units: str) -> float:
     }[units]
 
 
+def _tensor_scale(units: str) -> float:
+    return {
+        "e": 1e-9,
+        "s-2": 1.0,
+    }[units]
+
+
+def _validate_source_coordinates(
+    data: pd.DataFrame,
+    source: VectorSourceConfig,
+    grid: LoadedGrid,
+) -> None:
+    if source.coordinate_frame == "none":
+        return
+    columns = _required_mapping(
+        source.coordinate_columns,
+        source.file,
+        f"{source.section} coordinate columns",
+    )
+    coordinates = np.column_stack([
+        _numeric_column(data, column, source.file)
+        for column in columns
+    ])
+    coordinates = _reshape_rows(
+        coordinates, grid.x.size, grid.y.size, source.row_order)
+    if grid.flip_x:
+        coordinates = np.flip(coordinates, axis=0)
+    if grid.flip_y:
+        coordinates = np.flip(coordinates, axis=1)
+
+    if source.coordinate_frame == "grid":
+        expected_x, expected_y = np.meshgrid(
+            grid.x, grid.y, indexing="ij")
+        expected = np.stack((expected_x, expected_y), axis=-1)
+        valid = np.allclose(
+            coordinates, expected, rtol=1e-12, atol=1e-6)
+    else:
+        latitude_error = np.abs(coordinates[:, :, 0] - grid.latitude)
+        longitude_error = np.abs(
+            (coordinates[:, :, 1] - grid.longitude + 180.0) % 360.0
+            - 180.0
+        )
+        valid = bool(
+            np.all(latitude_error <= 1e-8)
+            and np.all(longitude_error <= 1e-8)
+        )
+    if not valid:
+        raise _data_error(
+            source.file,
+            f"{source.section} coordinates do not align with the grid.",
+        )
+
+
 def _to_ned(
     values: np.ndarray,
     source: VectorSourceConfig,
     grid: LoadedGrid,
 ) -> np.ndarray:
-    if source.frame == "ned":
-        return values
-    if source.frame == "enu":
-        return np.stack(
-            (values[:, :, 1], values[:, :, 0], -values[:, :, 2]),
-            axis=-1,
-        )
-    if source.frame == "custom":
-        matrix = np.asarray(source.custom_to_ned).reshape(3, 3)
-        if not np.allclose(
-            matrix @ matrix.T, np.eye(3), rtol=0, atol=1e-8
-        ) or not np.isclose(np.linalg.det(matrix), 1.0, rtol=0, atol=1e-8):
-            raise NavConfigError(
-                source.section,
-                "customToNed",
-                "Invalid rotation",
-                "The custom-to-NED matrix must be orthonormal with "
-                "determinant +1.",
-            )
-        return values @ matrix.T
+    rotations = _source_to_ned_rotations(
+        source.frame,
+        source.custom_to_ned,
+        grid,
+        source.section,
+    )
+    return np.einsum("xyij,xyj->xyi", rotations, values)
 
+
+def _source_to_ned_rotations(
+    frame: str,
+    custom_to_ned: Optional[tuple[float, ...]],
+    grid: LoadedGrid,
+    section: str,
+) -> np.ndarray:
+    shape = grid.latitude.shape + (3, 3)
+    if frame == "ned":
+        return np.broadcast_to(np.eye(3), shape)
+    if frame == "enu":
+        return np.broadcast_to(
+            np.array([
+                [0.0, 1.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 0.0, -1.0],
+            ]),
+            shape,
+        )
+    if frame == "ecef":
+        lla = np.column_stack((
+            grid.latitude.ravel(),
+            grid.longitude.ravel(),
+            grid.ellipsoid_height.ravel(),
+        ))
+        return ecef2ned_transform_vec(lla).reshape(shape)
+    if frame == "geocentric_ned":
+        delta = np.radians(
+            grid.latitude - grid.geocentric_latitude)
+        cosine = np.cos(delta)
+        sine = np.sin(delta)
+        rotations = np.zeros(shape)
+        rotations[:, :, 0, 0] = cosine
+        rotations[:, :, 0, 2] = sine
+        rotations[:, :, 1, 1] = 1.0
+        rotations[:, :, 2, 0] = -sine
+        rotations[:, :, 2, 2] = cosine
+        return rotations
+
+    matrix = np.asarray(custom_to_ned).reshape(3, 3)
+    if not np.allclose(
+        matrix @ matrix.T, np.eye(3), rtol=0, atol=1e-8
+    ) or not np.isclose(np.linalg.det(matrix), 1.0, rtol=0, atol=1e-8):
+        raise NavConfigError(
+            section,
+            "customToNed",
+            "Invalid rotation",
+            "The custom-to-NED matrix must be orthonormal with "
+            "determinant +1.",
+        )
+    return np.broadcast_to(matrix, shape)
+
+
+def _to_effective_gravity(
+    values: np.ndarray,
+    quantity: str,
+    grid: LoadedGrid,
+) -> np.ndarray:
+    if quantity != "gravitational_attraction":
+        return values
+
+    ecef = grid.ecef.reshape(-1, 3)
+    centrifugal_ecef = np.column_stack((
+        constants.OMEGA_E ** 2 * ecef[:, 0],
+        constants.OMEGA_E ** 2 * ecef[:, 1],
+        np.zeros(ecef.shape[0]),
+    ))
     lla = np.column_stack((
         grid.latitude.ravel(),
         grid.longitude.ravel(),
-        np.zeros(grid.latitude.size),
+        grid.ellipsoid_height.ravel(),
     ))
     transforms = ecef2ned_transform_vec(lla)
-    converted = np.einsum(
-        "nij,nj->ni", transforms, values.reshape(-1, 3))
-    return converted.reshape(values.shape)
+    centrifugal_ned = np.einsum(
+        "nij,nj->ni", transforms, centrifugal_ecef)
+    return values + centrifugal_ned.reshape(values.shape)
 
 
 def _data_error(file_path: Path, description: str) -> ValueError:

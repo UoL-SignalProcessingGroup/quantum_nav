@@ -11,7 +11,11 @@ from qnav.input.config_handler import NavConfigError
 from qnav.input.ini.custom_gravity_config import (
     read_custom_gravity_config,
 )
-from qnav.util.transformations import ecef2ned_transform_vec
+from qnav.util import constants
+from qnav.util.transformations import (
+    ecef2ned_transform_vec,
+    lla2ecef_vec,
+)
 
 
 def _write_csv_inputs(tmp_path: Path):
@@ -345,6 +349,143 @@ rowOrder = x_fastest
         np.array([1.0, 2.0, 3.0]),
     ).reshape(loaded.residual.shape)
     np.testing.assert_allclose(loaded.residual, expected)
+
+
+def test_converts_geocentric_local_frame_to_geodetic_ned(tmp_path: Path):
+    longitude = np.array([10.0, 10.1])
+    latitude = np.array([70.0, 70.1])
+    lon_grid, lat_grid = np.meshgrid(
+        longitude, latitude, indexing="xy")
+    height = np.full(lon_grid.size, 50.0)
+    pd.DataFrame({
+        "x": lon_grid.ravel(),
+        "y": lat_grid.ravel(),
+        "height": height,
+    }).to_csv(tmp_path / "coordinates.csv", index=False)
+
+    lla = np.column_stack((
+        lat_grid.ravel(),
+        lon_grid.ravel(),
+        height,
+    ))
+    ecef = lla2ecef_vec(lla)
+    geocentric_latitude = np.degrees(np.arctan2(
+        ecef[:, 2], np.hypot(ecef[:, 0], ecef[:, 1])))
+    delta = np.radians(lat_grid.ravel() - geocentric_latitude)
+    desired_down = 9.8
+    pd.DataFrame({
+        "north": -np.sin(delta) * desired_down,
+        "east": np.zeros(delta.size),
+        "down": np.cos(delta) * desired_down,
+    }).to_csv(tmp_path / "field.csv", index=False)
+    config_file = _write_config(
+        tmp_path,
+        _csv_field("Field", "field.csv", "geocentric_ned"),
+        mode="residual",
+        crs="EPSG:4326",
+    )
+
+    loaded = load_custom_map_data(
+        read_custom_gravity_config(config_file))
+
+    expected = np.broadcast_to(
+        np.array([0.0, 0.0, desired_down * 1e-5]),
+        loaded.residual.shape,
+    )
+    np.testing.assert_allclose(loaded.residual, expected, atol=1e-14)
+
+
+def test_normalizes_gravitational_attraction_to_effective_gravity(
+    tmp_path: Path,
+):
+    _write_csv_inputs(tmp_path)
+    field = pd.read_csv(tmp_path / "field.csv")
+    field.loc[:, :] = 0.0
+    field.to_csv(tmp_path / "field.csv", index=False)
+
+    reference = pd.read_csv(tmp_path / "reference.csv")
+    reference.loc[:, :] = 0.0
+    reference.to_csv(tmp_path / "reference.csv", index=False)
+    reference_section = _csv_field("Reference", "reference.csv")
+    reference_section += "\nquantity = gravitational_attraction\n"
+    config_file = _write_config(
+        tmp_path,
+        _csv_field("Field", "field.csv"),
+        reference_section,
+    )
+
+    loaded = load_custom_map_data(
+        read_custom_gravity_config(config_file))
+
+    flat_ecef = lla2ecef_vec(np.column_stack((
+        loaded.latitude.ravel(),
+        loaded.longitude.ravel(),
+        loaded.height.ravel(),
+    )))
+    centrifugal_ecef = np.column_stack((
+        constants.OMEGA_E ** 2 * flat_ecef[:, 0],
+        constants.OMEGA_E ** 2 * flat_ecef[:, 1],
+        np.zeros(flat_ecef.shape[0]),
+    ))
+    lla = np.column_stack((
+        loaded.latitude.ravel(),
+        loaded.longitude.ravel(),
+        loaded.height.ravel(),
+    ))
+    expected_reference = np.einsum(
+        "nij,nj->ni",
+        ecef2ned_transform_vec(lla),
+        centrifugal_ecef,
+    ).reshape(loaded.residual.shape)
+    np.testing.assert_allclose(loaded.residual, -expected_reference)
+
+
+def test_validates_vector_source_coordinates(tmp_path: Path):
+    _write_csv_inputs(tmp_path)
+    coordinates = pd.read_csv(tmp_path / "coordinates.csv")
+    field = pd.read_csv(tmp_path / "field.csv")
+    field["grid_x"] = coordinates["x"]
+    field["grid_y"] = coordinates["y"]
+    field.loc[3, "grid_x"] += 1.0
+    field.to_csv(tmp_path / "field.csv", index=False)
+    field_section = _csv_field("Field", "field.csv")
+    field_section += """
+coordinateFrame = grid
+gridXColumn = grid_x
+gridYColumn = grid_y
+"""
+    config_file = _write_config(
+        tmp_path, field_section, mode="residual")
+
+    with pytest.raises(ValueError, match="do not align"):
+        load_custom_map_data(
+            read_custom_gravity_config(config_file))
+
+
+def test_converts_orthometric_to_ellipsoid_height(tmp_path: Path):
+    _write_csv_inputs(tmp_path)
+    coordinates = pd.read_csv(tmp_path / "coordinates.csv")
+    coordinates["height"] = 20.0
+    coordinates["undulation"] = 30.0
+    coordinates.to_csv(tmp_path / "coordinates.csv", index=False)
+    config_file = _write_config(
+        tmp_path,
+        _csv_field("Field", "field.csv"),
+        mode="residual",
+    )
+    body = config_file.read_text(encoding="utf-8")
+    body = body.replace(
+        "heightColumn = height",
+        "heightColumn = height\n"
+        "heightReference = orthometric\n"
+        "geoidUndulationColumn = undulation",
+    )
+    config_file.write_text(body, encoding="utf-8")
+
+    loaded = load_custom_map_data(
+        read_custom_gravity_config(config_file))
+
+    np.testing.assert_allclose(loaded.ellipsoid_height, 50.0)
 
 
 def test_validates_csv_tensor_shape_and_columns(tmp_path: Path):

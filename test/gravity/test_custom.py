@@ -7,6 +7,7 @@ import pytest
 from pyproj import Transformer
 
 from qnav.gravity.custom import CustomGravityMap
+from qnav.gravity.nima import WGS84Gravity
 from qnav.gravity.simple import FixedValue
 
 
@@ -123,6 +124,26 @@ def test_vectorized_results_match_scalar_results(tmp_path: Path):
             gravity[index],
             model.calc_gravity_xyz(lat[index], lon[index], alt[index]),
         )
+
+
+def test_scalar_and_vector_down_match_full_vector_with_wgs84(
+    tmp_path: Path,
+):
+    configured, _, _, _ = _make_map(tmp_path)
+    model = CustomGravityMap(WGS84Gravity(), None, configured.config)
+    lat = np.array([70.0, 70.1, 70.2])
+    lon = np.array([10.0, 10.1, 10.2])
+    alt = np.array([0.0, 100.0, 200.0])
+
+    scalar_down = np.array([
+        model.calc_gravity_z(a, b, c)
+        for a, b, c in zip(lat, lon, alt)
+    ])
+    vector_down = model.calc_gravity_z_vec(lat, lon, alt)
+    full_down = model.calc_gravity_xyz_vec(lat, lon, alt)[:, 2]
+
+    np.testing.assert_allclose(scalar_down, full_down)
+    np.testing.assert_allclose(vector_down, full_down)
 
 
 def test_base_fallback_outside_map(tmp_path: Path):

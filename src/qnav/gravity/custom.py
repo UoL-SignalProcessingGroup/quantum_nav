@@ -92,7 +92,9 @@ class CustomGravityMap(GravityMap):
     def calc_gravity_z(self, lat: float, lon: float, alt: float) -> float:
         residual = self.get_residual(lat, lon)
         return float(
-            self._base_model.calc_gravity_z(lat, lon, alt) + residual[2])
+            self._base_model.calc_gravity_xyz(lat, lon, alt)[2]
+            + residual[2]
+        )
 
     def calc_gravity_z_vec(
         self,
@@ -102,8 +104,8 @@ class CustomGravityMap(GravityMap):
     ) -> np.ndarray:
         _validate_query_shapes(lat, lon, alt)
         residual = self.get_residual_vec(lat, lon)
-        base = self._base_model.calc_gravity_z_vec(lat, lon, alt)
-        return base + residual[..., 2]
+        base = self._base_model.calc_gravity_xyz_vec(lat, lon, alt)
+        return base[..., 2] + residual[..., 2]
 
     def calc_gravity_xyz(
         self,
