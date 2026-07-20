@@ -43,6 +43,11 @@ docs = [
     "Sphinx",
     "Sphinx-rtd-theme"
 ]
+maps = [
+    "rasterio>=1.4.4",
+    "xarray>=2025.1.0",
+    "h5netcdf>=1.4.0"
+]
 
 [tool.setuptools.dynamic]
 version = {attr = "qnav.__version__"}

@@ -289,15 +289,49 @@ conflated:
   matrix and is appropriate only when that rotation is constant over the map.
 * ``units`` defines the acceleration units and supports ``m/s2``, ``Gal``,
   and ``mGal``.
-* ``quantity`` distinguishes a direct ``residual``, ``effective_gravity``
-  that already includes centrifugal acceleration, and
+* ``representation`` is ``vector`` by default. ``scalar`` accepts a
+  ``gravity_disturbance`` or ``free_air_anomaly`` value and requires
+  ``verticalDirection = down`` or ``up``. Free-air anomaly conversion needs
+  the configured QNav geoid model. Bouguer, isostatic, and generic gravity
+  anomaly labels are rejected because they do not uniquely describe the
+  acceleration correction needed by the navigation model.
+* For vectors, ``quantity`` distinguishes a direct ``residual``,
+  ``effective_gravity`` that already includes centrifugal acceleration, and
   ``gravitational_attraction`` that does not. QNav adds WGS-84 centrifugal
   acceleration to the latter before total/reference subtraction.
 
-Version 1 custom maps must be complete rectilinear grids. CSV sources use
-named columns and declare whether X or Y changes fastest. MATLAB v5 through
-v7.2 sources use a packed numeric array, zero-based component indexes, and an
-``axisOrder`` containing ``component``, ``x``, and ``y``.
+All custom maps must describe a complete rectilinear grid with at least two
+coordinates on each axis. Supported source formats are:
+
+* ``csv``: named columns with ``rowOrder = x_fastest`` or ``y_fastest``.
+* ``delimited``: whitespace, tab, or a one-character separator; optional
+  one-character comment prefix and skipped rows; either a header with named
+  mappings or ``header = none`` with zero-based indexes. When grid and field
+  share a file, a configured subset is read in chunks.
+* ``mat``: MATLAB v5 through v7.2 numeric arrays. Packed vectors use
+  zero-based component indexes and an ``axisOrder`` containing ``component``,
+  ``x``, and ``y``. MATLAB v7.3/HDF5 is not accepted as MAT; export NetCDF or
+  CSV instead.
+* ``geotiff``: a non-rotated affine grid with explicit band mappings. Pixel
+  centres define grid coordinates, embedded CRS metadata must agree with
+  ``crs``, and NoData/masked cells are excluded from coverage.
+* ``netcdf``: one-dimensional X/Y variables and named field variables. Field
+  dimension order is detected by name; extra dimensions must be singleton.
+  CF scaling, fill values, and recognised CRS metadata are honoured. GMT GRD
+  files using this NetCDF layout are supported.
+
+GeoTIFF and NetCDF require ``pip install "qnav[maps]"``. Grid and field must
+use the same raster format and have exactly aligned axes. QNav never guesses
+a CRS or a physical quantity from a filename or column label.
+
+``maxCells`` in ``[CustomGravityMap]`` defaults to 5,000,000. An optional
+``[Subset]`` selects inclusive ``minX``, ``maxX``, ``minY``, and ``maxY``
+bounds with ``coordinateFrame = grid``, or longitude/latitude bounds with
+``coordinateFrame = wgs84``. ``paddingCells`` defaults to one. Subsetting is
+also the normal way to use global products without loading them in full.
+
+Ready-to-copy templates are provided in ``config/gravity_maps`` for generic
+vector CSV, scalar delimited text, scalar GeoTIFF, and scalar NetCDF maps.
 CSV vector sources may set ``coordinateFrame = grid`` with
 ``gridXColumn``/``gridYColumn``, or ``coordinateFrame = wgs84`` with
 ``latitudeColumn``/``longitudeColumn``. QNav then verifies every source row

@@ -93,20 +93,35 @@ was included by request.
 
 Custom Gravity Maps
 ...................
-User-supplied rectilinear gravity maps can be loaded from CSV or MATLAB
-files. A separate INI file defines the map's coordinate reference system,
-grid layout, vector frame, units, source fields, interpolation method, and
-out-of-coverage behaviour. QNav transforms WGS-84 trajectory positions into
-the map CRS before interpolation.
+User-supplied rectilinear gravity maps can be loaded from CSV, general
+delimited text, MATLAB, GeoTIFF, and NetCDF/GMT GRD files. GeoTIFF and
+NetCDF readers are optional and can be installed with
+``pip install "qnav[maps]"``. A separate INI file defines the map's
+coordinate reference system, grid layout, physical quantity, vector frame,
+units, source fields, interpolation method, and out-of-coverage behaviour.
+QNav transforms WGS-84 trajectory positions into the configured map CRS
+before interpolation; a map is not assumed to be WGS-84 merely because it
+also contains latitude and longitude columns.
 
-Custom maps provide full North-East-Down acceleration residuals. They may
-contain those residuals directly, or QNav can derive them by subtracting a
-configured reference vector field from a total vector field. Before
+Custom maps can provide full North-East-Down acceleration residuals or a
+scalar vertical gravity disturbance/free-air anomaly. A scalar is converted
+to the NED down component using its explicit ``verticalDirection``. QNav can
+also derive vector residuals by subtracting a configured reference vector
+field from a total vector field. Before
 subtraction, QNav converts geodetic, geocentric-local, ECEF, ENU, or constant
 custom axes to WGS-84 geodetic NED. It also normalises gravitational
 attraction by adding centrifugal acceleration when the source does not
 already contain it. Residuals are then added to the selected base gravity
 function.
+
+``gravity_disturbance`` is the preferred scalar map-matching signal because
+it is directly the difference between actual and normal gravity at the same
+position. ``free_air_anomaly`` is also supported, but requires a geoid model
+so QNav can apply its existing anomaly/disturbance conversion. Generic
+``gravity_anomaly``, Bouguer anomaly, and isostatic anomaly products are
+rejected: their reductions are not interchangeable with a physical
+acceleration correction without extra terrain, density, and reference-model
+metadata.
 
 Custom maps are two-dimensional surface corrections. The base function
 retains responsibility for altitude dependence, consistent with
@@ -114,3 +129,38 @@ SRTM2Gravity residual handling. Configured height and vertical-datum
 information is used to define the local vector frame and centrifugal
 acceleration at each map node; it does not create a three-dimensional
 interpolation volume.
+
+Large maps should use a ``[Subset]`` section and retain at least one padding
+cell for linear interpolation. Bounds can be expressed in the map grid or in
+WGS-84 and are transformed with a densified boundary. ``maxCells`` (five
+million by default) stops an accidentally global or misconfigured selection
+before field arrays are allocated. GeoTIFF windows, NetCDF indexes, and a
+shared delimited grid/field file are subset during reading.
+
+Examples of compatible public products
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The custom interface is intentionally provider-neutral. The following
+products are useful compatibility examples but remain subject to their
+providers' documentation, citation, and licence terms:
+
+* The `ICGEM Calculation Service
+  <https://icgem.gfz-potsdam.de/calcgrid>`_ can calculate regular
+  ellipsoidal grids of gravity disturbance. Its ASCII output can be described
+  with ``format = delimited`` and the provider's actual header/index layout;
+  choose gravity disturbance rather than an ambiguously named anomaly.
+* The `NCEI gravity catalogue
+  <https://www.ncei.noaa.gov/products/gravity-data>`_ includes regional
+  free-air grids and documented ASCII products. A complete regular grid can
+  use the delimited template. Point surveys and irregular flight lines must
+  first be gridded; QNav does not silently interpolate scattered data.
+* The `4D Antarctica compilation
+  <https://ftp.space.dtu.dk/pub/RF/4D-ANTARCTICA/4D_antarctica_gravity-grid.pdf>`_
+  documents free-air/gravity-disturbance fields in ASCII and GeoTIFF and an
+  underlying polar-stereographic grid. The appropriate projected CRS and the
+  chosen physical field must be configured explicitly. Bouguer and isostatic
+  fields from such products are deliberately not accepted as acceleration
+  corrections.
+
+The templates ``custom_delimited_free_air.ini``,
+``custom_geotiff_scalar.ini``, and ``custom_netcdf_scalar.ini`` demonstrate
+the supported layouts without bundling or downloading provider data.
