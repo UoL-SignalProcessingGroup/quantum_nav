@@ -10,6 +10,22 @@ from pyproj import Transformer
 from qnav.gravity.custom import CustomGravityMap
 from qnav.gravity.nima import WGS84Gravity
 from qnav.gravity.simple import FixedValue
+from qnav.input.config_handler import NavConfigError
+
+
+class _ConstantGeoid:
+    """Minimal non-dummy geoid used to verify anomaly conversions."""
+
+    def __init__(self, height: float = 25.0):
+        self.height = height
+
+    def get_height(self, lat: float, lon: float) -> float:
+        return self.height
+
+    def get_height_vec(
+        self, lat: np.ndarray, lon: np.ndarray,
+    ) -> np.ndarray:
+        return np.full(np.shape(lat), self.height, dtype=np.float64)
 
 
 def _make_map(
@@ -80,6 +96,99 @@ rowOrder = x_fastest
     )
     expected = np.transpose(residual_rows, (1, 0, 2))
     return CustomGravityMap(FixedValue(), None, config_file), x, y, expected
+
+
+def _make_scalar_map(
+    tmp_path: Path,
+    quantity: str = "gravity_disturbance",
+    vertical_direction: str = "down",
+    geoid: object | None = None,
+) -> CustomGravityMap:
+    x = np.array([10.0, 10.1, 10.2])
+    y = np.array([70.0, 70.1, 70.2])
+    xx, yy = np.meshgrid(x, y, indexing="xy")
+    pd.DataFrame({"x": xx.ravel(), "y": yy.ravel()}).to_csv(
+        tmp_path / "scalar_coordinates.csv", index=False)
+    values = 10.0 + 2.0 * (xx - 10.0) + 3.0 * (yy - 70.0)
+    pd.DataFrame({"value": values.ravel()}).to_csv(
+        tmp_path / "scalar.csv", index=False)
+    config_file = tmp_path / "scalar.ini"
+    config_file.write_text(
+        f"""
+[CustomGravityMap]
+name = Scalar custom map
+crs = EPSG:4326
+mode = residual
+interpolation = linear
+outOfBounds = base
+
+[Grid]
+format = csv
+file = scalar_coordinates.csv
+xColumn = x
+yColumn = y
+rowOrder = x_fastest
+
+[Field]
+format = csv
+file = scalar.csv
+representation = scalar
+valueColumn = value
+units = mGal
+quantity = {quantity}
+verticalDirection = {vertical_direction}
+rowOrder = x_fastest
+""",
+        encoding="utf-8",
+    )
+    base = WGS84Gravity() if quantity == "free_air_anomaly" else FixedValue()
+    return CustomGravityMap(base, geoid, config_file)
+
+
+def test_scalar_disturbance_becomes_down_residual(tmp_path: Path):
+    model = _make_scalar_map(tmp_path)
+
+    np.testing.assert_allclose(
+        model.get_residual(70.0, 10.0), [0.0, 0.0, 10e-5])
+    assert model.get_disturbance(70.0, 10.0) == pytest.approx(10e-5)
+
+
+def test_upward_scalar_direction_is_negated(tmp_path: Path):
+    model = _make_scalar_map(tmp_path, vertical_direction="up")
+
+    assert model.get_disturbance(70.0, 10.0) == pytest.approx(-10e-5)
+
+
+def test_free_air_anomaly_preserves_anomaly_and_converts_disturbance(
+    tmp_path: Path,
+):
+    model = _make_scalar_map(
+        tmp_path, quantity="free_air_anomaly", geoid=_ConstantGeoid())
+
+    anomaly = model.get_anomaly(70.0, 10.0)
+    expected_disturbance = model._anomaly_to_disturbance(
+        70.0, 10.0, anomaly)
+
+    assert anomaly == pytest.approx(10e-5)
+    assert model.get_disturbance(70.0, 10.0) == pytest.approx(
+        expected_disturbance)
+    assert model.get_residual(70.0, 10.0)[2] == pytest.approx(
+        expected_disturbance)
+
+
+def test_free_air_anomaly_requires_geoid_model(tmp_path: Path):
+    with pytest.raises(NavConfigError, match="requires a configured geoid"):
+        _make_scalar_map(tmp_path, quantity="free_air_anomaly")
+
+
+def test_scalar_anomaly_outside_coverage_returns_base(tmp_path: Path):
+    model = _make_scalar_map(
+        tmp_path, quantity="free_air_anomaly", geoid=_ConstantGeoid())
+    base = model.base_model.calc_gravity_z(0.0, 0.0, 100.0)
+
+    assert model.get_anomaly(0.0, 0.0) == 0.0
+    assert model.get_disturbance(0.0, 0.0) == 0.0
+    assert model.calc_gravity_z(0.0, 0.0, 100.0) == pytest.approx(base)
 
 
 def test_interpolates_full_ned_residual(tmp_path: Path):

@@ -55,6 +55,7 @@ class LoadedCustomMap:
     height: Optional[np.ndarray]
     ellipsoid_height: np.ndarray
     residual: np.ndarray
+    quantity: str
     crs: CRS
 
 
@@ -78,6 +79,12 @@ class CustomMapDataLoader:
         else:
             residual = field
 
+        quantity = (
+            self._config.field.quantity
+            if self._config.field.representation == "scalar"
+            else "residual"
+        )
+
         if self._config.tensor is not None:
             self._validate_tensor(self._config.tensor, grid)
 
@@ -89,6 +96,7 @@ class CustomMapDataLoader:
             height=grid.height,
             ellipsoid_height=grid.ellipsoid_height,
             residual=residual,
+            quantity=quantity,
             crs=crs,
         )
 
@@ -331,6 +339,9 @@ class CustomMapDataLoader:
         if source is None:
             raise ValueError("A configured vector source is required.")
 
+        if source.representation == "scalar":
+            return self._load_scalar(source, grid)
+
         if source.format == "csv":
             component_columns = _required_mapping(
                 source.component_columns, source.file,
@@ -391,6 +402,76 @@ class CustomMapDataLoader:
         values *= _acceleration_scale(source.units)
         values = _to_ned(values, source, grid)
         return _to_effective_gravity(values, source.quantity, grid)
+
+    def _load_scalar(
+        self,
+        source: VectorSourceConfig,
+        grid: LoadedGrid,
+    ) -> np.ndarray:
+        """Load a scalar vertical disturbance or free-air anomaly."""
+
+        if source.format == "csv":
+            value_column = _required_mapping(
+                source.value_column,
+                source.file,
+                f"{source.section} valueColumn",
+            )
+            requested_columns = [value_column]
+            if source.coordinate_columns is not None:
+                requested_columns.extend(source.coordinate_columns)
+            data = _read_csv(source.file, requested_columns)
+            _validate_source_coordinates(data, source, grid)
+            scalar = _numeric_column(data, value_column, source.file)
+            scalar = _reshape_rows(
+                scalar, grid.x.size, grid.y.size, source.row_order)
+        else:
+            value_variable = _required_mapping(
+                source.value_variable,
+                source.file,
+                f"{source.section} valueVariable",
+            )
+            scalar = _numeric_array(
+                _resolve_mat_value(
+                    self._load_mat(source.file),
+                    value_variable,
+                    source.file,
+                ),
+                value_variable,
+                source.file,
+            )
+            if scalar.ndim != 2:
+                raise _data_error(
+                    source.file,
+                    f"MAT scalar data must be 2-D, not {scalar.ndim}-D.",
+                )
+            permutation = tuple(
+                source.axis_order.index(axis) for axis in ("x", "y"))
+            scalar = np.transpose(scalar, permutation)
+
+        expected = (grid.x.size, grid.y.size)
+        if scalar.shape != expected:
+            raise _data_error(
+                source.file,
+                f"Scalar field has shape {scalar.shape}; expected {expected}.",
+            )
+        if grid.flip_x:
+            scalar = np.flip(scalar, axis=0)
+        if grid.flip_y:
+            scalar = np.flip(scalar, axis=1)
+
+        scalar = np.asarray(scalar, dtype=np.float64)
+        if np.any(np.isinf(scalar)):
+            raise _data_error(
+                source.file, "Scalar field must not contain infinite values.")
+        scalar *= _acceleration_scale(source.units)
+        if source.vertical_direction == "up":
+            scalar *= -1.0
+
+        values = np.zeros(expected + (3,), dtype=np.float64)
+        values[:, :, 2] = scalar
+        missing = np.isnan(scalar)
+        values[missing, :] = np.nan
+        return values
 
     def _validate_tensor(
         self,

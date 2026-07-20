@@ -24,12 +24,16 @@ _TENSOR_SECTION = "Tensor"
 _FORMATS = {"csv", "mat"}
 _ROW_ORDERS = {"x_fastest", "y_fastest"}
 _UNITS = {"m/s2", "gal", "mgal"}
+_REPRESENTATIONS = {"vector", "scalar"}
+_VERTICAL_DIRECTIONS = {"down", "up"}
 _FRAMES = {"ned", "enu", "ecef", "geocentric_ned", "custom"}
 _TENSOR_FRAMES = {"ned", "ecef", "geocentric_ned", "custom"}
 _QUANTITIES = {
     "residual",
     "effective_gravity",
     "gravitational_attraction",
+    "gravity_disturbance",
+    "free_air_anomaly",
 }
 _COORDINATE_FRAMES = {"none", "grid", "wgs84"}
 _MODES = {"residual", "total_minus_reference"}
@@ -68,12 +72,16 @@ class VectorSourceConfig:
     frame: str
     quantity: str
     row_order: str
+    representation: str = "vector"
+    vertical_direction: Optional[str] = None
     coordinate_frame: str = "none"
     coordinate_columns: Optional[tuple[str, str]] = None
     component_columns: Optional[tuple[str, str, str]] = None
+    value_column: Optional[str] = None
     data_variable: Optional[str] = None
     axis_order: tuple[str, ...] = ()
     component_indices: Optional[tuple[int, int, int]] = None
+    value_variable: Optional[str] = None
     custom_to_ned: Optional[tuple[float, ...]] = None
 
 
@@ -147,12 +155,36 @@ def read_custom_gravity_config(config_file: Path) -> CustomGravityConfig:
             "effective_gravity",
         )
 
-    if mode == "residual" and field.quantity != "residual":
+    if mode == "residual" and field.quantity not in {
+        "residual", "gravity_disturbance", "free_air_anomaly"
+    }:
         raise _error(
             _FIELD_SECTION,
             "quantity",
             "Incompatible quantity",
-            "mode=residual requires quantity=residual.",
+            "mode=residual requires a residual, gravity disturbance, or "
+            "free-air anomaly.",
+        )
+    if field.representation == "scalar" and field.quantity not in {
+        "gravity_disturbance", "free_air_anomaly"
+    }:
+        raise _error(
+            _FIELD_SECTION,
+            "quantity",
+            "Incompatible scalar quantity",
+            "Scalar fields require quantity=gravity_disturbance or "
+            "quantity=free_air_anomaly.",
+        )
+    if mode == "total_minus_reference" and (
+        field.representation != "vector"
+        or (reference is not None and reference.representation != "vector")
+    ):
+        raise _error(
+            _MAP_SECTION,
+            "mode",
+            "Incompatible scalar field",
+            "total_minus_reference requires vector field and reference "
+            "sources.",
         )
     if mode == "total_minus_reference" and (
         field.quantity == "residual"
@@ -257,12 +289,28 @@ def _read_vector_source(
     source_format = _choice(config, section, "format", _FORMATS)
     source_file = _source_path(config, section, base_dir)
     units = _choice(config, section, "units", _UNITS)
-    frame = _choice(config, section, "frame", _FRAMES)
+    representation = _choice(
+        config, section, "representation", _REPRESENTATIONS, "vector")
     quantity = _choice(
         config, section, "quantity", _QUANTITIES, default_quantity)
     row_order = _choice(
         config, section, "rowOrder", _ROW_ORDERS, "x_fastest")
 
+    if representation == "scalar":
+        vertical_direction = _choice(
+            config, section, "verticalDirection", _VERTICAL_DIRECTIONS)
+        return _read_scalar_source(
+            config,
+            section,
+            source_format,
+            source_file,
+            units,
+            quantity,
+            row_order,
+            vertical_direction,
+        )
+
+    frame = _choice(config, section, "frame", _FRAMES)
     custom_to_ned = _read_custom_rotation(config, section, frame)
 
     component_names = {
@@ -295,6 +343,7 @@ def _read_vector_source(
             frame=frame,
             quantity=quantity,
             row_order=row_order,
+            representation=representation,
             coordinate_frame=coordinate_frame,
             coordinate_columns=coordinate_columns,
             component_columns=(columns[0], columns[1], columns[2]),
@@ -334,10 +383,72 @@ def _read_vector_source(
         frame=frame,
         quantity=quantity,
         row_order=row_order,
+        representation=representation,
         data_variable=_required_str(config, section, "dataVariable"),
         axis_order=axis_order,
         component_indices=(indices[0], indices[1], indices[2]),
         custom_to_ned=custom_to_ned,
+    )
+
+
+def _read_scalar_source(
+    config: ConfigHandler,
+    section: str,
+    source_format: str,
+    source_file: Path,
+    units: str,
+    quantity: str,
+    row_order: str,
+    vertical_direction: str,
+) -> VectorSourceConfig:
+    """Read a scalar vertical gravity source."""
+
+    if source_format == "csv":
+        coordinate_frame = _choice(
+            config,
+            section,
+            "coordinateFrame",
+            _COORDINATE_FRAMES,
+            "none",
+        )
+        return VectorSourceConfig(
+            section=section,
+            format=source_format,
+            file=source_file,
+            units=units,
+            frame="ned",
+            quantity=quantity,
+            row_order=row_order,
+            representation="scalar",
+            vertical_direction=vertical_direction,
+            coordinate_frame=coordinate_frame,
+            coordinate_columns=_read_coordinate_columns(
+                config, section, coordinate_frame),
+            value_column=_required_str(config, section, "valueColumn"),
+        )
+
+    coordinate_frame = _choice(
+        config, section, "coordinateFrame", _COORDINATE_FRAMES, "none")
+    if coordinate_frame != "none":
+        raise _error(
+            section,
+            "coordinateFrame",
+            "Unsupported MAT coordinate mapping",
+            "Per-row coordinate validation is supported for CSV scalar "
+            "sources only.",
+        )
+    return VectorSourceConfig(
+        section=section,
+        format=source_format,
+        file=source_file,
+        units=units,
+        frame="ned",
+        quantity=quantity,
+        row_order=row_order,
+        representation="scalar",
+        vertical_direction=vertical_direction,
+        value_variable=_required_str(config, section, "valueVariable"),
+        axis_order=_scalar_axis_order(config, section),
     )
 
 
@@ -444,6 +555,22 @@ def _axis_order(config: ConfigHandler, section: str) -> tuple[str, ...]:
         raise _error(
             section, "axisOrder", "Invalid axes",
             "axisOrder must contain component, x, and y exactly once.")
+    return axes
+
+
+def _scalar_axis_order(
+    config: ConfigHandler,
+    section: str,
+) -> tuple[str, ...]:
+    raw_value = _optional_str(config, section, "axisOrder", "x,y")
+    axes = tuple(axis.strip().casefold() for axis in raw_value.split(","))
+    if len(axes) != 2 or set(axes) != {"x", "y"}:
+        raise _error(
+            section,
+            "axisOrder",
+            "Invalid axes",
+            "Scalar axisOrder must contain x and y exactly once.",
+        )
     return axes
 
 
