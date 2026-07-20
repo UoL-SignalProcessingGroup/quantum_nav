@@ -313,7 +313,7 @@ def test_netcdf_validates_pure_cf_grid_mapping(
         },
         coords={"x": [0.0, 1.0], "y": [-1.0, 0.0]},
     )
-    data["gravity"].attrs["grid_mapping"] = "polar_mapping"
+    data["gravity"].attrs["grid_mapping"] = "polar_mapping: x y"
     data["unrelated"].attrs["grid_mapping"] = "geographic_mapping"
     data.to_netcdf(data_file, engine="scipy")
     config = _write_scalar_config(
@@ -331,6 +331,66 @@ def test_netcdf_validates_pure_cf_grid_mapping(
     else:
         with pytest.raises(ValueError, match="Embedded CRS does not match"):
             CustomGravityMap(FixedValue(), None, config)
+
+
+def test_netcdf_rejects_later_conflicting_relevant_crs(tmp_path: Path):
+    xarray = pytest.importorskip("xarray")
+    from pyproj import CRS
+
+    data_file = tmp_path / "conflict.nc"
+    polar_cf = CRS.from_epsg(3413).to_cf()
+    polar_cf.pop("crs_wkt", None)
+    data = xarray.Dataset(
+        data_vars={
+            "gravity": (("y", "x"), np.ones((2, 2))),
+            "polar_mapping": ((), 0, polar_cf),
+        },
+        coords={"x": [0.0, 1.0], "y": [0.0, 1.0]},
+        attrs={"crs_wkt": CRS.from_epsg(4326).to_wkt()},
+    )
+    data["gravity"].attrs["grid_mapping"] = "polar_mapping"
+    data.to_netcdf(data_file, engine="scipy")
+    config = _write_scalar_config(
+        tmp_path / "map.ini",
+        "netcdf",
+        data_file.name,
+        "xVariable = x\nyVariable = y",
+        "valueVariable = gravity",
+    )
+
+    with pytest.raises(ValueError, match="Embedded CRS does not match"):
+        CustomGravityMap(FixedValue(), None, config)
+
+
+@pytest.mark.parametrize(
+    ("mapping", "message"),
+    [
+        ("missing_mapping", "references missing grid mapping"),
+        ("first second", "invalid grid_mapping attribute"),
+    ],
+)
+def test_netcdf_rejects_invalid_grid_mapping_references(
+    tmp_path: Path, mapping: str, message: str,
+):
+    xarray = pytest.importorskip("xarray")
+
+    data_file = tmp_path / "invalid-mapping.nc"
+    data = xarray.Dataset(
+        data_vars={"gravity": (("y", "x"), np.ones((2, 2)))},
+        coords={"x": [0.0, 1.0], "y": [0.0, 1.0]},
+    )
+    data["gravity"].attrs["grid_mapping"] = mapping
+    data.to_netcdf(data_file, engine="scipy")
+    config = _write_scalar_config(
+        tmp_path / "map.ini",
+        "netcdf",
+        data_file.name,
+        "xVariable = x\nyVariable = y",
+        "valueVariable = gravity",
+    )
+
+    with pytest.raises(ValueError, match=message):
+        CustomGravityMap(FixedValue(), None, config)
 
 
 def test_netcdf_rejects_non_singleton_extra_dimension(tmp_path: Path):
@@ -441,6 +501,37 @@ def test_subset_and_cell_guard_apply_before_interpolation(tmp_path: Path):
     np.testing.assert_allclose(model.map_data.y, [2.0, 3.0])
 
 
+def test_netcdf_cell_guard_precedes_auxiliary_array_loading(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+):
+    xarray = pytest.importorskip("xarray")
+
+    data_file = tmp_path / "map.nc"
+    xarray.Dataset(
+        data_vars={
+            "gravity": (("y", "x"), np.ones((6, 6))),
+            "height": (("y", "x"), np.ones((6, 6))),
+        },
+        coords={"x": np.arange(6.0), "y": np.arange(6.0)},
+    ).to_netcdf(data_file, engine="scipy")
+    config = _write_scalar_config(
+        tmp_path / "map.ini",
+        "netcdf",
+        data_file.name,
+        "xVariable = x\nyVariable = y\nheightVariable = height",
+        "valueVariable = gravity",
+        extra="maxCells = 4",
+    )
+
+    def reject_array_loading(*args, **kwargs):
+        raise AssertionError("auxiliary array loaded before maxCells guard")
+
+    monkeypatch.setattr(custom_data, "_netcdf_array", reject_array_loading)
+
+    with pytest.raises(ValueError, match="36 cells; maxCells is 4"):
+        CustomGravityMap(FixedValue(), None, config)
+
+
 def test_delimited_subset_streams_shared_grid_and_field(tmp_path: Path):
     data_file = tmp_path / "map.xyz"
     x, y = np.meshgrid(np.arange(6.0), np.arange(5.0), indexing="xy")
@@ -471,6 +562,85 @@ def test_delimited_subset_streams_shared_grid_and_field(tmp_path: Path):
     np.testing.assert_allclose(model.map_data.x, [2.0, 3.0])
     np.testing.assert_allclose(model.map_data.y, [1.0, 2.0])
     assert model.get_disturbance(2.0, 3.0) == pytest.approx(23e-5)
+
+
+def test_delimited_axis_discovery_is_bounded_by_chunk_size(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+):
+    data_file = tmp_path / "large.xyz"
+    x, y = np.meshgrid(np.arange(501.0), np.arange(200.0), indexing="xy")
+    pd.DataFrame({
+        "x": x.ravel(),
+        "y": y.ravel(),
+        "gravity": (y + x).ravel(),
+    }).to_csv(data_file, sep=" ", index=False)
+    config = _write_scalar_config(
+        tmp_path / "map.ini",
+        "delimited",
+        data_file.name,
+        "delimiter = whitespace\nheader = present\n"
+        "xColumn = x\nyColumn = y",
+        "delimiter = whitespace\nheader = present\n"
+        "valueColumn = gravity",
+        extra="maxCells = 4",
+    )
+    with config.open("a", encoding="utf-8") as file:
+        file.write(
+            "\n[Subset]\ncoordinateFrame = grid\n"
+            "minX = 10\nmaxX = 11\nminY = 10\nmaxY = 11\n"
+            "paddingCells = 0\n"
+        )
+    observed_lengths: list[int] = []
+    real_unique = custom_data.pd.unique
+
+    def record_unique(values):
+        observed_lengths.append(len(values))
+        return real_unique(values)
+
+    monkeypatch.setattr(custom_data.pd, "unique", record_unique)
+
+    model = CustomGravityMap(FixedValue(), None, config)
+
+    assert observed_lengths
+    assert max(observed_lengths) <= 100_000
+    np.testing.assert_allclose(model.map_data.x, [10.0, 11.0])
+    np.testing.assert_allclose(model.map_data.y, [10.0, 11.0])
+
+
+def test_delimited_cell_guard_precedes_selected_row_materialization(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+):
+    data_file = tmp_path / "map.xyz"
+    x, y = np.meshgrid(np.arange(6.0), np.arange(6.0), indexing="xy")
+    pd.DataFrame({
+        "x": x.ravel(),
+        "y": y.ravel(),
+        "gravity": (y + x).ravel(),
+    }).to_csv(data_file, sep=" ", index=False)
+    config = _write_scalar_config(
+        tmp_path / "map.ini",
+        "delimited",
+        data_file.name,
+        "delimiter = whitespace\nheader = present\n"
+        "xColumn = x\nyColumn = y",
+        "delimiter = whitespace\nheader = present\n"
+        "valueColumn = gravity",
+        extra="maxCells = 4",
+    )
+    with config.open("a", encoding="utf-8") as file:
+        file.write(
+            "\n[Subset]\ncoordinateFrame = grid\n"
+            "minX = 1\nmaxX = 4\nminY = 1\nmaxY = 4\n"
+            "paddingCells = 0\n"
+        )
+
+    def reject_concat(*args, **kwargs):
+        raise AssertionError("selected rows materialized before maxCells guard")
+
+    monkeypatch.setattr(custom_data.pd, "concat", reject_concat)
+
+    with pytest.raises(ValueError, match="16 cells; maxCells is 4"):
+        CustomGravityMap(FixedValue(), None, config)
 
 
 def test_wgs84_subset_is_transformed_to_projected_map_crs(tmp_path: Path):

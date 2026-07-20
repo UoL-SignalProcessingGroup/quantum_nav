@@ -175,14 +175,7 @@ class CustomMapDataLoader:
         ):
             geoid_undulation = geoid_undulation[np.ix_(
                 x_indices, y_indices)]
-        cell_count = int(x.size * y.size)
-        if cell_count > self._config.max_cells:
-            raise _data_error(
-                source.file,
-                f"Selected grid contains {cell_count:,} cells; maxCells is "
-                f"{self._config.max_cells:,}. Configure a smaller [Subset] "
-                "or explicitly raise maxCells.",
-            )
+        self._enforce_cell_limit(x.size, y.size, source.file)
 
         x, flip_x = _normalize_axis(x, "x")
         y, flip_y = _normalize_axis(y, "y")
@@ -470,6 +463,8 @@ class CustomMapDataLoader:
                 x, y = _geotiff_axes(dataset, source.file)
                 x_indices, y_indices = _subset_indices(
                     x, y, self._config.subset, crs)
+                self._enforce_cell_limit(
+                    x_indices.size, y_indices.size, source.file)
                 window = rasterio.windows.Window(
                     col_off=int(x_indices[0]),
                     row_off=int(y_indices[0]),
@@ -549,6 +544,8 @@ class CustomMapDataLoader:
                 y = _netcdf_axis(data, y_name, source.file)
                 x_indices, y_indices = _subset_indices(
                     x, y, self._config.subset, crs)
+                self._enforce_cell_limit(
+                    x_indices.size, y_indices.size, source.file)
                 x_dimension = data[x_name].dims[0]
                 y_dimension = data[y_name].dims[0]
                 height = (
@@ -708,6 +705,21 @@ class CustomMapDataLoader:
     def _data_crs(self) -> CRS:
         """Return the already-validated configured CRS."""
         return self._read_crs()
+
+    def _enforce_cell_limit(
+        self,
+        x_size: int,
+        y_size: int,
+        file_path: Path,
+    ) -> None:
+        cell_count = int(x_size * y_size)
+        if cell_count > self._config.max_cells:
+            raise _data_error(
+                file_path,
+                f"Selected grid contains {cell_count:,} cells; maxCells is "
+                f"{self._config.max_cells:,}. Configure a smaller [Subset] "
+                "or explicitly raise maxCells.",
+            )
 
     def _load_vector(
         self,
@@ -974,22 +986,38 @@ class CustomMapDataLoader:
                 f"Custom gravity data file does not exist: {file_path}")
         kwargs = _delimited_read_kwargs(options)
         try:
-            x_seen: list[np.ndarray] = []
-            y_seen: list[np.ndarray] = []
+            x_seen: dict[float, None] = {}
+            y_seen: dict[float, None] = {}
             for chunk in pd.read_csv(
                 file_path,
                 usecols=[x_mapping, y_mapping],
                 chunksize=100_000,
                 **kwargs,
             ):
-                x_seen.append(chunk[x_mapping].to_numpy())
-                y_seen.append(chunk[y_mapping].to_numpy())
+                x_values = pd.to_numeric(
+                    chunk[x_mapping], errors="raise").to_numpy(
+                        dtype=np.float64)
+                y_values = pd.to_numeric(
+                    chunk[y_mapping], errors="raise").to_numpy(
+                        dtype=np.float64)
+                if (
+                    not np.all(np.isfinite(x_values))
+                    or not np.all(np.isfinite(y_values))
+                ):
+                    raise _data_error(
+                        file_path, "Grid coordinates must all be finite.")
+                for value in pd.unique(x_values):
+                    x_seen.setdefault(float(value), None)
+                for value in pd.unique(y_values):
+                    y_seen.setdefault(float(value), None)
             if not x_seen:
                 raise _data_error(file_path, "Delimited data file is empty.")
-            x_axis = pd.unique(np.concatenate(x_seen)).astype(np.float64)
-            y_axis = pd.unique(np.concatenate(y_seen)).astype(np.float64)
+            x_axis = np.fromiter(x_seen, dtype=np.float64)
+            y_axis = np.fromiter(y_seen, dtype=np.float64)
             x_indices, y_indices = _subset_indices(
                 x_axis, y_axis, self._config.subset, crs)
+            self._enforce_cell_limit(
+                x_indices.size, y_indices.size, file_path)
             selected_x = x_axis[x_indices]
             selected_y = y_axis[y_indices]
             selected: list[pd.DataFrame] = []
@@ -1301,33 +1329,60 @@ def _validate_netcdf_crs(
     file_path: Path,
     relevant_variables: tuple[str, ...],
 ) -> None:
-    candidates: list[Any] = []
+    candidates: list[tuple[Any, str, bool]] = []
     for key in ("crs_wkt", "spatial_ref", "epsg_code", "crs"):
         if key in data.attrs:
-            candidates.append(data.attrs[key])
+            candidates.append((data.attrs[key], f"global {key}", key != "crs"))
     for name in relevant_variables:
         if name not in data.variables:
             continue
         variable = data[name]
         for key in ("crs_wkt", "spatial_ref", "epsg_code", "crs"):
             if key in variable.attrs:
-                candidates.append(variable.attrs[key])
-        mapping_name = variable.attrs.get("grid_mapping")
-        if mapping_name in data.variables:
+                candidates.append((
+                    variable.attrs[key],
+                    f"variable '{name}' {key}",
+                    key != "crs",
+                ))
+        mapping_attribute = variable.attrs.get("grid_mapping")
+        if mapping_attribute is None:
+            continue
+        mapping_names = _cf_grid_mapping_names(
+            mapping_attribute, name, file_path)
+        for mapping_name in mapping_names:
+            if mapping_name not in data.variables:
+                raise _data_error(
+                    file_path,
+                    f"NetCDF variable '{name}' references missing grid "
+                    f"mapping variable '{mapping_name}'.",
+                )
             mapping = data[mapping_name]
             for key in ("crs_wkt", "spatial_ref", "epsg_code", "crs"):
                 if key in mapping.attrs:
-                    candidates.append(mapping.attrs[key])
+                    candidates.append((
+                        mapping.attrs[key],
+                        f"grid mapping '{mapping_name}' {key}",
+                        key != "crs",
+                    ))
             if "grid_mapping_name" in mapping.attrs:
-                candidates.append(dict(mapping.attrs))
-    for candidate in candidates:
+                candidates.append((
+                    dict(mapping.attrs),
+                    f"CF grid mapping '{mapping_name}'",
+                    True,
+                ))
+    for candidate, description, authoritative in candidates:
         try:
             embedded = (
                 CRS.from_cf(candidate)
                 if isinstance(candidate, dict)
                 else CRS.from_user_input(candidate)
             )
-        except (CRSError, ValueError, TypeError):
+        except (CRSError, ValueError, TypeError) as error:
+            if authoritative:
+                raise _data_error(
+                    file_path,
+                    f"Invalid NetCDF {description} CRS metadata: {error}",
+                ) from error
             continue
         _validate_embedded_crs(
             embedded,
@@ -1335,7 +1390,38 @@ def _validate_netcdf_crs(
             file_path,
             allow_cf_axis_normalization=isinstance(candidate, dict),
         )
-        return
+
+
+def _cf_grid_mapping_names(
+    value: Any,
+    variable: str,
+    file_path: Path,
+) -> tuple[str, ...]:
+    """Parse simple and CF 1.12 extended grid-mapping attributes."""
+
+    if not isinstance(value, str) or not value.strip():
+        raise _data_error(
+            file_path,
+            f"NetCDF variable '{variable}' has an invalid grid_mapping "
+            "attribute.",
+        )
+    tokens = value.split()
+    extended = tuple(token[:-1] for token in tokens if token.endswith(":"))
+    if extended:
+        if any(not name for name in extended):
+            raise _data_error(
+                file_path,
+                f"NetCDF variable '{variable}' has an invalid extended "
+                "grid_mapping attribute.",
+            )
+        return extended
+    if len(tokens) != 1:
+        raise _data_error(
+            file_path,
+            f"NetCDF variable '{variable}' has an invalid grid_mapping "
+            "attribute.",
+        )
+    return (tokens[0],)
 
 
 def _validate_aligned_axes(
