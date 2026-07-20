@@ -277,7 +277,9 @@ conflated:
 * ``crs`` defines the horizontal coordinates of the grid. QNav accepts a
   two-dimensional projected or geographic CRS understood by PROJ, such as
   ``EPSG:3413``. Vertical, geocentric, three-dimensional, and compound CRSs
-  are rejected.
+  are rejected. For geographic grids, equivalent longitudes are normalised
+  to the convention used by the map axis, including ``-180``/``180`` and
+  ``0``/``360`` conventions.
 * ``frame`` defines the gravity-vector axes. Supported values are ``NED``,
   ``ENU``, ``ECEF``, ``geocentric_ned``, and ``custom``.
   ``geocentric_ned`` is a local spherical frame based on geocentric latitude;

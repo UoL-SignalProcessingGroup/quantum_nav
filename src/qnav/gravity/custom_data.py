@@ -140,6 +140,8 @@ class CustomMapDataLoader:
                 geoid_undulation = np.flip(
                     geoid_undulation, axis=1)
 
+        x_grid: np.ndarray
+        y_grid: np.ndarray
         x_grid, y_grid = np.meshgrid(x, y, indexing="ij")
         try:
             inverse = Transformer.from_crs(crs, "EPSG:4326", always_xy=True)
@@ -577,6 +579,8 @@ def _axes_from_rows(
             file_path,
             "Grid coordinates do not form a complete Cartesian product.")
 
+    expected_x: np.ndarray
+    expected_y: np.ndarray
     if row_order == "x_fastest":
         x_axis = x_values[:nx]
         y_axis = y_values[::nx]
@@ -675,6 +679,8 @@ def _validate_source_coordinates(
         coordinates = np.flip(coordinates, axis=1)
 
     if source.coordinate_frame == "grid":
+        expected_x: np.ndarray
+        expected_y: np.ndarray
         expected_x, expected_y = np.meshgrid(
             grid.x, grid.y, indexing="ij")
         expected = np.stack((expected_x, expected_y), axis=-1)

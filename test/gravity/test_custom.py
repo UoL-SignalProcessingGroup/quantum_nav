@@ -198,6 +198,40 @@ def test_projected_crs_boundary_roundoff_remains_in_coverage(
         result, np.stack((expected[0, 0], expected[-1, -1])), atol=1e-12)
 
 
+@pytest.mark.parametrize(
+    ("map_longitudes", "query_longitude"),
+    (
+        ((-180.0, -179.9, -179.8), 180.1),
+        ((180.0, 180.1, 180.2), -179.9),
+        ((350.0, 350.1, 350.2), -9.9),
+    ),
+)
+def test_geographic_query_uses_map_longitude_convention(
+    tmp_path: Path,
+    map_longitudes: tuple[float, float, float],
+    query_longitude: float,
+):
+    model, _, _, expected = _make_map(tmp_path)
+    coordinates_file = tmp_path / "coordinates.csv"
+    coordinates = pd.read_csv(coordinates_file)
+    coordinates["x"] = np.tile(map_longitudes, 3)
+    coordinates.to_csv(coordinates_file, index=False)
+    model = CustomGravityMap(FixedValue(), None, tmp_path / "map.ini")
+
+    result = model.get_residual(70.1, query_longitude)
+
+    np.testing.assert_allclose(result, expected[1, 1])
+
+
+def test_longitude_normalization_does_not_mask_out_of_bounds_query(
+    tmp_path: Path,
+):
+    model, _, _, _ = _make_map(tmp_path, out_of_bounds="error")
+
+    with pytest.raises(ValueError, match="cannot provide"):
+        model.get_residual(70.1, 190.0)
+
+
 def test_rejects_mismatched_query_shapes(tmp_path: Path):
     model, _, _, _ = _make_map(tmp_path)
 

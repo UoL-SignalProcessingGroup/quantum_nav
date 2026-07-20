@@ -5,7 +5,7 @@ from typing import Optional
 
 import numpy as np
 
-from pyproj import Transformer
+from pyproj import CRS, Transformer
 from scipy.interpolate import RegularGridInterpolator
 
 from qnav.earth.geoid import GeoidModel
@@ -172,8 +172,15 @@ class CustomGravityMap(GravityMap):
 
         x_values, y_values = self._query_transformer.transform(
             lon_values, lat_values)
+        x_values = np.asarray(x_values, dtype=np.float64)
+        if self._data.crs.is_geographic:
+            x_values = _normalize_periodic_axis(
+                x_values,
+                self._data.x,
+                _longitude_period(self._data.crs),
+            )
         x_values = _clip_transform_roundoff(
-            np.asarray(x_values, dtype=np.float64), self._data.x)
+            x_values, self._data.x)
         y_values = _clip_transform_roundoff(
             np.asarray(y_values, dtype=np.float64), self._data.y)
         points = np.column_stack((
@@ -230,3 +237,24 @@ def _clip_transform_roundoff(
             values,
         ),
     )
+
+
+def _longitude_period(crs: CRS) -> float:
+    """Return one revolution in the geographic CRS longitude unit."""
+
+    for axis in crs.axis_info:
+        if axis.direction.casefold() in {"east", "west"}:
+            return float(2.0 * np.pi / axis.unit_conversion_factor)
+    raise ValueError("Geographic CRS has no longitude axis.")
+
+
+def _normalize_periodic_axis(
+    values: np.ndarray,
+    axis: np.ndarray,
+    period: float,
+) -> np.ndarray:
+    """Choose the equivalent periodic coordinate nearest the map axis."""
+
+    midpoint = (float(axis[0]) + float(axis[-1])) / 2.0
+    revolutions = np.round((midpoint - values) / period)
+    return values + revolutions * period
