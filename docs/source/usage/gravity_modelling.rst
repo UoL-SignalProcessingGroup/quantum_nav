@@ -90,3 +90,18 @@ Irish Sea Model
 ...............
 A bespoke marine gravity anomaly map covering an area a north western region Irish sea. Support for this model
 was included by request.
+
+Custom Gravity Maps
+...................
+User-supplied rectilinear gravity maps can be loaded from CSV or MATLAB
+files. A separate INI file defines the map's coordinate reference system,
+grid layout, vector frame, units, source fields, interpolation method, and
+out-of-coverage behaviour. QNav transforms WGS-84 trajectory positions into
+the map CRS before interpolation.
+
+Custom maps provide full North-East-Down acceleration residuals. They may
+contain those residuals directly, or QNav can derive them by subtracting a
+configured reference vector field from a total vector field. Residuals are
+then added to the selected base gravity function. The base function retains
+responsibility for altitude dependence, consistent with SRTM2Gravity
+residual handling.

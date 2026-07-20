@@ -236,6 +236,12 @@ correction maps used in both ground truth and estimation.
    * - ``estimatedGravityCorrectionMap``
      - The optional gravity correction map to use for the simulation estimation.
      - See Below
+   * - ``trueGravityMapConfig``
+     - INI definition for a custom ground-truth gravity map.
+     - Filepath
+   * - ``estimatedGravityMapConfig``
+     - INI definition for a custom estimated gravity map.
+     - Filepath
 
 .. note:: Toolbox supports the following gravity function options:
 
@@ -255,6 +261,38 @@ correction maps used in both ground truth and estimation.
     * ``srtm2gravityFS`` - Use SRTM2Gravity full-scale gravity map.
     * ``srtm2gravityRes`` - Use SRTM2Gravity residual gravity map.
     * ``irishSea`` - Use bespoke Irish sea gravity anomaly map.
+    * ``custom`` - Use a user-supplied gravity map defined by a separate INI file.
+
+Custom Gravity Map Settings
+...........................
+Custom maps are selected with ``trueGravityCorrectionMap = custom`` or
+``estimatedGravityCorrectionMap = custom``. The corresponding
+``trueGravityMapConfig`` or ``estimatedGravityMapConfig`` value points to a
+separate INI file. Paths inside that file are resolved relative to the custom
+map configuration, allowing map definitions to be moved as a unit.
+
+The custom map configuration separates three concepts that must not be
+conflated:
+
+* ``crs`` defines the horizontal coordinates of the grid, using any CRS
+  understood by PROJ, such as ``EPSG:3413``.
+* ``frame`` defines the gravity-vector axes. Supported values are ``NED``,
+  ``ENU``, ``ECEF``, and ``custom``. A custom frame requires a row-major
+  three-by-three ``customToNed`` rotation matrix.
+* ``units`` defines the acceleration units and supports ``m/s2``, ``Gal``,
+  and ``mGal``.
+
+Version 1 custom maps must be complete rectilinear grids. CSV sources use
+named columns and declare whether X or Y changes fastest. MATLAB v5 through
+v7.2 sources use a packed numeric array, zero-based component indexes, and an
+``axisOrder`` containing ``component``, ``x``, and ``y``.
+
+``mode = residual`` loads a correction directly. With
+``mode = total_minus_reference``, QNav converts the field and reference to
+NED metres per second squared before subtracting them. The residual is added
+to the configured base gravity function. ``outOfBounds = base`` falls back to
+that function outside map coverage or at missing cells, while ``error``
+raises an exception. Custom maps never extrapolate beyond their coverage.
 
 Geoid Settings
 ..............

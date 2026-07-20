@@ -2,10 +2,12 @@
 import qnav.input.ini.database_config as data_dirs
 
 from functools import partial
+from pathlib import Path
 from typing import Optional
 
 from qnav.earth.geoid import GeoidModel
 from qnav.gravity.base import GravityModel
+from qnav.gravity.custom import CustomGravityMap
 from qnav.gravity.egm import GeoidCorrection
 from qnav.gravity.geosat import Geosat44
 from qnav.gravity.ggm_plus import GGMPlusAcc, GGMPlusDist
@@ -14,7 +16,7 @@ from qnav.gravity.nima import WGS84Gravity
 from qnav.gravity.simple import FixedValue, SimpleUniform
 from qnav.gravity.somigliana import Somigliana
 from qnav.gravity.srtm2gravity import SRTM2GravityFull, SRTM2GravityRes
-from qnav.input.config_handler import ConfigHandler
+from qnav.input.config_handler import ConfigHandler, NavConfigError
 from qnav.input.ini.geoid_config import get_estimation_geoid_model
 
 __SECTION_ID = 'Gravity'
@@ -38,7 +40,8 @@ def get_true_gravity_model(config: ConfigHandler):
     # TODO: Include better error handling
     grav_func = _make_gravity_function(func_id)
     geoid_model = get_estimation_geoid_model(config)
-    return _make_gravity_map(config, grav_func, geoid_model, map_id)
+    return _make_gravity_map(
+        config, grav_func, geoid_model, map_id, "trueGravityMapConfig")
 
 
 def get_estimated_gravity_model(config: ConfigHandler):
@@ -51,7 +54,9 @@ def get_estimated_gravity_model(config: ConfigHandler):
     # TODO: Include better error handling
     grav_func = _make_gravity_function(func_id)
     geoid_model = get_estimation_geoid_model(config)
-    return _make_gravity_map(config, grav_func, geoid_model, map_id)
+    return _make_gravity_map(
+        config, grav_func, geoid_model, map_id,
+        "estimatedGravityMapConfig")
 
 
 def get_gradient_grid(config: ConfigHandler):
@@ -95,7 +100,8 @@ def _make_gravity_function(func_id: str) -> GravityModel:
 def _make_gravity_map(config: ConfigHandler,
                       gravity_model: GravityModel,
                       geoid_model: Optional[GeoidModel],
-                      map_id: str) -> GravityModel:
+                      map_id: str,
+                      custom_config_field: str = None) -> GravityModel:
 
     # Create short-hand functions
     get_bool = partial(config.get_bool, __SECTION_ID)
@@ -146,8 +152,46 @@ def _make_gravity_map(config: ConfigHandler,
             return SRTM2GravityRes(gravity_model, geoid_model, srtm2gravity_dir,
                                    can_download, margin_size)
 
+        case 'custom':
+            config_path = _get_custom_map_config(
+                config, custom_config_field)
+            return CustomGravityMap(
+                gravity_model, geoid_model, config_path)
+
         case _:
             raise ValueError(f'unrecognised gravity map {map_id}')
+
+
+def _get_custom_map_config(
+    config: ConfigHandler,
+    field_name: Optional[str],
+) -> Path:
+    if field_name is None or not config.is_value_set(
+            __SECTION_ID, field_name):
+        raise NavConfigError(
+            __SECTION_ID,
+            field_name or "GravityMapConfig",
+            "Missing value",
+            "A custom gravity map requires a role-specific INI "
+            "configuration path.",
+        )
+
+    configured_path = Path(
+        config.get_str(__SECTION_ID, field_name))
+    if not configured_path.is_absolute():
+        main_config = Path(config.config_file).resolve()
+        configured_path = main_config.parent / configured_path
+    configured_path = configured_path.resolve()
+
+    if not configured_path.is_file():
+        raise NavConfigError(
+            __SECTION_ID,
+            field_name,
+            "FileNotFoundError",
+            f"The custom gravity map configuration "
+            f"'{configured_path}' does not exist.",
+        )
+    return configured_path
 
 
 
