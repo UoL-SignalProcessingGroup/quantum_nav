@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, TypeVar
 
 import numpy as np
 import pandas as pd
@@ -19,6 +19,9 @@ from qnav.input.ini.custom_gravity_config import (
     VectorSourceConfig,
 )
 from qnav.util.transformations import ecef2ned_transform_vec
+
+
+_T = TypeVar("_T")
 
 
 @dataclass(frozen=True)
@@ -142,13 +145,17 @@ class CustomMapDataLoader:
         self,
         source: GridSourceConfig,
     ) -> tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
-        columns = [source.x_column, source.y_column]
+        x_column = _required_mapping(
+            source.x_column, source.file, "Grid xColumn")
+        y_column = _required_mapping(
+            source.y_column, source.file, "Grid yColumn")
+        columns = [x_column, y_column]
         if source.height_column is not None:
             columns.append(source.height_column)
         data = _read_csv(source.file, columns)
 
-        x_values = _numeric_column(data, source.x_column, source.file)
-        y_values = _numeric_column(data, source.y_column, source.file)
+        x_values = _numeric_column(data, x_column, source.file)
+        y_values = _numeric_column(data, y_column, source.file)
         x_axis, y_axis = _axes_from_rows(
             x_values, y_values, source.row_order, source.file)
 
@@ -166,14 +173,18 @@ class CustomMapDataLoader:
         source: GridSourceConfig,
     ) -> tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
         mat_data = self._load_mat(source.file)
+        x_variable = _required_mapping(
+            source.x_variable, source.file, "Grid xVariable")
+        y_variable = _required_mapping(
+            source.y_variable, source.file, "Grid yVariable")
         x_axis = _numeric_array(
-            _resolve_mat_value(mat_data, source.x_variable, source.file),
-            source.x_variable,
+            _resolve_mat_value(mat_data, x_variable, source.file),
+            x_variable,
             source.file,
         ).squeeze()
         y_axis = _numeric_array(
-            _resolve_mat_value(mat_data, source.y_variable, source.file),
-            source.y_variable,
+            _resolve_mat_value(mat_data, y_variable, source.file),
+            y_variable,
             source.file,
         ).squeeze()
         if x_axis.ndim != 1 or y_axis.ndim != 1:
@@ -206,19 +217,28 @@ class CustomMapDataLoader:
             raise ValueError("A configured vector source is required.")
 
         if source.format == "csv":
-            data = _read_csv(source.file, list(source.component_columns))
+            component_columns = _required_mapping(
+                source.component_columns, source.file,
+                f"{source.section} component columns")
+            data = _read_csv(source.file, list(component_columns))
             values = np.column_stack([
                 _numeric_column(data, column, source.file)
-                for column in source.component_columns
+                for column in component_columns
             ])
             values = _reshape_rows(
                 values, grid.x.size, grid.y.size, source.row_order)
         else:
             mat_data = self._load_mat(source.file)
+            data_variable = _required_mapping(
+                source.data_variable, source.file,
+                f"{source.section} dataVariable")
+            component_indices = _required_mapping(
+                source.component_indices, source.file,
+                f"{source.section} component indexes")
             packed = _numeric_array(
                 _resolve_mat_value(
-                    mat_data, source.data_variable, source.file),
-                source.data_variable,
+                    mat_data, data_variable, source.file),
+                data_variable,
                 source.file,
             )
             if packed.ndim != 3:
@@ -230,13 +250,13 @@ class CustomMapDataLoader:
                 for axis in ("x", "y", "component")
             )
             packed = np.transpose(packed, permutation)
-            max_index = max(source.component_indices)
+            max_index = max(component_indices)
             if packed.shape[2] <= max_index:
                 raise _data_error(
                     source.file,
                     f"Component index {max_index} exceeds the packed "
                     f"component axis of size {packed.shape[2]}.")
-            values = packed[:, :, source.component_indices]
+            values = packed[:, :, component_indices]
 
         expected = (grid.x.size, grid.y.size, 3)
         if values.shape != expected:
@@ -258,19 +278,25 @@ class CustomMapDataLoader:
         grid: LoadedGrid,
     ) -> None:
         if source.format == "csv":
-            data = _read_csv(source.file, list(source.columns))
+            columns = _required_mapping(
+                source.columns, source.file, "Tensor component columns")
+            data = _read_csv(source.file, list(columns))
             values = np.column_stack([
                 _numeric_column(data, column, source.file)
-                for column in source.columns
+                for column in columns
             ])
             values = _reshape_rows(
                 values, grid.x.size, grid.y.size, source.row_order)
         else:
             mat_data = self._load_mat(source.file)
+            data_variable = _required_mapping(
+                source.data_variable, source.file, "Tensor dataVariable")
+            indices = _required_mapping(
+                source.indices, source.file, "Tensor component indexes")
             packed = _numeric_array(
                 _resolve_mat_value(
-                    mat_data, source.data_variable, source.file),
-                source.data_variable,
+                    mat_data, data_variable, source.file),
+                data_variable,
                 source.file,
             )
             if packed.ndim != 3:
@@ -282,19 +308,22 @@ class CustomMapDataLoader:
                 for axis in ("x", "y", "component")
             )
             packed = np.transpose(packed, permutation)
-            max_index = max(source.indices)
+            max_index = max(indices)
             if packed.shape[2] <= max_index:
                 raise _data_error(
                     source.file,
                     f"Tensor index {max_index} exceeds the packed component "
                     f"axis of size {packed.shape[2]}.")
-            values = packed[:, :, source.indices]
+            values = packed[:, :, indices]
 
         expected = (grid.x.size, grid.y.size, 6)
         if values.shape != expected:
             raise _data_error(
                 source.file,
                 f"Tensor field has shape {values.shape}; expected {expected}.")
+        if not np.all(np.isfinite(values)):
+            raise _data_error(
+                source.file, "Tensor field must contain only finite values.")
 
     def _load_mat(self, file_path: Path) -> dict[str, Any]:
         if file_path not in self._mat_cache:
@@ -363,6 +392,18 @@ def _numeric_array(value: Any, variable: str, file_path: Path) -> np.ndarray:
         raise _data_error(
             file_path,
             f"MAT variable '{variable}' is not a numeric array.") from error
+
+
+def _required_mapping(
+    value: Optional[_T],
+    file_path: Path,
+    name: str,
+) -> _T:
+    """Reject incomplete dataclass configurations with a useful data error."""
+
+    if value is None:
+        raise _data_error(file_path, f"{name} is required for this format.")
+    return value
 
 
 def _resolve_mat_value(

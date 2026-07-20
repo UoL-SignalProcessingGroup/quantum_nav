@@ -101,7 +101,7 @@ def _make_gravity_map(config: ConfigHandler,
                       gravity_model: GravityModel,
                       geoid_model: Optional[GeoidModel],
                       map_id: str,
-                      custom_config_field: str = None) -> GravityModel:
+                      custom_config_field: Optional[str] = None) -> GravityModel:
 
     # Create short-hand functions
     get_bool = partial(config.get_bool, __SECTION_ID)

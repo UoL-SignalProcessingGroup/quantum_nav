@@ -8,7 +8,7 @@ alongside the data source rather than hard-coding them in QNav.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Optional, overload
 
 import numpy as np
 
@@ -191,17 +191,8 @@ def _read_vector_source(
                 section, "customToNed", "Invalid matrix",
                 "A custom vector frame requires nine comma-separated "
                 "custom-to-NED matrix values.")
-        custom_to_ned = tuple(float(value) for value in values)
-
-    common = {
-        "section": section,
-        "format": source_format,
-        "file": source_file,
-        "units": units,
-        "frame": frame,
-        "row_order": row_order,
-        "custom_to_ned": custom_to_ned,
-    }
+        custom_to_ned = tuple(
+            float(value) for value in np.asarray(values).ravel())
 
     component_names = {
         "ned": ("north", "east", "down"),
@@ -211,12 +202,19 @@ def _read_vector_source(
     }[frame]
 
     if source_format == "csv":
+        columns = tuple(
+            _required_str(config, section, f"{name}Column")
+            for name in component_names
+        )
         return VectorSourceConfig(
-            **common,
-            component_columns=tuple(
-                _required_str(config, section, f"{name}Column")
-                for name in component_names
-            ),
+            section=section,
+            format=source_format,
+            file=source_file,
+            units=units,
+            frame=frame,
+            row_order=row_order,
+            component_columns=(columns[0], columns[1], columns[2]),
+            custom_to_ned=custom_to_ned,
         )
 
     axis_order = _axis_order(config, section)
@@ -230,10 +228,16 @@ def _read_vector_source(
             "North, east, and down components must use distinct indexes.")
 
     return VectorSourceConfig(
-        **common,
+        section=section,
+        format=source_format,
+        file=source_file,
+        units=units,
+        frame=frame,
+        row_order=row_order,
         data_variable=_required_str(config, section, "dataVariable"),
         axis_order=axis_order,
-        component_indices=indices,
+        component_indices=(indices[0], indices[1], indices[2]),
+        custom_to_ned=custom_to_ned,
     )
 
 
@@ -241,6 +245,7 @@ def _read_tensor_source(
         config: ConfigHandler,
         base_dir: Path,
 ) -> Optional[TensorSourceConfig]:
+    assert config.parser is not None
     if not config.parser.has_section(_TENSOR_SECTION):
         return None
 
@@ -356,18 +361,40 @@ def _required_str(
     return value.strip()
 
 
+@overload
+def _optional_str(
+        config: ConfigHandler,
+        section: str,
+        name: str,
+        fallback: str,
+) -> str:
+    ...
+
+
+@overload
+def _optional_str(
+        config: ConfigHandler,
+        section: str,
+        name: str,
+        fallback: None = None,
+) -> Optional[str]:
+    ...
+
+
 def _optional_str(
         config: ConfigHandler,
         section: str,
         name: str,
         fallback: Optional[str] = None,
 ) -> Optional[str]:
+    assert config.parser is not None
     if not config.parser.has_option(section, name):
         return fallback
     return config.get_str(section, name)
 
 
 def _require_section(config: ConfigHandler, section: str) -> None:
+    assert config.parser is not None
     if not config.parser.has_section(section):
         raise _error(
             section, "", "Missing section",

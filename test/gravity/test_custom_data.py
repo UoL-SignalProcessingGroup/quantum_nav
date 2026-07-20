@@ -380,3 +380,38 @@ rowOrder = x_fastest
         read_custom_gravity_config(config_file))
 
     assert loaded.residual.shape == (3, 2, 3)
+
+
+def test_rejects_nonfinite_tensor_values(tmp_path: Path):
+    _write_csv_inputs(tmp_path)
+    tensor = {
+        name: np.arange(6, dtype=float)
+        for name in ("nn", "ee", "dd", "ne", "nd", "ed")
+    }
+    tensor["nd"][2] = np.nan
+    pd.DataFrame(tensor).to_csv(tmp_path / "tensor.csv", index=False)
+    config_file = _write_config(
+        tmp_path,
+        _csv_field("Field", "field.csv"),
+        mode="residual",
+    )
+    with config_file.open("a", encoding="utf-8") as stream:
+        stream.write(
+            """
+[Tensor]
+format = csv
+file = tensor.csv
+nnColumn = nn
+eeColumn = ee
+ddColumn = dd
+neColumn = ne
+ndColumn = nd
+edColumn = ed
+units = E
+rowOrder = x_fastest
+"""
+        )
+
+    with pytest.raises(ValueError, match="only finite"):
+        load_custom_map_data(
+            read_custom_gravity_config(config_file))
