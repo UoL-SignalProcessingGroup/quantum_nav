@@ -42,6 +42,9 @@ __DEFAULT_Q_IMU_IS_USED = False
 # The default quantum sensor ID.
 __DEFAULT_QUANTUM_SENSOR = "concept"
 
+# The default quantum fusion ID.
+__DEFAULT_QUANTUM_FUSION = "basic"
+
 # The default quantum sensor measurement ID.
 __DEFAULT_QUANTUM_IMU_FREQ: float = 1
 
@@ -297,7 +300,7 @@ def get_quantum_imu_fusion(config: ConfigHandler, sensor: ConceptQuantumImu,
 
     # Shorthand function for reading float values from configuration
     get_id = partial(config.get_str_alpha, __SECTION_ID)
-    method_name: str = get_id("quantumImuFusion", __DEFAULT_QUANTUM_SENSOR)
+    method_name: str = get_id("quantumImuFusion", __DEFAULT_QUANTUM_FUSION)
 
     # TODO: Swap real axis but provide estimate?
     # TODO: CHECK CORRECT AXIS

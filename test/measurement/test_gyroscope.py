@@ -167,7 +167,7 @@ def test_measurement_noise(mock_rng, random_truth: GroundTruth, args: dict):
 
     # Calculate the expected values.
     angle_rates = random_truth.angle_rates
-    expected_noise = np.degrees(np.degrees(noise * 1e-6) * args['seed'])
+    expected_noise = np.degrees(noise * 1e-6 * args['seed'])
     expected = angle_rates + expected_noise
 
     # Compare expected against each step:

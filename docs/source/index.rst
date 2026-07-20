@@ -42,6 +42,7 @@ presents the following key features:
    usage/trajectory
    usage/gravity_modelling
    usage/measurement
+   usage/raw_data
    usage/fusion
    usage/configuration
    usage/packages

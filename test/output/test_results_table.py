@@ -174,3 +174,45 @@ class TestResults:
             _assert_is_mem_map(read_data)
         else:
             _assert_is_not_mem_map(read_data)
+
+    @staticmethod
+    def test_retained_views_survive_read_replacement(data_to_save, results_dir):
+        results_file = results_dir / 'results.qnr'
+        table = ResultsTable(results_file)
+        table.write('Testing results', **data_to_save)
+        table.read(virtual_memory=True)
+        retained = table.get_data()
+
+        table.read(virtual_memory=True)
+
+        _assert_time_match(retained, data_to_save)
+        _assert_fields_match(retained, data_to_save)
+
+    @staticmethod
+    def test_retained_writer_views_survive_overwrite(data_to_save, results_dir):
+        results_file = results_dir / 'results.qnr'
+        table = ResultsTable(results_file)
+        table.write('Testing results', **data_to_save)
+        retained = table.get_data()
+        replacement = {name: value * 2
+                       for name, value in data_to_save.items()}
+
+        table.write('Replacement', **replacement)
+
+        _assert_time_match(retained, data_to_save)
+        _assert_fields_match(retained, data_to_save)
+        _assert_fields_match(table.get_data(), replacement)
+
+    @staticmethod
+    def test_retained_reader_views_block_destination_overwrite(
+            data_to_save, results_dir):
+        results_file = results_dir / 'results.qnr'
+        table = ResultsTable(results_file)
+        table.write('Testing results', **data_to_save)
+        table.read(virtual_memory=True)
+        retained = table.get_data()
+
+        with pytest.raises(RuntimeError, match='get_data'):
+            table.write('Replacement', **data_to_save)
+
+        _assert_time_match(retained, data_to_save)

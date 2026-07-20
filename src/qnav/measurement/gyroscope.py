@@ -82,7 +82,7 @@ class Gyroscope(Sensor):
         # Unpack required error properties:
         self._bias_error = error_profile.bias_error
         self._bias_drift_rate = error_profile.bias_drift_rate
-        self._avg_meas_noise_md = np.degrees(error_profile.avg_meas_noise) * 1e-6
+        self._avg_meas_noise_md = error_profile.avg_meas_noise * 1e-6
         self._meas_noise = self._avg_meas_noise_md * self._rng.normal(size=3)
         self.__error_matrix = error_profile.error_matrix
 
