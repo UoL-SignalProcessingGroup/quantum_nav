@@ -1,6 +1,8 @@
 
 import json
 import struct
+import tempfile
+import weakref
 import numpy as np
 
 from pathlib import Path
@@ -37,11 +39,75 @@ class ResultsTable:
     def __init__(self, file_path: Path, read_only: bool = False, auto_load: bool = True):
         self._file_path = file_path
         self._read_only = read_only
+        self._exported_views = []
+        self._mapping_is_destination = False
+        self._backing_file = None
+        self._retired_mappings = []
 
         if auto_load and file_path.exists():
             self.read()
 
+    def _live_exported_views(self) -> bool:
+        self._exported_views = [
+            reference for reference in self._exported_views
+            if reference() is not None
+        ]
+        return bool(self._exported_views)
+
+    @staticmethod
+    def _close_mapping(mapping, backing_file) -> None:
+        mapped = getattr(mapping, "_mmap", None)
+        if mapped is not None:
+            mapped.close()
+        if backing_file is not None:
+            backing_file.close()
+
+    def _cleanup_retired_mappings(self) -> None:
+        retained = []
+        for mapping, backing_file, references, is_destination in self._retired_mappings:
+            references = [reference for reference in references
+                          if reference() is not None]
+            if references:
+                retained.append(
+                    (mapping, backing_file, references, is_destination))
+            else:
+                self._close_mapping(mapping, backing_file)
+        self._retired_mappings = retained
+
+    def _release_memmap(self, *, for_overwrite: bool = False) -> None:
+        """Release an unshared mapping before replacing this table's data.
+
+        Arrays returned by :meth:`get_data` may outlive the table's current
+        view. Closing their shared mapping would leave those arrays pointing
+        at invalid memory. Reads can simply leave such an old mapping alive;
+        overwrites fail explicitly until the caller releases the views.
+        """
+        self._cleanup_retired_mappings()
+        if for_overwrite and any(
+                is_destination for _, _, _, is_destination
+                in self._retired_mappings):
+            raise RuntimeError(
+                "Cannot overwrite results while get_data() views are retained")
+        data = self._data_table
+        if isinstance(data, np.memmap):
+            if self._live_exported_views():
+                if for_overwrite and self._mapping_is_destination:
+                    raise RuntimeError(
+                        "Cannot overwrite results while get_data() views are retained")
+                self._retired_mappings.append((
+                    data, self._backing_file, self._exported_views,
+                    self._mapping_is_destination))
+            else:
+                self._close_mapping(data, self._backing_file)
+            self._time_steps = None
+        self._data_table = None
+        self._backing_file = None
+        self._mapping_is_destination = False
+        self._exported_views = []
+
     def read(self, virtual_memory: bool = True):
+
+        self._release_memmap()
 
         # Open the file and attempt to read header:
         with self._file_path.open('rb') as f:
@@ -59,6 +125,7 @@ class ResultsTable:
             self._data_table = np.memmap(
                 self._file_path, np.float64, 'r',
                 offset=offset, shape=shape)
+            self._mapping_is_destination = True
 
         else:
             self._data_table = np.fromfile(
@@ -107,6 +174,8 @@ class ResultsTable:
         if self._read_only:
             raise ValueError("Cannot write data in read-only mode")
 
+        self._release_memmap(for_overwrite=True)
+
         header = self.__generate_header(desc, time_steps, **data)
         data_size = header["size"]
         fields = header["fields"]
@@ -132,39 +201,59 @@ class ResultsTable:
             else:
                 to_write[:, index:index + size] = data[field]
 
-        self._description = desc
-        self._time_steps = to_write[:, 0]
-        self._data_table = to_write
-        self._index_dict = fields
         to_write.flush()
+
+        # Keep the writer's queryable view on an anonymous temporary mapping.
+        # This avoids a dense RAM copy without leaving the destination file
+        # locked against another ResultsTable writer on Windows.
+        backing_file = tempfile.TemporaryFile()
+        backing_file.truncate(int(np.prod(data_size)) * np.dtype(np.float64).itemsize)
+        loaded = np.memmap(
+            backing_file, np.float64, 'r+', shape=data_size)
+        loaded[:] = to_write
+        loaded.flush()
+        self._close_mapping(to_write, None)
+
+        self._description = desc
+        self._time_steps = loaded[:, 0]
+        self._data_table = loaded
+        self._index_dict = fields
+        self._backing_file = backing_file
+        self._mapping_is_destination = False
 
     def get_data(self) -> dict:
 
         if self._data_table is None:
             raise LookupError("no data within table")
 
+        values_view = self._data_table.view()
+        time_view = self._time_steps.view()
         fields = {}
-        columns = ["time"] * self._data_table.shape[1]
+        columns = ["time"] * values_view.shape[1]
 
         for field, (index, size) in self._index_dict.items():
 
             if size == 1:
-                fields[field] = self._data_table[:, index]
+                fields[field] = values_view[:, index]
                 columns[index] = field
 
             else:
-                fields[field] = self._data_table[:, index:index + size]
+                fields[field] = values_view[:, index:index + size]
                 for i in range(index, index + size):
                     columns[i] = f"{field} ({i - index + 1})"
 
         table = {
             'columns': columns,
-            'values': self._data_table
+            'values': values_view
         }
+
+        if isinstance(self._data_table, np.memmap):
+            for view in (time_view, values_view, *fields.values()):
+                self._exported_views.append(weakref.ref(view))
 
         return {
             'description': self._description,
-            'time_steps': self._time_steps,
+            'time_steps': time_view,
             'table': table,
             'data': fields,
         }

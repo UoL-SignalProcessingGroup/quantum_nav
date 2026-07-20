@@ -24,6 +24,7 @@ from qnav.measurement.gyroscope import Gyroscope
 from qnav.measurement.platform import SensorAxis
 from qnav.measurement.sensor import SensorFusion
 from qnav.measurement.sensor import FusionTrigger
+from qnav.measurement.sensor import resolve_time_step
 from qnav.util.transformations import cross_prod_xy
 # from qnav.util.transformations import cross_prod3
 from math import radians, sin, cos, tan, pi
@@ -33,6 +34,13 @@ import qnav.util.transformations as trans
 import qnav.util.constants as const
 import numpy as np
 import math
+
+
+def _adams_bashforth_weights(time_step: float,
+                             previous_time_step: float) -> tuple[float, float]:
+    """Return AB2 weights for derivative increments at unequal intervals."""
+    step_ratio = time_step / previous_time_step
+    return 1.0 + 0.5 * step_ratio, -0.5 * step_ratio ** 2
 
 
 class NumericalINS(SensorFusion):
@@ -97,7 +105,8 @@ class NumericalINS(SensorFusion):
             warn("Accelerometer and Gyroscope have different measurement frequencies")
 
 
-    def perform_fusion(self, estimated_state: EstimatedState) -> None:
+    def perform_fusion(self, estimated_state: EstimatedState,
+                       time_step: float = None) -> None:
         """
         Performs fusion using latest accelerometer and gyroscope measurements.
         Using the latest basic inertial measurements, updates the full current
@@ -105,16 +114,22 @@ class NumericalINS(SensorFusion):
 
         :param estimated_state: The current estimated state.
         :type estimated_state: EstimatedState
+
+        :param time_step: Optional elapsed interval in seconds. When omitted,
+            each sensor's configured interval is used.
+        :type time_step: float
         """
 
         # Get the latest measurement from the sensors:
         measured_acceleration = self._accelerometer.last_measurement
         measured_angle_rates = self._gyroscope.last_measurement
 
-        # TODO: Correct for non-uniform time steps?
-        # Get the time step difference between measurements
-        acc_time_step = self._accelerometer.time_step
-        gyro_time_step = self._gyroscope.time_step
+        # Explicit replay intervals apply to both measurements. Simulation
+        # callers retain the independently configured sensor intervals.
+        acc_time_step = resolve_time_step(
+            time_step, self._accelerometer.time_step)
+        gyro_time_step = resolve_time_step(
+            time_step, self._gyroscope.time_step)
 
         # Unpack old estimated states
         est_position = estimated_state.position
@@ -246,7 +261,8 @@ class RungeKutta(NumericalINS):
         * Lever-arm effects from rotations not around origin/centre of the IMU
     """
 
-    def perform_fusion(self, estimated_state: EstimatedState) -> None:
+    def perform_fusion(self, estimated_state: EstimatedState,
+                       time_step: float = None) -> None:
         """
         Performs fusion using latest accelerometer and gyroscope measurements.
         Using the latest basic inertial measurements, updates the full current
@@ -254,6 +270,10 @@ class RungeKutta(NumericalINS):
 
         :param estimated_state: The current estimated state.
         :type estimated_state: EstimatedState
+
+        :param time_step: Optional elapsed interval in seconds. When omitted,
+            the mean configured IMU interval is used.
+        :type time_step: float
         """
 
         # Get the latest measurement from the sensors:
@@ -261,9 +281,9 @@ class RungeKutta(NumericalINS):
         measured_angle_rates = self._gyroscope.last_measurement
 
         # Get the timestep between measurements:
-        acc_time_step = self._accelerometer.time_step
-        gyro_time_step = self._gyroscope.time_step
-        time_step = (acc_time_step + gyro_time_step) / 2
+        configured_time_step = (
+            self._accelerometer.time_step + self._gyroscope.time_step) / 2
+        time_step = resolve_time_step(time_step, configured_time_step)
 
         # Define Angular velocity for Earth's rotation (in local NED axes)
         ref_lla = estimated_state.position
@@ -478,10 +498,16 @@ class AdamsBashforth(NumericalINS):
         self._d_est_attitude = np.zeros(3)
         self._d_est_angle_rates = np.zeros(3)
 
+        # Interval represented by the stored increments. This is required for
+        # the variable-step Adams-Bashforth coefficients.
+        self._previous_time_step = None
+
         # Set that bootstrapping is required.
         self.__requires_bootstrap = True
 
-    def __perform_bootstrapping(self, estimated_state: EstimatedState):
+    def __perform_bootstrapping(self, estimated_state: EstimatedState,
+                                time_step: float,
+                                requested_time_step: float = None):
         """
         An alternative processing method for the first run.
         If previous estimates are not available, this method can be used
@@ -505,7 +531,10 @@ class AdamsBashforth(NumericalINS):
         # Use the parent class's update method.
         # super().take_inertia_measurement(
         #     time_step, measured_acceleration, measured_angle_rates)
-        super().perform_fusion(estimated_state)
+        # Passing None preserves NumericalINS's legacy handling of unequal
+        # accelerometer and gyroscope frequencies when replay did not provide
+        # an explicit interval.
+        super().perform_fusion(estimated_state, requested_time_step)
 
         # Obtain the updated estimation values.
         position_e1 = trans.lla2ned(estimated_state.position, ref_lla)
@@ -520,8 +549,10 @@ class AdamsBashforth(NumericalINS):
         self._d_est_acceleration = acceleration_b1 - acceleration_b0
         self._d_est_attitude = attitude_1 - attitude_0
         self._d_est_angle_rates = angle_rate_b1 - angle_rate_b0
+        self._previous_time_step = time_step
 
-    def perform_fusion(self, estimated_state: EstimatedState) -> None:
+    def perform_fusion(self, estimated_state: EstimatedState,
+                       time_step: float = None) -> None:
         """
         Performs fusion using latest accelerometer and gyroscope measurements.
         Using the latest basic inertial measurements, updates the full current
@@ -529,22 +560,27 @@ class AdamsBashforth(NumericalINS):
 
         :param estimated_state: The current estimated state.
         :type estimated_state: EstimatedState
+
+        :param time_step: Optional elapsed interval in seconds. When omitted,
+            the mean configured IMU interval is used.
+        :type time_step: float
         """
+
+        requested_time_step = time_step
+        configured_time_step = (
+            self._accelerometer.time_step + self._gyroscope.time_step) / 2
+        time_step = resolve_time_step(time_step, configured_time_step)
 
         # Use bootstrapping for the first run
         if self.__requires_bootstrap:
-            self.__perform_bootstrapping(estimated_state)
+            self.__perform_bootstrapping(
+                estimated_state, time_step, requested_time_step)
             self.__requires_bootstrap = False
             return
 
         # Get the latest measurement from the sensors:
         measured_acceleration = self._accelerometer.last_measurement
         measured_angle_rates = self._gyroscope.last_measurement
-
-        # Get the timestep between measurements:
-        acc_time_step = self._accelerometer.time_step
-        gyro_time_step = self._gyroscope.time_step
-        time_step = (acc_time_step + gyro_time_step) / 2
 
         ref_lla = estimated_state.position
 
@@ -654,12 +690,21 @@ class AdamsBashforth(NumericalINS):
         d_attitude_0 = self._d_est_attitude
         d_angle_rate_b0 = self._d_est_angle_rates
 
-        # Sum together all Adams-Bashforth terms
-        position_e2 = position_e0 + 1.5 * d_position_e1 - 0.5 * d_position_e0
-        velocity_b2 = velocity_b0 + 1.5 * d_velocity_b1 - 0.5 * d_velocity_b0
-        acceleration_b2 = acceleration_b0 + 1.5 * d_acceleration_b1 - 0.5 * d_acceleration_b0
-        attitude_2 = attitude_0 + 1.5 * d_attitude_1 - 0.5 * d_attitude_0
-        angle_rate_b2 = angle_rate_b0 + 1.5 * d_angle_rate_b1 - 0.5 * d_angle_rate_b0
+        # Variable-step AB2. The stored values are increments rather than raw
+        # derivatives, hence the previous-increment coefficient is squared.
+        # With equal intervals these reduce exactly to the legacy 3/2, -1/2.
+        current_weight, previous_weight = _adams_bashforth_weights(
+            time_step, self._previous_time_step)
+        position_e2 = position_e0 + current_weight * d_position_e1 \
+            + previous_weight * d_position_e0
+        velocity_b2 = velocity_b0 + current_weight * d_velocity_b1 \
+            + previous_weight * d_velocity_b0
+        acceleration_b2 = acceleration_b0 + current_weight * d_acceleration_b1 \
+            + previous_weight * d_acceleration_b0
+        attitude_2 = attitude_0 + current_weight * d_attitude_1 \
+            + previous_weight * d_attitude_0
+        angle_rate_b2 = angle_rate_b0 + current_weight * d_angle_rate_b1 \
+            + previous_weight * d_angle_rate_b0
 
         # Ensure the updated attitude values are valid
         attitude_2 = np.remainder(attitude_2 + pi, 2 * pi) - pi
@@ -679,4 +724,5 @@ class AdamsBashforth(NumericalINS):
         self._d_est_acceleration = d_acceleration_b1
         self._d_est_attitude = d_attitude_1
         self._d_est_angle_rates = d_angle_rate_b1
+        self._previous_time_step = time_step
 
