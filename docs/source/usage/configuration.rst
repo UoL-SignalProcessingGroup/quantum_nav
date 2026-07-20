@@ -279,7 +279,8 @@ conflated:
   ``EPSG:3413``. Vertical, geocentric, three-dimensional, and compound CRSs
   are rejected. For geographic grids, equivalent longitudes are normalised
   to the convention used by the map axis, including ``-180``/``180`` and
-  ``0``/``360`` conventions.
+  ``0``/``360`` conventions. The longitude axis must span less than one
+  revolution; a full-revolution axis duplicates its seam and is rejected.
 * ``frame`` defines the gravity-vector axes. Supported values are ``NED``,
   ``ENU``, ``ECEF``, ``geocentric_ned``, and ``custom``.
   ``geocentric_ned`` is a local spherical frame based on geocentric latitude;

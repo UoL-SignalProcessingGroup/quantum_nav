@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -230,6 +231,99 @@ def test_longitude_normalization_does_not_mask_out_of_bounds_query(
 
     with pytest.raises(ValueError, match="cannot provide"):
         model.get_residual(70.1, 190.0)
+
+
+@pytest.mark.parametrize(
+    "map_longitudes",
+    (
+        (-180.0, 0.0, 180.0),
+        (0.0, 180.0, 360.0),
+        (-200.0, 0.0, 200.0),
+    ),
+)
+def test_rejects_ambiguous_geographic_longitude_span(
+    tmp_path: Path,
+    map_longitudes: tuple[float, float, float],
+):
+    _make_map(tmp_path)
+    coordinates_file = tmp_path / "coordinates.csv"
+    coordinates = pd.read_csv(coordinates_file)
+    coordinates["x"] = np.tile(map_longitudes, 3)
+    coordinates.to_csv(coordinates_file, index=False)
+
+    with pytest.raises(ValueError, match="less than one revolution"):
+        CustomGravityMap(FixedValue(), None, tmp_path / "map.ini")
+
+
+@pytest.mark.parametrize(
+    "map_longitudes",
+    (
+        (-179.999, 0.0, 179.999),
+        (359820.001, 360000.0, 360179.999),
+    ),
+)
+def test_accepts_geographic_axis_just_under_one_revolution(
+    tmp_path: Path,
+    map_longitudes: tuple[float, float, float],
+):
+    _make_map(tmp_path)
+    coordinates_file = tmp_path / "coordinates.csv"
+    coordinates = pd.read_csv(coordinates_file)
+    coordinates["x"] = np.tile(map_longitudes, 3)
+    coordinates.to_csv(coordinates_file, index=False)
+
+    model = CustomGravityMap(FixedValue(), None, tmp_path / "map.ini")
+
+    assert model.map_data.x[-1] - model.map_data.x[0] < 360.0
+
+
+@pytest.mark.parametrize(
+    ("latitude", "longitude"),
+    (
+        (70.1, np.nan),
+        (70.1, np.inf),
+        (70.1, -np.inf),
+        (np.nan, 10.1),
+        (np.inf, 10.1),
+        (-np.inf, 10.1),
+    ),
+)
+def test_nonfinite_query_uses_coverage_policy_without_warning(
+    tmp_path: Path,
+    latitude: float,
+    longitude: float,
+):
+    model, _, _, _ = _make_map(tmp_path)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        result = model.get_residual(latitude, longitude)
+
+    np.testing.assert_allclose(result, 0.0)
+
+
+def test_nonfinite_query_respects_error_policy_without_warning(
+    tmp_path: Path,
+):
+    model, _, _, _ = _make_map(tmp_path, out_of_bounds="error")
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        with pytest.raises(ValueError, match="cannot provide"):
+            model.get_residual(np.inf, 10.1)
+
+
+def test_vectorized_query_isolates_nonfinite_rows(tmp_path: Path):
+    model, _, _, expected = _make_map(tmp_path)
+    latitude = np.array([70.1, np.nan, 70.1])
+    longitude = np.array([10.1, 10.1, np.inf])
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        result = model.get_residual_vec(latitude, longitude)
+
+    np.testing.assert_allclose(result[0], expected[1, 1])
+    np.testing.assert_allclose(result[1:], 0.0)
 
 
 def test_rejects_mismatched_query_shapes(tmp_path: Path):

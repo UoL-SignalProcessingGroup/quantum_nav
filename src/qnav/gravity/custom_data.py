@@ -128,6 +128,18 @@ class CustomMapDataLoader:
 
         x, flip_x = _normalize_axis(x, "x")
         y, flip_y = _normalize_axis(y, "y")
+        if crs.is_geographic:
+            period = geographic_longitude_period(crs)
+            span = float(x[-1] - x[0])
+            scale = max(1.0, abs(span), period)
+            tolerance = np.finfo(np.float64).eps * scale * 64
+            if span >= period - tolerance:
+                raise _data_error(
+                    source.file,
+                    "Geographic longitude axes must span less than one "
+                    "revolution so equivalent seam coordinates are not "
+                    "duplicated.",
+                )
         if height is not None:
             if flip_x:
                 height = np.flip(height, axis=0)
@@ -484,6 +496,15 @@ def load_custom_map_data(config: CustomGravityConfig) -> LoadedCustomMap:
     """Convenience wrapper for loading a custom gravity map."""
 
     return CustomMapDataLoader(config).load()
+
+
+def geographic_longitude_period(crs: CRS) -> float:
+    """Return one revolution in the geographic CRS longitude unit."""
+
+    for axis in crs.axis_info:
+        if axis.direction.casefold() in {"east", "west"}:
+            return float(2.0 * np.pi / axis.unit_conversion_factor)
+    raise ValueError("Geographic CRS has no longitude axis.")
 
 
 def _read_csv(file_path: Path, columns: list[str]) -> pd.DataFrame:

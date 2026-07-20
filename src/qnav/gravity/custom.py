@@ -5,12 +5,16 @@ from typing import Optional
 
 import numpy as np
 
-from pyproj import CRS, Transformer
+from pyproj import Transformer
 from scipy.interpolate import RegularGridInterpolator
 
 from qnav.earth.geoid import GeoidModel
 from qnav.gravity.base import GravityModel
-from qnav.gravity.custom_data import LoadedCustomMap, load_custom_map_data
+from qnav.gravity.custom_data import (
+    LoadedCustomMap,
+    geographic_longitude_period,
+    load_custom_map_data,
+)
 from qnav.gravity.map import GravityMap
 from qnav.input.ini.custom_gravity_config import (
     CustomGravityConfig,
@@ -177,7 +181,7 @@ class CustomGravityMap(GravityMap):
             x_values = _normalize_periodic_axis(
                 x_values,
                 self._data.x,
-                _longitude_period(self._data.crs),
+                geographic_longitude_period(self._data.crs),
             )
         x_values = _clip_transform_roundoff(
             x_values, self._data.x)
@@ -187,8 +191,13 @@ class CustomGravityMap(GravityMap):
             x_values.ravel(),
             y_values.ravel(),
         ))
-        residual = np.asarray(
-            self._interpolator(points), dtype=np.float64)
+        finite_points = np.all(np.isfinite(points), axis=1)
+        residual = np.full((points.shape[0], 3), np.nan, dtype=np.float64)
+        if np.any(finite_points):
+            residual[finite_points] = np.asarray(
+                self._interpolator(points[finite_points]),
+                dtype=np.float64,
+            )
         invalid = ~np.all(np.isfinite(residual), axis=1)
 
         if np.any(invalid):
@@ -239,15 +248,6 @@ def _clip_transform_roundoff(
     )
 
 
-def _longitude_period(crs: CRS) -> float:
-    """Return one revolution in the geographic CRS longitude unit."""
-
-    for axis in crs.axis_info:
-        if axis.direction.casefold() in {"east", "west"}:
-            return float(2.0 * np.pi / axis.unit_conversion_factor)
-    raise ValueError("Geographic CRS has no longitude axis.")
-
-
 def _normalize_periodic_axis(
     values: np.ndarray,
     axis: np.ndarray,
@@ -256,5 +256,9 @@ def _normalize_periodic_axis(
     """Choose the equivalent periodic coordinate nearest the map axis."""
 
     midpoint = (float(axis[0]) + float(axis[-1])) / 2.0
-    revolutions = np.round((midpoint - values) / period)
-    return values + revolutions * period
+    normalized = values.copy()
+    finite = np.isfinite(values)
+    finite_values = values[finite]
+    revolutions = np.round((midpoint - finite_values) / period)
+    normalized[finite] = finite_values + revolutions * period
+    return normalized
