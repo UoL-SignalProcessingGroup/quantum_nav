@@ -76,6 +76,30 @@ def test_reads_custom_gravity_config(tmp_path: Path):
     assert result.reference.quantity == "gravitational_attraction"
 
 
+def test_epsg3413_total_reference_example_declares_verified_semantics():
+    config_file = (
+        Path(__file__).parents[2]
+        / "config"
+        / "gravity_maps"
+        / "custom_epsg3413_total_reference.ini"
+    )
+
+    result = read_custom_gravity_config(config_file)
+
+    assert result.crs == "EPSG:3413"
+    assert result.mode == "total_minus_reference"
+    assert result.grid.height_reference == "geoid_surface"
+    assert result.field.format == "mat"
+    assert result.field.data_variable == "gdatsum"
+    assert result.field.component_indices == (1, 2, 3)
+    assert result.field.frame == "geocentric_ned"
+    assert result.field.quantity == "effective_gravity"
+    assert result.reference is not None
+    assert result.reference.frame == "ned"
+    assert result.reference.quantity == "gravitational_attraction"
+    assert result.reference.coordinate_frame == "wgs84"
+
+
 def test_residual_mode_does_not_require_reference(tmp_path: Path):
     body = _valid_config().replace(
         "mode = total_minus_reference", "mode = residual")

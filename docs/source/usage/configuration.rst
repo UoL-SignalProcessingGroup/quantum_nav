@@ -333,6 +333,9 @@ also the normal way to use global products without loading them in full.
 
 Ready-to-copy templates are provided in ``config/gravity_maps`` for generic
 vector CSV, scalar delimited text, scalar GeoTIFF, and scalar NetCDF maps.
+``custom_epsg3413_total_reference.ini`` demonstrates a projected grid with a
+packed geocentric-NED effective-gravity field and a geodetic-NED
+gravitational-attraction reference using generic paths.
 CSV vector sources may set ``coordinateFrame = grid`` with
 ``gridXColumn``/``gridYColumn``, or ``coordinateFrame = wgs84`` with
 ``latitudeColumn``/``longitudeColumn``. QNav then verifies every source row
