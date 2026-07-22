@@ -57,6 +57,11 @@ def _write_config(
     mode: str = "total_minus_reference",
     crs: str = "EPSG:3413",
 ) -> Path:
+    if mode == "total_minus_reference":
+        if "quantity =" not in field_section:
+            field_section += "\nquantity = effective_gravity\n"
+        if reference_section and "quantity =" not in reference_section:
+            reference_section += "\nquantity = effective_gravity\n"
     config_file = tmp_path / "map.ini"
     config_file.write_text(
         f"""
@@ -514,6 +519,84 @@ def test_normalizes_gravitational_attraction_to_effective_gravity(
         centrifugal_ecef,
     ).reshape(loaded.residual.shape)
     np.testing.assert_allclose(loaded.residual, -expected_reference)
+
+
+def test_rotates_effective_field_before_normalizing_and_subtracting_reference(
+    tmp_path: Path,
+):
+    longitude = np.array([10.0, 10.1])
+    latitude = np.array([70.0, 70.1])
+    lon_grid, lat_grid = np.meshgrid(longitude, latitude, indexing="xy")
+    height = np.full(lon_grid.size, 50.0)
+    pd.DataFrame({
+        "x": lon_grid.ravel(),
+        "y": lat_grid.ravel(),
+        "height": height,
+    }).to_csv(tmp_path / "coordinates.csv", index=False)
+
+    lla = np.column_stack((lat_grid.ravel(), lon_grid.ravel(), height))
+    ecef = lla2ecef_vec(lla)
+    geocentric_latitude = np.degrees(np.arctan2(
+        ecef[:, 2], np.hypot(ecef[:, 0], ecef[:, 1])))
+    delta = np.radians(lat_grid.ravel() - geocentric_latitude)
+    desired_effective = np.column_stack((
+        np.full(delta.size, 1e-3),
+        np.full(delta.size, 2e-3),
+        np.full(delta.size, 9.8),
+    ))
+    geocentric_field = np.empty_like(desired_effective)
+    geocentric_field[:, 0] = (
+        np.cos(delta) * desired_effective[:, 0]
+        - np.sin(delta) * desired_effective[:, 2]
+    )
+    geocentric_field[:, 1] = desired_effective[:, 1]
+    geocentric_field[:, 2] = (
+        np.sin(delta) * desired_effective[:, 0]
+        + np.cos(delta) * desired_effective[:, 2]
+    )
+    pd.DataFrame(
+        geocentric_field, columns=["north", "east", "down"],
+    ).to_csv(tmp_path / "field.csv", index=False)
+
+    attraction = np.broadcast_to(
+        np.array([3e-3, 4e-3, 9.7]), desired_effective.shape).copy()
+    pd.DataFrame(
+        attraction, columns=["north", "east", "down"],
+    ).to_csv(tmp_path / "reference.csv", index=False)
+    field_section = _csv_field(
+        "Field", "field.csv", "geocentric_ned",
+    ).replace("units = mGal", "units = m/s2")
+    field_section += "\nquantity = effective_gravity\n"
+    reference_section = _csv_field(
+        "Reference", "reference.csv",
+    ).replace("units = mGal", "units = m/s2")
+    reference_section += "\nquantity = gravitational_attraction\n"
+    config_file = _write_config(
+        tmp_path,
+        field_section,
+        reference_section,
+        crs="EPSG:4326",
+    )
+
+    loaded = load_custom_map_data(
+        read_custom_gravity_config(config_file))
+
+    centrifugal_ecef = np.column_stack((
+        constants.OMEGA_E ** 2 * ecef[:, 0],
+        constants.OMEGA_E ** 2 * ecef[:, 1],
+        np.zeros(ecef.shape[0]),
+    ))
+    centrifugal_ned = np.einsum(
+        "nij,nj->ni", ecef2ned_transform_vec(lla), centrifugal_ecef,
+    )
+    expected = desired_effective - attraction - centrifugal_ned
+    expected = np.transpose(
+        expected.reshape(lat_grid.shape + (3,)), (1, 0, 2))
+    np.testing.assert_allclose(
+        loaded.residual,
+        expected,
+        atol=1e-14,
+    )
 
 
 def test_validates_vector_source_coordinates(tmp_path: Path):

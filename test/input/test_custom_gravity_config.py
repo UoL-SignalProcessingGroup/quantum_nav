@@ -139,18 +139,22 @@ longitudeColumn = longitude""",
     assert result.field.coordinate_columns == ("latitude", "longitude")
 
 
-def test_defaults_quantities_compatibly_with_mode(tmp_path: Path):
-    body = _valid_config().replace(
-        "quantity = effective_gravity\n", "", 1)
-    body = body.replace(
-        "quantity = gravitational_attraction\n", "", 1)
+@pytest.mark.parametrize(
+    "declaration",
+    [
+        "quantity = effective_gravity\n",
+        "quantity = gravitational_attraction\n",
+    ],
+)
+def test_total_minus_reference_requires_explicit_quantities(
+    tmp_path: Path,
+    declaration: str,
+):
+    body = _valid_config().replace(declaration, "", 1)
     config_file = _write_config(tmp_path, body)
 
-    result = read_custom_gravity_config(config_file)
-
-    assert result.field.quantity == "effective_gravity"
-    assert result.reference is not None
-    assert result.reference.quantity == "effective_gravity"
+    with pytest.raises(NavConfigError, match="explicit quantity"):
+        read_custom_gravity_config(config_file)
 
 
 @pytest.mark.parametrize(

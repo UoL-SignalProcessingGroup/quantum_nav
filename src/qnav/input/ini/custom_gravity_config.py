@@ -187,8 +187,7 @@ def read_custom_gravity_config(config_file: Path) -> CustomGravityConfig:
     subset = _read_subset(config)
 
     grid = _read_grid(config, config_file.parent)
-    default_field_quantity = (
-        "residual" if mode == "residual" else "effective_gravity")
+    default_field_quantity = "residual" if mode == "residual" else None
     field = _read_vector_source(
         config,
         _FIELD_SECTION,
@@ -203,7 +202,7 @@ def read_custom_gravity_config(config_file: Path) -> CustomGravityConfig:
             config,
             _REFERENCE_SECTION,
             config_file.parent,
-            "effective_gravity",
+            None,
         )
 
     if mode == "residual" and field.quantity not in {
@@ -538,7 +537,7 @@ def _read_vector_source(
         config: ConfigHandler,
         section: str,
         base_dir: Path,
-        default_quantity: str,
+        default_quantity: Optional[str],
 ) -> VectorSourceConfig:
     source_format = _choice(config, section, "format", _FORMATS)
     source_file = _source_path(config, section, base_dir)
@@ -1050,9 +1049,18 @@ def _choice(
 def _read_quantity(
     config: ConfigHandler,
     section: str,
-    fallback: str,
+    fallback: Optional[str],
 ) -> str:
     value = _optional_str(config, section, "quantity", fallback)
+    if value is None:
+        raise _error(
+            section,
+            "quantity",
+            "Missing physical quantity",
+            "An explicit quantity is required for each source in "
+            "total_minus_reference mode so gravitational attraction is not "
+            "silently treated as effective gravity.",
+        )
     normalized = value.strip().casefold()
     if normalized in _NONPHYSICAL_ANOMALIES:
         raise _error(

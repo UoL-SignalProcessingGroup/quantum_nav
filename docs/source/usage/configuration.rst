@@ -350,6 +350,11 @@ normalisation.
 ``mode = total_minus_reference``, QNav converts the field and reference to
 geodetic NED effective gravity in metres per second squared before subtracting
 them. The residual is added to the configured base gravity function.
+Both ``[Field]`` and ``[Reference]`` must explicitly declare ``frame`` and
+``quantity`` in this mode. There is intentionally no quantity default: for
+example, an effective-gravity field in ``geocentric_ned`` and a
+``gravitational_attraction`` reference in geodetic ``NED`` require different
+normalization steps before they can be subtracted safely.
 ``outOfBounds = base`` falls back to that function outside map coverage or at
 missing cells, while ``error`` raises an exception. Custom maps never
 extrapolate beyond their coverage.
