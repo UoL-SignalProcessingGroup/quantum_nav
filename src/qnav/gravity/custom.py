@@ -97,7 +97,7 @@ class CustomGravityMap(GravityMap):
 
         values, valid = self._query_map(lat, lon)
         if self._data.quantity == "free_air_anomaly":
-            result = np.zeros(3, dtype=np.float64)
+            result: np.ndarray = np.zeros(3, dtype=np.float64)
             result[2] = self._anomaly_to_disturbance(
                 lat, lon, float(values[2])) if bool(valid) else 0.0
             return result
@@ -152,10 +152,9 @@ class CustomGravityMap(GravityMap):
             values, valid = self._query_map(lat, lon)
             correction = self._interpolate_valid_anomalies(
                 lat, lon, alt, values[..., 2], valid)
-            return self._base_model.calc_gravity_z_vec(
-                lat, lon, alt) + correction
+            return self._base_gravity_z_vec(lat, lon, alt) + correction
         residual = self.get_residual_vec(lat, lon)
-        base = self._base_model.calc_gravity_xyz_vec(lat, lon, alt)
+        base = self._base_gravity_xyz_vec(lat, lon, alt)
         return base[..., 2] + residual[..., 2]
 
     def calc_gravity_xyz(
@@ -164,7 +163,10 @@ class CustomGravityMap(GravityMap):
         lon: float,
         alt: float,
     ) -> np.ndarray:
-        base = self._base_model.calc_gravity_xyz(lat, lon, alt)
+        base = np.asarray(
+            self._base_model.calc_gravity_xyz(lat, lon, alt),
+            dtype=np.float64,
+        ).copy()
         if self._data.quantity == "free_air_anomaly":
             values, valid = self._query_map(lat, lon)
             if bool(valid):
@@ -180,7 +182,7 @@ class CustomGravityMap(GravityMap):
         alt: np.ndarray,
     ) -> np.ndarray:
         _validate_query_shapes(lat, lon, alt)
-        base = self._base_model.calc_gravity_xyz_vec(lat, lon, alt)
+        base = self._base_gravity_xyz_vec(lat, lon, alt)
         if self._data.quantity == "free_air_anomaly":
             values, valid = self._query_map(lat, lon)
             base[..., 2] += self._interpolate_valid_anomalies(
@@ -260,6 +262,38 @@ class CustomGravityMap(GravityMap):
                 anomaly.ravel()[valid_flat],
             )
         return correction
+
+    def _base_gravity_z_vec(
+        self,
+        lat: np.ndarray,
+        lon: np.ndarray,
+        alt: np.ndarray,
+    ) -> np.ndarray:
+        """Call a one-dimensional base API while preserving query shape."""
+
+        shape = np.shape(lat)
+        result = self._base_model.calc_gravity_z_vec(
+            np.asarray(lat, dtype=np.float64).ravel(),
+            np.asarray(lon, dtype=np.float64).ravel(),
+            np.asarray(alt, dtype=np.float64).ravel(),
+        )
+        return np.asarray(result, dtype=np.float64).reshape(shape).copy()
+
+    def _base_gravity_xyz_vec(
+        self,
+        lat: np.ndarray,
+        lon: np.ndarray,
+        alt: np.ndarray,
+    ) -> np.ndarray:
+        """Call a one-dimensional base API while preserving query shape."""
+
+        shape = np.shape(lat)
+        result = self._base_model.calc_gravity_xyz_vec(
+            np.asarray(lat, dtype=np.float64).ravel(),
+            np.asarray(lon, dtype=np.float64).ravel(),
+            np.asarray(alt, dtype=np.float64).ravel(),
+        )
+        return np.asarray(result, dtype=np.float64).reshape(shape + (3,)).copy()
 
     def _query_map(
         self,

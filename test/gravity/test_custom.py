@@ -220,6 +220,47 @@ def test_vectorized_anomaly_fallback_does_not_query_geoid_outside_map(
         model.base_model.calc_gravity_z(lat[1], lon[1], alt[1]))
 
 
+@pytest.mark.parametrize("quantity", [
+    "gravity_disturbance",
+    "free_air_anomaly",
+])
+def test_multidimensional_batches_match_scalar_queries(
+    tmp_path: Path,
+    quantity: str,
+):
+    geoid = _ConstantGeoid() if quantity == "free_air_anomaly" else None
+    model = _make_scalar_map(tmp_path, quantity=quantity, geoid=geoid)
+    lat = np.array([[70.0, 70.1], [70.1, 70.2]])
+    lon = np.array([[10.0, 10.1], [10.2, 10.2]])
+    alt = np.array([[0.0, 25.0], [50.0, 100.0]])
+
+    expected_z = np.array([
+        model.calc_gravity_z(lat[index], lon[index], alt[index])
+        for index in np.ndindex(lat.shape)
+    ]).reshape(lat.shape)
+    expected_xyz = np.array([
+        model.calc_gravity_xyz(lat[index], lon[index], alt[index])
+        for index in np.ndindex(lat.shape)
+    ]).reshape(lat.shape + (3,))
+    expected_anomaly = np.array([
+        model.get_anomaly(lat[index], lon[index])
+        for index in np.ndindex(lat.shape)
+    ]).reshape(lat.shape)
+    expected_disturbance = np.array([
+        model.get_disturbance(lat[index], lon[index])
+        for index in np.ndindex(lat.shape)
+    ]).reshape(lat.shape)
+
+    np.testing.assert_allclose(
+        model.calc_gravity_z_vec(lat, lon, alt), expected_z)
+    np.testing.assert_allclose(
+        model.calc_gravity_xyz_vec(lat, lon, alt), expected_xyz)
+    np.testing.assert_allclose(
+        model.get_anomaly_vec(lat, lon), expected_anomaly)
+    np.testing.assert_allclose(
+        model.get_disturbance_vec(lat, lon), expected_disturbance)
+
+
 def test_headerless_whitespace_scalar_map_loads_directly(tmp_path: Path):
     rows = [
         "1 7.000000 -5.000000 10.0 0.0 100.0",

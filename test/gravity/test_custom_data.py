@@ -152,6 +152,68 @@ frame = NED
     np.testing.assert_allclose(loaded.residual, total)
 
 
+def test_loads_mat_scalar_with_declared_axis_order(tmp_path: Path):
+    x, y, _ = _write_csv_inputs(tmp_path)
+    scalar_xy = x[:, None] + 2.0 * y[None, :]
+    savemat(tmp_path / "scalar.mat", {"disturbance": scalar_xy.T})
+    field_section = """
+[Field]
+format = mat
+file = scalar.mat
+representation = scalar
+valueVariable = disturbance
+axisOrder = y,x
+units = m/s2
+quantity = gravity_disturbance
+verticalDirection = down
+"""
+    config_file = _write_config(
+        tmp_path, field_section, mode="residual")
+
+    loaded = load_custom_map_data(
+        read_custom_gravity_config(config_file))
+
+    np.testing.assert_allclose(loaded.residual[:, :, 0], 0.0)
+    np.testing.assert_allclose(loaded.residual[:, :, 1], 0.0)
+    np.testing.assert_allclose(loaded.residual[:, :, 2], scalar_xy)
+
+
+def test_validates_mat_tensor_with_declared_axis_order(tmp_path: Path):
+    _write_csv_inputs(tmp_path)
+    tensor = np.zeros((6, 3, 2), dtype=np.float64)
+    for component in range(6):
+        tensor[component, :, :] = component + 1.0
+    savemat(tmp_path / "tensor.mat", {"gradient": tensor})
+    config_file = _write_config(
+        tmp_path,
+        _csv_field("Field", "field.csv"),
+        mode="residual",
+    )
+    config_file.write_text(
+        config_file.read_text(encoding="utf-8") + """
+[Tensor]
+format = mat
+file = tensor.mat
+dataVariable = gradient
+axisOrder = component,x,y
+nnIndex = 0
+eeIndex = 1
+ddIndex = 2
+neIndex = 3
+ndIndex = 4
+edIndex = 5
+units = E
+frame = NED
+""",
+        encoding="utf-8",
+    )
+
+    loaded = load_custom_map_data(
+        read_custom_gravity_config(config_file))
+
+    assert loaded.residual.shape == (3, 2, 3)
+
+
 def test_converts_enu_to_ned(tmp_path: Path):
     _write_csv_inputs(tmp_path)
     enu = pd.DataFrame({
