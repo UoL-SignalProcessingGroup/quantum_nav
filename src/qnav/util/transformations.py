@@ -608,7 +608,7 @@ def quaternion_to_euler(quat: np.ndarray) -> np.ndarray:
     heading = math.atan2(sin_y_cos_p, cos_y_cos_p)
     heading = math.degrees(heading)
 
-    sin_p = 2 * (w * y - x * z)
+    sin_p = np.clip(2 * (w * y - x * z), -1.0, 1.0)
     pitch = math.asin(sin_p)
     pitch = math.degrees(pitch)
 
@@ -679,7 +679,7 @@ def quaternion_to_euler_vec(quat: np.ndarray) -> np.ndarray:
     cos_y_cos_p = 1 - 2 * (y * y + z * z)
     heading = np.arctan2(sin_y_cos_p, cos_y_cos_p)
 
-    sin_p = 2 * (w * y - x * z)
+    sin_p = np.clip(2 * (w * y - x * z), -1.0, 1.0)
     pitch = np.arcsin(sin_p)
 
     sin_r_cos_p = 2 * (w * x + y * z)

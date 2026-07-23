@@ -32,7 +32,8 @@ class AccelerometerGM(Accelerometer):
         super().update(time_sec)
 
         # Replace the value for measurement noise
-        noise = self._gm_rng.get_random(self.time_step)
+        clock_time = self.time_step if time_sec is None else time_sec
+        noise = self._gm_rng.get_random(clock_time)
         self._meas_noise = self._avg_meas_noise_mg * noise
         # self._meas_noise = noise
 
@@ -62,7 +63,8 @@ class GyroscopeGM(Gyroscope):
         super().update(time_sec)
 
         # Replace the value for measurement noise
-        noise = self._gm_rng.get_random(self.time_step)
+        clock_time = self.time_step if time_sec is None else time_sec
+        noise = self._gm_rng.get_random(clock_time)
         self._meas_noise = self._avg_meas_noise_md * noise
         # self._meas_noise = noise
 

@@ -210,7 +210,12 @@ def get_quantum_grav_fusion(config: ConfigHandler, sensor: GravityGradiometer) -
 
         case "particlefilter":
             filter_params = _get_particle_filter_params(config)
-            return GravityGradientPF(sensor, filter_params, rng_seed=rand_seed)
+            return GravityGradientPF(
+                sensor,
+                filter_params,
+                est_interferometer=_get_gravity_interferometer(config),
+                rng_seed=rand_seed,
+            )
 
         case _:
             raise NavConfigError(

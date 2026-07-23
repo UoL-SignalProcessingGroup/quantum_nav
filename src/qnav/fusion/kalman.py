@@ -20,10 +20,54 @@ from qnav.util.transformations import cross_prod_xy
 from qnav.util.constants import OMEGA_E
 from qnav.fusion.ins import NumericalINS
 from qnav.gravity.base import GravityModel
+from qnav.measurement.sensor import resolve_time_step
 from math import degrees, radians, cos, sin, tan
 
 import qnav.util.transformations as trans
 import numpy as np
+
+
+_FIRST_ORDER_TRANSITIONS = (
+    (0, 1), (1, 2), (3, 4), (4, 5), (6, 7), (7, 8),
+    (9, 10), (11, 12), (13, 14),
+)
+_SECOND_ORDER_TRANSITIONS = ((0, 2), (3, 5), (6, 8))
+
+
+def _nominal_time_step(f_matrix: np.ndarray) -> float:
+    """Infer the interval used to construct a standard INS transition."""
+    candidates = np.array([
+        f_matrix[row, col] for row, col in _FIRST_ORDER_TRANSITIONS
+        if np.isfinite(f_matrix[row, col]) and f_matrix[row, col] > 0
+    ])
+    if candidates.size == 0:
+        raise ValueError("Kalman transition matrix has no usable time step")
+    return float(np.median(candidates))
+
+
+def _transition_for_time_step(f_matrix: np.ndarray, nominal_dt: float,
+                              time_step: float) -> np.ndarray:
+    """Rescale the standard kinematic terms of a transition matrix."""
+    transition = np.copy(f_matrix)
+    first_order_ratio = time_step / nominal_dt
+    second_order_ratio = first_order_ratio ** 2
+    for row, col in _FIRST_ORDER_TRANSITIONS:
+        transition[row, col] *= first_order_ratio
+    for row, col in _SECOND_ORDER_TRANSITIONS:
+        transition[row, col] *= second_order_ratio
+    return transition
+
+
+def _process_noise_for_time_step(q_matrix: np.ndarray, nominal_dt: float,
+                                 time_step: float) -> np.ndarray:
+    """Scale discrete process noise for an unequal interval.
+
+    ``KalmanEstimatedState`` stores an already-discretized Q without its
+    underlying continuous noise parameters, so exact rediscretization is not
+    generally recoverable. Interval-proportional scaling is the conservative
+    approximation and preserves arbitrary user-provided covariance structure.
+    """
+    return np.copy(q_matrix) * (time_step / nominal_dt)
 
 class KalmanINS(NumericalINS):
     """
@@ -34,13 +78,18 @@ class KalmanINS(NumericalINS):
     than the other more basic INS methods provided in the project.
     """
 
-    def perform_fusion(self, kalman_state: KalmanEstimatedState) -> None:
+    def perform_fusion(self, kalman_state: KalmanEstimatedState,
+                       time_step: float = None) -> None:
         """
         Performs fusion using latest accelerometer and gyroscope measurements.
         Updates the estimated states by performing Kalman Filtering.
 
         :param kalman_state: The current estimated state.
         :type kalman_state: EstimatedState
+
+        :param time_step: Optional elapsed interval in seconds. When omitted,
+            the transition and process-noise matrices are used unchanged.
+        :type time_step: float
         """
 
         # Obtain the measurements from the accelerometer and gyroscope
@@ -63,6 +112,17 @@ class KalmanINS(NumericalINS):
         r_matrix = kalman_state.r_matrix
         f_matrix = kalman_state.f_matrix
         q_matrix = kalman_state.q_matrix
+
+        # Preserve the exact legacy path unless replay supplies an interval.
+        # Standard generated matrices are rediscretized; custom process-noise
+        # matrices use interval-proportional scaling as a documented fallback.
+        if time_step is not None:
+            nominal_dt = _nominal_time_step(f_matrix)
+            time_step = resolve_time_step(time_step, nominal_dt)
+            f_matrix = _transition_for_time_step(
+                f_matrix, nominal_dt, time_step)
+            q_matrix = _process_noise_for_time_step(
+                q_matrix, nominal_dt, time_step)
 
         # Use current LLA position to define local reference axes (Local NED)
         state_vector = kalman_state.state_vector
